@@ -1,6 +1,4 @@
-gmts <- list()
-
-bcols = c("#FFFDE7","#FFEBEE") # colors for parameter wellpanels
+bcols = c("#f0eee9","#e9ebf0") # colors for parameter wellpanels
 
 # # available GMT gene sets
 gmt_dir <- paste0(dirname(getwd()),"/eVITTA/easyGSEA/www/gmts/hsa/")

@@ -1,3 +1,36 @@
+/* Stylesheet included 
+Main bright blue: #00589b;
+Sharper main bright blue: #1d89ff;
+Sidebar muted dark blue: #112a41;
+Sidebar darker muted dark blue: #031321;
+Sidebar, toggle, logo hover: #14497c;
+Sidebar text: #a3bcd6;
+
+*/
+/*------------------------------------------------------*/
+
+/* logo */
+.skin-blue .main-header .logo {
+                      background-color: #00589b;
+                      }
+
+/* logo when hovered */
+.skin-blue .main-header .logo:hover {
+                      background-color: #004a82;
+                      }
+
+/* navbar (rest of the header) */
+.skin-blue .main-header .navbar {
+                      background-color: #00589b;
+                      }        
+
+/* toggle button when hovered  */                    
+ .skin-blue .main-header .navbar .sidebar-toggle:hover{
+                      background-color: #004a82;
+                      }
+
+/*------------------------------------------------------*/
+
 /* box headers */
 .box.box-solid.box-danger>.box-header {
                       color: #fff;
@@ -22,3 +55,53 @@
     margin-right: 3px;
     margin-left: 1.5px;
 }
+
+/*------------------------------------------------------*/
+.handler-danger {
+  background: #CF5C78 !important;
+}
+
+.pretty.p-danger input[type="checkbox"]:checked + label::before,
+.pretty.p-danger input[type="radio"]:checked + label::before {
+    background-color: #CF5C78;
+    border-color: #CF5C78;
+}
+.pretty.p-danger input[type="checkbox"]:checked + label::after,
+.pretty.p-danger input[type="radio"]:checked + label::after {
+    background-color: #CF5C78 !important;
+    border-color: #CF5C78 !important;
+}
+
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-danger,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-danger {
+  background: #CF5C78 !important;
+}
+
+.pretty.p-danger {
+  background: #CF5C78 !important;
+  background-color: #CF5C78 !important;
+  border-color: #CF5C78 !important;
+}
+
+.btn-primary {
+  background: #00589b !important;
+}
+
+.btn-primary:hover {
+    background:#004a82 !important;
+}
+
+.btn-danger {
+  background: #CF5C78 !important;
+}
+
+.btn-danger:hover {
+    background:#d57088 !important;
+}
+
+.btn-danger:not(:disabled):not(.disabled):active, .btn-danger:focus, .btn-danger:active, .btn-danger:active:focus {
+  background: #ac3350 !important;
+  border-color: #ac3350 !important;
+}
+
+

@@ -39,8 +39,10 @@ plot_ui <- function(n){
     gs_mode_id <- paste0("gs_mode_",x); gs_mode_id_q <- paste0(gs_mode_id,"_q")
     gs_db_id <- paste0("gs_db_",x); gs_db_id_q <- paste0(gs_db_id,"_q")
     gs_lib_id <- paste0("gs_l_",x); gs_lib_id_q <- paste0(gs_lib_id,"_q")
+    gs_lib_genes_id <- paste0("gs_lgs_",x); gs_lib_genes_id_q <- paste0(gs_lib_genes_id,"_q") # verbatimTextOutput
+    gs_gene_id <- paste0("gs_lg_",x); gs_gene_id_q <- paste0(gs_gene_id,"_q") # gene to search
+    # manual gene input
     gs_manual_id <- paste0("gs_m_",x); gs_manual_id_q <- paste0(gs_manual_id,"_q")
-    gs_gene_id <- paste0("gs_lg_",x); gs_gene_id_q <- paste0(gs_gene_id,"_q")
     gs_genes_id <- paste0("gs_mg_",x)
 
     # the UI
@@ -54,8 +56,8 @@ plot_ui <- function(n){
           cat_id,
           label = HTML(paste0(x,".1. Select data category:",add_help(cat_id_q))),
           choices = c("Gene" = "g", "Gene set" = "gs")
-          ,selected = "g"
-          ,status = "warning"
+          ,selected = rv[[cat_id]]
+          ,status = "danger"
           ,icon = icon("check")
           ,shape = "curve"
           # ,plain = T
@@ -73,7 +75,8 @@ plot_ui <- function(n){
                         "CNV"="cnv",
                         "miRNA"="mir",
                         "Methylation"="met"),
-            status = "warning",
+            status = "danger",
+            selected = rv[[db_id]],
             checkIcon = list(
               yes = tags$i(class = "fa fa-check-square", 
                            style = "color: white"),
@@ -84,6 +87,7 @@ plot_ui <- function(n){
             g_ui_id,
             HTML(paste0(x,".3. Select your gene of interest:",add_help(g_ui_id_q)))
             ,choices=c()
+            ,selected=rv[[g_ui_id]]
             ,width = "100%"
           )
         )
@@ -93,6 +97,7 @@ plot_ui <- function(n){
             gs_mode_id,
             HTML(paste0(x,".2. Mode of analysis:",add_help(gs_mode_id_q)))
             ,choices = c("Library"="lib","Manual"="manual")
+            ,selected = rv[[gs_mode_id]]
             ,inline = T
           )
           ,conditionalPanel(
@@ -100,13 +105,15 @@ plot_ui <- function(n){
             fluidRow(
               column(
                 4,
-                selectizeInput(
+                pickerInput(
                   gs_db_id,
                   HTML(paste0(x,".3a. Select database:"),add_help(gs_db_id_q))
                   ,choices=gmt_dbs
+                  ,selected=rv[[gs_db_id]]
                   ,options = list(
-                    placeholder = 'Type to search ...'
-                    ,onInitialize = I('function() { this.setValue(""); }')
+                    `live-search` = TRUE
+                    , title = 'Nothing selected'
+                    # ,onInitialize = I('function() { this.setValue(""); }')
                   )
                 )
               )
@@ -114,13 +121,15 @@ plot_ui <- function(n){
                 condition = sprintf("input.%s != ''", gs_db_id),
                 column(
                   4,
-                  selectizeInput(
+                  pickerInput(
                     gs_lib_id,
                     HTML(paste0(x,".3b. Select your gene set of interest:"),add_help(gs_lib_id_q))
-                    ,choices=""
+                    ,choices=names(rv[[paste0("gmts",x)]])
+                    ,selected=rv[[gs_lib_id]]
                     ,options = list(
-                      placeholder = 'Type to search ...'
-                      ,onInitialize = I('function() { this.setValue(""); }')
+                      `live-search` = TRUE
+                      , title = 'Nothing selected'
+                      # ,onInitialize = I('function() { this.setValue(""); }')
                     )
                   )
                 )
@@ -149,16 +158,17 @@ plot_ui <- function(n){
                   )
                   
                 )
-              ) 
+              )
             )
-            
-          )
-          ,conditionalPanel(
-            condition = sprintf("input.%s!=''", gs_lib_id),
-            verbatimTextOutput(
-              gs_genes_id
+            ,conditionalPanel(
+              condition = sprintf("input.%s != ''", gs_lib_id),
+              fluidRow(
+                column(
+                  12,
+                  verbatimTextOutput(gs_lib_genes_id, placeholder = F)
+                )
+              )
             )
-            
           )
           ,conditionalPanel(
             condition = sprintf("input.%s=='manual'", gs_mode_id),
