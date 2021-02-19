@@ -27,14 +27,16 @@ gmt_input_lst <- reactive({
 })
 
 observeEvent(gmt_input_lst(),{
-  lapply(1:input$variable_n, function(x){
-    db_id <- paste0("gs_db_",x)
-    lib_id <- paste0("gs_l_",x)
-    lib_gene_id <- paste0("gs_lg_",x)
-    db <- input[[db_id]]
-    
-    req(db != "")
-    withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
+  lst <- gmt_input_lst() %>% unlist() %>% unique()
+  req(lst != "")
+  if(lst[1] == ""){array <- 2}else{array <- 1:input$variable_n}
+  withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
+    for(x in array){
+      db_id <- paste0("gs_db_",x)
+      lib_id <- paste0("gs_l_",x)
+      db <- input[[db_id]]
+      
+      req(db != "")
       gmt_path <- retrieve_gmt_path(db)
       gmt <- gmtPathways(gmt_path)
       
@@ -47,6 +49,6 @@ observeEvent(gmt_input_lst(),{
         lib_id
         ,choices = names(gmt)
       )
-    })
+    }
   })
 })
