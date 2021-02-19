@@ -1,0 +1,24 @@
+/* box headers */
+.box.box-solid.box-danger>.box-header {
+                      color: #fff;
+                      background: #1976d2;
+                      background-color: #1976d2;
+                      }
+
+/* box and tabbox top color */
+.box.box-danger {
+    border-top-color: #FFF;
+}
+
+/* box title */
+.box-header .box-title, .box-header>.fa, .box-header>.glyphicon, .box-header>.ion {
+                      display: inline-block;
+                      font-size: 17px;
+                      margin: 0;
+                      line-height: 1;
+                  }
+/* add margins to fa icons */                  
+.fa {
+    margin-right: 3px;
+    margin-left: 1.5px;
+}
