@@ -165,7 +165,7 @@ plot_ui <- function(n){
               fluidRow(
                 column(
                   12,
-                  verbatimTextOutput(gs_lib_genes_id, placeholder = F)
+                  verbatimTextOutput(gs_lib_genes_id)
                 )
               )
             )
