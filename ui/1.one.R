@@ -23,6 +23,7 @@ bodyOne <- tabItem(tabName = "one",
             )
             
             ,uiOutput("ui_parameters")
+            ,uiOutput("ui_parameters_confirm")
         )
     )
 )

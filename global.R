@@ -19,6 +19,5 @@ library(rintrojs)
 
 options(repos = BiocManager::repositories())
 
-bcols = c("#FFFDE7","#FFEBEE") # colors for parameter wellpanels
-
 source("global/functions.R")
+source("global/variables.R")
