@@ -20,7 +20,7 @@ radioTooltip <- function(id, choice, title, placement = "top", trigger = "hover"
 }
 
 
-# function to generate dynamic parameter UIs
+# ------- function to generate dynamic G/GS parameter UIs ----------
 plot_ui <- function(n){
   # automatically adjust column width according to # of analysis selected
   if(n == 1){col_w <- 12}else{col_w <- 6}
@@ -37,10 +37,12 @@ plot_ui <- function(n){
     g_ui_id <- paste0("g_",x); g_ui_id_q <- paste0(g_ui_id,"_q")
     # gene set to analyze
     gs_mode_id <- paste0("gs_mode_",x); gs_mode_id_q <- paste0(gs_mode_id,"_q")
+    gs_db_id <- paste0("gs_db_",x); gs_db_id_q <- paste0(gs_db_id,"_q")
     gs_lib_id <- paste0("gs_l_",x); gs_lib_id_q <- paste0(gs_lib_id,"_q")
     gs_manual_id <- paste0("gs_m_",x); gs_manual_id_q <- paste0(gs_manual_id,"_q")
-    gs_gene_id <- paste0("gs_mg_",x); gs_gene_id_q <- paste0(gs_gene_id,"_q")
-    gs_genes_id <- paste0("gs_mgs_",x)
+    gs_gene_id <- paste0("gs_lg_",x); gs_gene_id_q <- paste0(gs_gene_id,"_q")
+    gs_genes_id <- paste0("gs_mg_",x)
+
     # the UI
     column(
       col_w,
@@ -97,25 +99,57 @@ plot_ui <- function(n){
             condition = sprintf("input.%s=='lib'", gs_mode_id),
             fluidRow(
               column(
-                8,
-                selectizeInput(
-                  gs_lib_id,
-                  HTML(paste0(x,".3. Select your gene set of interest:"),add_help(gs_lib_id_q))
-                  ,choices=gmts
-                  ,selected=rv$gs
-                )
-              )
-              ,column(
                 4,
-                searchInput(
-                  gs_gene_id,
-                  HTML(paste0("Search for gene sets comprising a gene:", add_help(gs_gene_id_q))),
-                  placeholder = "Enter a gene here in HUGO symbol format",
-                  btnSearch = icon("search"), 
-                  btnReset = icon("remove"),
-                  width = "100%"
+                selectizeInput(
+                  gs_db_id,
+                  HTML(paste0(x,".3a. Select database:"),add_help(gs_db_id_q))
+                  ,choices=gmt_dbs
+                  ,options = list(
+                    placeholder = 'Type to search ...'
+                    ,onInitialize = I('function() { this.setValue(""); }')
+                  )
                 )
               )
+              ,conditionalPanel(
+                condition = sprintf("input.%s != ''", gs_db_id),
+                column(
+                  4,
+                  selectizeInput(
+                    gs_lib_id,
+                    HTML(paste0(x,".3b. Select your gene set of interest:"),add_help(gs_lib_id_q))
+                    ,choices=""
+                    ,options = list(
+                      placeholder = 'Type to search ...'
+                      ,onInitialize = I('function() { this.setValue(""); }')
+                    )
+                  )
+                )
+                
+              )
+              ,conditionalPanel(
+                condition = sprintf("input.%s != ''", gs_db_id),
+                column(
+                  4,
+                  # selectizeInput(
+                  #   gs_gene_id,
+                  #   HTML(paste0("Filter gene sets that comprise a gene:",add_help(gs_gene_id_q)))
+                  #   ,choices=""
+                  #   ,options = list(
+                  #     placeholder = 'Type to search ...'
+                  #     ,onInitialize = I('function() { this.setValue(""); }')
+                  #   )
+                  # )
+                  searchInput(
+                    gs_gene_id,
+                    HTML(paste0("Filter gene sets that comprise a gene:", add_help(gs_gene_id_q))),
+                    placeholder = "Enter a gene here in HUGO symbol format",
+                    btnSearch = icon("search"),
+                    btnReset = icon("remove"),
+                    width = "100%"
+                  )
+                  
+                )
+              ) 
             )
             
           )
@@ -146,7 +180,9 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")
-        ,bsTooltip(gs_lib_id_q, HTML("For full list of available gene set libraries, visit <b>easyGSEA User Guide</b>.")
+        ,bsTooltip(gs_db_id_q, HTML("For full list of available gene set databases, visit <b>easyGSEA User Guide</b>.")
+                   ,placement = "right")
+        ,bsTooltip(gs_lib_id_q, HTML("Search for keywords (e.g. glycolysis, chemokine, tor signaling) and select the one of interest.")
                    ,placement = "right")
         ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene of interest. Click search icon to search or hit \\'Enter\\'.")
                    ,placement = "top")

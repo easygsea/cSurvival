@@ -1,3 +1,3 @@
 rv <- reactiveValues(
-  gs = "" # gene set of interest
+  gmt = list() # store GMTs
 )
