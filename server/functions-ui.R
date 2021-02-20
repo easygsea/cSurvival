@@ -228,55 +228,10 @@ plot_ui <- function(n){
 # # update these into rv when selections change
 update_all <- function(){
   for(x in 1:rv$variable_n){
-    lst <- list(
-      # category to analyze
-      cat_id <- paste0("cat_",x)
-      # type of db to analyze
-      ,db_id <- paste0("db_",x)
-      # gene to analyze
-      ,g_ui_id <- paste0("g_",x)
-      # gene set to analyze
-      ,gs_mode_id <- paste0("gs_mode_",x)
-      ,gs_db_id <- paste0("gs_db_",x)
-      ,gs_lib_id <- paste0("gs_l_",x)
-      ,gs_lib_genes_id <- paste0("gs_lgs_",x)
-      ,gs_gene_id <- paste0("gs_lg_",x)
-      # manual gene input
-      ,gs_manual_id <- paste0("gs_m_",x)
-      ,gs_genes_id <- paste0("gs_mg_",x)
-      ,lower_id <- paste0("lower_",x)
-      ,higher_id <- paste0("higher_",x)
-      ,step_id <- paste0("step_",x)
-    )
+    lst <- dyn_list(x)
     
     updateRV(lst)
-    
-    # req(input[[gs_db_id]] != "")
-    # req(rv[[gs_lib_id]] != "")
-    # req(rv[[paste0("gmts",x)]])
-    # req(length(rv[[paste0("gmts",x)]])>0)
-    # 
-    # output[[gs_lib_genes_id]] <- renderText({
-    #   genes <- rv[[paste0("gmts",x)]][[input[[gs_lib_id]]]]
-    #   paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
-    # })
   }
-}
-
-init_rvs <- function(){
-  lapply(1:rv$variable_n, function(x){
-    lower_id <- paste0("lower_",x)
-    higher_id <- paste0("higher_",x)
-    step_id <- paste0("step_",x)
-    cat_id <- paste0("cat_",x)
-    db_id <- paste0("db_",x)
-    
-    rv[[lower_id]] <- .15
-    rv[[higher_id]] <- .15
-    rv[[step_id]] <- .01
-    rv[[cat_id]] <- "g"
-    rv[[db_id]] <- "rna"
-  })
 }
 
 #======================================================================#
@@ -288,7 +243,7 @@ plot_run_ui <- function(n){
   lapply(1:n, function(x){
 
     lower_id <- paste0("lower_",x); lower_id_q <- paste0(lower_id,"_q",x)
-    higher_id <- paste0("higher_",x); higher_id_q <- paste0(higher_id,"_q",x)
+    higher_id <- paste0("upper_",x); higher_id_q <- paste0(higher_id,"_q",x)
     step_id <- paste0("step_",x); step_id_q <- paste0(step_id,"_q",x)
     col <- extract_color(x)
     
@@ -322,9 +277,9 @@ plot_run_ui <- function(n){
             )
             ,sliderTextInput(
               higher_id,
-              label = HTML(paste0("Higher threshold:",add_help(higher_id_q)))
+              label = HTML(paste0("Upper threshold:",add_help(higher_id_q)))
               ,selected = rv[[higher_id]]
-              ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45)
+              ,choices = c(.55, .6, .65, .7, .75, .8, .85, .9, .95)
               ,grid = TRUE
             )
             ,sliderTextInput(
