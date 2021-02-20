@@ -23,7 +23,13 @@ bodyOne <- tabItem(tabName = "one",
             )
             
             ,uiOutput("ui_parameters")
-            ,uiOutput("ui_parameters_confirm")
+            ,fluidRow(
+              column(
+                12, align="center"
+                ,uiOutput("ui_parameters_confirm")
+                ,add_gear("par_gear")
+              )
+            )
         )
     )
 )

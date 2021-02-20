@@ -18,3 +18,20 @@ label_with_help_bttn <- function(label_text, bttn_id, bttn_status="info", bttn_s
     bsButton(bttn_id, label = "", icon = icon("question"), style = bttn_status, size = "extra-small"))
 }
 
+# # add a gear button
+add_gear <- function(id, left="6.9em", top="-4em", title="Click to adjust run parameters", up = F){
+  div(
+    style=sprintf("position: relative; align: center; left: %s; top: %s;",left, top),
+    dropdownButton(
+      circle = TRUE, status = "info",
+      size = "xs",
+      icon = icon("gear"),# class = "opt"),
+      up = up,
+      tooltip = tooltipOptions(title = "Click to adjust run parameters"),
+      
+      fluidRow(
+        uiOutput(id)
+      )
+    )
+  )
+}

@@ -4,7 +4,9 @@
 observeEvent(input$variable_n,{
   rv$variable_n <- input$variable_n
   update_all()
+  init_rvs()
   rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+  rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
 })
 
 output$ui_parameters <- renderUI({
@@ -23,6 +25,20 @@ output$ui_parameters_confirm <- renderUI({
       ,size = "large"
     )
   )
+})
+
+# ----- run parameters -------
+output$par_gear <- renderUI({
+  rv[["ui_run_parameters"]]
+})
+
+# update all run parameters according to analysis #1
+observeEvent(input$toall,{
+  lapply(1:rv$variable_n, function(x){
+    updateSliderTextInput(session, paste0("lower_",x), selected = input[["lower_1"]])
+    updateSliderTextInput(session, paste0("higher_",x), selected = input[["higher_1"]])
+    updateSliderTextInput(session, paste0("step_",x), selected = input[["step_1"]])
+  })
 })
 
 # -------- auto GMT loading ---------

@@ -99,6 +99,16 @@ Sidebar text: #a3bcd6;
     background:#d57088 !important;
 }
 
+.btn-warning {
+  background: #f5df4d !important;
+  border-color: #f5df4d !important;
+}
+
+.btn-warning:hover {
+    background:#e5d13e !important;
+  border-color: #f5df4d !important;
+}
+
 .btn-danger:not(:disabled):not(.disabled):active, .btn-danger:focus, .btn-danger:active, .btn-danger:active:focus {
   background: #ac3350 !important;
   border-color: #ac3350 !important;

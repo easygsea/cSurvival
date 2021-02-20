@@ -1,3 +1,6 @@
+#======================================================================#
+####                     general UI functions                       ####
+#======================================================================#
 # radiotooltip
 radioTooltip <- function(id, choice, title, placement = "top", trigger = "hover", options = NULL){
   
@@ -19,8 +22,13 @@ radioTooltip <- function(id, choice, title, placement = "top", trigger = "hover"
   htmltools::attachDependencies(bsTag, shinyBS:::shinyBSDep)
 }
 
-
-# ------- function to generate dynamic G/GS parameter UIs ----------
+#======================================================================#
+####          function to generate dynamic 1 2, or more G/GS UIs     ####
+#======================================================================#
+extract_color <- function(x, cols=bcols){
+  bcol_n <- x %% 2; if(bcol_n == 0){bcol_n <- 2}
+  return(cols[bcol_n])
+}
 plot_ui <- function(n){
   # automatically adjust column width according to # of analysis selected
   if(n == 1){col_w <- 12}else{col_w <- 6}
@@ -28,7 +36,7 @@ plot_ui <- function(n){
   # create the UI list
   ui <- lapply(1:n, function(x){
     # color number for the wellpanel
-    bcol_n <- x %% 2; if(bcol_n == 0){bcol_n <- 2}
+    col <- extract_color(x)
     # category to analyze
     cat_id <- paste0("cat_",x); cat_id_q <- paste0(cat_id,"_q")
     # type of db to analyze
@@ -50,7 +58,7 @@ plot_ui <- function(n){
       col_w,
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
       wellPanel(
-        style = paste0("background-color: ", bcols[bcol_n], "; border: .5px solid #fff;"),
+        style = paste0("background-color: ", col, "; border: .5px solid #fff;"),
         h4(paste0("Analysis #",x), align = "center"),
         prettyRadioButtons(
           cat_id,
@@ -236,6 +244,9 @@ update_all <- function(){
       # manual gene input
       ,gs_manual_id <- paste0("gs_m_",x)
       ,gs_genes_id <- paste0("gs_mg_",x)
+      ,lower_id <- paste0("lower_",x)
+      ,higher_id <- paste0("higher_",x)
+      ,step_id <- paste0("step_",x)
     )
     
     updateRV(lst)
@@ -250,4 +261,81 @@ update_all <- function(){
     #   paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
     # })
   }
+}
+
+init_rvs <- function(){
+  lapply(1:rv$variable_n, function(x){
+    lower_id <- paste0("lower_",x)
+    higher_id <- paste0("higher_",x)
+    step_id <- paste0("step_",x)
+    cat_id <- paste0("cat_",x)
+    db_id <- paste0("db_",x)
+    
+    rv[[lower_id]] <- .15
+    rv[[higher_id]] <- .15
+    rv[[step_id]] <- .01
+    rv[[cat_id]] <- "g"
+    rv[[db_id]] <- "rna"
+  })
+}
+
+#======================================================================#
+####           function to generate dynamic run parameter UI     ####
+#======================================================================#
+plot_run_ui <- function(n){
+  if(n == 1){col_w <- 12}else{col_w <- 6}
+
+  lapply(1:n, function(x){
+
+    lower_id <- paste0("lower_",x); lower_id_q <- paste0(lower_id,"_q",x)
+    higher_id <- paste0("higher_",x); higher_id_q <- paste0(higher_id,"_q",x)
+    step_id <- paste0("step_",x); step_id_q <- paste0(step_id,"_q",x)
+    col <- extract_color(x)
+    
+    column(
+      col_w,align="center",
+      # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
+      wellPanel(
+        style = paste0("background-color: ", col, "; border: .5px solid #fff;"),
+        if(rv[[paste0("cat_",x)]] == "g" & rv[[paste0("db_",x)]] != "snv"){
+          div(
+            h4(paste0("Run parameters for Analysis #",x), align = "center"),
+            sliderTextInput(
+              lower_id,
+              label = HTML(paste0("Lower threshold:",add_help(lower_id_q)))
+              ,selected = rv[[lower_id]]
+              ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45)
+              ,grid = TRUE
+            )
+            ,sliderTextInput(
+              higher_id,
+              label = HTML(paste0("Higher threshold:",add_help(higher_id_q)))
+              ,selected = rv[[higher_id]]
+              ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45)
+              ,grid = TRUE
+            )
+            ,sliderTextInput(
+              step_id,
+              label = HTML(paste0("Step size:",add_help(step_id_q)))
+              ,selected = rv[[step_id]]
+              ,choices = c(.01, .02, .03, .05, .1, .15, .2, .25)
+              ,grid = TRUE
+            )
+            ,if(x == 1){
+              bsButton("toall", "Apply to all", style = "warning")
+            }
+            ,bsTooltip(lower_id_q,HTML("The percentile to start analysis.")
+                       ,placement = "right")
+            ,bsTooltip(higher_id_q,HTML("The percentile to end analysis.")
+                       ,placement = "right")
+            ,bsTooltip(step_id_q,HTML("Step size to iterate to find the optimum threshold to separate high from low expressions.")
+                       ,placement = "right")
+          )
+        }else{
+          h4(paste0("Mutation analysis does not need parameter adjustment (Analysis #)",x), align = "center")
+        }
+        
+      )
+    )
+  })
 }
