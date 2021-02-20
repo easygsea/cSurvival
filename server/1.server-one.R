@@ -6,6 +6,9 @@ observeEvent(input$variable_n,{
   update_all()
   init_rvs()
   rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+})
+
+observe({
   rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
 })
 

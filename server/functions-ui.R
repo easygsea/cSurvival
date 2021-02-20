@@ -292,12 +292,25 @@ plot_run_ui <- function(n){
     step_id <- paste0("step_",x); step_id_q <- paste0(step_id,"_q",x)
     col <- extract_color(x)
     
+    check_inputs <- function(){
+      cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
+      if(is.null(input[[cat_id]]) & is.null(input[[db_id]])){
+        return(rv[[cat_id]] == "g" & rv[[db_id]] != "snv")
+      }else if(is.null(input[[cat_id]])){
+        return(rv[[cat_id]] == "g" & input[[db_id]] != "snv")
+      }else if(is.null(input[[db_id]])){
+        return(input[[cat_id]] == "g" & rv[[db_id]] != "snv")
+      }else{
+        return(input[[cat_id]] == "g" & input[[db_id]] != "snv")
+      }
+    }
+    
     column(
       col_w,align="center",
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
       wellPanel(
         style = paste0("background-color: ", col, "; border: .5px solid #fff;"),
-        if(rv[[paste0("cat_",x)]] == "g" & rv[[paste0("db_",x)]] != "snv"){
+        if(check_inputs()){
           div(
             h4(paste0("Run parameters for Analysis #",x), align = "center"),
             sliderTextInput(
@@ -332,7 +345,7 @@ plot_run_ui <- function(n){
                        ,placement = "right")
           )
         }else{
-          h4(paste0("Mutation analysis does not need parameter adjustment (Analysis #)",x), align = "center")
+          h4(paste0("SNV (mutation) analysis does not need parameter adjustment (Analysis #)",x), align = "center")
         }
         
       )
