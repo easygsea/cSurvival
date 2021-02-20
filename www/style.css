@@ -93,10 +93,17 @@ Sidebar text: #a3bcd6;
 
 .btn-danger {
   background: #CF5C78 !important;
+  border-color: #CF5C78 !important;
 }
 
 .btn-danger:hover {
     background:#d57088 !important;
+  border-color: #CF5C78 !important;
+}
+
+.btn-danger:not(:disabled):not(.disabled):active, .btn-danger:focus, .btn-danger:active, .btn-danger:active:focus {
+  background: #ac3350 !important;
+  border-color: #ac3350 !important;
 }
 
 .btn-warning {
@@ -105,13 +112,8 @@ Sidebar text: #a3bcd6;
 }
 
 .btn-warning:hover {
-    background:#e5d13e !important;
+  background:#e5d13e !important;
   border-color: #f5df4d !important;
-}
-
-.btn-danger:not(:disabled):not(.disabled):active, .btn-danger:focus, .btn-danger:active, .btn-danger:active:focus {
-  background: #ac3350 !important;
-  border-color: #ac3350 !important;
 }
 
 
