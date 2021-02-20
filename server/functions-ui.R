@@ -165,7 +165,7 @@ plot_ui <- function(n){
               fluidRow(
                 column(
                   12,
-                  # div(paste0("vtxt_anchor",x))
+                  # div(id=paste0("vtxt_anchor",x))
                   verbatimTextOutput(gs_lib_genes_id)
                 )
               )
@@ -212,4 +212,42 @@ plot_ui <- function(n){
   
   # create the UI
   do.call(tagList, ui)
+}
+
+#======================================================================#
+####                    Update rv according to Input               ####
+#======================================================================#
+# # update these into rv when selections change
+update_all <- function(){
+  for(x in 1:rv$variable_n){
+    lst <- list(
+      # category to analyze
+      cat_id <- paste0("cat_",x)
+      # type of db to analyze
+      ,db_id <- paste0("db_",x)
+      # gene to analyze
+      ,g_ui_id <- paste0("g_",x)
+      # gene set to analyze
+      ,gs_mode_id <- paste0("gs_mode_",x)
+      ,gs_db_id <- paste0("gs_db_",x)
+      ,gs_lib_id <- paste0("gs_l_",x)
+      ,gs_lib_genes_id <- paste0("gs_lgs_",x)
+      ,gs_gene_id <- paste0("gs_lg_",x)
+      # manual gene input
+      ,gs_manual_id <- paste0("gs_m_",x)
+      ,gs_genes_id <- paste0("gs_mg_",x)
+    )
+    
+    updateRV(lst)
+    
+    # req(input[[gs_db_id]] != "")
+    # req(rv[[gs_lib_id]] != "")
+    # req(rv[[paste0("gmts",x)]])
+    # req(length(rv[[paste0("gmts",x)]])>0)
+    # 
+    # output[[gs_lib_genes_id]] <- renderText({
+    #   genes <- rv[[paste0("gmts",x)]][[input[[gs_lib_id]]]]
+    #   paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
+    # })
+  }
 }
