@@ -322,7 +322,7 @@ plot_run_ui <- function(n){
               ,grid = TRUE
             )
             ,if(x == 1){
-              bsButton("toall", "Apply to all", style = "warning")
+              bsButton("toall", strong("Apply to all"), style = "warning")
             }
             ,bsTooltip(lower_id_q,HTML("The percentile to start analysis.")
                        ,placement = "right")
