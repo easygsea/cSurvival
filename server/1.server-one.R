@@ -2,13 +2,19 @@
 ####                          STEP 1. parameters                   ####
 #======================================================================#
 observeEvent(input$variable_n,{
-  n <- floor(input$variable_n)
+  req(input$variable_n)
+  n <- floor(input$variable_n); if(n<1){n <- 1}
   if(n > 2){
     shinyalert("We currently support interaction analysis up to two variables.")
     rv$variable_n <- 2
   }else{
     rv$variable_n <- n
   }
+  updateNumericInput(
+    session,
+    "variable_n",
+    value = rv$variable_n
+  )
   update_all()
   init_rvs()
   rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
