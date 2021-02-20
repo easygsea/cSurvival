@@ -203,7 +203,7 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(gs_lib_id_q, HTML("Search for keywords (e.g. glycolysis, chemokine, tor signaling) and select the one of interest.")
                    ,placement = "right")
-        ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene of interest. Click search icon to search or hit \\'Enter\\'.")
+        ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene of interest, in HUGO symbol format. Click search icon to search or hit \\'Enter\\'.")
                    ,placement = "top")
         ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited.")
                    ,placement = "right")
