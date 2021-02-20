@@ -165,6 +165,7 @@ plot_ui <- function(n){
               fluidRow(
                 column(
                   12,
+                  # div(paste0("vtxt_anchor",x))
                   verbatimTextOutput(gs_lib_genes_id)
                 )
               )

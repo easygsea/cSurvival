@@ -38,14 +38,14 @@ observeEvent(gmt_input_lst(),{
   lst_u <- lst %>% unlist() %>% unique()
   req(!is.null(lst_u) & lst_u != "")
   n <- isolate(input$variable_n)
-  if(n>1){req(!is.null(lst[[2]]) & lst[[2]] != "")}
+  if(n>1){req(!is.null(lst[[2]]))}
   if(lst_u[1] == ""){array <- 2}else{array <- 1:n}
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
     for(x in array){
       gs_db_id <- paste0("gs_db_",x)
       gs_lib_id <- paste0("gs_l_",x)
       
-      db <- isolate(input[[gs_db_id]])
+      db <- rv[[gs_db_id]] <- isolate(input[[gs_db_id]])
       
       req(db != "")
       gmt_path <- retrieve_gmt_path(db)
@@ -77,29 +77,29 @@ observeEvent(lib_input_lst(),{
   lst_u <- lst %>% unlist() %>% unique()
   req(!is.null(lst_u) & lst_u != "")
   n <- isolate(input$variable_n)
-  if(n>1){req(!is.null(lst[[2]]) & lst[[2]] != "")}
+  if(n>1){req(!is.null(lst[[2]]))}
   if(lst_u[1] == ""){array <- 2}else{array <- 1:n}
   withProgress(value = 1, message = "Extracting gene information from the selected gene set. Please wait a minute...",{
     for(x in array){
       lib_id <- paste0("gs_l_",x)
       lib_genes_id <- paste0("gs_lgs_",x)
-      gs <- isolate(input[[lib_id]])
+      gs <- rv[[lib_id]] <- isolate(input[[lib_id]])
 
       req(!is.null(gs) & gs != "")
       genes <- rv[[paste0("gmts",x)]][[gs]]
-      print(x);print(str(genes));print(lib_genes_id)
-
-      output[[lib_genes_id]] <- renderText({
-        paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
-      })
+      
       # removeUI(
       #   selector = paste0("#",lib_genes_id)
       # )
-      # insertUI(
-      #   selector = paste0("#",lib_genes_id),
-      #   where = "afterBegin",
-      #   ui = verbatimTextOutput(lib_genes_id)
-      # )
+      
+      insertUI(
+        selector = paste0("#vtxt_anchor",x),
+        ui = verbatimTextOutput(lib_genes_id)
+      )
+      
+      output[[lib_genes_id]] <- renderText({
+        paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
+      })
     }
   })
 })
