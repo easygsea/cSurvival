@@ -301,7 +301,7 @@ plot_run_ui <- function(n){
       }else if(is.null(input[[db_id]])){
         return(input[[cat_id]] == "g" & rv[[db_id]] != "snv")
       }else{
-        return(input[[cat_id]] == "g" & input[[db_id]] != "snv")
+        return((input[[cat_id]] == "g" & input[[db_id]] != "snv") | input[[cat_id]] == "gs")
       }
     }
     
