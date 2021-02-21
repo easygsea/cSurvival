@@ -178,7 +178,7 @@ plot_ui <- function(n){
                   )
               )
               ,conditionalPanel(
-                condition = printf("input.%s != ''", gs_gene_id),
+                condition = sprintf("input.%s != ''", gs_gene_id),
                 column(
                   8,
                   span(verbatimTextOutput(gs_gene_genes_id), style = rv$verbTxtStyle2)

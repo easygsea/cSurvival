@@ -93,6 +93,36 @@ observeEvent(lib_input_lst(),{
   })
 })
 
+# ------- [1C] verbatimText feedback on user-supplied gene(s), filter gss ---------
+lg_input_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    db_id <- paste0("gs_lg_",x)
+    input[[db_id]]
+  })
+})
+
+observeEvent(lg_input_lst(),{
+  lst <- lg_input_lst()
+  array <- check_array(lst)
+  
+  lapply(array, function(x){
+    lgg <- isolate(input[[paste0("gs_lg_",x)]])
+    req(lgg != "")
+    
+    genes <- toupper(lgg) %>% str_split(" |,") %>% unlist() %>% unique() %>% .[.!=""]
+    print(genes)
+    
+    # gs_lib_id <- paste0("gs_l_",x)
+    # gs <- rv[[gs_lib_id]]
+    # req(gs != "")
+    # gmts <- rv[[paste0("gmts",x)]]
+    # 
+    # output[[paste0("gs_lgg_",x)]] <- renderText({
+    #   paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
+    # })
+  })
+})
+
 # ----- 1.2. run parameters -------
 # update dynamic rvs
 observe({

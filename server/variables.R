@@ -11,8 +11,10 @@ dyn_list <- function(x){
     ,gs_mode_id <- paste0("gs_mode_",x)
     ,gs_db_id <- paste0("gs_db_",x)
     ,gs_lib_id <- paste0("gs_l_",x)
-    ,gs_lib_genes_id <- paste0("gs_lgs_",x)
+    ,gs_lib_genes_id <- paste0("gs_lgs_",x) # verbtxt
+    # user input gene(s) to filter gs
     ,gs_gene_id <- paste0("gs_lg_",x)
+    ,gs_gene_genes_id <- paste0("gs_lgg_",x) # verbtxt
     # manual gene input
     ,gs_manual_id <- paste0("gs_m_",x)
     ,gs_genes_id <- paste0("gs_mg_",x)
