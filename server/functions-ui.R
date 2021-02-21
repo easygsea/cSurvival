@@ -223,18 +223,6 @@ plot_ui <- function(n){
 }
 
 #======================================================================#
-####                    Update rv according to Input               ####
-#======================================================================#
-# # update these into rv when selections change
-update_all <- function(){
-  for(x in 1:rv$variable_n){
-    lst <- dyn_list(x)
-    
-    updateRV(lst)
-  }
-}
-
-#======================================================================#
 ####           function to generate dynamic run parameter UI     ####
 #======================================================================#
 plot_run_ui <- function(n){

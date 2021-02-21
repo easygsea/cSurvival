@@ -39,13 +39,9 @@ gmt_input_lst <- reactive({
 
 observeEvent(gmt_input_lst(),{
   lst <- gmt_input_lst()
-  lst_u <- lst %>% unlist() %>% unique()
-  req(!is.null(lst_u) & lst_u != "")
-  n <- rv$variable_n
-  if(n>1){req(!is.null(lst[[2]]))}
-  if(lst_u[1] == ""){array <- 2}else{array <- 1:n}
+  array <- check_array(lst)
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
-    for(x in array){
+    lapply(array, function(x) {
       gs_db_id <- paste0("gs_db_",x)
       gs_lib_id <- paste0("gs_l_",x)
       
@@ -65,7 +61,7 @@ observeEvent(gmt_input_lst(),{
         ,choices = names(gmt)
         ,selected=rv[[gs_lib_id]]
       )
-    }
+    })
   })
 })
 
@@ -77,13 +73,10 @@ lib_input_lst <- reactive({
   })
 })
 
-observe({
+observeEvent(lib_input_lst(),{
   lst <- lib_input_lst()
-  lst_u <- lst %>% unlist() %>% unique()
-  req(!is.null(lst_u) & lst_u != "")
-  n <- rv$variable_n
-  if(n>1){req(!is.null(lst[[2]]))}
-  if(lst_u[1] == ""){array <- 2}else{array <- 1:n}
+  array <- check_array(lst)
+  
   lapply(array, function(x){
     gs_lib_id <- paste0("gs_l_",x)
     gs_lib_genes_id <- paste0("gs_lgs_",x)
