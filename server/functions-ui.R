@@ -131,7 +131,7 @@ plot_ui <- function(n){
                   4,
                   selectizeInput(
                     gs_lib_id,
-                    HTML(paste0(x,".3b. Select your gene set of interest:"),add_help(gs_lib_id_q))
+                    HTML(paste0(x,".3b. Select gene set:"),add_help(gs_lib_id_q))
                     ,choices=names(rv[[paste0("gmts",x)]])
                     ,selected=rv[[gs_lib_id]]
                     ,options = list(
@@ -168,14 +168,14 @@ plot_ui <- function(n){
                 )
               )
             )
-            ,conditionalPanel(
-              condition = sprintf("input.%s != ''", gs_lib_id),
-              fluidRow(
-                column(
-                  12,
-                  # div(id=paste0("vtxt_anchor",x))
-                  verbatimTextOutput(gs_lib_genes_id)
-                )
+            ,fluidRow(
+              conditionalPanel(
+                condition = sprintf("input.%s != ''", gs_lib_id),
+                  column(
+                    8,
+                    # div(id=paste0("vtxt_anchor",x))
+                    verbatimTextOutput(gs_lib_genes_id)
+                  )
               )
             )
           )
