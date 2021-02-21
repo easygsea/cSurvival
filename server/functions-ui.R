@@ -148,18 +148,9 @@ plot_ui <- function(n){
                 condition = sprintf("input.%s != ''", gs_db_id),
                 column(
                   4,
-                  # selectizeInput(
-                  #   gs_gene_id,
-                  #   HTML(paste0("Filter gene sets that comprise a gene:",add_help(gs_gene_id_q)))
-                  #   ,choices=""
-                  #   ,options = list(
-                  #     placeholder = 'Type to search ...'
-                  #     ,onInitialize = I('function() { this.setValue(""); }')
-                  #   )
-                  # )
                   searchInput(
                     gs_gene_id,
-                    HTML(paste0("Filter gene sets by gene combination:", add_help(gs_gene_id_q))),
+                    HTML(paste0("(Optional) gene set filtering by gene combination:", add_help(gs_gene_id_q))),
                     value = rv[[gs_gene_id]],
                     placeholder = "Enter genes in HUGO symbol format",
                     btnSearch = icon("search"),
@@ -212,7 +203,7 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(gs_lib_id_q, HTML("Search for keywords (e.g. glycolysis, chemokine, tor signaling) and select the one of interest.")
                    ,placement = "right")
-        ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by space \" \" or comma \",\". Click search icon to search or hit \\'Enter\\'.")
+        ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by \"&\" (and) or \"|\" (or). | is evaluated before &. Example: MYC&TP53|BCL2&BRCA1|BRCA2 is evaluated as MYC&(TP53|BCL2)&(BRCA1|BRCA2), which means MYC and (TP53 or BCL2) and (BRCA1 or BRCA2)")
                    ,placement = "top")
         ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited.")
                    ,placement = "right")
