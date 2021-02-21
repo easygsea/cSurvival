@@ -106,20 +106,48 @@ observeEvent(lg_input_lst(),{
   array <- check_array(lst)
   
   lapply(array, function(x){
-    lgg <- isolate(input[[paste0("gs_lg_",x)]])
+    lgg_id <- paste0("gs_lg_",x)
+    lgg <- isolate(input[[lgg_id]])
+    
     req(lgg != "")
+    rv[[lgg_id]] <- lgg
     
-    genes <- toupper(lgg) %>% str_split(" |,") %>% unlist() %>% unique() %>% .[.!=""]
-    print(genes)
+    genes <- toupper(lgg) %>% gsub(" ","",.) %>% str_split(.,"&") %>% .[[1]]
+    gmts <- rv[[paste0("gmts",x)]]
+
+    filtered_gmts <- lapply(seq_along(gmts), function(i) {
+      gmt <- gmts[i]
+      gs <- names(gmt)
+      words_in_name <- unnest_tokens(tibble(str_split(gs,"_")[[1]]), word, x)[["word"]] %>% toupper(.)
+      txt <- c(words_in_name, gmt[[1]])
+      count <- 0
+      for(gene in genes){
+        gene <- str_split(gene,"\\|")[[1]]
+        g_check <- sapply(gene, function(x){
+          return(x %in% txt)
+        })
+        if(any(g_check)){
+          count <- count + 1
+        }
+      }
+
+      if(!(count < length(genes))){
+        return(gmt)
+      }
+    })
     
-    # gs_lib_id <- paste0("gs_l_",x)
-    # gs <- rv[[gs_lib_id]]
-    # req(gs != "")
-    # gmts <- rv[[paste0("gmts",x)]]
-    # 
-    # output[[paste0("gs_lgg_",x)]] <- renderText({
-    #   paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
-    # })
+    filtered_gmts[sapply(filtered_gmts, is.null)] <- NULL
+
+    if(length(filtered_gmts) == 0){
+      shinyalert("No gene detected in the selected database. Double check if your input follows the right format. Or try another database.")
+    }else{
+      output[[paste0("gs_lgg_",x)]] <- renderText({
+        paste0("(n=",length(genes),") ", paste0(genes, collapse = " "))
+      })
+    }
+    
+
+    
   })
 })
 

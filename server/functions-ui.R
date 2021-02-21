@@ -180,7 +180,7 @@ plot_ui <- function(n){
               ,conditionalPanel(
                 condition = sprintf("input.%s != ''", gs_gene_id),
                 column(
-                  8,
+                  4,
                   span(verbatimTextOutput(gs_gene_genes_id), style = rv$verbTxtStyle2)
                   
                 )
