@@ -167,6 +167,7 @@ plot_ui <- function(n){
                     conditionalPanel(
                       condition = sprintf("input.%s != ''", gs_lib_id),
                       span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
+                      # ,uiOutput(paste0(gs_lib_genes_id,"_tag"))
                   )
               )
               ,column(

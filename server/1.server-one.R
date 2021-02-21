@@ -195,6 +195,12 @@ observeEvent(lg_input_btn_lst(),{
       output[[paste0("gs_lgg_",x)]] <- renderText({
         rv[[paste0("gs_lgg_",x)]]
       })
+      
+      # output[[paste0("gs_lgg_",x,"_tag")]] <- renderUI({
+      #   tags$head(tags$style(
+      #     paste0("#gs_lgg_",x,"{",rv$verbTxtStyle1,"}")
+      #   ))
+      # })
 
     })
   })
