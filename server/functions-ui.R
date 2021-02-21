@@ -64,7 +64,7 @@ plot_ui <- function(n){
         prettyRadioButtons(
           cat_id,
           label = HTML(paste0(x,".1. Select data category:",add_help(cat_id_q))),
-          choices = c("Gene" = "g", "Gene set" = "gs")
+          choices = c("Gene" = "g", "Gene set (GS)" = "gs")
           ,selected = rv[[cat_id]]
           ,status = "danger"
           ,icon = icon("check")
@@ -132,8 +132,8 @@ plot_ui <- function(n){
                   4,
                   selectizeInput(
                     gs_lib_id,
-                    HTML(paste0(x,".3b. Select gene set:"),add_help(gs_lib_id_q))
-                    ,choices=names(rv[[paste0("gmts",x)]])
+                    HTML(paste0(x,".3b. Select gene set (GS):"),add_help(gs_lib_id_q))
+                    ,choices=names(rv[[paste0("gmts_tmp",x)]])
                     ,selected=rv[[gs_lib_id]]
                     ,options = list(
                       # `live-search` = TRUE,
@@ -159,7 +159,8 @@ plot_ui <- function(n){
                   # )
                   searchInput(
                     gs_gene_id,
-                    HTML(paste0("Filter gene sets by genes:", add_help(gs_gene_id_q))),
+                    HTML(paste0("Filter gene sets by gene combination:", add_help(gs_gene_id_q))),
+                    value = rv[[gs_gene_id]],
                     placeholder = "Enter genes in HUGO symbol format",
                     btnSearch = icon("search"),
                     btnReset = icon("remove"),
@@ -170,19 +171,18 @@ plot_ui <- function(n){
               )
             )
             ,fluidRow(
-              conditionalPanel(
-                condition = sprintf("input.%s != ''", gs_lib_id),
-                  column(
+              column(
                     8,
-                    span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
+                    conditionalPanel(
+                      condition = sprintf("input.%s != ''", gs_lib_id),
+                      span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
                   )
               )
-              ,conditionalPanel(
-                condition = sprintf("input.%s != ''", gs_gene_id),
-                column(
+              ,column(
                   4,
-                  span(verbatimTextOutput(gs_gene_genes_id), style = rv$verbTxtStyle2)
-                  
+                  conditionalPanel(
+                    condition = sprintf("input.%s != ''", gs_gene_id),
+                    span(verbatimTextOutput(gs_gene_genes_id), style = rv$verbTxtStyle2)
                 )
                 
               )

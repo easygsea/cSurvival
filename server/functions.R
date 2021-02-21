@@ -16,6 +16,8 @@ init_rv <- function(x){
   rv[[paste0("gs_lgs_",x)]] <- ""
   # gs gene to search
   rv[[paste0("gs_lg_",x)]] <- ""
+  rv[[paste0("gs_lg_",x,"_search")]] <- 0
+  rv[[paste0("gs_lgg_",x)]] <- ""
   # manual gene input
   rv[[paste0("gs_m_",x)]] <- ""
   # feedback on manual gene input
@@ -56,20 +58,22 @@ req_lst <- function(lst){
 
 # req rv not equal to input value
 req_diff_rv <- function(namespaces){
-  lapply(namespaces, function(x){
-    rv[[x]] != input[[lst]]
-  })
+  !all(
+    sapply(namespaces, function(x){
+      rv[[x]] == input[[x]]
+    })
+  )
 }
 
 # specific function to handle the bug when second panel is initiated but not responding to UI update
 check_array <- function(lst){
-  lst_u <- lst %>% unlist() %>% unique()
-  req(!is.null(lst_u) & lst_u != "")
+  # lst_u <- lst %>% unlist() %>% unique()
+  # req(lst_u != "")
   n <- rv$variable_n
   if(n>1){
-    req(!is.null(lst[[2]]))
+    # req(!is.null(lst[[2]]))
     req(lst[[2]] != "")
   }
-  if(lst_u[1] == ""){array <- 2}else{array <- 1:n}
+  if(lst[1] == ""){array <- 2}else{array <- 1:n}
   return(array)
 }

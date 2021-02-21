@@ -14,6 +14,8 @@ dyn_list <- function(x){
     ,gs_lib_genes_id <- paste0("gs_lgs_",x) # verbtxt
     # user input gene(s) to filter gs
     ,gs_gene_id <- paste0("gs_lg_",x)
+    # search btn click
+    ,gs_gene_btn_id <- paste0("gs_lg_",x,"_search")
     ,gs_gene_genes_id <- paste0("gs_lgg_",x) # verbtxt
     # manual gene input
     ,gs_manual_id <- paste0("gs_m_",x)
