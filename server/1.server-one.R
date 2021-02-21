@@ -55,7 +55,7 @@ observeEvent(gmt_input_lst(),{
       rv[[paste0("gmts",x)]] <- gmt
       
       # update gene set UI
-      updatePickerInput(
+      updateSelectInput(
         session,
         gs_lib_id
         ,choices = names(gmt)

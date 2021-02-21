@@ -113,15 +113,15 @@ plot_ui <- function(n){
             fluidRow(
               column(
                 4,
-                pickerInput(
+                selectizeInput(
                   gs_db_id,
                   HTML(paste0(x,".3a. Select database:"),add_help(gs_db_id_q))
                   ,choices=gmt_dbs
                   ,selected=rv[[gs_db_id]]
                   ,options = list(
-                    `live-search` = TRUE
-                    , title = 'Nothing selected'
-                    # ,onInitialize = I('function() { this.setValue(""); }')
+                    # `live-search` = TRUE,
+                    placeholder = 'Type to search ...'
+                    ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
                   )
                 )
               )
@@ -129,15 +129,15 @@ plot_ui <- function(n){
                 condition = sprintf("input.%s != ''", gs_db_id),
                 column(
                   4,
-                  pickerInput(
+                  selectizeInput(
                     gs_lib_id,
                     HTML(paste0(x,".3b. Select your gene set of interest:"),add_help(gs_lib_id_q))
                     ,choices=names(rv[[paste0("gmts",x)]])
                     ,selected=rv[[gs_lib_id]]
                     ,options = list(
-                      `live-search` = TRUE
-                      , title = 'Nothing selected'
-                      # ,onInitialize = I('function() { this.setValue(""); }')
+                      # `live-search` = TRUE,
+                      placeholder = 'Type to search ...'
+                      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_lib_id]]))
                     )
                   )
                 )
@@ -158,8 +158,8 @@ plot_ui <- function(n){
                   # )
                   searchInput(
                     gs_gene_id,
-                    HTML(paste0("Filter gene sets that comprise a gene:", add_help(gs_gene_id_q))),
-                    placeholder = "Enter a gene here in HUGO symbol format",
+                    HTML(paste0("Filter gene sets by genes:", add_help(gs_gene_id_q))),
+                    placeholder = "Enter genes in HUGO symbol format",
                     btnSearch = icon("search"),
                     btnReset = icon("remove"),
                     width = "100%"
@@ -203,7 +203,7 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(gs_lib_id_q, HTML("Search for keywords (e.g. glycolysis, chemokine, tor signaling) and select the one of interest.")
                    ,placement = "right")
-        ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene of interest, in HUGO symbol format. Click search icon to search or hit \\'Enter\\'.")
+        ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by space \" \" or comma \",\". Click search icon to search or hit \\'Enter\\'.")
                    ,placement = "top")
         ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited.")
                    ,placement = "right")
