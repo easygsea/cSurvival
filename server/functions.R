@@ -1,4 +1,5 @@
 # assign values to dynamic RVs when initialized
+# btn0_rds <- readRDS(paste0(getwd(),"/inc/btn0.rds"))
 init_rv <- function(x){
   # category to analyze
   rv[[paste0("cat_",x)]] <- "g"
@@ -16,7 +17,7 @@ init_rv <- function(x){
   rv[[paste0("gs_lgs_",x)]] <- ""
   # gs gene to search
   rv[[paste0("gs_lg_",x)]] <- ""
-  rv[[paste0("gs_lg_",x,"_search")]] <- 0
+  rv[[paste0("gs_lg_",x,"_search")]] <- 0 # btn0_rds
   rv[[paste0("gs_lgg_",x)]] <- ""
   # manual gene input
   rv[[paste0("gs_m_",x)]] <- ""
@@ -61,6 +62,15 @@ req_diff_rv <- function(namespaces){
   !all(
     sapply(namespaces, function(x){
       rv[[x]] == input[[x]]
+    })
+  )
+}
+
+# req rv larger than or equal to input value, applies to btn
+req_diff_rv_btn <- function(namespaces){
+  !all(
+    sapply(namespaces, function(x){
+      rv[[x]] >= input[[x]][1]
     })
   )
 }

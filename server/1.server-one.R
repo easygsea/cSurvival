@@ -116,13 +116,14 @@ observeEvent(lg_input_btn_lst(),{
   lst <- lg_input_lst()
   array <- check_array(lst)
   namespaces <- paste0("gs_lg_",array,"_search")
-  req(req_diff_rv(namespaces))
+  req(req_diff_rv_btn(namespaces))
   withProgress(value = 1, message = "Filtering gene sets contain the entered gene criteria. Please wait a minute ...",{
     lapply(array, function(x){
       # update the search button value
       lgg_btn_id <- paste0("gs_lg_",x,"_search")
-      rv[[lgg_btn_id]] <- input[[lgg_btn_id]]
-      
+      # saveRDS(input[[lgg_btn_id]], file = paste0(getwd(),"/inc/btn0.rds"))
+      rv[[lgg_btn_id]] <- input[[lgg_btn_id]][1]
+
       # the user-supplied GS-filtering genes
       lgg_id <- paste0("gs_lg_",x)
       lgg <- input[[lgg_id]]
