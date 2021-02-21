@@ -58,11 +58,16 @@ observeEvent(gmt_input_lst(),{
       rv[[paste0("gmts",x)]] <- rv[[paste0("gmts_tmp",x)]] <- gmt
       
       # update gene set UI
-      updateSelectInput(
+      updateSelectizeInput(
         session,
         gs_lib_id
         ,choices = names(gmt)
         ,selected=rv[[gs_lib_id]]
+        ,options = list(
+          # `live-search` = TRUE,
+          placeholder = sprintf('(n=%s) Type to search ...',length(gmt))
+          ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
+        )
       )
     })
   })
@@ -176,21 +181,27 @@ observeEvent(lg_input_btn_lst(),{
       filtered_gmts <- unlist(filtered_gmts, recursive = F)
       
       if(length(filtered_gmts) == 0){
-        shinyalert("Unable to detect the entered gene(s) in the selected database. Double check if your input follows the right format. Or try another database.")
+        shinyalert("Unable to detect the entered gene combination in the selected database. Try another database, or double check if your input follows the right format.")
       }
-        
-      req(length(filtered_gmts) > 0)
+       
+      gmt_length <-  length(filtered_gmts)
+      req(gmt_length > 0)
       
       rv[[paste0("gmts_tmp",x)]] <- filtered_gmts
-      rv[[paste0("gs_lgg_",x)]] <- paste0("Filter by: ", paste0(genes, collapse = " "))
+      rv[[paste0("gs_lgg_",x)]] <- paste0("Filtered by: ", paste0(genes, collapse = " "))
 
-
+      gs_db_id <- paste0("gs_l_",x)
       # update gene set UI
-      updateSelectInput(
+      updateSelectizeInput(
         session,
-        paste0("gs_l_",x)
+        gs_db_id
         ,choices = names(filtered_gmts)
-        ,selected=rv[[paste0("gs_l_",x)]]
+        ,selected=rv[[gs_db_id]]
+        ,options = list(
+          # `live-search` = TRUE,
+          placeholder = sprintf('(Filtered n=%s) Type to search ...',gmt_length)
+          ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
+        )
       )
       
       output[[paste0("gs_lgg_",x)]] <- renderText({
