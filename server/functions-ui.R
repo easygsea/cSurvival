@@ -47,8 +47,9 @@ plot_ui <- function(n){
     gs_mode_id <- paste0("gs_mode_",x); gs_mode_id_q <- paste0(gs_mode_id,"_q")
     gs_db_id <- paste0("gs_db_",x); gs_db_id_q <- paste0(gs_db_id,"_q")
     gs_lib_id <- paste0("gs_l_",x); gs_lib_id_q <- paste0(gs_lib_id,"_q")
-    gs_lib_genes_id <- paste0("gs_lgs_",x); gs_lib_genes_id_q <- paste0(gs_lib_genes_id,"_q") # verbatimTextOutput
+    gs_lib_genes_id <- paste0("gs_lgs_",x) # verbatimTextOutput on gs genes
     gs_gene_id <- paste0("gs_lg_",x); gs_gene_id_q <- paste0(gs_gene_id,"_q") # gene to search
+    gs_gene_genes_id <- paste0("gs_lgg_",x) # verbatimTextOutput on input genes to filter GS
     # manual gene input
     gs_manual_id <- paste0("gs_m_",x); gs_manual_id_q <- paste0(gs_manual_id,"_q")
     gs_genes_id <- paste0("gs_mg_",x)
@@ -173,9 +174,17 @@ plot_ui <- function(n){
                 condition = sprintf("input.%s != ''", gs_lib_id),
                   column(
                     8,
-                    # div(id=paste0("vtxt_anchor",x))
-                    verbatimTextOutput(gs_lib_genes_id)
+                    span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
                   )
+              )
+              ,conditionalPanel(
+                condition = printf("input.%s != ''", gs_gene_id),
+                column(
+                  8,
+                  span(verbatimTextOutput(gs_gene_genes_id), style = rv$verbTxtStyle2)
+                  
+                )
+                
               )
             )
           )
