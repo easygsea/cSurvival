@@ -181,7 +181,7 @@ observeEvent(lg_input_btn_lst(),{
       filtered_gmts <- unlist(filtered_gmts, recursive = F)
       
       if(length(filtered_gmts) == 0){
-        shinyalert("Unable to detect the entered gene combination in the selected database. Try another database, or double check if your input follows the right format.")
+        shinyalert("Unable to detect the entered gene combination in the selected database. Try another database or another gene combination, or double check if your input follows the right format.")
       }
        
       gmt_length <-  length(filtered_gmts)
