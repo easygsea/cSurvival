@@ -45,30 +45,7 @@ observeEvent(gmt_input_lst(),{
   req(req_diff_rv(namespaces))
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
     lapply(array, function(x) {
-      gs_db_id <- paste0("gs_db_",x)
-      gs_lib_id <- paste0("gs_l_",x)
-      
-      db <- rv[[gs_db_id]] <- isolate(input[[gs_db_id]])
-      
-      req(db != "")
-      gmt_path <- retrieve_gmt_path(db)
-      gmt <- gmtPathways(gmt_path)
-      
-      # update variables
-      rv[[paste0("gmts",x)]] <- rv[[paste0("gmts_tmp",x)]] <- gmt
-      
-      # update gene set UI
-      updateSelectizeInput(
-        session,
-        gs_lib_id
-        ,choices = names(gmt)
-        ,selected=rv[[gs_lib_id]]
-        ,options = list(
-          # `live-search` = TRUE,
-          placeholder = sprintf('(n=%s) Type to search ...',length(gmt))
-          ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
-        )
-      )
+      update_gs_by_db(x)
     })
   })
 }, ignoreInit = T)
@@ -131,7 +108,7 @@ observeEvent(lg_input_btn_lst(),{
 
       # the user-supplied GS-filtering genes
       lgg_id <- paste0("gs_lg_",x)
-      lgg <- input[[lgg_id]]
+      lgg <- rv[[lgg_id]] <- input[[lgg_id]]
       
       # check if input is empty
       if(lgg == ""){
@@ -140,9 +117,7 @@ observeEvent(lg_input_btn_lst(),{
       
       req(lgg != "")
       # proceed only rv not equal to input
-      # update rv
-      rv[[lgg_id]] <- lgg
-      
+
       # check if valid entry
       genes <- toupper(lgg) %>% gsub(" ","",.) %>% str_split(.,"&") %>% .[[1]] %>% unique()
       
@@ -191,6 +166,9 @@ observeEvent(lg_input_btn_lst(),{
       rv[[paste0("gs_lgg_",x)]] <- paste0("Filtered by: ", paste0(genes, collapse = " "))
 
       gs_db_id <- paste0("gs_l_",x)
+      
+      rv[[paste0("gs_placeholder",x)]] <- sprintf('(Filtered n=%s) Type to search ...',gmt_length)
+      
       # update gene set UI
       updateSelectizeInput(
         session,
@@ -199,7 +177,7 @@ observeEvent(lg_input_btn_lst(),{
         ,selected=rv[[gs_db_id]]
         ,options = list(
           # `live-search` = TRUE,
-          placeholder = sprintf('(Filtered n=%s) Type to search ...',gmt_length)
+          placeholder = rv[[paste0("gs_placeholder",x)]]
           ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
         )
       )
@@ -221,21 +199,37 @@ observeEvent(lg_input_btn_lst(),{
 }, ignoreInit = T)
 
 # ------- [1D] reset to all gene sets on clear filtering ---------
-# lg_input_clearbtn_lst <- reactive({
-#   lapply(1:rv$variable_n, function(x){
-#     db_id <- paste0("gs_lg_",x,"_reset")
-#     input[[db_id]]
-#   })
-# })
-# 
-# observeEvent(lg_input_clearbtn_lst(),{
-#   lst <- lg_input_clearbtn_lst()
-#   array <- check_array(lst)
-#   withProgress(value = 1, message = "Resetting choices to all gene sets in the selected database ...")
-#   print("hihihi")
-#   print(lst)
-#   print("end")
-# }, ignoreInit = T)
+lg_input_clearbtn_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    db_id <- paste0("gs_lg_",x,"_reset")
+    input[[db_id]]
+  })
+})
+
+observeEvent(lg_input_clearbtn_lst(),{
+  print("hihihi")
+  print(paste0("btn#1: ",rv[["gs_lg_1_reset"]]))
+  print(paste0("btn#2: ",rv[["gs_lg_2_reset"]]))
+  print(lg_input_clearbtn_lst())
+  print(rv[["gs_lg_1"]])
+  print(rv[["gs_lg_2"]])
+  print("end")
+  # lst <- lg_input_lst()
+  # array <- check_array(lst)
+  array <- 1:rv$variable_n
+  # print(array)
+  namespaces <- paste0("gs_lg_",array)
+  req(req_filter_on(namespaces))
+  withProgress(value = 1, message = "Resetting choices to all gene sets in the selected database ...",{
+    lapply(array, function(x) {
+      # update the search button value
+      lgg_btn_id <- paste0("gs_lg_",x,"_reset")
+      rv[[lgg_btn_id]] <- input[[lgg_btn_id]][1]
+      # update the GS
+      update_gs_by_db(x)
+    })
+  })
+}, ignoreInit = T)
 
 # ----- 1.2. run parameters -------
 # update dynamic rvs

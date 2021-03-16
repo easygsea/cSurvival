@@ -137,7 +137,7 @@ plot_ui <- function(n){
                     ,selected=rv[[gs_lib_id]]
                     ,options = list(
                       # `live-search` = TRUE,
-                      placeholder = 'Type to search ...'
+                      placeholder = rv$gs_placeholder
                       ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_lib_id]]))
                     )
                   )
