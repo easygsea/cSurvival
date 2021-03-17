@@ -1,0 +1,4 @@
+Establish collections of df_gene and df_survival
+1. Separate scripts for data extraction only
+2. Establish df for each cancer
+3. Create a csv denoting collections
