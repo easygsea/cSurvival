@@ -9,7 +9,10 @@ library(TCGAbiolinks)
 library(microbenchmark) # test the time spent on a command
 library(fgsea) # use the function gmtpathways
 
-setwd("C:/Users/15067/Desktop/WORK!!!!!!!!1/gdc_data")
+# setwd("C:/Users/15067/Desktop/WORK!!!!!!!!1/gdc_data")
+setwd("/Users/jeancheng/Documents/KMplot/LUAD_V2_TCGAbiolink")
+
+# -------- step 1. read in TCGA projects -----------
 project_names <- c("TCGA-BRCA", "TCGA-GBM", "TCGA-OV", "TCGA-LUAD",
                    "TCGA-UCEC", "TCGA-KIRC", "TCGA-HNSC", "TCGA-LGG",
                    "TCGA-THCA", "TCGA-LUSC", "TCGA-PRAD", "TCGA-SKCM",
@@ -142,13 +145,16 @@ df_gene <- data.table::fread(df_gene_path)
 # df_gene <- df_gene_scale %>%
 #   data.table::transpose(keep.names = "gene", make.names = "patient_id") %>% 
 #   mutate_at(vars(!gene), as.numeric)
-patient_ids <- df_gene_scale$patient_id
+patient_ids <- df_gene$patient_id
 df_gene_scale <- apply(df_gene[,-1], 2, scale)
-df_gene_scale<- df_gene_scale[,complete.cases(t(df_gene_scale))] 
+# df_gene_scale<- df_gene_scale[,complete.cases(t(df_gene_scale))] 
+# function to remove all na per column
+not_all_na <- function(x) any(!is.na(x))
 df_gene_scale <- try(
   as_tibble(df_gene_scale) %>%
+  dplyr::select(where(not_all_na)) %>%
   mutate(patient_id = patient_ids) %>%
-  select(patient_id, everything())
+  dplyr::select(patient_id, everything())
 )
 if(!inherits(df_gene_scale, "try-error")){
   unlink(df_gene_scale_path, recursive = T)
