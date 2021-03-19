@@ -110,26 +110,28 @@ update_gs_by_db <- function(x){
   
   db <- rv[[gs_db_id]] <- isolate(input[[gs_db_id]])
   
-  req(db != "")
-  gmt_path <- retrieve_gmt_path(db)
-  gmt <- gmtPathways(gmt_path)
-  
-  # update variables
-  rv[[paste0("gmts",x)]] <- rv[[paste0("gmts_tmp",x)]] <- gmt
-  
-  # update placeholder
-  rv[[paste0("gs_placeholder",x)]] <- sprintf('(Total n=%s) Type to search ...',length(gmt))
-  
-  # update gene set UI
-  updateSelectizeInput(
-    session,
-    gs_lib_id
-    ,choices = names(gmt)
-    ,selected=rv[[gs_lib_id]]
-    ,options = list(
-      # `live-search` = TRUE,
-      placeholder = rv[[paste0("gs_placeholder",x)]]
-      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
+  if(db != ""){
+    gmt_path <- retrieve_gmt_path(db)
+    gmt <- gmtPathways(gmt_path)
+    
+    # update variables
+    rv[[paste0("gmts",x)]] <- rv[[paste0("gmts_tmp",x)]] <- gmt
+    
+    # update placeholder
+    rv[[paste0("gs_placeholder",x)]] <- sprintf('(Total n=%s) Type to search ...',length(gmt))
+    
+    # update gene set UI
+    updateSelectizeInput(
+      session,
+      gs_lib_id
+      ,choices = names(gmt)
+      ,selected=rv[[gs_lib_id]]
+      ,options = list(
+        # `live-search` = TRUE,
+        placeholder = rv[[paste0("gs_placeholder",x)]]
+        ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
+      )
     )
-  )
+  }
+  
 }
