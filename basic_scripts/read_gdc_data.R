@@ -8,6 +8,7 @@ library(data.table)
 library(TCGAbiolinks)
 library(microbenchmark) # test the time spent on a command
 library(fgsea) # use the function gmtpathways
+library("org.Hs.eg.db") # generate the id conversion table
 
 # setwd("C:/Users/15067/Desktop/WORK!!!!!!!!1/gdc_data")
 setwd("/Users/jeancheng/Documents/KMplot/LUAD_V2_TCGAbiolink")
@@ -24,6 +25,7 @@ project_names <- c("TCGA-BRCA", "TCGA-GBM", "TCGA-OV", "TCGA-LUAD",
                    "TCGA-CHOL")
 # the name of the cancer project
 project_name <- "TCGA-LUAD"
+project_name <- "TCGA-COAD"
 # The path for reading and writing the patient data frames
 dir.create(project_name)
 # the query to download the gene information of all patients
@@ -136,16 +138,51 @@ if(!inherits(df_survival, "try-error")){
 # output the df_survival
 fwrite(df_survival, file = df_survival_path)
 
+
 # df_gene_scale <- read_csv(df_gene_path)
 df_gene <- data.table::fread(df_gene_path)
-
-
 
 # df_gene_scale <- data.table::fread(df_gene_path)
 # df_gene <- df_gene_scale %>%
 #   data.table::transpose(keep.names = "gene", make.names = "patient_id") %>% 
 #   mutate_at(vars(!gene), as.numeric)
 patient_ids <- df_gene$patient_id
+
+# create individual tables using org.Hs
+egENS <- toTable(org.Hs.egENSEMBL)
+egSYMBOL <- toTable(org.Hs.egSYMBOL)
+
+# bind the tables
+id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
+
+# extract the gene ids from df_gene and find their names from id conversion table
+gene_ids <- as_tibble_col(colnames(df_gene)[-1], column_name = "ensembl_id")
+gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
+
+# extract the ids that do not exist in the id conversion table
+gene_na_table <- gene_ids_table %>%
+  filter(is.na(gene_id)) %>%
+  mutate(full_name = ensembl_id)
+# extract the ids that exist in the id conversion table
+gene_not_na <- gene_ids_table %>%
+  filter(!is.na(gene_id))
+# summarise the duplicated gene_ids and symbols in the df
+unique_ids_symbols <- 
+  aggregate(x= tibble(gene_not_na["gene_id"], gene_not_na["symbol"]), 
+            by=gene_not_na["ensembl_id"], 
+            FUN = function(X) paste(unique(X), collapse="|")) %>%
+  mutate(full_name = paste(symbol, gene_id, ensembl_id, sep = "|"))
+
+full_name_table <- rbind(unique_ids_symbols, gene_na_table)
+
+# unique_symbols <- 
+#   aggregate(x= gene_ids_table["gene_id"], 
+#             by=gene_ids_table["ensembl_id"], 
+#             FUN = function(X) length(unique(X)))
+# filter(unique_symbols, gene_id == 7)
+# max(unique_symbols$gene_id)
+
+# scale the df_gene and generate df_gene_scale
 df_gene_scale <- apply(df_gene[,-1], 2, scale)
 # df_gene_scale<- df_gene_scale[,complete.cases(t(df_gene_scale))] 
 # function to remove all na per column
@@ -156,6 +193,12 @@ df_gene_scale <- try(
   mutate(patient_id = patient_ids) %>%
   dplyr::select(patient_id, everything())
 )
+
+colnames(df_gene_scale)[-1] <- 
+  left_join(as_tibble_col(colnames(df_gene_scale)[-1], column_name = "ensembl_id"),
+            full_name_table,
+            by = "ensembl_id")$full_name
+
 if(!inherits(df_gene_scale, "try-error")){
   unlink(df_gene_scale_path, recursive = T)
 } else {next}

@@ -1,2 +1,9 @@
 
 .DS_Store
+basic_scripts/TCGA-LGG
+basic_scripts/TCGA-COAD
+
+basic_scripts/tcga_projects.csv
+.DS_Store
+basic_scripts/.Rhistory
+.DS_Store
