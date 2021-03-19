@@ -218,9 +218,9 @@ df_survival <- fread(df_survival_path) %>%
 # output: a data frame containing columns survival_days, censoring_status and level, or
 # the p.value, or the quantile, or the cutoff of gene level of the data frame
 # attribute info = c("df", "pval", "quantile", "cutoff")
-get_info_most_significant <- function(gene_name, rename=NULL, df_survival_previous = df_survival, df_gene_overall = df_gene, margin = .1, step = .01){  
+get_info_most_significant <- function(gene_name, rename=NULL, df_survival_previous = df_survival, df_gene_overall = df_gene_scale, min = .1, max = .9, step = .01){  
   # initiate quantiles according to margin and step values
-  quantile_s = seq(margin, 1 - margin, by = step)
+  quantile_s = seq(min, max, by = step)
   # # generate the survival data frames with levels of gene percentages
   # df_survival_with_gene <- df_survival_previous %>%
   #   left_join(select(df_gene_overall, patient_id, gene = gene_name), by = "patient_id") %>%
@@ -243,7 +243,7 @@ get_info_most_significant <- function(gene_name, rename=NULL, df_survival_previo
     gene_quantiles <- df_gene_s[[gene_name]] %>% 
       lapply(function(x) ifelse(x > quantiles[[i]], "high", "low"))
     names(gene_quantiles) <- patient_ids
-    print(quantiles[[i]])
+    # print(quantiles[[i]])
     # generate survival analysis df
     df_survival_quantile <- df_survival_previous
     df_survival_quantile$level <- gene_quantiles[match(df_survival_quantile$patient_id,names(gene_quantiles))]
@@ -296,7 +296,7 @@ get_level_name <- function(gene_name_1, gene_name_2){
 # input: two gene names
 get_df_two_genes <- function(gene_name_1, gene_name_2){
   df_two_genes <- get_info_most_significant(gene_name_1)[[1]][["df"]] %>%
-    inner_join(select(get_info_most_significant(gene_name_2)[[1]][["df"]], patient_id, level), by = "patient_id") %>%
+    inner_join(dplyr::select(get_info_most_significant(gene_name_2)[[1]][["df"]], patient_id, level), by = "patient_id") %>%
     mutate("x_y_level" = paste0(`level.x`, "_", `level.y`))
   # df_two_genes[[get_level_name(gene_name_1, gene_name_2)]] <- paste0(df_two_genes$`level.x`, "_", df_two_genes$`level.y`)
   df_two_genes
