@@ -4,9 +4,18 @@ Establish collections of df_gene and df_survival
 3. Create a csv denoting collections
 
 Establish df collections for
-1. [df_snv.csv] Mutation (somatic nucleotide variation, SNV): binary
+1. [df_snv_type.csv df_snv_class.csv] Mutation (somatic nucleotide variation, SNV)
 2. [df_cnv.csv df_cnv_scale.csv] Copy number variation (CNV), may need ID conversion
 3. [df_mir.csv df_mir_scale.csv] microRNA (miRNA)
 4. [df_met.csv df_met_scale.csv] Methylation
 
-2-4跟现在处理的df_gene类似，2的话如果是ENSG一类似的还是需要下ID转换。1的数据比较特别，应该是有或者没有，也就是 1 0 这样的，具体的需要下载下来了后看看是什么样的，我们再讨论处理
+1的数据处理出来应像
+[df_snv_type.csv]
+"patient","PTCHD2|57540|ENSG****",...
+"TCGA-97-7938-01A","Missense_SNP",...
+......
+
+[df_snv_class.csv]
+"patient","PTCHD2|57540|ENSG****",...
+"TCGA-97-7938-01A","Missense_Mutation",...
+......
