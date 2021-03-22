@@ -33,6 +33,7 @@ init_rv <- function(x){
   rv[[paste0("upper_",x)]] <- .85
   # step size
   rv[[paste0("step_",x)]] <- .01
+  rv[[paste0("snv_method_",x)]] <- "mutect"
 }
 
 # update these into rv when selections change
@@ -89,20 +90,20 @@ req_filter_on <- function(namespaces){ # namespace = paste0("gs_lg_",x),
   )
 }
 
-# specific function to handle the bug when second panel is initiated but not responding to UI update
-check_array <- function(lst){
-  # lst_u <- lst %>% unlist() %>% unique()
-  # req(lst_u != "")
-  n <- rv$variable_n
-  if(n>1){
-    # req(!is.null(lst[[2]]))
-    req(lst[[2]] != "")
-  }
-  if(lst[1] == ""){array <- 2}else{array <- 1:n}
-  return(array)
-}
+# # specific function to handle the bug when second panel is initiated but not responding to UI update
+# check_array <- function(lst){
+#   # lst_u <- lst %>% unlist() %>% unique()
+#   # req(lst_u != "")
+#   n <- rv$variable_n
+#   if(n>1){
+#     # req(!is.null(lst[[2]]))
+#     req(lst[[2]] != "")
+#   }
+#   if(lst[1] == ""){array <- 2}else{array <- 1:n}
+#   return(array)
+# }
 
-# ------- return GSs when a db is selected -------
+# ------- return all GSs when a db is selected -------
 update_gs_by_db <- function(x){
   gs_db_id <- paste0("gs_db_",x)
   gs_lib_id <- paste0("gs_l_",x)

@@ -80,7 +80,7 @@ plot_ui <- function(n){
             inputId = db_id,
             label = HTML(paste0(x,".2. Select type of molecular data:",add_help(db_id_q))),
             choices = c("Expression"="rna", 
-                        "SNV"="snv",
+                        "Mutation"="snv",
                         "CNV"="cnv",
                         "miRNA"="mir",
                         "Methylation"="met"),
@@ -231,10 +231,14 @@ plot_run_ui <- function(n){
 
   lapply(1:n, function(x){
 
-    lower_id <- paste0("lower_",x); lower_id_q <- paste0(lower_id,"_q",x)
-    higher_id <- paste0("upper_",x); higher_id_q <- paste0(higher_id,"_q",x)
-    step_id <- paste0("step_",x); step_id_q <- paste0(step_id,"_q",x)
+    lower_id <- paste0("lower_",x); lower_id_q <- paste0(lower_id,"_q")
+    higher_id <- paste0("upper_",x); higher_id_q <- paste0(higher_id,"_q")
+    step_id <- paste0("step_",x); step_id_q <- paste0(step_id,"_q")
     col <- extract_color(x)
+    
+    snv_id <- paste0("snv_method_",x); snv_id_q <- paste0(snv_id,"_q")
+    normal_id <- paste0("normal_",x); snv_id_q <- paste0(normal_id,"_q")
+    mutated_id <- paste0("mutated_",x); snv_id_q <- paste0(mutated_id,"_q")
     
     check_inputs <- function(){
       cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
@@ -289,7 +293,22 @@ plot_run_ui <- function(n){
                        ,placement = "right")
           )
         }else{
-          h4(paste0("SNV (mutation) analysis does not need parameter adjustment (Analysis #)",x), align = "center")
+          div(
+            h4(paste0("Run parameters for Analysis #",x), align = "center"),
+            selectizeInput(
+              snv_id
+              ,label = HTML(paste0("Select mutation caller:",add_help(snv_id_q)))
+              ,choices = snv_algorithms
+              ,selected = rv[[snv_id]]
+              ,options = list(
+                # `live-search` = TRUE,
+                placeholder = 'Type to search ...'
+                ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
+              )
+            ,bsTooltip(snv_id_q
+                       ,HTML("The algorithm used for calling nucleotide variations")
+                       ,placement = "top")
+          )
         }
         
       )
