@@ -84,8 +84,7 @@ req_filter_on <- function(namespaces){ # namespace = paste0("gs_lg_",x),
   !all(
     sapply(namespaces, function(x){
       # user's input
-      lgg_id <- paste0("gs_lg_",x)
-      rv[[lgg_id]] == ""
+      rv[[x]] == ""
     })
   )
 }
