@@ -4,18 +4,18 @@ Establish collections of df_gene and df_survival
 3. Create a csv denoting collections
 
 Establish df collections for
-1. [df_snv_type.csv df_snv_class.csv] Mutation (somatic nucleotide variation, SNV)
+1. [df_snv_type_mutect.csv df_snv_class_mutect.csv df_snv_type_varscan.csv df_snv_class_varscan.csv df_snv_type_somaticsniper.csv df_snv_class_somaticsniper.csv df_snv_type_muse.csv df_snv_class_muse.csv] Mutation (somatic nucleotide variation, SNV) 共八个文件
 2. [df_cnv.csv df_cnv_scale.csv] Copy number variation (CNV), may need ID conversion
 3. [df_mir.csv df_mir_scale.csv] microRNA (miRNA)
 4. [df_met.csv df_met_scale.csv] Methylation
 
 1的数据处理出来应像
-[df_snv_type.csv]
+[df_snv_type_mutect.csv]
 "patient","PTCHD2|57540|ENSG****",...
 "TCGA-97-7938-01A","SNP",...
 ......
 
-[df_snv_class.csv]
+[df_snv_class_mutect.csv]
 "patient","PTCHD2|57540|ENSG****",...
 "TCGA-97-7938-01A","Missense_Mutation",...
 ......

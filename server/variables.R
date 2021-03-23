@@ -1,3 +1,11 @@
+# algorithms for variant calling
+snv_algorithms <- list(
+  "MuTect" = "mutect"
+  ,"VarScan" = "varscan"
+  ,"SomaticSniper" = "somaticsniper"
+  ,"MuSE" = "muse"
+)
+
 # dynamic variables need initiatialization and updates according to inputs' changes
 dyn_list <- function(x){
   list(
@@ -23,5 +31,6 @@ dyn_list <- function(x){
     ,lower_id <- paste0("lower_",x)
     ,higher_id <- paste0("upper_",x)
     ,step_id <- paste0("step_",x)
+    ,snv_id <- paste0("snv_method_",x)
   )
 }
