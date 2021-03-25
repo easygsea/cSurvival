@@ -133,7 +133,7 @@ plot_ui <- function(n){
                     ,selected=rv[[gs_lib_id]]
                     ,options = list(
                       # `live-search` = TRUE,
-                      placeholder = rv$gs_placeholder
+                      placeholder = rv[[paste0("gs_placeholder",x)]]
                       ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_lib_id]]))
                     )
                   )
@@ -224,9 +224,9 @@ plot_ui <- function(n){
 #======================================================================#
 plot_run_ui <- function(n){
   if(n == 1){col_w <- 12}else{col_w <- 6}
-
-  lapply(1:n, function(x){
-
+  
+  ui <- lapply(1:n, function(x){
+    
     lower_id <- paste0("lower_",x); lower_id_q <- paste0(lower_id,"_q")
     higher_id <- paste0("upper_",x); higher_id_q <- paste0(higher_id,"_q")
     step_id <- paste0("step_",x); step_id_q <- paste0(step_id,"_q")
@@ -280,8 +280,7 @@ plot_run_ui <- function(n){
               ,grid = TRUE
             )
             ,if(x == 1 & rv$variable_n > 1){
-              # req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input")
-              req(input[["db_2"]] != "snv")
+              req(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input"))
               bsButton("toall", strong("Apply to all"), style = "warning")
             }
             ,bsTooltip(lower_id_q,HTML("The percentile to start analysis.")
@@ -293,53 +292,56 @@ plot_run_ui <- function(n){
           )
         }else{
           
-            div(
-              if(T){ #grepl("^TCGA",input$project)
-                # mutation caller options
-                selectizeInput(
-                  snv_id
-                  ,label = HTML(paste0("Somatic mutation caller:",add_help(snv_id_q)))
-                  ,choices = snv_algorithms
-                  ,selected = rv[[snv_id]]
-                  ,options = list(
-                    # `live-search` = TRUE,
-                    placeholder = 'Type to search ...'
-                    ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
-                )
-              }
-              ,bsTooltip(snv_id_q
-                           ,HTML("The algorithm used for calling somatic nucleotide variations")
-                           ,placement = "top")
-                
-                # non-silent variants classifications
-                ,selectizeInput(
-                  non_id
-                  ,label = HTML(paste0("Non-synomynous variants:",add_help(non_id_q)))
-                  ,choices = variant_types
-                  ,selected = variant_types_non
-                  ,multiple = T
-                )
-                ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
-                           ,placement = "top")
-                
-                # silent variants classifications
-                ,selectizeInput(
-                  syn_id
-                  ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
-                  ,choices = variant_types
-                  ,selected = variant_types_syn
-                  ,multiple = T
-                )
-                ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
-                           ,placement = "top")
-                
-                ,if(x == 1 & rv$variable_n > 1){
-                  req(input[["db_2"]] == "snv")
-                  bsButton("toall_m", strong("Apply to all"), style = "warning")
-                }
+          div(
+            if(T){ #grepl("^TCGA",input$project)
+              # mutation caller options
+              selectizeInput(
+                snv_id
+                ,label = HTML(paste0("Somatic mutation caller:",add_help(snv_id_q)))
+                ,choices = snv_algorithms
+                ,selected = rv[[snv_id]]
+                ,options = list(
+                  # `live-search` = TRUE,
+                  placeholder = 'Type to search ...'
+                  ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
+              )
+            }
+            ,bsTooltip(snv_id_q
+                       ,HTML("The algorithm used for calling somatic nucleotide variations")
+                       ,placement = "top")
+            
+            # non-silent variants classifications
+            ,selectizeInput(
+              non_id
+              ,label = HTML(paste0("Non-synomynous variants:",add_help(non_id_q)))
+              ,choices = variant_types
+              ,selected = variant_types_non
+              ,multiple = T
             )
+            ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                       ,placement = "top")
+            
+            # silent variants classifications
+            ,selectizeInput(
+              syn_id
+              ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
+              ,choices = variant_types
+              ,selected = variant_types_syn
+              ,multiple = T
+            )
+            ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                       ,placement = "top")
+            
+            ,if(x == 1 & rv$variable_n > 1){
+              req(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal"))
+              bsButton("toall_m", strong("Apply to all"), style = "warning")
+            }
+          )
         }
       )
     )
   })
+
+  do.call(tagList, ui)
+  
 }

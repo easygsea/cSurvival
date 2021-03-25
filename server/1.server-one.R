@@ -45,7 +45,23 @@ observeEvent(gmt_input_lst(),{
   req(req_diff_rv(namespaces))
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
     lapply(array, function(x) {
-      update_gs_by_db(x)
+      gs_db_id <- paste0("gs_db_",x)
+      if(rv[[gs_db_id]] != input[[gs_db_id]]){
+        # extract GS data
+        update_gs_by_db(x)
+        
+        # update searchInput
+        gs_gene_id <- paste0("gs_lg_",x)
+        updateSearchInput(
+          session,
+          gs_gene_id,
+          value = ""
+        )
+        
+        # update verttext
+        gs_gene_genes_id <- paste0("gs_lgg_",x)
+        output[[gs_gene_genes_id]] <- NULL
+      }
     })
   })
 }, ignoreInit = T)
@@ -217,7 +233,7 @@ lg_input_clearbtn_lst <- reactive({
 observeEvent(lg_input_clearbtn_lst(),{
   array <- 1:rv$variable_n
   namespaces <- paste0("gs_lg_",array)
-  req(req_filter_on(namespaces))
+  req(req_diff_rv_btn(namespaces))
   withProgress(value = 1, message = "Resetting choices to all gene sets in the selected database ...",{
     lapply(array, function(x) {
       lgg_btn_id <- paste0("gs_lg_",x,"_reset")
@@ -232,18 +248,9 @@ observeEvent(lg_input_clearbtn_lst(),{
 }, ignoreInit = T)
 
 # ----- 1.2. run parameters -------
-# update dynamic rvs
-db_lst <- reactive({
-  lapply(1:rv$variable_n, function(x){
-    db_id <- paste0("db_",x)
-    input[[db_id]]
-  })
-})
-
-observeEvent(db_lst(),{
-  # print(db_lst())
+observe({
   rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
-}, ignoreInit = T)
+})
 
 # parameters for KM analysis
 output$par_gear <- renderUI({

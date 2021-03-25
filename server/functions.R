@@ -81,14 +81,22 @@ req_diff_rv_btn <- function(namespaces){
 }
 
 # req GS filter input content exist
-req_filter_on <- function(namespaces, filter="", target="rv"){ # namespace = paste0("gs_lg_",x),
+req_filter_on <- function(namespaces, filter="", target="rv", mode="equal"){ # namespace = paste0("gs_lg_",x),
   !all(
     sapply(namespaces, function(x){
       # user's input
       if(target=="rv"){
-        rv[[x]] == filter
+        if(mode == "equal"){
+          rv[[x]] == filter
+        }else{
+          rv[[x]] != filter
+        }
       }else if(target == "input"){
-        input[[x]] == filter
+        if(mode == "equal"){
+          input[[x]] == filter
+        }else{
+          input[[x]] != filter
+        }
       }
     })
   )
