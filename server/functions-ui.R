@@ -79,11 +79,7 @@ plot_ui <- function(n){
           radioGroupButtons(
             inputId = db_id,
             label = HTML(paste0(x,".2. Select type of molecular data:",add_help(db_id_q))),
-            choices = c("Expression"="rna", 
-                        "Mutation"="snv",
-                        "CNV"="cnv",
-                        "miRNA"="mir",
-                        "Methylation"="met"),
+            choices = data_types,
             status = "danger",
             selected = rv[[db_id]],
             checkIcon = list(
@@ -237,8 +233,8 @@ plot_run_ui <- function(n){
     col <- extract_color(x)
     
     snv_id <- paste0("snv_method_",x); snv_id_q <- paste0(snv_id,"_q")
-    normal_id <- paste0("normal_",x); snv_id_q <- paste0(normal_id,"_q")
-    mutated_id <- paste0("mutated_",x); snv_id_q <- paste0(mutated_id,"_q")
+    non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
+    syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
     check_inputs <- function(){
       cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
@@ -258,9 +254,10 @@ plot_run_ui <- function(n){
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
       wellPanel(
         style = paste0("background-color: ", col, "; border: .5px solid #fff;"),
+        h4(paste0("Run parameters for Analysis #",x), align = "center"),
+        h4(paste0("(",names(data_types)[match(input[[paste0("db_",x)]], data_types)],")")),
         if(check_inputs()){
           div(
-            h4(paste0("Run parameters for Analysis #",x), align = "center"),
             sliderTextInput(
               lower_id,
               label = HTML(paste0("Lower threshold:",add_help(lower_id_q)))
@@ -282,7 +279,9 @@ plot_run_ui <- function(n){
               ,choices = c(.01, .02, .03, .05, .1, .15, .2, .25)
               ,grid = TRUE
             )
-            ,if(x == 1){
+            ,if(x == 1 & rv$variable_n > 1){
+              # req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input")
+              req(input[["db_2"]] != "snv")
               bsButton("toall", strong("Apply to all"), style = "warning")
             }
             ,bsTooltip(lower_id_q,HTML("The percentile to start analysis.")
@@ -293,24 +292,53 @@ plot_run_ui <- function(n){
                        ,placement = "right")
           )
         }else{
-          div(
-            h4(paste0("Run parameters for Analysis #",x), align = "center"),
-            selectizeInput(
-              snv_id
-              ,label = HTML(paste0("Select mutation caller:",add_help(snv_id_q)))
-              ,choices = snv_algorithms
-              ,selected = rv[[snv_id]]
-              ,options = list(
-                # `live-search` = TRUE,
-                placeholder = 'Type to search ...'
-                ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
-              )
-            ,bsTooltip(snv_id_q
-                       ,HTML("The algorithm used for calling nucleotide variations")
-                       ,placement = "top")
-          )
+          
+            div(
+              if(T){ #grepl("^TCGA",input$project)
+                # mutation caller options
+                selectizeInput(
+                  snv_id
+                  ,label = HTML(paste0("Somatic mutation caller:",add_help(snv_id_q)))
+                  ,choices = snv_algorithms
+                  ,selected = rv[[snv_id]]
+                  ,options = list(
+                    # `live-search` = TRUE,
+                    placeholder = 'Type to search ...'
+                    ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
+                )
+              }
+              ,bsTooltip(snv_id_q
+                           ,HTML("The algorithm used for calling somatic nucleotide variations")
+                           ,placement = "top")
+                
+                # non-silent variants classifications
+                ,selectizeInput(
+                  non_id
+                  ,label = HTML(paste0("Non-synomynous variants:",add_help(non_id_q)))
+                  ,choices = variant_types
+                  ,selected = variant_types_non
+                  ,multiple = T
+                )
+                ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                           ,placement = "top")
+                
+                # silent variants classifications
+                ,selectizeInput(
+                  syn_id
+                  ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
+                  ,choices = variant_types
+                  ,selected = variant_types_syn
+                  ,multiple = T
+                )
+                ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                           ,placement = "top")
+                
+                ,if(x == 1 & rv$variable_n > 1){
+                  req(input[["db_2"]] == "snv")
+                  bsButton("toall_m", strong("Apply to all"), style = "warning")
+                }
+            )
         }
-        
       )
     )
   })

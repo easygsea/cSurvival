@@ -233,9 +233,17 @@ observeEvent(lg_input_clearbtn_lst(),{
 
 # ----- 1.2. run parameters -------
 # update dynamic rvs
-observe({
-  rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
+db_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    db_id <- paste0("db_",x)
+    input[[db_id]]
+  })
 })
+
+observeEvent(db_lst(),{
+  print(db_lst())
+  rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
+}, ignoreInit = T)
 
 # parameters for KM analysis
 output$par_gear <- renderUI({
@@ -244,10 +252,18 @@ output$par_gear <- renderUI({
 
 # update all run parameters according to analysis #1
 observeEvent(input$toall,{
-  lapply(1:rv$variable_n, function(x){
+  lapply(2:rv$variable_n, function(x){
     updateSliderTextInput(session, paste0("lower_",x), selected = input[["lower_1"]])
-    updateSliderTextInput(session, paste0("higher_",x), selected = input[["higher_1"]])
+    updateSliderTextInput(session, paste0("upper_",x), selected = input[["upper_1"]])
     updateSliderTextInput(session, paste0("step_",x), selected = input[["step_1"]])
+  })
+})
+
+observeEvent(input$toall_m,{
+  lapply(2:rv$variable_n, function(x){
+    updateSelectInput(session, paste0("snv_method_",x), selected = input[["snv_method_1"]])
+    updateSelectizeInput(session, paste0("nonsynonymous_",x), selected = input[["nonsynonymous_1"]])
+    updateSelectizeInput(session, paste0("synonymous_",x), selected = input[["synonymous_1"]])
   })
 })
 
