@@ -67,7 +67,7 @@ observeEvent(lib_input_lst(),{
     gs_lib_id <- paste0("gs_l_",x)
     gs_lib_genes_id <- paste0("gs_lgs_",x)
     
-    if(input[[gs_lib_id]]){
+    if(!is.na(input[[gs_lib_id]])){
       gs <- rv[[gs_lib_id]] <- input[[gs_lib_id]]
       
       if(!is.null(gs) & gs != ""){
@@ -241,7 +241,7 @@ db_lst <- reactive({
 })
 
 observeEvent(db_lst(),{
-  print(db_lst())
+  # print(db_lst())
   rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
 }, ignoreInit = T)
 
