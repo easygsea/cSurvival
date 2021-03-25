@@ -280,8 +280,9 @@ plot_run_ui <- function(n){
               ,grid = TRUE
             )
             ,if(x == 1 & rv$variable_n > 1){
-              req(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input"))
-              bsButton("toall", strong("Apply to all"), style = "warning")
+              if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input")){
+                bsButton("toall", strong("Apply to all"), style = "warning")
+              }
             }
             ,bsTooltip(lower_id_q,HTML("The percentile to start analysis.")
                        ,placement = "right")
@@ -333,8 +334,9 @@ plot_run_ui <- function(n){
                        ,placement = "top")
             
             ,if(x == 1 & rv$variable_n > 1){
-              req(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal"))
-              bsButton("toall_m", strong("Apply to all"), style = "warning")
+              if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){
+                bsButton("toall_m", strong("Apply to all"), style = "warning")
+              }
             }
           )
         }

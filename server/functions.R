@@ -92,10 +92,14 @@ req_filter_on <- function(namespaces, filter="", target="rv", mode="equal"){ # n
           rv[[x]] != filter
         }
       }else if(target == "input"){
-        if(mode == "equal"){
-          input[[x]] == filter
+        if(!is.null(input[[x]])){
+          if(mode == "equal"){
+            input[[x]] == filter
+          }else{
+            input[[x]] != filter
+          }
         }else{
-          input[[x]] != filter
+          FALSE
         }
       }
     })
