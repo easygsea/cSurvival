@@ -262,21 +262,21 @@ plot_run_ui <- function(n){
               lower_id,
               label = HTML(paste0("Lower threshold:",add_help(lower_id_q)))
               ,selected = rv[[lower_id]]
-              ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45)
+              ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45, .5)
               ,grid = TRUE
             )
             ,sliderTextInput(
               higher_id,
               label = HTML(paste0("Upper threshold:",add_help(higher_id_q)))
               ,selected = rv[[higher_id]]
-              ,choices = c(.55, .6, .65, .7, .75, .8, .85, .9, .95)
+              ,choices = c(.5, .55, .6, .65, .7, .75, .8, .85, .9, .95)
               ,grid = TRUE
             )
             ,sliderTextInput(
               step_id,
               label = HTML(paste0("Step size:",add_help(step_id_q)))
               ,selected = rv[[step_id]]
-              ,choices = c(.01, .02, .03, .05, .1, .15, .2, .25)
+              ,choices = c(0, .01, .02, .03, .05, .1, .15, .2, .25)
               ,grid = TRUE
             )
             ,if(x == 1 & rv$variable_n > 1){
@@ -288,7 +288,7 @@ plot_run_ui <- function(n){
                        ,placement = "right")
             ,bsTooltip(higher_id_q,HTML("The percentile to end analysis.")
                        ,placement = "right")
-            ,bsTooltip(step_id_q,HTML("Step size to iterate to find the optimum threshold to separate high from low expressions.")
+            ,bsTooltip(step_id_q,HTML("Step size to iterate to find the optimum threshold to separate high from low expressions. Slide to 0 to disable the iteration.")
                        ,placement = "right")
           )
         }else{
