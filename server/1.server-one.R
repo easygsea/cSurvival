@@ -1,4 +1,58 @@
 #======================================================================#
+####  STEP 0. Freeze project once selected, update gene selection UI   ####
+#======================================================================#
+observeEvent(input$project,{
+  # update genes placeholder
+  if(input$project == ""){
+    lapply(1:rv$variable_n, function(x){
+      g_ui_id <- paste0("g_",x)
+      updateSelectizeInput(
+        session,
+        g_ui_id
+        ,choices=c()
+        ,options = list(
+          placeholder = 'On top left, select a project to load genes ...'
+        )
+      )
+    })
+  }
+
+  req(input$project != "")
+  
+  withProgress(value = 1, message = "Retrieving data from project .... ",{
+    project <- rv$project <- input$project
+    indir <- paste0(getwd(),"/project_data/",project,"/")
+    update_genes_ui()
+  })
+  
+  shinyjs::disable("project")
+})
+
+## reset project
+observeEvent(input$reset_project,{
+  rv$project <- ""
+  shinyjs::enable("project")
+  
+  updateSelectizeInput(
+    session,
+    "project",
+    selected = ""
+  )
+})
+
+## update gene selection UI
+genes_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+   input[[paste0("db_",x)]]
+  })
+})
+
+observeEvent(genes_lst(),{
+  req(rv$project != "")
+  update_genes_ui()
+},ignoreInit = T)
+
+#======================================================================#
 ####                          STEP 1. parameters                   ####
 #======================================================================#
 # ----- 1.1. detect and organize user inputs -------

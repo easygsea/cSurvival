@@ -1,5 +1,5 @@
 #======================================================================#
-####                       general functions                        ####
+####                       General functions                        ####
 #======================================================================#
 # assign values to dynamic RVs when initialized
 # btn0_rds <- readRDS(paste0(getwd(),"/inc/btn0.rds"))
@@ -122,7 +122,10 @@ req_filter_on <- function(namespaces, filter="", target="rv", mode="equal"){ # n
 #   return(array)
 # }
 
-# ------- return all GSs when a db is selected -------
+#======================================================================#
+####                       Data handling                        ####
+#======================================================================#
+# return all GSs when a db is selected
 update_gs_by_db <- function(x){
   gs_db_id <- paste0("gs_db_",x)
   gs_lib_id <- paste0("gs_l_",x)
@@ -152,5 +155,39 @@ update_gs_by_db <- function(x){
       )
     )
   }
-  
+}
+
+# retrieve genes from a project
+retrieve_genes <- function(project,x){
+  indir <- paste0(getwd(),"/project_data/",project,"/")
+  db_id <- paste0("db_",x)
+  method <- rv[[paste0("snv_method_",x)]]
+
+  if(is.null(input[[db_id]])){
+    fread(paste0(indir,"df_gene_scale.csv"),sep=",",nrows = 0) %>% names(.) %>% .[-1]
+  }else if(input[[db_id]] == "rna"){
+    fread(paste0(indir,"df_gene_scale.csv"),sep=",",nrows = 0) %>% names(.) %>% .[-1]
+  }else if(input[[db_id]] == "snv"){
+    a <- fread(paste0(indir,"df_snv_class_",method,".csv"),sep=",",nrows = 0) %>% names(.) %>% .[-1]
+  }
+}
+
+# update genes in the UI accordingly
+update_genes_ui <- function(){
+  lapply(1:rv$variable_n, function(x){
+    rv[[paste0("genes",x)]] <- retrieve_genes(rv$project,x)
+    
+    g_ui_id <- paste0("g_",x)
+    
+    updateSelectizeInput(
+      session,
+      g_ui_id,
+      choices = rv[[paste0("genes",x)]]
+      ,selected = ""
+      ,server = TRUE
+      ,options = list(
+        placeholder = 'Type to search ...'
+      )
+    )
+  })
 }

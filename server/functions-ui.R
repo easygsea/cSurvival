@@ -29,6 +29,7 @@ extract_color <- function(x, cols=bcols){
   bcol_n <- x %% 2; if(bcol_n == 0){bcol_n <- 2}
   return(cols[bcol_n])
 }
+
 plot_ui <- function(n){
   # automatically adjust column width according to # of analysis selected
   if(n == 1){col_w <- 12}else{col_w <- 6}
@@ -94,6 +95,10 @@ plot_ui <- function(n){
             ,choices=c()
             ,selected=rv[[g_ui_id]]
             ,width = "100%"
+            ,options = list(
+              placeholder = 'On top left, select a project to load genes ...'
+              ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
+            )
           )
         )
         ,conditionalPanel(
@@ -188,11 +193,11 @@ plot_ui <- function(n){
         )
         
         # tooltip for data category
-        ,bsTooltip(cat_id_q, HTML("<b>Gene</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene correlates with poorer/better prognosis.<br><b>Gene set</b>: to study if the average expression level of a gene set, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
+        ,bsTooltip(cat_id_q, HTML("<b>Gene</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene correlates with poorer/better prognosis.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer prognosis, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
                    ,placement = "right")
         ,bsTooltip(db_id_q, HTML("To study if cancer prognosis is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
                    ,placement = "right")
-        ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID")
+        ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID. If a gene is not found, it is probably barely expressed/mutated/affected in the selected cancer type.")
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")

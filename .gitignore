@@ -1,2 +1,24 @@
 
 .DS_Store
+project_data/TCGA-BRCA/df_gene.csv
+project_data/TCGA-BRCA/df_gene_scale.csv
+project_data/TCGA-BRCA/df_snv_class_muse.csv
+project_data/TCGA-BRCA/df_snv_class_mutect.csv
+project_data/TCGA-BRCA/df_snv_class_somaticsniper.csv
+project_data/TCGA-BRCA/df_snv_class_varscan.csv
+project_data/TCGA-BRCA/df_snv_type_muse.csv
+project_data/TCGA-BRCA/df_snv_type_mutect.csv
+project_data/TCGA-BRCA/df_snv_type_somaticsniper.csv
+project_data/TCGA-BRCA/df_snv_type_varscan.csv
+project_data/TCGA-BRCA/df_survival.csv
+project_data/TCGA-LUAD/df_gene.csv
+project_data/TCGA-LUAD/df_gene_scale.csv
+project_data/TCGA-LUAD/df_snv_class_muse.csv
+project_data/TCGA-LUAD/df_snv_class_mutect.csv
+project_data/TCGA-LUAD/df_snv_class_somaticsniper.csv
+project_data/TCGA-LUAD/df_snv_class_varscan.csv
+project_data/TCGA-LUAD/df_snv_type_muse.csv
+project_data/TCGA-LUAD/df_snv_type_mutect.csv
+project_data/TCGA-LUAD/df_snv_type_somaticsniper.csv
+project_data/TCGA-LUAD/df_snv_type_varscan.csv
+project_data/TCGA-LUAD/df_survival.csv
