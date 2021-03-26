@@ -21,7 +21,7 @@ observeEvent(input$project,{
   
   withProgress(value = 1, message = "Retrieving data from project .... ",{
     project <- rv$project <- input$project
-    indir <- paste0(getwd(),"/project_data/",project,"/")
+    rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     update_genes_ui()
   })
   

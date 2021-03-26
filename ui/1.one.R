@@ -56,4 +56,8 @@ bodyOne <- tabItem(tabName = "one",
             
         )
     )
+    
+    ,fluidRow(
+      uiOutput("ui_results")
+    )
 )
