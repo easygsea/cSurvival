@@ -316,7 +316,7 @@ plot_run_ui <- function(n){
               non_id
               ,label = HTML(paste0("Non-synomynous variants:",add_help(non_id_q)))
               ,choices = variant_types
-              ,selected = variant_types_non
+              ,selected = rv[[non_id]]
               ,multiple = T
             )
             ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
@@ -327,7 +327,7 @@ plot_run_ui <- function(n){
               syn_id
               ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
               ,choices = variant_types
-              ,selected = variant_types_syn
+              ,selected = rv[[syn_id]]
               ,multiple = T
             )
             ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")

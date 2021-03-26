@@ -33,7 +33,10 @@ init_rv <- function(x){
   rv[[paste0("upper_",x)]] <- .85
   # step size
   rv[[paste0("step_",x)]] <- .01
+  # parameters for SNV mutation analysis
   rv[[paste0("snv_method_",x)]] <- "mutect"
+  rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
+  rv[[paste0("synonymous_",x)]] <- variant_types_syn
 }
 
 # update these into rv when selections change
