@@ -24,7 +24,7 @@ observeEvent(input$project,{
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     rv$df_survival <- fread(paste0(rv$indir,"df_survival.csv"),sep=",",header=T) %>%
       dplyr::select(patient_id,survival_days,censoring_status)
-    update_genes_ui()
+    update_genes_ui(opt="nil")
   })
   
   shinyjs::disable("project")
@@ -51,6 +51,8 @@ genes_lst <- reactive({
 
 observeEvent(genes_lst(),{
   req(rv$project != "")
+  print(genes_lst())
+  print("hihi")
   update_genes_ui()
 },ignoreInit = T)
 

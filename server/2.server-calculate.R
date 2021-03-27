@@ -62,13 +62,16 @@ observeEvent(input$confirm,{
               
               # extract most significant df
               df <- results[["df"]]
-              
-              # perform survival analysis
-              km_fit_id <- paste0("km_fit_",x)
-              rv[[km_fit_id]] <- cal_surv_rna(df)
-              print(rv[[km_fit_id]])
+            }else{
+              clow_id <- paste0("clow_",x)
+              cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
+              df <- get_df_by_cutoff(data, cutoff)
             }
             
+            # perform survival analysis
+            km_fit_id <- paste0("km_fit_",x)
+            rv[[km_fit_id]] <- cal_surv_rna(df)
+            print(rv[[km_fit_id]])
           }
         }
       })

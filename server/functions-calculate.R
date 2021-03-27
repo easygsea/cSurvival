@@ -10,6 +10,19 @@ extract_gene_data <- function(x, type){
   }
 }
 
+# generate survival df
+generate_surv_df <- function(patient_ids, exp, q){
+  # generate the data from for model first
+  gene_quantiles <- exp %>% 
+    sapply(function(x) ifelse(x > q, "high", "low"))
+  names(gene_quantiles) <- patient_ids
+  
+  # generate survival analysis df
+  df <- rv$df_survival
+  df$level <- gene_quantiles[match(df$patient_id,names(gene_quantiles))]
+  df %>% dplyr::filter(level != "NULL")
+}
+
 # generate survival df for analysis
 get_info_most_significant_rna <- function(data, min, max, step){
   # initiate quantiles according to margin and step values
@@ -27,15 +40,7 @@ get_info_most_significant_rna <- function(data, min, max, step){
   quantiles <- quantile(exp, quantile_s)
   
   for(i in seq_along(quantiles)){
-    # generate the data from for model first
-    gene_quantiles <- exp %>% 
-      sapply(function(x) ifelse(x > quantiles[i], "high", "low"))
-    names(gene_quantiles) <- patient_ids
-
-    # generate survival analysis df
-    df <- rv$df_survival
-    df$level <- gene_quantiles[match(df$patient_id,names(gene_quantiles))]
-    df <- df %>% dplyr::filter(level != "NULL")
+    df <- generate_surv_df(patient_ids, exp, quantiles[i])
 
     # test if there is significant difference between high and low level genes
     surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
@@ -54,6 +59,18 @@ get_info_most_significant_rna <- function(data, min, max, step){
     cutoff = cutoff_most_significant
   )
   return(results)
+}
+
+# generate df if user-defined cutoffs
+get_df_by_cutoff <- function(data, cutoff){
+  cutoff <- cutoff/100
+  # extract patients' IDs and expression values
+  patient_ids <- data$patient_id
+  exp <-data[,2] %>% unlist(.) %>% unname(.)
+  
+  # the quantile we will use to define the level of gene percentages
+  q <- quantile(exp, cutoff)
+  df <- generate_surv_df(patient_ids, exp, q)
 }
 
 ## Perform survival analysis

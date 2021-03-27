@@ -28,11 +28,11 @@ init_rv <- function(x){
   # feedback on manual gene input
   rv[[paste0("gs_mg_",x)]] <- ""
   # lower bound for quantile loop
-  rv[[paste0("lower_",x)]] <- .15
+  rv[[paste0("lower_",x)]] <- .25
   # upper bound for quantile loop
-  rv[[paste0("upper_",x)]] <- .85
+  rv[[paste0("upper_",x)]] <- .75
   # step size
-  rv[[paste0("step_",x)]] <- .01
+  rv[[paste0("step_",x)]] <- .05
   # parameters for SNV mutation analysis
   rv[[paste0("snv_method_",x)]] <- "mutect"
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
@@ -174,17 +174,18 @@ retrieve_genes <- function(x){
 }
 
 # update genes in the UI accordingly
-update_genes_ui <- function(){
+update_genes_ui <- function(opt="hi"){
   lapply(1:rv$variable_n, function(x){
     rv[[paste0("genes",x)]] <- retrieve_genes(x)
     
     g_ui_id <- paste0("g_",x)
+    if(opt == "nil"){gg <- ""}else{gg <- rv[[g_ui_id]]}
     
     updateSelectizeInput(
       session,
       g_ui_id,
       choices = rv[[paste0("genes",x)]]
-      ,selected = ""
+      ,selected = gg
       ,server = TRUE
       ,options = list(
         placeholder = 'Type to search ...'

@@ -325,9 +325,9 @@ plot_run_ui <- function(n){
             ,bsTooltip(iter_id_q,HTML(paste0("<b>Dynamic iteration</b>: Determine the optimal cutoff by searching for the percentile yielding the lowest P-value"
                                              ,"<br><b>Manual cutoffs</b>: Manually enter the cutoffs for high- and low-",datatype," groups"))
                        ,placement = "top")
-            ,bsTooltip(lower_id_q,HTML("The percentile to start analysis")
+            ,bsTooltip(lower_id_q,HTML("The percentile to start iteration")
                        ,placement = "right")
-            ,bsTooltip(higher_id_q,HTML("The percentile to end analysis")
+            ,bsTooltip(higher_id_q,HTML("The percentile to end iteration")
                        ,placement = "right")
             ,bsTooltip(step_id_q,HTML(paste0("Step size to iterate to find the optimum cutoff"))
                        ,placement = "right")
