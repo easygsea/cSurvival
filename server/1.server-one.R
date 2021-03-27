@@ -22,6 +22,8 @@ observeEvent(input$project,{
   withProgress(value = 1, message = "Retrieving data from project .... ",{
     project <- rv$project <- input$project
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
+    rv$df_survival <- fread(paste0(rv$indir,"df_survival.csv"),sep=",",header=T) %>%
+      dplyr::select(patient_id,survival_days,censoring_status)
     update_genes_ui()
   })
   
@@ -266,14 +268,9 @@ observeEvent(lg_input_btn_lst(),{
             }
           }
       }
-      
-        
-        
       }
     })
   })
-
-  
 }, ignoreInit = T)
 
 # ------- [1D] reset to all gene sets on clear filtering ---------
@@ -286,7 +283,7 @@ lg_input_clearbtn_lst <- reactive({
 
 observeEvent(lg_input_clearbtn_lst(),{
   array <- 1:rv$variable_n
-  namespaces <- paste0("gs_lg_",array)
+  namespaces <- paste0("gs_lg_",array,"_reset")
   req(req_diff_rv_btn(namespaces))
   withProgress(value = 1, message = "Resetting choices to all gene sets in the selected database ...",{
     lapply(array, function(x) {

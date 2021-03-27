@@ -8,6 +8,8 @@ library(DT)
 library(tidyverse)
 library(tidytext)
 library(fgsea)
+library(survival) # to do the survival analysis
+library(survminer) # to plot the survival analysis nicer
 library(data.table)
 library(RColorBrewer)
 library(plotly)
