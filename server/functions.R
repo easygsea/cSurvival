@@ -37,6 +37,8 @@ init_rv <- function(x){
   rv[[paste0("snv_method_",x)]] <- "mutect"
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
   rv[[paste0("synonymous_",x)]] <- variant_types_syn
+  rv[[paste0("iter_",x)]] <- "iter"
+  rv[[paste0("clow_",x)]] <- 49
 }
 
 # update these into rv when selections change

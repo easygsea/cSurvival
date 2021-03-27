@@ -61,24 +61,35 @@ observeEvent(genes_lst(),{
 # capping maximum # of analysis at 2
 observeEvent(input$variable_n,{
   req(input$variable_n)
-  n <- floor(input$variable_n); if(n<1){n <- 1}
-  if(n > 2){
-    shinyalert("We currently support interaction analysis up to two variables.")
-    n <- 2
+  load <- function(){
+    n <- floor(input$variable_n); if(n<1){n <- 1}
+    if(n > 2){
+      shinyalert("We currently support interaction analysis up to two variables.")
+      n <- 2
+    }
+    
+    rv$variable_n <- n
+    
+    if(is.null(rv[[paste0("cat_",rv$variable_n)]])){
+      init_rv(rv$variable_n)
+    }
+    updateNumericInput(
+      session,
+      "variable_n",
+      value = rv$variable_n
+    )
+    update_all()
+    rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
   }
-
-  rv$variable_n <- n
   
-  if(is.null(rv[[paste0("cat_",rv$variable_n)]])){
-    init_rv(rv$variable_n)
+  if(input$variable_n==1){
+    load()
+  }else{
+    withProgress(value = 1, message = "Loading parameters ...",{
+      load()
+    })
   }
-  updateNumericInput(
-    session,
-    "variable_n",
-    value = rv$variable_n
-  )
-  update_all()
-  rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+  
 })
 
 # main panels for user inputs
@@ -311,9 +322,15 @@ output$par_gear <- renderUI({
 # update all run parameters according to analysis #1
 observeEvent(input$toall,{
   lapply(2:rv$variable_n, function(x){
-    updateSliderTextInput(session, paste0("lower_",x), selected = input[["lower_1"]])
-    updateSliderTextInput(session, paste0("upper_",x), selected = input[["upper_1"]])
-    updateSliderTextInput(session, paste0("step_",x), selected = input[["step_1"]])
+    updateRadioGroupButtons(session, paste0("iter_",x), selected = input[["iter_1"]])
+    if(input[["iter_1"]] == "iter"){
+      updateSliderTextInput(session, paste0("lower_",x), selected = input[["lower_1"]])
+      updateSliderTextInput(session, paste0("upper_",x), selected = input[["upper_1"]])
+      updateSliderTextInput(session, paste0("step_",x), selected = input[["step_1"]])
+    }else{
+      updateSliderInput(session, paste0("clow_",x), value = input[["clow_1"]])
+    }
+    
   })
 })
 

@@ -55,5 +55,7 @@ dyn_list <- function(x){
     ,snv_id <- paste0("snv_method_",x)
     ,non_id <- paste0("nonsynonymous_",x)
     ,syn_id <- paste0("synonymous_",x)
+    ,iter_id <- paste0("iter_",x)
+    ,clow_id <- paste0("clow_",x)
   )
 }
