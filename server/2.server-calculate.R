@@ -19,7 +19,14 @@ observeEvent(input$confirm,{
             # extract gene expression/mutation data
             data <- extract_gene_data(x,input[[db_id]])
             results <- get_info_most_significant_rna(data, min, max, step)
-            print(str(results))
+            
+            # extract most significant df
+            df <- results[["df"]]
+            
+            # perform survival analysis
+            km_fit_id <- paste0("km_fit_",x)
+            rv[[km_fit_id]] <- cal_surv_rna(df)
+            print(rv[[km_fit_id]])
           }
         }
       })

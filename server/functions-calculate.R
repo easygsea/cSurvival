@@ -56,7 +56,8 @@ get_info_most_significant_rna <- function(data, min, max, step){
   return(results)
 }
 
-### Perform survival analysis
-cal_surv <- function(results){
-  
+## Perform survival analysis
+cal_surv_rna <- function(df){
+  km_fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+  return(km_fit)
 }

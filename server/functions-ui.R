@@ -197,7 +197,7 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(db_id_q, HTML("To study if cancer prognosis is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
                    ,placement = "right")
-        ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID. If a gene is not found, it is probably barely expressed/mutated/affected in the selected cancer type.")
+        ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID. If a gene is not found, it means its expression/mutation is barely detected in the selected cancer project.")
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")
@@ -259,7 +259,7 @@ plot_run_ui <- function(n){
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
       wellPanel(
         style = paste0("background-color: ", col, "; border: .5px solid #fff;"),
-        h4(paste0("Run parameters for Analysis #",x), align = "center"),
+        h4(paste0("Advanced run parameters for Analysis #",x), align = "center"),
         h4(paste0("(",names(data_types)[match(input[[paste0("db_",x)]], data_types)],")")),
         if(check_inputs()){
           div(
