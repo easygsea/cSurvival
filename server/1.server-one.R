@@ -51,9 +51,7 @@ genes_lst <- reactive({
 
 observeEvent(genes_lst(),{
   req(rv$project != "")
-  print(genes_lst())
-  print("hihi")
-  update_genes_ui()
+  update_genes_ui(opt="nil")
 },ignoreInit = T)
 
 #======================================================================#
