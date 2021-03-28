@@ -64,7 +64,7 @@ observeEvent(input$confirm,{
               df <- results[["df"]]
               rv[[paste0("quantile_most_significant_",x)]] <- results[["quantile"]]
               rv[[paste0("least_p_value_",x)]] <- results[["pval"]]
-              rv[[paste0("cutoff_most_significant_",2)]] <- results[["cutoff"]]
+              rv[[paste0("cutoff_most_significant_",x)]] <- results[["cutoff"]]
             }else{
               clow_id <- paste0("clow_",x)
               cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
@@ -73,12 +73,17 @@ observeEvent(input$confirm,{
             }
             
             # perform survival analysis
-            km_fit_id <- paste0("km_fit_",x)
-            rv[[km_fit_id]] <- cal_surv_rna(df)
-            print(rv[[km_fit_id]])
+            cox_fit_id <- paste0("cox_fit_",x)
+            rv[[cox_fit_id]] <- cal_surv_rna(df)
+            print(rv[[cox_fit_id]])
           }
         }
       })
+      
+      # generate interaction KM
+      if(rv$variable_n > 0){
+        
+      }
     })
   }
 })

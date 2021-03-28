@@ -40,15 +40,15 @@ Sidebar text: #a3bcd6;
 
 /* box and tabbox top color */
 .box.box-danger {
-    border-top-color: #FFF;
+    border-top-color: #FFF; !important
 }
 
 .box.box-warning {
-    border-top-color: #F5DF4D;
+    border-top-color: #F5DF4D; !important
 }
 
-.box.box-default {
-    border-top-color: #939597;
+.box {
+    border-top-color: #939597; !important
 }
 
 /* box title */

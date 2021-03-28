@@ -43,8 +43,8 @@ get_info_most_significant_rna <- function(data, min, max, step){
     df <- generate_surv_df(patient_ids, exp, quantiles[i])
 
     # test if there is significant difference between high and low level genes
-    surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-    p_diff <- 1- pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+    surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+    p_diff <- coef(summary(surv_diff))[,5]
     if(p_diff < least_p_value){
       least_p_value = p_diff
       df_most_significant <- df
@@ -73,8 +73,10 @@ get_df_by_cutoff <- function(data, cutoff){
   df <- generate_surv_df(patient_ids, exp, q)
 }
 
+# combine and generate interaction df
+
 ## Perform survival analysis
 cal_surv_rna <- function(df){
-  km_fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
-  return(km_fit)
+  cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+  return(cox_fit)
 }

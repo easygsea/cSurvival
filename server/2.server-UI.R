@@ -1,10 +1,10 @@
 # Plots area
 output$ui_results <- renderUI({
-  req(!is.null(rv[["km_fit_1"]]))
+  # req(!is.null(rv[["km_fit_1"]]))
   
   if(rv$variable_n == 1){
     types <- list(
-      "KM plot #1" = 1
+      "Surv plot #1" = 1
       ,"Distribution in TCGA"
       ,"Distribution in TARGET"
     )
@@ -12,7 +12,7 @@ output$ui_results <- renderUI({
     indi <- as.list(1:rv$variable_n)
     names(indi) <- paste0("KM plot #",1:rv$variable_n)
     types <- list(
-      "Interaction KM plot" = "all"
+      "Interaction Surv plot" = "all"
     ) %>% c(.,indi,list(
       "Violin" = "violin"
     ))
@@ -41,12 +41,22 @@ output$ui_results <- renderUI({
     )
     ,column(
       8,
-      plotOutput("ui_plot")
+      box(
+        width = 12, status = "warning",
+        plotOutput("ui_plot")
+      )
+    )
+    ,column(
+      4,
+      box(
+        width = 12,
+        uiOutput("ui_stats")
+      )
     )
     ,absolutePanel(
       actionBttn(
         inputId = "up_button", label=NULL, 
-        icon = icon("angle-double-up"), style="material-circle", color="primary", size="md"
+        icon = icon("angle-double-up"), style="material-circle", color="default", size="md"
       ),
       tags$script(HTML(
         "document.getElementById('up_button').onclick= function(){
