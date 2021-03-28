@@ -62,10 +62,14 @@ observeEvent(input$confirm,{
               
               # extract most significant df
               df <- results[["df"]]
+              rv[[paste0("quantile_most_significant_",x)]] <- results[["quantile"]]
+              rv[[paste0("least_p_value_",x)]] <- results[["pval"]]
+              rv[[paste0("cutoff_most_significant_",2)]] <- results[["cutoff"]]
             }else{
               clow_id <- paste0("clow_",x)
               cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
               df <- get_df_by_cutoff(data, cutoff)
+              rv[[paste0("quantile_most_significant_",x)]] <- input[[clow_id]]
             }
             
             # perform survival analysis

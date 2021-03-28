@@ -43,6 +43,14 @@ Sidebar text: #a3bcd6;
     border-top-color: #FFF;
 }
 
+.box.box-warning {
+    border-top-color: #F5DF4D;
+}
+
+.box.box-default {
+    border-top-color: #939597;
+}
+
 /* box title */
 .box-header .box-title, .box-header>.fa, .box-header>.glyphicon, .box-header>.ion {
                       display: inline-block;

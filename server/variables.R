@@ -1,3 +1,8 @@
+# script to scroll down directly
+src_results <- tags$script(HTML(
+  "document.getElementById('ui_results').scrollIntoView();"
+))
+
 # ------- TCGA data types, e.g expression, snv ---------
 data_types <- c("Expression"="rna", 
                 "Mutation"="snv",
