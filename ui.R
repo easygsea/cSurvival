@@ -12,7 +12,7 @@ shinyUI(
         
         title="cSurival",
 
-        dashboardHeader(title = HTML("<b>cSurvival</b>: Cancer patient survival estimate with Kaplan–Meier method")
+        dashboardHeader(title = div(id="ui_title",HTML("<b>cSurvival</b>: Cancer patient survival estimate with Kaplan–Meier method"))
                         ,titleWidth = "100%"
         )
         # skin = "black",

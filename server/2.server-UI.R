@@ -1,6 +1,6 @@
 # Plots area
 output$ui_results <- renderUI({
-  # req(!is.null(rv[["km_fit_1"]]))
+  req(!is.null(rv[["km_fit_1"]]))
   
   if(rv$variable_n == 1){
     types <- list(
@@ -20,30 +20,41 @@ output$ui_results <- renderUI({
   
   box(
     width = 12, status = "danger",
-    div(
-      id="results_box",
-      # src_results,
-      # scroll_up_button(),
-      column(
-        12,align="center",
-        radioGroupButtons(
-          inputId = "plot_type",
-          label = NULL,
-          choices = types,
-          # size = "sm",
-          checkIcon = list(
-            yes = icon("check-square"),
-            no = icon("square-o")
-          ),
-          # status = "primary",
-          direction = "horizontal"
-        )
-        # ,tags$hr(style = "border-color: #F5DF4D;")
+    tags$script(HTML(
+      "document.getElementById('ui_results').scrollIntoView();"
+    )),
+    column(
+      12,align="center",
+      radioGroupButtons(
+        inputId = "plot_type",
+        label = NULL,
+        choices = types,
+        # size = "sm",
+        checkIcon = list(
+          yes = icon("check-square"),
+          no = icon("square-o")
+        ),
+        # status = "primary",
+        direction = "horizontal"
       )
-      ,column(
-        8,
-        plotOutput("ui_plot")
-      )
+      # ,tags$hr(style = "border-color: #F5DF4D;")
+    )
+    ,column(
+      8,
+      plotOutput("ui_plot")
+    )
+    ,absolutePanel(
+      actionBttn(
+        inputId = "up_button", label=NULL, 
+        icon = icon("angle-double-up"), style="material-circle", color="primary", size="md"
+      ),
+      tags$script(HTML(
+        "document.getElementById('up_button').onclick= function(){
+                    document.getElementById('ui_title').scrollIntoView()
+                };"
+      )),
+      right = 20,
+      top = 4
     )
   )
 })

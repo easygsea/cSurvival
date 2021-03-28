@@ -22,26 +22,6 @@ radioTooltip <- function(id, choice, title, placement = "top", trigger = "hover"
   htmltools::attachDependencies(bsTag, shinyBS:::shinyBSDep)
 }
 
-# Create a function for the go up buttons in kegg,reactome and wp plots
-scroll_up_button <- function(){
-  div(
-    absolutePanel(
-      actionBttn(
-        inputId = "up_button", label=NULL, 
-        icon = icon("angle-double-up"), style="material-circle", color="primary", size="md"
-      ),
-      tags$script(HTML(
-        "document.getElementById('up_button').onclick= function(){
-                    document.getElementsByTagName('head')[0].scrollIntoView()
-                };"
-      )),
-      right = 20,
-      top = 4
-    )
-    
-  )
-}
-
 #======================================================================#
 ####          function to generate dynamic 1 2, or more G/GS UIs     ####
 #======================================================================#
