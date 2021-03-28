@@ -258,7 +258,7 @@ plot_run_ui <- function(n){
         return((input[[cat_id]] == "g" & input[[db_id]] != "snv") | input[[cat_id]] == "gs")
       }
     }
-    datatype <- names(data_types)[match(input[[paste0("db_",x)]], data_types)]
+    datatype <- call_datatype(x)
     column(
       col_w,align="center",
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),

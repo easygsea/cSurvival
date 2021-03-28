@@ -127,6 +127,11 @@ req_filter_on <- function(namespaces, filter="", target="rv", mode="equal"){ # n
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# call the data type
+call_datatype <- function(x){
+  names(data_types)[match(input[[paste0("db_",x)]], data_types)]
+}
+
 # return all GSs when a db is selected
 update_gs_by_db <- function(x){
   gs_db_id <- paste0("gs_db_",x)

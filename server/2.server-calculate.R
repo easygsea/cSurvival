@@ -72,6 +72,9 @@ observeEvent(input$confirm,{
               rv[[paste0("quantile_most_significant_",x)]] <- input[[clow_id]]
             }
             
+            # save df
+            rv[[paste0("df_",x)]] <- df
+            
             # perform survival analysis
             cox_fit_id <- paste0("cox_fit_",x)
             rv[[cox_fit_id]] <- cal_surv_rna(df)
@@ -82,7 +85,7 @@ observeEvent(input$confirm,{
       
       # generate interaction KM
       if(rv$variable_n > 0){
-        
+        # generate interaction df
       }
     })
   }
