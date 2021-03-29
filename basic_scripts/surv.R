@@ -41,6 +41,14 @@ cox.surv <- ggsurvplot(cox.fit,data=new_data,
            # tables.theme = theme_cleantable(),  # Clean theme for tables
            # tables.y.text = FALSE               # Hide tables y axis text
 )
-cox.surv
-cox.surv$table <- km.surv$table
-print(cox.surv,risk.table.height = 0.3,theme_cleantable(base_size = 20))
+
+cox.surv$table <- km.surv$table + theme_cleantable(
+  base_size = 18,
+  font.main = c(18, "plain", "black"),
+  font.submain = c(18, "plain", "black"),
+  font.caption = c(18, "plain", "black"),
+  font.tickslab = c(16, "plain", "black"),
+  # legend = c("top", "bottom", "left", "right", "none"),
+  font.legend = c(18, "plain", "black")
+)
+print(cox.surv,risk.table.height = 0.3)

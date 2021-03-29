@@ -80,10 +80,10 @@ get_df_by_cutoff <- function(data, cutoff){
 # combine and generate interaction df
 
 ## Perform survival analysis
-cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.line="none", palette="jco"){
-  # # run KM
-  # km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
-  # km.surv <- ggsurvplot(km.fit, data=df, risk.table = TRUE, palette = palette)
+cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.line="none", palette="jco", base_size=20){
+  # run KM
+  km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+  km.surv <- ggsurvplot(km.fit, data=df, risk.table = TRUE, palette = palette)
   
   # create new df to seperate effects
   lels <- unique(df$level) %>% sort(.,decreasing = T)
@@ -101,15 +101,15 @@ cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.li
                          # legend.title = call_datatype(x),               # Change legend titles
                          legend.labs = lels,  # Change legend labels
                          ggtheme = theme_survminer(
-                           base_size = 20,
-                           font.main = c(22, "plain", "black"),
-                           font.submain = c(20, "plain", "black"),
-                           font.x = c(20, "plain", "black"),
-                           font.y = c(20, "plain", "black"),
-                           font.caption = c(20, "plain", "black"),
-                           font.tickslab = c(18, "plain", "black"),
+                           base_size = base_size,
+                           font.main = c((base_size + 2), "plain", "black"),
+                           font.submain = c(base_size, "plain", "black"),
+                           font.x = c(base_size, "plain", "black"),
+                           font.y = c(base_size, "plain", "black"),
+                           font.caption = c(base_size, "plain", "black"),
+                           font.tickslab = c((base_size - 2), "plain", "black"),
                            # legend = c("top", "bottom", "left", "right", "none"),
-                           font.legend = c(20, "plain", "black")
+                           font.legend = c(base_size, "plain", "black")
                          ),
                          palette = palette                    # Use JCO journal color palette
                          # risk.table = T,                  # Add No at risk table
@@ -119,8 +119,17 @@ cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.li
                          # tables.y.text = FALSE               # Hide tables y axis text
   ))
   
-  # # add KM table to Cox table
-  # cox.surv$table <- km.surv$table
+  # add KM table to Cox table
+  base_size2 <- base_size
+  cox.surv$table <- km.surv$table + theme_cleantable(
+    base_size = base_size2,
+    font.main = c(base_size2, "plain", "black"),
+    font.submain = c(base_size2, "plain", "black"),
+    font.caption = c(base_size2, "plain", "black"),
+    font.tickslab = c((base_size2 - 2), "plain", "black"),
+    # legend = c("top", "bottom", "left", "right", "none"),
+    font.legend = c(base_size2, "plain", "black")
+  )
   fig <- cox.surv
   
   results <- list(

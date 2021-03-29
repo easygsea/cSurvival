@@ -41,7 +41,7 @@ output$ui_results <- renderUI({
     )
     ,column(
       7,
-      plotOutput("cox_plot",height = "550px")
+      plotOutput("cox_plot",height = "600px")
     )
     ,column(
       5,
@@ -76,7 +76,6 @@ output$cox_plot <- renderPlot({
       fig <- res[["fig"]]
     }
     
-    # print(fig, risk.table.height = 0.3)
-    fig
+    print(fig, risk.table.height = 0.2)
   })
 })
