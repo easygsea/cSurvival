@@ -1,28 +1,95 @@
 #======================================================================#
+####  STEP 0. Freeze project once selected, update gene selection UI   ####
+#======================================================================#
+observeEvent(input$project,{
+  # update genes placeholder
+  if(input$project == ""){
+    lapply(1:rv$variable_n, function(x){
+      g_ui_id <- paste0("g_",x)
+      updateSelectizeInput(
+        session,
+        g_ui_id
+        ,choices=c()
+        ,options = list(
+          placeholder = 'On top left, select a project to load genes ...'
+        )
+      )
+    })
+  }
+
+  req(input$project != "")
+  
+  withProgress(value = 1, message = "Retrieving data from project .... ",{
+    project <- rv$project <- input$project
+    rv$indir <- paste0(getwd(),"/project_data/",project,"/")
+    rv$df_survival <- fread(paste0(rv$indir,"df_survival.csv"),sep=",",header=T) %>%
+      dplyr::select(patient_id,survival_days,censoring_status)
+    update_genes_ui(opt="nil")
+  })
+  
+  shinyjs::disable("project")
+})
+
+## reset project
+observeEvent(input$reset_project,{
+  rv$project <- ""
+  shinyjs::enable("project")
+  
+  updateSelectizeInput(
+    session,
+    "project",
+    selected = ""
+  )
+})
+
+## update gene selection UI
+genes_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+   input[[paste0("db_",x)]]
+  })
+})
+
+observeEvent(genes_lst(),{
+  req(rv$project != "")
+  update_genes_ui(opt="nil")
+},ignoreInit = T)
+
+#======================================================================#
 ####                          STEP 1. parameters                   ####
 #======================================================================#
 # ----- 1.1. detect and organize user inputs -------
 # capping maximum # of analysis at 2
 observeEvent(input$variable_n,{
   req(input$variable_n)
-  n <- floor(input$variable_n); if(n<1){n <- 1}
-  if(n > 2){
-    shinyalert("We currently support interaction analysis up to two variables.")
-    n <- 2
+  load <- function(){
+    n <- floor(input$variable_n); if(n<1){n <- 1}
+    if(n > 2){
+      shinyalert("We currently support interaction analysis up to two variables.")
+      n <- 2
+    }
+    
+    rv$variable_n <- n
+    
+    if(is.null(rv[[paste0("cat_",rv$variable_n)]])){
+      init_rv(rv$variable_n)
+    }
+    updateNumericInput(
+      session,
+      "variable_n",
+      value = rv$variable_n
+    )
+    update_all()
+    rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
   }
-
-  rv$variable_n <- n
   
-  if(is.null(rv[[paste0("cat_",rv$variable_n)]])){
-    init_rv(rv$variable_n)
+  if(input$variable_n==1){
+    load()
+  }else{
+    withProgress(value = 1, message = "Loading parameters ...",{
+      load()
+    })
   }
-  updateNumericInput(
-    session,
-    "variable_n",
-    value = rv$variable_n
-  )
-  update_all()
-  rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+  
 })
 
 # main panels for user inputs
@@ -45,7 +112,23 @@ observeEvent(gmt_input_lst(),{
   req(req_diff_rv(namespaces))
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
     lapply(array, function(x) {
-      update_gs_by_db(x)
+      gs_db_id <- paste0("gs_db_",x)
+      if(rv[[gs_db_id]] != input[[gs_db_id]]){
+        # extract GS data
+        update_gs_by_db(x)
+        
+        # update searchInput
+        gs_gene_id <- paste0("gs_lg_",x)
+        updateSearchInput(
+          session,
+          gs_gene_id,
+          value = ""
+        )
+        
+        # update verttext
+        gs_gene_genes_id <- paste0("gs_lgg_",x)
+        output[[gs_gene_genes_id]] <- NULL
+      }
     })
   })
 }, ignoreInit = T)
@@ -67,7 +150,7 @@ observeEvent(lib_input_lst(),{
     gs_lib_id <- paste0("gs_l_",x)
     gs_lib_genes_id <- paste0("gs_lgs_",x)
     
-    if(input[[gs_lib_id]]){
+    if(!is.na(input[[gs_lib_id]])){
       gs <- rv[[gs_lib_id]] <- input[[gs_lib_id]]
       
       if(!is.null(gs) & gs != ""){
@@ -196,14 +279,9 @@ observeEvent(lg_input_btn_lst(),{
             }
           }
       }
-      
-        
-        
       }
     })
   })
-
-  
 }, ignoreInit = T)
 
 # ------- [1D] reset to all gene sets on clear filtering ---------
@@ -216,8 +294,8 @@ lg_input_clearbtn_lst <- reactive({
 
 observeEvent(lg_input_clearbtn_lst(),{
   array <- 1:rv$variable_n
-  namespaces <- paste0("gs_lg_",array)
-  req(req_filter_on(namespaces))
+  namespaces <- paste0("gs_lg_",array,"_reset")
+  req(req_diff_rv_btn(namespaces))
   withProgress(value = 1, message = "Resetting choices to all gene sets in the selected database ...",{
     lapply(array, function(x) {
       lgg_btn_id <- paste0("gs_lg_",x,"_reset")
@@ -232,7 +310,6 @@ observeEvent(lg_input_clearbtn_lst(),{
 }, ignoreInit = T)
 
 # ----- 1.2. run parameters -------
-# update dynamic rvs
 observe({
   rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
 })
@@ -244,10 +321,24 @@ output$par_gear <- renderUI({
 
 # update all run parameters according to analysis #1
 observeEvent(input$toall,{
-  lapply(1:rv$variable_n, function(x){
-    updateSliderTextInput(session, paste0("lower_",x), selected = input[["lower_1"]])
-    updateSliderTextInput(session, paste0("higher_",x), selected = input[["higher_1"]])
-    updateSliderTextInput(session, paste0("step_",x), selected = input[["step_1"]])
+  lapply(2:rv$variable_n, function(x){
+    updateRadioGroupButtons(session, paste0("iter_",x), selected = input[["iter_1"]])
+    if(input[["iter_1"]] == "iter"){
+      updateSliderTextInput(session, paste0("lower_",x), selected = input[["lower_1"]])
+      updateSliderTextInput(session, paste0("upper_",x), selected = input[["upper_1"]])
+      updateSliderTextInput(session, paste0("step_",x), selected = input[["step_1"]])
+    }else{
+      updateSliderInput(session, paste0("clow_",x), value = input[["clow_1"]])
+    }
+    
+  })
+})
+
+observeEvent(input$toall_m,{
+  lapply(2:rv$variable_n, function(x){
+    updateSelectInput(session, paste0("snv_method_",x), selected = input[["snv_method_1"]])
+    updateSelectizeInput(session, paste0("nonsynonymous_",x), selected = input[["nonsynonymous_1"]])
+    updateSelectizeInput(session, paste0("synonymous_",x), selected = input[["synonymous_1"]])
   })
 })
 

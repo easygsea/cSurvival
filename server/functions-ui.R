@@ -29,6 +29,7 @@ extract_color <- function(x, cols=bcols){
   bcol_n <- x %% 2; if(bcol_n == 0){bcol_n <- 2}
   return(cols[bcol_n])
 }
+
 plot_ui <- function(n){
   # automatically adjust column width according to # of analysis selected
   if(n == 1){col_w <- 12}else{col_w <- 6}
@@ -79,11 +80,7 @@ plot_ui <- function(n){
           radioGroupButtons(
             inputId = db_id,
             label = HTML(paste0(x,".2. Select type of molecular data:",add_help(db_id_q))),
-            choices = c("Expression"="rna", 
-                        "Mutation"="snv",
-                        "CNV"="cnv",
-                        "miRNA"="mir",
-                        "Methylation"="met"),
+            choices = data_types,
             status = "danger",
             selected = rv[[db_id]],
             checkIcon = list(
@@ -98,6 +95,10 @@ plot_ui <- function(n){
             ,choices=c()
             ,selected=rv[[g_ui_id]]
             ,width = "100%"
+            ,options = list(
+              placeholder = 'On top left, select a project to load genes ...'
+              ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
+            )
           )
         )
         ,conditionalPanel(
@@ -137,7 +138,7 @@ plot_ui <- function(n){
                     ,selected=rv[[gs_lib_id]]
                     ,options = list(
                       # `live-search` = TRUE,
-                      placeholder = rv$gs_placeholder
+                      placeholder = rv[[paste0("gs_placeholder",x)]]
                       ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_lib_id]]))
                     )
                   )
@@ -192,11 +193,11 @@ plot_ui <- function(n){
         )
         
         # tooltip for data category
-        ,bsTooltip(cat_id_q, HTML("<b>Gene</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene correlates with poorer/better prognosis.<br><b>Gene set</b>: to study if the average expression level of a gene set, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
+        ,bsTooltip(cat_id_q, HTML("<b>Gene</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene correlates with poorer/better prognosis.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer prognosis, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
                    ,placement = "right")
         ,bsTooltip(db_id_q, HTML("To study if cancer prognosis is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
                    ,placement = "right")
-        ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID")
+        ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID. If a gene is not found, it means its expression/mutation is barely detected in the selected cancer project.")
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")
@@ -228,17 +229,22 @@ plot_ui <- function(n){
 #======================================================================#
 plot_run_ui <- function(n){
   if(n == 1){col_w <- 12}else{col_w <- 6}
-
-  lapply(1:n, function(x){
-
+  
+  ui <- lapply(1:n, function(x){
+    
+    iter_id <- paste0("iter_",x); iter_id_q <- paste0(iter_id,"_q")
+    
     lower_id <- paste0("lower_",x); lower_id_q <- paste0(lower_id,"_q")
     higher_id <- paste0("upper_",x); higher_id_q <- paste0(higher_id,"_q")
     step_id <- paste0("step_",x); step_id_q <- paste0(step_id,"_q")
+    
+    clow_id <- paste0("clow_",x); clow_id_q <- paste0(clow_id,"_q")
+
     col <- extract_color(x)
     
     snv_id <- paste0("snv_method_",x); snv_id_q <- paste0(snv_id,"_q")
-    normal_id <- paste0("normal_",x); snv_id_q <- paste0(normal_id,"_q")
-    mutated_id <- paste0("mutated_",x); snv_id_q <- paste0(mutated_id,"_q")
+    non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
+    syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
     check_inputs <- function(){
       cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
@@ -252,66 +258,135 @@ plot_run_ui <- function(n){
         return((input[[cat_id]] == "g" & input[[db_id]] != "snv") | input[[cat_id]] == "gs")
       }
     }
-    
+    datatype <- call_datatype(x)
     column(
       col_w,align="center",
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
       wellPanel(
         style = paste0("background-color: ", col, "; border: .5px solid #fff;"),
+        h4(paste0("Advanced run parameters for Analysis #",x), align = "center"),
+        h4(paste0("(",datatype,")")),
+        tags$hr(style="border-color: #c2bfb5;"),
         if(check_inputs()){
           div(
-            h4(paste0("Run parameters for Analysis #",x), align = "center"),
-            sliderTextInput(
-              lower_id,
-              label = HTML(paste0("Lower threshold:",add_help(lower_id_q)))
-              ,selected = rv[[lower_id]]
-              ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45)
-              ,grid = TRUE
+            radioGroupButtons(
+              inputId = iter_id,
+              label = HTML(paste0("Select method to stratify high- and low- ",datatype," groups"),add_help(iter_id_q)),
+              choiceNames = c("Dynamic iteration", "Manual cutoffs"),
+              choiceValues = c("iter","manual"),
+              selected = rv[[iter_id]],
+              size = "sm",
+              checkIcon = list(
+                yes = icon("check-square"),
+                no = icon("square-o")
+              ),
+              # status = "primary",
+              direction = "horizontal"
+            ),
+            conditionalPanel(
+              sprintf('input.%s == "iter"',iter_id),
+              sliderTextInput(
+                lower_id,
+                label = HTML(paste0("Start percentile:",add_help(lower_id_q)))
+                ,selected = rv[[lower_id]]
+                ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45, .5)
+                ,grid = TRUE
+              )
+              ,sliderTextInput(
+                higher_id,
+                label = HTML(paste0("End percentile:",add_help(higher_id_q)))
+                ,selected = rv[[higher_id]]
+                ,choices = c(.5, .55, .6, .65, .7, .75, .8, .85, .9, .95)
+                ,grid = TRUE
+              )
+              ,sliderTextInput(
+                step_id,
+                label = HTML(paste0("Step size:",add_help(step_id_q)))
+                ,selected = rv[[step_id]]
+                ,choices = c(.01, .02, .03, .05, .1, .15, .2, .25)
+                ,grid = TRUE
+              )
             )
-            ,sliderTextInput(
-              higher_id,
-              label = HTML(paste0("Upper threshold:",add_help(higher_id_q)))
-              ,selected = rv[[higher_id]]
-              ,choices = c(.55, .6, .65, .7, .75, .8, .85, .9, .95)
-              ,grid = TRUE
+            ,conditionalPanel(
+              sprintf('input.%s == "manual"',iter_id),
+              sliderInput(
+                clow_id,
+                HTML(paste0("Cutoff percentile:",add_help(clow_id_q))),
+                value = rv[[clow_id]],
+                min = 10,max = 90,step=1
+              )
             )
-            ,sliderTextInput(
-              step_id,
-              label = HTML(paste0("Step size:",add_help(step_id_q)))
-              ,selected = rv[[step_id]]
-              ,choices = c(.01, .02, .03, .05, .1, .15, .2, .25)
-              ,grid = TRUE
-            )
-            ,if(x == 1){
-              bsButton("toall", strong("Apply to all"), style = "warning")
+            
+            ,if(x == 1 & rv$variable_n > 1){
+              if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input")){
+                bsButton("toall", strong("Apply to all"), style = "warning")
+              }
             }
-            ,bsTooltip(lower_id_q,HTML("The percentile to start analysis.")
+            ,bsTooltip(iter_id_q,HTML(paste0("<b>Dynamic iteration</b>: Determine the optimal cutoff by searching for the percentile yielding the lowest P-value"
+                                             ,"<br><b>Manual cutoffs</b>: Manually enter the cutoffs for high- and low-",datatype," groups"))
+                       ,placement = "top")
+            ,bsTooltip(lower_id_q,HTML("The percentile to start iteration")
                        ,placement = "right")
-            ,bsTooltip(higher_id_q,HTML("The percentile to end analysis.")
+            ,bsTooltip(higher_id_q,HTML("The percentile to end iteration")
                        ,placement = "right")
-            ,bsTooltip(step_id_q,HTML("Step size to iterate to find the optimum threshold to separate high from low expressions.")
+            ,bsTooltip(step_id_q,HTML(paste0("Step size to iterate to find the optimum cutoff"))
+                       ,placement = "right")
+            ,bsTooltip(clow_id_q,HTML("Cases &le; the cutoff will be classified as low, while those &gt; the cutoff will be classified as high")
                        ,placement = "right")
           )
         }else{
+          
           div(
-            h4(paste0("Run parameters for Analysis #",x), align = "center"),
-            selectizeInput(
-              snv_id
-              ,label = HTML(paste0("Select mutation caller:",add_help(snv_id_q)))
-              ,choices = snv_algorithms
-              ,selected = rv[[snv_id]]
-              ,options = list(
-                # `live-search` = TRUE,
-                placeholder = 'Type to search ...'
-                ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
+            if(grepl("^TCGA",input$project)){
+              # mutation caller options
+              selectizeInput(
+                snv_id
+                ,label = HTML(paste0("Somatic mutation caller:",add_help(snv_id_q)))
+                ,choices = snv_algorithms
+                ,selected = rv[[snv_id]]
+                ,options = list(
+                  # `live-search` = TRUE,
+                  placeholder = 'Type to search ...'
+                  ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
               )
+            }
             ,bsTooltip(snv_id_q
-                       ,HTML("The algorithm used for calling nucleotide variations")
+                       ,HTML("The algorithm used for calling somatic nucleotide variations")
                        ,placement = "top")
+            
+            # non-silent variants classifications
+            ,selectizeInput(
+              non_id
+              ,label = HTML(paste0("Non-synomynous variants:",add_help(non_id_q)))
+              ,choices = variant_types
+              ,selected = rv[[non_id]]
+              ,multiple = T
+            )
+            ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                       ,placement = "top")
+            
+            # silent variants classifications
+            ,selectizeInput(
+              syn_id
+              ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
+              ,choices = variant_types
+              ,selected = rv[[syn_id]]
+              ,multiple = T
+            )
+            ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                       ,placement = "top")
+            
+            ,if(x == 1 & rv$variable_n > 1){
+              if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){
+                bsButton("toall_m", strong("Apply to all"), style = "warning")
+              }
+            }
           )
         }
-        
       )
     )
   })
+
+  do.call(tagList, ui)
+  
 }

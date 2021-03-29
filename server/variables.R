@@ -1,4 +1,11 @@
-# algorithms for variant calling
+# ------- TCGA data types, e.g expression, snv ---------
+data_types <- c("Expression"="rna", 
+                "Mutation"="snv",
+                "CNV"="cnv",
+                "miRNA"="mir",
+                "Methylation"="met")
+
+# ------- algorithms for somatic variant calling, e.g. mutect -----------
 snv_algorithms <- list(
   "MuTect" = "mutect"
   ,"VarScan" = "varscan"
@@ -6,7 +13,21 @@ snv_algorithms <- list(
   ,"MuSE" = "muse"
 )
 
-# dynamic variables need initiatialization and updates according to inputs' changes
+# ------ variant types/classes, for classification into non- or synonymous mutations -------
+variant_types <- c("Frame_Shift_Del","Frame_Shift_Ins","In_Frame_Del","In_Frame_Ins"
+                  ,"Missense_Mutation","Nonsense_Mutation","Nonstop_Mutation"
+                  ,"Splice_Site","Translation_Start_Site"
+                  ,"Silent","Splice_Region","Intron","5'UTR","RNA","3'UTR"        
+                  ,"5'Flank","3'Flank","IGR")
+
+variant_types_non <- c("Frame_Shift_Del","Frame_Shift_Ins","In_Frame_Del","In_Frame_Ins"
+                       ,"Missense_Mutation","Nonsense_Mutation","Nonstop_Mutation"
+                       ,"Splice_Site","Translation_Start_Site")
+
+variant_types_syn <- c("Silent","Splice_Region","Intron","5'UTR","RNA","3'UTR"        
+                       ,"5'Flank","3'Flank","IGR")
+
+# ------- dynamic variables need initiatialization and updates according to inputs' changes ------
 dyn_list <- function(x){
   list(
     # category to analyze
@@ -32,5 +53,9 @@ dyn_list <- function(x){
     ,higher_id <- paste0("upper_",x)
     ,step_id <- paste0("step_",x)
     ,snv_id <- paste0("snv_method_",x)
+    ,non_id <- paste0("nonsynonymous_",x)
+    ,syn_id <- paste0("synonymous_",x)
+    ,iter_id <- paste0("iter_",x)
+    ,clow_id <- paste0("clow_",x)
   )
 }

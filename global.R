@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(shinydashboardPlus, include.only=c("appButton","boxPad","descriptionBlock","loadingState")) #"box",
 library(shinythemes)
 library(shinyWidgets)
 library(shinyBS)
@@ -8,7 +9,10 @@ library(DT)
 library(tidyverse)
 library(tidytext)
 library(fgsea)
+library(survival) # to do the survival analysis
+library(survminer) # to plot the survival analysis nicer
 library(data.table)
+library(grid)
 library(RColorBrewer)
 library(plotly)
 library(htmltools)
