@@ -14,7 +14,7 @@ extract_gene_data <- function(x, type){
 generate_surv_df <- function(patient_ids, exp, q){
   # generate the data from for model first
   gene_quantiles <- exp %>% 
-    sapply(function(x) ifelse(x > q, "high", "low"))
+    sapply(function(x) ifelse(x > q, "High", "Low"))
   names(gene_quantiles) <- patient_ids
   
   # generate survival analysis df
@@ -55,9 +55,7 @@ get_info_most_significant_rna <- function(data, min, max, step){
       cutoff_most_significant <- names(quantiles)[i]
     }
   }
-  lels <- unique(df_most_significant$level) %>% sort(.,decreasing = T)
-  df_most_significant$level <- factor(df_most_significant$level, levels = lels)
-  
+
   results <- list(
     df = df_most_significant,
     cutoff = cutoff_most_significant
@@ -86,9 +84,9 @@ cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.li
   km.surv <- ggsurvplot(km.fit, data=df, risk.table = TRUE, palette = palette)
   
   # create new df to seperate effects
-  lels <- unique(df$level) %>% sort(.,decreasing = T)
+  lels <- levels(df$level)
   new_df <- with(df,data.frame(level = lels))
-  
+
   # run Cox regression
   cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
   cox.fit <- survfit(cox_fit,newdata=new_df)

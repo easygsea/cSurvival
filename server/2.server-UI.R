@@ -79,3 +79,10 @@ output$cox_plot <- renderPlot({
     print(fig, risk.table.height = 0.2)
   })
 })
+
+# --------- 2. display the statistics -------------
+output$ui_stats <- renderUI({
+  div(
+    
+  )
+})
