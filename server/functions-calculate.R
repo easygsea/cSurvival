@@ -80,10 +80,10 @@ get_df_by_cutoff <- function(data, cutoff){
 # combine and generate interaction df
 
 ## Perform survival analysis
-cal_surv_rna <- function(df, conf.int=T, surv.median.line="none", palette="jco"){
-  # run KM
-  km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
-  km.surv <- ggsurvplot(km.fit, data=df, risk.table = TRUE, palette = palette)
+cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.line="none", palette="jco"){
+  # # run KM
+  # km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+  # km.surv <- ggsurvplot(km.fit, data=df, risk.table = TRUE, palette = palette)
   
   # create new df to seperate effects
   lels <- unique(df$level) %>% sort(.,decreasing = T)
@@ -92,25 +92,35 @@ cal_surv_rna <- function(df, conf.int=T, surv.median.line="none", palette="jco")
   # run Cox regression
   cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
   cox.fit <- survfit(cox_fit,newdata=new_df)
-  cox.surv <- ggsurvplot(cox.fit,data=new_df,
-                         title = "Survival Curves",
+  cox.surv <- suppressWarnings(ggsurvplot(cox.fit,data=new_df,
+                         title = title,
                          xlab = "Days",
                          ylab = "Survival probability",
                          conf.int=conf.int,
                          surv.median.line = surv.median.line,            # Add median survival lines
                          # legend.title = call_datatype(x),               # Change legend titles
                          legend.labs = lels,  # Change legend labels
-                         palette = palette,                    # Use JCO journal color palette
-                         risk.table.height = 0.3
+                         ggtheme = theme_survminer(
+                           base_size = 20,
+                           font.main = c(22, "plain", "black"),
+                           font.submain = c(20, "plain", "black"),
+                           font.x = c(20, "plain", "black"),
+                           font.y = c(20, "plain", "black"),
+                           font.caption = c(20, "plain", "black"),
+                           font.tickslab = c(18, "plain", "black"),
+                           # legend = c("top", "bottom", "left", "right", "none"),
+                           font.legend = c(20, "plain", "black")
+                         ),
+                         palette = palette                    # Use JCO journal color palette
                          # risk.table = T,                  # Add No at risk table
                          # cumevents = TRUE,                   # Add cumulative No of events table
                          # tables.height = 0.15,               # Specify tables height
                          # tables.theme = theme_cleantable(),  # Clean theme for tables
                          # tables.y.text = FALSE               # Hide tables y axis text
-  )
+  ))
   
-  # add KM table to Cox table
-  cox.surv$table <- km.surv$table
+  # # add KM table to Cox table
+  # cox.surv$table <- km.surv$table
   fig <- cox.surv
   
   results <- list(

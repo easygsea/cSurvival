@@ -337,7 +337,7 @@ plot_run_ui <- function(n){
         }else{
           
           div(
-            if(T){ #grepl("^TCGA",input$project)
+            if(grepl("^TCGA",input$project)){
               # mutation caller options
               selectizeInput(
                 snv_id

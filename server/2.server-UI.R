@@ -40,18 +40,12 @@ output$ui_results <- renderUI({
       # ,tags$hr(style = "border-color: #F5DF4D;")
     )
     ,column(
-      8,
-      box(
-        width = 12, status = "warning",
-        plotOutput("cox_plot")
-      )
+      7,
+      plotOutput("cox_plot",height = "550px")
     )
     ,column(
-      4,
-      box(
-        width = 12,
-        uiOutput("ui_stats")
-      )
+      5,
+      uiOutput("ui_stats")
     )
     ,absolutePanel(
       actionBttn(
@@ -82,6 +76,7 @@ output$cox_plot <- renderPlot({
       fig <- res[["fig"]]
     }
     
-    print(fig, risk.table.height = 0.3)
+    # print(fig, risk.table.height = 0.3)
+    fig
   })
 })

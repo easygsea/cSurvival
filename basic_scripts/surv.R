@@ -23,6 +23,17 @@ cox.surv <- ggsurvplot(cox.fit,data=new_data,
            # surv.median.line = "hv",            # Add median survival lines
            # legend.title = call_datatype(x),               # Change legend titles
            legend.labs = c("Low", "High"),  # Change legend labels
+           ggtheme = theme_survminer(
+             base_size = 18,
+             font.main = c(20, "plain", "black"),
+             font.submain = c(18, "plain", "black"),
+             font.x = c(18, "plain", "black"),
+             font.y = c(18, "plain", "black"),
+             font.caption = c(18, "plain", "black"),
+             font.tickslab = c(16, "plain", "black"),
+             # legend = c("top", "bottom", "left", "right", "none"),
+             font.legend = c(18, "plain", "black")
+           ),
            palette = "jco"                    # Use JCO journal color palette
            # risk.table = T,                  # Add No at risk table
            # cumevents = TRUE,                   # Add cumulative No of events table
@@ -30,4 +41,6 @@ cox.surv <- ggsurvplot(cox.fit,data=new_data,
            # tables.theme = theme_cleantable(),  # Clean theme for tables
            # tables.y.text = FALSE               # Hide tables y axis text
 )
+cox.surv
 cox.surv$table <- km.surv$table
+print(cox.surv,risk.table.height = 0.3,theme_cleantable(base_size = 20))
