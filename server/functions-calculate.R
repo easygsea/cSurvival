@@ -21,6 +21,9 @@ generate_surv_df <- function(patient_ids, exp, q){
   df <- rv$df_survival
   df$level <- gene_quantiles[match(df$patient_id,names(gene_quantiles))]
   df %>% dplyr::filter(level != "NULL")
+  lels <- unique(df$level) %>% sort(.,decreasing = T)
+  df$level <- factor(df$level, levels = lels)
+  return(df)
 }
 
 # generate survival df for analysis
@@ -40,22 +43,23 @@ get_info_most_significant_rna <- function(data, min, max, step){
   quantiles <- quantile(exp, quantile_s)
   
   for(i in seq_along(quantiles)){
-    df <- generate_surv_df(patient_ids, exp, quantiles[i])
+    q <- quantiles[i]
+    df <- generate_surv_df(patient_ids, exp, q)
 
     # test if there is significant difference between high and low level genes
     surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
     p_diff <- coef(summary(surv_diff))[,5]
     if(p_diff < least_p_value){
-      least_p_value = p_diff
+      # least_p_value = p_diff
       df_most_significant <- df
-      quantile_most_significant <- names(quantiles)[i]
-      cutoff_most_significant <- quantiles[i]
+      cutoff_most_significant <- names(quantiles)[i]
     }
   }
+  lels <- unique(df_most_significant$level) %>% sort(.,decreasing = T)
+  df_most_significant$level <- factor(df_most_significant$level, levels = lels)
+  
   results <- list(
     df = df_most_significant,
-    pval = least_p_value,
-    quantile = quantile_most_significant,
     cutoff = cutoff_most_significant
   )
   return(results)
@@ -76,7 +80,42 @@ get_df_by_cutoff <- function(data, cutoff){
 # combine and generate interaction df
 
 ## Perform survival analysis
-cal_surv_rna <- function(df){
+cal_surv_rna <- function(df, conf.int=T, surv.median.line="none", palette="jco"){
+  # run KM
+  km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+  km.surv <- ggsurvplot(km.fit, data=df, risk.table = TRUE, palette = palette)
+  
+  # create new df to seperate effects
+  lels <- unique(df$level) %>% sort(.,decreasing = T)
+  new_df <- with(df,data.frame(level = lels))
+  
+  # run Cox regression
   cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-  return(cox_fit)
+  cox.fit <- survfit(cox_fit,newdata=new_df)
+  cox.surv <- ggsurvplot(cox.fit,data=new_df,
+                         title = "Survival Curves",
+                         xlab = "Days",
+                         ylab = "Survival probability",
+                         conf.int=conf.int,
+                         surv.median.line = surv.median.line,            # Add median survival lines
+                         # legend.title = call_datatype(x),               # Change legend titles
+                         legend.labs = lels,  # Change legend labels
+                         palette = palette,                    # Use JCO journal color palette
+                         risk.table.height = 0.3
+                         # risk.table = T,                  # Add No at risk table
+                         # cumevents = TRUE,                   # Add cumulative No of events table
+                         # tables.height = 0.15,               # Specify tables height
+                         # tables.theme = theme_cleantable(),  # Clean theme for tables
+                         # tables.y.text = FALSE               # Hide tables y axis text
+  )
+  
+  # add KM table to Cox table
+  cox.surv$table <- km.surv$table
+  fig <- cox.surv
+  
+  results <- list(
+    stats = summary(cox_fit),
+    fig = fig
+  )
+  return(results)
 }

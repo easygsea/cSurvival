@@ -1,6 +1,6 @@
 # ------------ Plots area ------------
 output$ui_results <- renderUI({
-  req(!is.null(rv[["cox_fit_1"]]))
+  req(!is.null(rv[["cox_1"]]))
   
   if(rv$variable_n == 1){
     types <- list(
@@ -10,7 +10,7 @@ output$ui_results <- renderUI({
     )
   }else{
     indi <- as.list(1:rv$variable_n)
-    names(indi) <- paste0("KM plot #",1:rv$variable_n)
+    names(indi) <- paste0("Surv plot #",1:rv$variable_n)
     types <- list(
       "Interaction Surv plot" = "all"
     ) %>% c(.,indi,list(
@@ -77,27 +77,11 @@ output$cox_plot <- renderPlot({
       fit <- survfit(res.cox)
     }else if(suppressWarnings(!is.na(as.numeric(input$plot_type)))){
       x <- input$plot_type
-      res <- rv[[paste0("cox_fit_",x)]]
       df <- rv[[paste0("df_",x)]]
-      fit <- survfit(res,data=data.frame(level = c("high", "low"), 
-                                         age = rep(1, 2)
-      ))
+      res <- rv[[paste0("cox_",x)]]
+      fig <- res[["fig"]]
     }
     
-    ggsurvplot(fit,
-               title = "Survival Curves",
-               xlab = "Days",
-               ylab = "Survival probability",
-               pval = TRUE, pval.method = TRUE,    # Add p-value &  method name
-               surv.median.line = "hv",            # Add median survival lines
-               # legend.title = call_datatype(x),               # Change legend titles
-               # legend.labs = c("High", "Low"),  # Change legend labels
-               palette = "jco",                    # Use JCO journal color palette
-               risk.table = TRUE,                  # Add No at risk table
-               cumevents = TRUE,                   # Add cumulative No of events table
-               tables.height = 0.15,               # Specify tables height
-               tables.theme = theme_cleantable(),  # Clean theme for tables
-               tables.y.text = FALSE               # Hide tables y axis text
-    )
+    print(fig, risk.table.height = 0.3)
   })
 })
