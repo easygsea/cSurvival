@@ -9,10 +9,14 @@ library(TCGAbiolinks)
 library(microbenchmark) # test the time spent on a command
 library(fgsea) # use the function gmtpathways
 library("org.Hs.eg.db") # generate the id conversion table
+library(maftools)
 
+select <- dplyr::select
 # setwd("C:/Users/15067/Desktop/WORK!!!!!!!!1/gdc_data")
-setwd("/Users/jeancheng/Documents/KMplot/LUAD_V2_TCGAbiolink")
-
+# setwd("~/Desktop/cSurvival/basic_scripts")
+# setwd("/Users/jeancheng/Documents/KMplot/LUAD_V2_TCGAbiolink")
+df_gdc_projects <- getGDCprojects() %>%
+  filter(grepl("TCGA", id))
 # -------- step 1. read in TCGA projects -----------
 project_names <- c("TCGA-BRCA", "TCGA-GBM", "TCGA-OV", "TCGA-LUAD",
                    "TCGA-UCEC", "TCGA-KIRC", "TCGA-HNSC", "TCGA-LGG",
@@ -25,7 +29,67 @@ project_names <- c("TCGA-BRCA", "TCGA-GBM", "TCGA-OV", "TCGA-LUAD",
                    "TCGA-CHOL")
 # the name of the cancer project
 project_name <- "TCGA-LUAD"
+
+# create a query that downloads all the snv data
+query_snv <- try(
+                  GDCquery(project = project_name,
+                      data.category = "Simple Nucleotide Variation",
+                      data.type = "Masked Somatic Mutation",
+                      experimental.strategy = "WXS")
+                )
+if(inherits(query_snv, "try-error")){next}
+# download them
+GDCdownload(query_snv, method = "api", directory = paste0(project_name, "/", "snv_data"))
+# find the exact file that we want
+special_names <- c("mutect", "varscan", "somaticsniper", "muse")
+for(name_special in special_names){
+    # name_special <- "mutect"
+    # the path to output the data frames related to snv
+    df_snv_type_path = paste0(project_name, "/df_snv_type_", name_special, ".csv")
+    df_snv_class_path = paste0(project_name, "/df_snv_class_", name_special, ".csv")
+    # read the maf
+    filename_snv <- list.files(pattern = grep(name_special, query_snv[[1]][[1]]$file_name,value = T), recursive = T)[1]
+    df_maf <- try(read.maf(maf  = filename_snv))
+    # extract the useful information and generate the column names
+    df_snv <- try(
+      df_maf@data[,c("Hugo_Symbol", "Entrez_Gene_Id", "Gene", 
+                             "Tumor_Sample_Barcode","Variant_Type", "Variant_Classification")] %>%
+      mutate(full_name = paste(Hugo_Symbol, Entrez_Gene_Id, Gene, sep = "|")) %>%
+      mutate(Tumor_Sample_Barcode = str_sub(Tumor_Sample_Barcode, start = 1L, end = 12L))
+    )
+    # if the data is read successfully, delete the older version of csv
+    if(!inherits(df_snv, "try-error")){
+      unlink(df_snv_type_path, recursive = T)
+      unlink(df_snv_class_path, recursive = T)
+    } else {next}
+      
+    # write the first line of the csvs
+    write(paste0("patient,", paste(unique(df_snv$full_name), collapse = ",")), file = df_snv_type_path, append = T)
+    write(paste0("patient,", paste(unique(df_snv$full_name), collapse = ",")), file = df_snv_class_path, append = T)
+    
+    # the list of data frames that contain the infomation of each patient
+    snv_dfs <- split(df_snv, df_snv$Tumor_Sample_Barcode)
+    
+    for(i in seq_along(snv_dfs)){
+      patient_snv <-left_join(tibble(full_name = unique(df_snv$full_name)), snv_dfs[[i]][!duplicated(snv_dfs[[i]]$full_name), ], by = "full_name")
+      # write the information to corresponding csvs
+      write(paste0(names(snv_dfs)[i], ",", paste(patient_snv$Variant_Type, collapse = ",")), file = df_snv_type_path, append = T)
+      write(paste0(names(snv_dfs)[i], ",", paste(patient_snv$Variant_Classification, collapse = ",")), file = df_snv_class_path, append = T)
+    }
+
+}
+
+
+df_blablabla <- fread(df_snv_type_path)
+
+
+
+
 project_name <- "TCGA-COAD"
+# the path to write all the csvs
+df_survival_path <- paste0(project_name, "/df_survival.csv")
+df_gene_path = paste0(project_name, "/", "df_gene.csv")
+df_gene_scale_path = paste0(project_name, "/", "df_gene_scale.csv")
 # The path for reading and writing the patient data frames
 dir.create(project_name)
 # the query to download the gene information of all patients
@@ -56,10 +120,6 @@ GDCdownload(query_patient_clinical, method = "api", directory = paste0(project_n
 
 
 filename_patient <- list.files(pattern = grep("clinical_patient", query_patient_clinical[[1]][[1]]$file_name,value = T), recursive = T)[1]
-# the path to write all the csvs
-df_survival_path <- paste0(project_name, "/df_survival.csv")
-df_gene_path = paste0(project_name, "/", "df_gene.csv")
-df_gene_scale_path = paste0(project_name, "/", "df_gene_scale.csv")
 
 cases_name_complete <- query_gene_counts[[1]][[1]]$cases
 # the vector contains the shorten name of all patient ids
@@ -310,7 +370,7 @@ head(df_most_significant)
 # (quantile_most_significant <- get_info_most_significant(gene_1, info = "quantile"))
 # (least_p_value <- get_info_most_significant(gene_1, info = "pval"))
 # (cutoff_most_significant <- get_info_most_significant(gene_1, info = "cutoff"))
-km_fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df_most_significant)
+km_fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df_most_significant) # type = "right"  
 ggsurvplot(
   fit = km_fit,
   xlab = "Days",
@@ -386,3 +446,174 @@ generate_gene_gmt_df <- function(geneset, df_gmt_content = df_gmt, df_gene_scale
 path_gmts <- list.files("./gmts")
 df_gmt <- lapply(paste0("gmts/",path_gmts), function(x) gmtPathways(x)) %>% unlist(., recursive = F)
 df_gmt[[1]]
+####--------------------------This section is for TARGET ----------------------#
+df_gdc_projects <- getGDCprojects() %>%
+  filter(grepl("TARGET", id))
+
+project_name <- "TARGET-AML"
+
+# The path for reading and writing the patient data frames
+dir.create(project_name)
+# the path to output the data frames related to snv
+df_snv_type_path = paste0(project_name, "/df_snv_type.csv")
+df_snv_class_path = paste0(project_name, "/df_snv_class.csv")
+
+# create a query that downloads all the snv data
+query_snv <- try(
+  GDCquery(project = project_name,
+           data.category = "Simple Nucleotide Variation",
+           data.type = "Masked Somatic Mutation",
+           experimental.strategy = "WXS")
+)
+if(!inherits(query_snv, "try-error")){
+  unlink(paste0(project_name, "/", "snv_data"), recursive = T)
+  }else{next}
+# download them
+GDCdownload(query_snv, method = "api", directory = paste0(project_name, "/", "snv_data"))
+# create a list that stores all the .mafs
+df_target_snv_list <- list()
+for(j in seq_along(query_snv[[1]][[1]]$file_name)){
+  filename_target_snv <- list.files(pattern = query_snv[[1]][[1]]$file_name[j], recursive = T)
+  df_maf_target_snv <- try(
+    read.maf(maf = filename_target_snv
+             ,useAll = F
+             ,vc_nonSyn = c("Frame_Shift_Del","Frame_Shift_Ins","In_Frame_Del","In_Frame_Ins"
+                            ,"Missense_Mutation","Nonsense_Mutation","Nonstop_Mutation"
+                            ,"Splice_Site","Translation_Start_Site"
+                            ,"Silent","Splice_Region","Intron","5'UTR","RNA","3'UTR"
+                            ,"5'Flank","3'Flank","IGR")
+             )@data[,c("Hugo_Symbol", "Entrez_Gene_Id", "Gene", 
+                                          "Tumor_Sample_Barcode","Variant_Type", "Variant_Classification")] %>%
+      mutate(full_name = paste(Hugo_Symbol, Entrez_Gene_Id, Gene, sep = "|")) %>%
+      mutate(Tumor_Sample_Barcode = str_sub(Tumor_Sample_Barcode, start = 1L, end = 16L))
+  )
+  if(!inherits(df_maf_target_snv, "try-error")){
+    df_target_snv_list[[j]] <- df_maf_target_snv
+  }else{next}
+}
+# combine together all the .mafs
+df_snv <- try(bind_rows(df_target_snv_list))
+
+# if the data is read successfully, delete the older version of csv
+if(!inherits(df_snv, "try-error")){
+  unlink(df_snv_type_path, recursive = T)
+  unlink(df_snv_class_path, recursive = T)
+} else {next}
+
+# write the first line of the csvs
+write(paste0("patient,", paste(unique(df_snv$full_name), collapse = ",")), file = df_snv_type_path, append = T)
+write(paste0("patient,", paste(unique(df_snv$full_name), collapse = ",")), file = df_snv_class_path, append = T)
+
+# the list of data frames that contain the information of each patient
+snv_dfs <- split(df_snv, df_snv$Tumor_Sample_Barcode)
+
+for(i in seq_along(snv_dfs)){
+  patient_snv <-left_join(tibble(full_name = unique(df_snv$full_name)), snv_dfs[[i]][!duplicated(snv_dfs[[i]]$full_name), ], by = "full_name")
+  # write the information to corresponding csvs
+  write(paste0(names(snv_dfs)[i], ",", paste(patient_snv$Variant_Type, collapse = ",")), file = df_snv_type_path, append = T)
+  write(paste0(names(snv_dfs)[i], ",", paste(patient_snv$Variant_Classification, collapse = ",")), file = df_snv_class_path, append = T)
+}
+
+# delete the downloaded file
+unlink(paste0(project_name, "/", "snv_data"), recursive = T)
+
+
+
+
+
+
+
+
+
+
+
+
+
+filename_bla <- list.files(pattern = query_snv[[1]][[1]]$file_name[9], recursive = T)
+df_blablabla <- read.maf(filename_bla)
+filename_bla <- list.files(pattern = query_snv[[1]][[1]]$file_name[2], recursive = T)
+df_blablabla_2 <- read.maf(filename_bla)@data[,c("Hugo_Symbol", "Entrez_Gene_Id", "Gene", 
+                                                 "Tumor_Sample_Barcode","Variant_Type", "Variant_Classification")] %>%
+  mutate(full_name = paste(Hugo_Symbol, Entrez_Gene_Id, Gene, sep = "|"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+project_name <- "TARGET-AML"
+# extracting data from projects start with TARGET-
+library(readxl)
+# the path to write all the csvs
+df_survival_path <- paste0(project_name, "/df_survival.csv")
+df_gene_path = paste0(project_name, "/", "df_gene.csv")
+df_gene_scale_path = paste0(project_name, "/", "df_gene_scale.csv")
+# The path for reading and writing the patient data frames
+dir.create(project_name)
+
+# the query to download the survival information of all patients
+query_patient_clinical <- try(
+  GDCquery(project = project_name,
+           data.category = "Clinical",
+           data.type = "Clinical Supplement")
+)
+if(!inherits(query_patient_clinical, "try-error")){
+  unlink(paste0(project_name, "/", "patient_data"), recursive = T)
+} else {next}
+# download the corresponding data
+GDCdownload(query_patient_clinical, method = "api", directory = paste0(project_name, "/", "patient_data"))
+# extract the filenames that we need
+filenames_survival <- query_patient_clinical[[1]][[1]]$file_name[!grepl(pattern = "CDE|Supplement", query_patient_clinical[[1]][[1]]$file_name)]
+# the list to store all the survival dfs
+dfs_survival <- list()
+# loop through all the survival dfs and combine them together
+for(i in seq_along(filenames_survival)){
+  # acquire the file name of individual .xlsx file
+  filename_xlsx <- list.files(pattern = filenames_survival[i], recursive = T)
+  # read the .xlsx file
+  df_xlsx <- try(
+    read_xlsx(filename_xlsx) %>%
+    select(patient_id = `TARGET USI`, censoring_status = `Vital Status`, survival_days = `Overall Survival Time in Days`) %>%
+    filter(!is.na(censoring_status)) %>%
+    mutate(censoring_status = ifelse(censoring_status=="Alive", 0 , 1))
+  )
+  if(inherits(df_xlsx, "try-error")){next}
+  # store them in the list
+  dfs_survival[[i]] <- df_xlsx
+}
+# combine them together
+df_survival <- try(rbindlist(dfs_survival))
+if(!inherits(df_survival, "try-error")){
+  unlink(df_survival_path, recursive = T)
+} else {next}
+# delete duplicated patient rows
+df_survival <- df_survival[!duplicated(df_survival$patient_id), ]
+
+# output the df_survival
+fwrite(df_survival, file = df_survival_path)
+
+
+
+
+
+
+
+
+
+# project starts with CGCI
+library(XML)
+data <- xmlParse(file = file.choose())
+xml_data <- xmlToList(data)
+
+# projects start with HCMI-CMDC
+library(jsonlite)
+df_json <- 
+  fromJSON(txt = file.choose()) 
+# target-os and target-all-p2 need to be fixed
