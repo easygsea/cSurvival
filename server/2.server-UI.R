@@ -99,7 +99,7 @@ output$cox_plot <- renderPlot({
       x <- input$plot_type
       
       # the gene(s)/GS(s) as the title
-      rv[["title"]] <- ifelse(input[[paste0("cat_",x)]]=="g",isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
+      rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
       
       # no of cases in each group
       rv[["lels"]] <- rv[[paste0("lels_",x)]]
