@@ -189,6 +189,7 @@ plot_ui <- function(n){
               ,value = ""
               ,placeholder = "Type to enter..."
             )
+            ,bsButton(paste0("add_btn_",x),tags$strong("Submit"),style = "warning")
           )
         )
         

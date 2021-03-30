@@ -122,6 +122,7 @@ Sidebar text: #a3bcd6;
 .btn-warning:hover {
   background:#e5d13e !important;
   border-color: #f5df4d !important;
+  color: #939597 !important;
 }
 
 .bttn-material-circle.bttn-danger {
