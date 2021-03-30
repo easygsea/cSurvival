@@ -9,7 +9,7 @@ bodyOne <- tabItem(tabName = "one",
                   8,
                   selectizeInput(
                     "project",
-                    HTML("Cancer type by project")
+                    h4(strong("Cancer type by project"))
                     ,choices = projects[grepl("TCGA|TARGET",names(projects))]
                     ,width = "100%"
                     ,options = list(
@@ -28,17 +28,18 @@ bodyOne <- tabItem(tabName = "one",
                       "Reset project"
                       ,width = "100%"
                     )
-                    ,tags$style(type='text/css', "#reset_project { margin-top: 25px;}"),
+                    ,tags$style(type='text/css', "#reset_project { margin-top: 45px;}"),
                   )
                 )
                 ,column(
                   2,#align="right",
                   numericInput(
                     "variable_n",
-                    HTML("No. of analysis"),
+                    h4(strong("No. of analysis")),
                     value = 1,
                     min = 1, max = 2, step = 1
                   )
+                  # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
                 )
               )
               

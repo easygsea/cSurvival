@@ -128,10 +128,12 @@ cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.li
     # legend = c("top", "bottom", "left", "right", "none"),
     font.legend = c(base_size2, "plain", "black")
   )
-  fig <- cox.surv
   
+  fig <- cox.surv
+  stats <- summary(cox_fit)
+
   results <- list(
-    stats = summary(cox_fit),
+    stats = stats,
     fig = fig
   )
   return(results)

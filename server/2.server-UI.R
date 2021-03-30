@@ -41,7 +41,8 @@ output$ui_results <- renderUI({
     )
     ,column(
       7,
-      plotOutput("cox_plot",height = "600px")
+      h3(rv[["title"]]),
+      plotOutput("cox_plot",height = "585px")
     )
     ,column(
       5,
@@ -71,8 +72,12 @@ output$cox_plot <- renderPlot({
       fit <- survfit(res.cox)
     }else if(suppressWarnings(!is.na(as.numeric(input$plot_type)))){
       x <- input$plot_type
-      df <- rv[[paste0("df_",x)]]
-      res <- rv[[paste0("cox_",x)]]
+      # extract statistics and figure
+      # df <- rv[[paste0("df_",x)]]
+      res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
+      hr <- res[["stats"]]$coefficients[,2]; p <- res[["stats"]]$coefficients[,5]
+      rv[["hr"]] <- round(as.numeric(hr), 2)
+      rv[["p"]] <- format(as.numeric(p), scientific = T, digits = 3)
       fig <- res[["fig"]]
     }
     
@@ -82,7 +87,34 @@ output$cox_plot <- renderPlot({
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
-  div(
-    
+  req(rv[["hr"]])
+  
+  column(12,
+    h3("Statistics"),
+    boxPad(
+      color = "light-blue",
+      fluidRow(
+        column(
+          6,
+          descriptionBlock(
+            header = rv[["hr"]],
+            text = "HR (hazard ratio)"
+            ,rightBorder = T
+          )
+        )
+        ,column(
+          6,
+          descriptionBlock(
+            header = rv[["p"]],
+            text = "P-value"
+            ,rightBorder = F
+          )
+        )
+      )
+    )
+    ,boxPad(
+      color = "gray",
+      renderPrint({print(rv[["res"]][["stats"]])})
+    )
   )
 })
