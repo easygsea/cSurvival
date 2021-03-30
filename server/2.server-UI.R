@@ -194,6 +194,29 @@ output$plot_gear <- renderUI({
         ,placement = "top")
       )
     )
+    # toggle tables for KM plot
+    ,conditionalPanel(
+      'input.cox_km == "km"',
+      column(
+        12,
+        materialSwitch(
+          inputId = "risk_table",
+          label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
+          value = rv$risk_table, inline = F, width = "100%",
+          status = "danger"
+        )
+        ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
+                   ,placement = "top")
+        , materialSwitch(
+          inputId = "cum_table",
+          label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
+          value = rv$cum_table, inline = F, width = "100%",
+          status = "danger"
+        )
+        ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+                   ,placement = "top")
+      )
+    )
   )
 })
 
@@ -201,6 +224,8 @@ observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
 observeEvent(input$median,{rv$median <- input$median},ignoreNULL = F)
 observeEvent(input$confi,{rv$confi <- input$confi})
 observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})
+observeEvent(input$risk_table,{rv$risk_table <- input$risk_table})
+observeEvent(input$cum_table,{rv$cum_table <- input$cum_table})
 
 # --------- 1b. download plot -------------
 output$download_plot <- downloadHandler(

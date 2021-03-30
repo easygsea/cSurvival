@@ -7,4 +7,5 @@ rv <- reactiveValues(
   ,cox_km = "cox"
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"
+  ,risk_table = T,cum_table=T
 )

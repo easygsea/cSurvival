@@ -133,7 +133,7 @@ plot_surv <-
   function(
     res, mode=rv$cox_km
     , title=NULL
-    , risk.table = TRUE, cumevents = TRUE, ncensor.plot = FALSE # parameters for KM mode
+    , risk.table = rv$risk_table, cumevents = rv$cum_table, ncensor.plot = FALSE # parameters for KM mode
     , conf.int=rv$confi, conf.int.style = rv$confi_opt# "ribbon" "step"
     # , surv.median.line="none" # "hv", "h", "v"
     , palette="jco"
