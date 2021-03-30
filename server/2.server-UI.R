@@ -125,7 +125,7 @@ output$plot_gear <- renderUI({
       12,
       radioGroupButtons(
         inputId = "cox_km",
-        label = HTML(paste0("Select survival analysis method"),add_help(paste0("cox_km_q"))),
+        label = HTML(paste0("Survival analysis method:"),add_help(paste0("cox_km_q"))),
         choiceNames = c("Cox proportional-hazards model (Cox)", "Kaplan-Meier logrank (KM)"),
         choiceValues = c("cox","km"),
         selected = rv[["cox_km"]],
@@ -136,7 +136,7 @@ output$plot_gear <- renderUI({
         ),
         direction = "horizontal"
       )
-      ,bsTooltip("cox_km_q",HTML(paste0("The method for analyzing and summarizing survival data. "
+      ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
                                         ,"Cox regression model assesses the effect of several risk factors simultaneously,"
                                         ," while KM describe the survival according to one factor under investigation. "
                                         ))
@@ -150,15 +150,49 @@ output$plot_gear <- renderUI({
       ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
                  ,placement = "top")
     )
-    # ,conditionalPanel(
-    #   'input.cox_km == "cox',
-    #   
-    # )
+    ,conditionalPanel(
+      'input.confi',
+      column(
+        12,
+        radioGroupButtons(
+          inputId = "confi_opt",
+          label = HTML(paste0("Confidence interval style:"),add_help(paste0("confi_opt_q"))),
+          choiceNames = c("Ribbon", "Step"),
+          choiceValues = c("ribbon","step"),
+          selected = rv$confi_opt,
+          size = "sm",
+          checkIcon = list(
+            yes = icon("check-square"),
+            no = icon("square-o")
+          ),
+          direction = "horizontal"
+        )
+        ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
+                                             ," <b>Step</b> plots boundaries."
+        ))
+        ,placement = "top")
+      )
+      
+      # checkboxGroupButtons(
+      #   inputId = "confi_opt",
+      #   label = HTML(paste0("Plot line(s)",add_help("confi_opt_q"))),
+      #   choices = c("adj.P.Val"="padj", 
+      #               "|logFC|"="fc"),
+      #   selected = rv$show_padj_logfc, 
+      #   size="s",
+      #   checkIcon = list(
+      #     no = tags$i(class = "fa fa-times", 
+      #                 style = "color: crimson"),
+      #     yes = tags$i(class = "fa fa-check", 
+      #                  style = "color: green"))
+      # )
+    )
   )
 })
 
 observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
 observeEvent(input$confi,{rv$confi <- input$confi})
+observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})
 
 # --------- 1b. download plot -------------
 output$download_plot <- downloadHandler(
