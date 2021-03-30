@@ -5,5 +5,6 @@ rv <- reactiveValues(
   ,verbTxtStyle2 = ""
   
   ,cox_km = "cox"
+  ,median = NULL
   ,confi = T,confi_opt = "ribbon"
 )

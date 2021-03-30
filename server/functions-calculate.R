@@ -135,13 +135,22 @@ plot_surv <-
     , title=NULL
     , risk.table = TRUE, cumevents = TRUE, ncensor.plot = FALSE # parameters for KM mode
     , conf.int=rv$confi, conf.int.style = rv$confi_opt# "ribbon" "step"
-    , surv.median.line="none" # "hv", "h", "v"
+    # , surv.median.line="none" # "hv", "h", "v"
     , palette="jco"
     , base_size=20
   ){
     df <- res[[mode]][["df"]]
     fit <- res[[mode]][["fit"]]
     lels <- res[[mode]][["lels"]]
+    
+    # median survival lines
+    if(is.null(rv$median)){
+      surv.median.line="none"
+    }else if(length(rv$median)==2){
+      surv.median.line="hv"
+    }else{
+      surv.median.line=rv$median
+    }
     
     if(mode == "km"){
       fig <- ggsurvplot(fit, data=df, 

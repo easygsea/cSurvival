@@ -123,6 +123,7 @@ output$plot_gear <- renderUI({
   fluidRow(
     column(
       12,
+      # survival analysis method
       radioGroupButtons(
         inputId = "cox_km",
         label = HTML(paste0("Survival analysis method:"),add_help(paste0("cox_km_q"))),
@@ -141,6 +142,26 @@ output$plot_gear <- renderUI({
                                         ," while KM describe the survival according to one factor under investigation. "
                                         ))
                  ,placement = "top")
+      
+      # median thresholds
+      ,checkboxGroupButtons(
+        inputId = "median",
+        label = HTML(paste0("Draw line(s) at median survival?",add_help("median_q"))),
+        choices = c("Horizontal"="h",
+                    "Vertical"="v"
+                    ),
+        selected = rv$median,
+        size="s",
+        checkIcon = list(
+          no = tags$i(class = "fa fa-times",
+                      style = "color: crimson"),
+          yes = tags$i(class = "fa fa-check",
+                       style = "color: green"))
+      )
+      ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
+      ))
+      ,placement = "top")
+      # confidence intervals
       ,materialSwitch(
         inputId = "confi",
         label = HTML(paste0("<b>Plot confidence intervals?</b>",add_help("confi_q"))),
@@ -172,25 +193,12 @@ output$plot_gear <- renderUI({
         ))
         ,placement = "top")
       )
-      
-      # checkboxGroupButtons(
-      #   inputId = "confi_opt",
-      #   label = HTML(paste0("Plot line(s)",add_help("confi_opt_q"))),
-      #   choices = c("adj.P.Val"="padj", 
-      #               "|logFC|"="fc"),
-      #   selected = rv$show_padj_logfc, 
-      #   size="s",
-      #   checkIcon = list(
-      #     no = tags$i(class = "fa fa-times", 
-      #                 style = "color: crimson"),
-      #     yes = tags$i(class = "fa fa-check", 
-      #                  style = "color: green"))
-      # )
     )
   )
 })
 
 observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
+observeEvent(input$median,{rv$median <- input$median},ignoreNULL = F)
 observeEvent(input$confi,{rv$confi <- input$confi})
 observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})
 
