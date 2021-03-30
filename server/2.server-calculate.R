@@ -44,8 +44,10 @@ observeEvent(input$confirm,{
         # perform analysis according to input type
         cat_id <- paste0("cat_",x)
         db_id <- paste0("db_",x)
-        if((input[[cat_id]] == "g" & !is.null(input[[db_id]])) | input[[cat_id]] == "gs"){
-          extract_mode <- ifelse(input[[cat_id]]=="gs", input[[cat_id]], input[[db_id]])
+        gs_mode_id <- paste0("gs_mode_",x)
+        
+        if((input[[cat_id]] == "g" & !is.null(input[[db_id]])) | (input[[cat_id]] == "gs" & !is.null(input[[gs_mode_id]]))){
+          extract_mode <- ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)
 

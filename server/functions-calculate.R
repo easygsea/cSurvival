@@ -11,7 +11,7 @@ extract_gene_data <- function(x, type){
     
     # infile
     infile <- paste0(rv$indir,"df_gene_scale.csv")
-  }else if(type == "gs"){
+  }else if(type == "lib"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
     infile <- paste0(rv$indir,"df_gene_scale.csv")
