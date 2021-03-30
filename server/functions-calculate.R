@@ -51,7 +51,7 @@ generate_surv_df <- function(patient_ids, exp, q){
 get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
-
+  
   # initialize the most significant p value and model
   least_p_value <- 1
   quantile_most_significant <- NULL
@@ -66,18 +66,24 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
 
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s)
-  
+
   for(i in seq_along(quantiles)){
     q <- quantiles[i]
     df <- generate_surv_df(patient_ids, exp, q)
 
-    # test if there is significant difference between high and low level genes
-    surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-    p_diff <- coef(summary(surv_diff))[,5]
-    if(p_diff < least_p_value){
-      # least_p_value = p_diff
+    # # test if there is significant difference between high and low level genes
+    # if(rv$cox_km == "cox"){
+      surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      p_diff <- coef(summary(surv_diff))[,5]
+    # }else if(rv$cox_km == "km"){
+    #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+    #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+    # }
+      
+    if(p_diff <= least_p_value){
+      least_p_value <- p_diff
       df_most_significant <- df
-      cutoff_most_significant <- names(quantiles)[i]
+      cutoff_most_significant <- names(quantiles[i])
     }
   }
 
