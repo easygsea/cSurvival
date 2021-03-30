@@ -155,7 +155,8 @@ observeEvent(lib_input_lst(),{
       
       if(!is.null(gs) & gs != ""){
         genes <- rv[[paste0("gmts",x)]][[gs]]
-        
+        rv[[paste0("gs_genes_",x)]] <- genes
+
         output[[gs_lib_genes_id]] <- renderText({
           paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
         })

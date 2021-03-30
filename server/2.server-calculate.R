@@ -43,13 +43,14 @@ observeEvent(input$confirm,{
       lapply(1:rv$variable_n, function(x){
         # perform analysis according to input type
         cat_id <- paste0("cat_",x)
-        if(input[[cat_id]] == "g"){
-          db_id <- paste0("db_",x)
+        db_id <- paste0("db_",x)
+        if((input[[cat_id]] == "g" & !is.null(input[[db_id]])) | input[[cat_id]] == "gs"){
+          extract_mode <- ifelse(input[[cat_id]]=="gs", input[[cat_id]], input[[db_id]])
           # extract gene expression/mutation data
-          data <- extract_gene_data(x,input[[db_id]])
-          
+          data <- extract_gene_data(x,extract_mode)
+
           # perform Surv if expression-like data
-          if(input[[db_id]] != "snv"){
+          if(input[[db_id]] != "snv" | input[[cat_id]] == "gs"){
             iter_id <- paste0("iter_",x)
             yn <- ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
             if(yn){
@@ -58,7 +59,7 @@ observeEvent(input$confirm,{
               max <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
               step <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
               
-              results <- get_info_most_significant_rna(data, min, max, step)
+              results <- get_info_most_significant_rna(data, min, max, step, mode=input[[cat_id]])
               
               # extract most significant df
               df <- results[["df"]]

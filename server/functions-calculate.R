@@ -1,25 +1,34 @@
 # extract gene expression/mutation data
 extract_gene_data <- function(x, type){
+  # all genes in selected project
+  a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
+  
   if(type == "rna"){
+    all_genes <- rv[[paste0("genes",x)]]
+    # selected gene
     g_ui_id <- paste0("g_",x)
-    a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
+    genes <- input[[g_ui_id]]
     
-    # # files
+    # infile
     infile <- paste0(rv$indir,"df_gene_scale.csv")
-    
-    # # method 1 fread drop columns
-    col_to_drop <- a_range[input[[g_ui_id]] != rv[[paste0("genes",x)]]]
-    data <- fread(infile,sep=",",header=T,drop = col_to_drop)
-    
-    # # # method 2 fread essential columns
-    # ofile <- paste0(rv$indir,"tmp.csv")
-    # unlink(ofile)
-    # col_to_keep <- a_range[input[[g_ui_id]] == rv[[paste0("genes",x)]]]
-    # system(paste0("cut -d',' -f1,",col_to_keep," ",infile," > ",ofile))
-    # data <- fread(ofile,sep=",",header=T)
-
-    return(data)
+  }else if(type == "gs"){
+    all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+    genes <- toupper(rv[[paste0("gs_genes_",x)]])
+    infile <- paste0(rv$indir,"df_gene_scale.csv")
   }
+  
+  # # method 1 fread drop columns
+  col_to_drop <- a_range[!all_genes %in% genes]
+  data <- fread(infile,sep=",",header=T,drop = col_to_drop)
+  
+  # # # method 2 fread essential columns
+  # ofile <- paste0(rv$indir,"tmp.csv")
+  # unlink(ofile)
+  # col_to_keep <- a_range[input[[g_ui_id]] == rv[[paste0("genes",x)]]]
+  # system(paste0("cut -d',' -f1,",col_to_keep," ",infile," > ",ofile))
+  # data <- fread(ofile,sep=",",header=T)
+
+  return(data)
 }
 
 # generate survival df
@@ -39,7 +48,7 @@ generate_surv_df <- function(patient_ids, exp, q){
 }
 
 # generate survival df for analysis
-get_info_most_significant_rna <- function(data, min, max, step){
+get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
 
@@ -49,7 +58,11 @@ get_info_most_significant_rna <- function(data, min, max, step){
   
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
-  exp <-data[,2] %>% unlist(.) %>% unname(.)
+  if(mode == "g"){
+    exp <-data[,2] %>% unlist(.) %>% unname(.)
+  }else if(mode == "gs"){
+    exp <- rowMeans(data[,-1]) %>% unlist(.) %>% unname(.)
+  }
 
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s)
