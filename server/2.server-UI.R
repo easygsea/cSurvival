@@ -42,7 +42,7 @@ output$ui_results <- renderUI({
     ,column(
       7,
       h3(rv[["title"]]),
-      plotOutput("cox_plot",height = "585px")
+      plotOutput("cox_plot",height = "580px")
     )
     ,column(
       5,
@@ -74,7 +74,7 @@ output$cox_plot <- renderPlot({
       x <- input$plot_type
       
       # the gene(s)/GS(s) as the title
-      rv[["title"]] <- input[[paste0("g_",x)]]
+      rv[["title"]] <- isolate(input[[paste0("g_",x)]])
       
       # no of cases in each group
       rv[["lels"]] <- rv[[paste0("lels_",x)]]

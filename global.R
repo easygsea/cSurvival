@@ -1,6 +1,6 @@
 library(shiny)
 library(shinydashboard)
-library(shinydashboardPlus, include.only=c("appButton","boxPad","descriptionBlock","loadingState")) #"box",
+library(shinydashboardPlus, include.only=c("boxPad","descriptionBlock")) # "appButton","box","loadingState"
 library(shinythemes)
 library(shinyWidgets)
 library(shinyBS)
