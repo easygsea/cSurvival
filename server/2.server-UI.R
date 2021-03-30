@@ -45,7 +45,7 @@ output$ui_results <- renderUI({
       plotOutput("cox_plot",height = "580px")
       ,div(
         align = "left",
-        style = "position: absolute; right: 4.5em; top: 2.5em;",
+        style = "position: absolute; right: 3.5em; top: 2.5em;",
         # add a id for the gear button in introjs
         div(
           id = "gear_btn",
@@ -141,6 +141,14 @@ output$plot_gear <- renderUI({
                                         ," while KM describe the survival according to one factor under investigation. "
                                         ))
                  ,placement = "top")
+      ,materialSwitch(
+        inputId = "confi",
+        label = HTML(paste0("<b>Plot confidence intervals?</b>",add_help("confi_q"))),
+        value = rv$confi, inline = F, width = "100%",
+        status = "danger"
+      )
+      ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
+                 ,placement = "top")
     )
     # ,conditionalPanel(
     #   'input.cox_km == "cox',
@@ -150,6 +158,7 @@ output$plot_gear <- renderUI({
 })
 
 observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
+observeEvent(input$confi,{rv$confi <- input$confi})
 
 # --------- 1b. download plot -------------
 output$download_plot <- downloadHandler(

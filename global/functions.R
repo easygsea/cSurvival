@@ -19,7 +19,10 @@ label_with_help_bttn <- function(label_text, bttn_id, bttn_status="info", bttn_s
 }
 
 # # add a gear button
-add_gear <- function(id, left="6.9em", top="-4em", title="Click for advanced run parameters", up = F, width = "80%"){
+add_gear <- function(
+  id, left="6.9em", top="-4em", title="Click for advanced run parameters", up = F, width = "80%"
+  , placement="top"
+  ){
   div(
     style=sprintf("position: relative; align: center; left: %s; top: %s;",left, top),
     dropdownButton(
@@ -27,7 +30,7 @@ add_gear <- function(id, left="6.9em", top="-4em", title="Click for advanced run
       size = "xs",
       icon = icon("gear"),# class = "opt"),
       up = up, width = width,
-      tooltip = tooltipOptions(title = title),
+      tooltip = tooltipOptions(title = title, placement = placement),
       
       fluidRow(
         uiOutput(id)
