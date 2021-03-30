@@ -23,7 +23,7 @@ shinyUI(
             ),
             # theme = shinytheme("flatly"),
             use_waiter(), # dependencies
-            waiter_show_on_load(tagList(spin_three_bounce(),h4(loadMsg)), color = "lightblue"), # shows before anything else
+            waiter_show_on_load(tagList(spin_three_bounce(),h4(loadMsg)), color = "#00589b"), # shows before anything else
             disconnectMessage(text = "Your session has timed out. Please refresh page and start again. For bug report, email us at jcheng@cmmt.ubc.ca. Thank you for your support."),
 
             useShinyalert(),  # Set up shinyalert

@@ -124,4 +124,10 @@ Sidebar text: #a3bcd6;
   border-color: #f5df4d !important;
 }
 
+.bttn-material-circle.bttn-danger {
+  background: #CF5C78 !important;
+  border-color: #CF5C78 !important;
+  color:#CF5C78 !important;
+}
+
 

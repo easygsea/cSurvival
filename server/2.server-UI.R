@@ -43,6 +43,31 @@ output$ui_results <- renderUI({
       7,
       h3(rv[["title"]]),
       plotOutput("cox_plot",height = "580px")
+      ,div(
+        align = "left",
+        style = "position: absolute; right: 4.5em; top: 2.5em;",
+        # add a id for the gear button in introjs
+        div(
+          id = "gear_btn",
+          style="display: inline-block;vertical-align:top;",
+          dropdown(
+            uiOutput("plot_gear"),
+            circle = TRUE, status = "danger", style = "material-circle",
+            size="sm", right = T,
+            icon = icon("gear"), width = "300px",
+            tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+          )  
+        ),
+        div(
+          id="download_btn",
+          style="display: inline-block;vertical-align:top;",
+          downloadBttn(
+            size = "sm", color = "danger", style = "material-circle",
+            outputId = "download_vis", label = NULL
+          )
+          ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+        )
+      )
     )
     ,column(
       5,
