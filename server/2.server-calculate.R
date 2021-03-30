@@ -42,7 +42,7 @@ observeEvent(input$confirm,{
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
       df_list <- list()
       rv[["title_all"]] = ""
-      rv[["cutoff_all"]] = vector()
+      rv[["cutoff_all"]] = ""
       for(x in 1:rv$variable_n){
         # perform analysis according to input type
         cat_id <- paste0("cat_",x)
@@ -72,7 +72,7 @@ observeEvent(input$confirm,{
               # extract most significant df
               df <- results[["df"]]
               rv[[paste0("cutoff_",x)]] <- results[["cutoff"]]
-              rv[["cutoff_all"]] <- c(rv[["cutoff_all"]],paste0("#",x,": ",results[["cutoff"]]))
+              rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],"; #",x,": ",results[["cutoff"]])
             }else{
               clow_id <- paste0("clow_",x)
               cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
