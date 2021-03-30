@@ -80,7 +80,7 @@ observeEvent(input$confirm,{
 
             # perform survival analysis
             cox_id <- paste0("cox_",x)
-            rv[[cox_id]] <- cal_surv_rna(df, title = NULL)
+            rv[[cox_id]] <- cal_surv_rna(df)
           }
         }
       })

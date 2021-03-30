@@ -80,25 +80,63 @@ get_df_by_cutoff <- function(data, cutoff){
 ## Perform survival analysis
 cal_surv_rna <- 
   function(
-    df, title="Survival Curves"
-    , mode="cox"
-    , risk.table = TRUE, cumevents = TRUE # parameters for KM mode
-    , conf.int=T, surv.median.line="none", palette="jco", base_size=20
+    df
   ){
+    # run KM
+    km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+    # summary statistics
+    km.stats <- summary(km.fit)
+    
+    # create new df to seperate effects in Cox regression
+    lels <- levels(df$level)
+    new_df <- with(df,data.frame(level = lels))
+    # run Cox regression
+    cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+    # summary statistics
+    cox.stats <- summary(cox_fit)
+    cox.fit <- survfit(cox_fit,newdata=new_df)
+
+    # save df, fit, and statistics
+    results <- list(
+      km = list(
+        df = df,
+        fit = km.fit,
+        stats = km.stats
+      )
+      ,cox = list(
+        df = new_df,
+        fit = cox.fit,
+        stats = cox.stats
+      )
+    )
+    return(results)
+  }
+
+## Plot survival results
+plot_surv <- 
+  function(
+    res, mode=rv$cox_km
+    , title=NULL
+    , risk.table = TRUE, cumevents = TRUE, ncensor.plot = FALSE # parameters for KM mode
+    , conf.int=T, conf.int.style = "ribbon" # "step"
+    , surv.median.line="none" # "hv", "h", "v"
+    , palette="jco"
+    , base_size=20
+  ){
+    df <- res[[mode]][["df"]]
+    fit <- res[[mode]][["fit"]]
+    
     if(mode == "km"){
-      # run KM
-      fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
-      # summary statistics
-      stats <- summary(fit)
-      # the plot
       fig <- ggsurvplot(fit, data=df, 
                         title = title,
                         xlab = "Days",
                         ylab = "Survival probability",
-                        conf.int=conf.int,
-                        risk.table = TRUE, 
-                        cumevents = TRUE,                   # Add cumulative No of events table
+                        conf.int=conf.int, conf.int.style=conf.int.style,
+                        risk.table = risk.table, 
+                        cumevents = cumevents,                   # Add cumulative No of events table
+                        ncensor.plot = ncensor.plot,
                         palette = palette,
+                        legend.title = "",               # Change legend titles
                         legend.labs = lels,  # Change legend labels
                         ggtheme = theme_survminer(
                           base_size = base_size,
@@ -114,7 +152,7 @@ cal_surv_rna <-
                         tables.height = 0.15,               # Specify tables height
                         tables.theme = theme_cleantable(),  # Clean theme for tables
                         tables.y.text = FALSE               # Hide tables y axis text
-                        )
+      )
       
       # adjust Cox table size
       base_size2 <- base_size
@@ -128,21 +166,11 @@ cal_surv_rna <-
         font.legend = c(base_size2, "plain", "black")
       )
     }else if(mode == "cox"){
-      # create new df to seperate effects
-      lels <- levels(df$level)
-      new_df <- with(df,data.frame(level = lels))
-      
-      # run Cox regression
-      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-      # summary statistics
-      stats <- summary(cox_fit)
-      fit <- survfit(cox_fit,newdata=new_df)
-      # the plot
-      fig <- ggsurvplot(fit,data=new_df,
+      fig <- ggsurvplot(fit,data=df,
                         title = title,
                         xlab = "Days",
                         ylab = "Survival probability",
-                        conf.int=conf.int,
+                        conf.int=conf.int, conf.int.style=conf.int.style,
                         surv.median.line = surv.median.line,            # Add median survival lines
                         legend.title = "",               # Change legend titles
                         legend.labs = lels,  # Change legend labels
@@ -160,10 +188,6 @@ cal_surv_rna <-
                         palette = palette                    # Use JCO journal color palette
       )
     }
-    # save statistics and figure
-    results <- list(
-      stats = stats,
-      fig = fig
-    )
-    return(results)
-}
+    
+    return(fig)
+  }

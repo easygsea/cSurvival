@@ -107,18 +107,52 @@ output$cox_plot <- renderPlot({
       # the cutoff percentile
       rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
 
-      # extract statistics and figure
-      # df <- rv[[paste0("df_",x)]]
+      # extract statistics
       res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-      hr <- res[["stats"]]$coefficients[,2]; p <- res[["stats"]]$coefficients[,5]
+      stats <- res[[rv[["cox_km"]]]][["stats"]]
+      hr <- stats$coefficients[,2]; p <- stats$coefficients[,5]
       rv[["hr"]] <- round(as.numeric(hr), 2)
       rv[["p"]] <- format(as.numeric(p), scientific = T, digits = 3)
-      fig <- res[["fig"]]
+      
+      # generate figure
+      fig <- plot_surv(res)
     }
     
-    print(fig, risk.table.height = 0.2)
+    fig
   })
 })
+
+# --------- 1a. plot parameters -------------
+output$plot_gear <- renderUI({
+  fluidRow(
+    column(
+      12,
+      radioGroupButtons(
+        inputId = "cox_km",
+        label = HTML(paste0("Select survival analysis method"),add_help(paste0("cox_km_q"))),
+        choiceNames = c("Cox proportional-hazards model (Cox)", "Kaplan-Meier logrank (KM)"),
+        choiceValues = c("cox","km"),
+        selected = rv[["cox_km"]],
+        size = "sm",
+        checkIcon = list(
+          yes = icon("check-square"),
+          no = icon("square-o")
+        ),
+        direction = "horizontal"
+      )
+      ,bsTooltip("cox_km_q",HTML(paste0("The method for analyzing and summarizing survival data. "
+                                        ,"KM describe the survival according to one factor under investigation. "
+                                        ,"Cox regression model assesses the effect of several risk factors simultaneously."))
+                 ,placement = "top")
+    )
+    # ,conditionalPanel(
+    #   'input.cox_km == "cox',
+    #   
+    # )
+  )
+})
+
+observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
@@ -149,7 +183,7 @@ output$ui_stats <- renderUI({
             ,rightBorder = F
           )
         )
-        ,bsTooltip("hr_q",HTML(paste0("A positive HR value indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
+        ,bsTooltip("hr_q",HTML(paste0("Only applicable to Cox regression analysis. A positive HR value indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                                       ," a negative HR value indicates a lower risk of death for the ",lel1," as compared to the ",lel2))
                    ,placement = "bottom")
       )
@@ -173,7 +207,7 @@ output$ui_stats <- renderUI({
           )
         })
       )
-      ,renderPrint({print(rv[["res"]][["stats"]])})
+      ,renderPrint({print(rv[["res"]][[rv$cox_km]][["stats"]])})
     )
   )
 })
