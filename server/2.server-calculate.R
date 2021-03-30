@@ -40,14 +40,20 @@ observeEvent(input$confirm,{
     
     req(is.null(error_g) & is.null(error_lib) & is.null(error_gs))
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
-      lapply(1:rv$variable_n, function(x){
+      df_list <- list()
+      rv[["title_all"]] = ""
+      rv[["cutoff_all"]] = vector()
+      for(x in 1:rv$variable_n){
         # perform analysis according to input type
         cat_id <- paste0("cat_",x)
         db_id <- paste0("db_",x)
         gs_mode_id <- paste0("gs_mode_",x)
+        g_ui_id <- paste0("g_",x);gs_lib_id <- gs_lib_id <- paste0("gs_l_",x)
         
         if((input[[cat_id]] == "g" & !is.null(input[[db_id]])) | (input[[cat_id]] == "gs" & !is.null(input[[gs_mode_id]]))){
           extract_mode <- ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
+          rv[[paste0("title_",x)]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
+          rv[["title_all"]] <- paste0(c(rv[["title_all"]],rv[[paste0("title_",x)]]),collapse = " vs ")
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)
 
@@ -66,6 +72,7 @@ observeEvent(input$confirm,{
               # extract most significant df
               df <- results[["df"]]
               rv[[paste0("cutoff_",x)]] <- results[["cutoff"]]
+              rv[["cutoff_all"]] <- c(rv[["cutoff_all"]],paste0("#",x,": ",results[["cutoff"]]))
             }else{
               clow_id <- paste0("clow_",x)
               cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
@@ -74,8 +81,9 @@ observeEvent(input$confirm,{
             }
             
             # save df
+            df_list[[x]] <- df
             rv[[paste0("df_",x)]] <- df
-            
+
             # no of cases in each group
             lels <- levels(df$level)
             rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
@@ -86,11 +94,28 @@ observeEvent(input$confirm,{
             rv[[cox_id]] <- cal_surv_rna(df)
           }
         }
-      })
+      }
       
       # generate interaction KM
-      if(rv$variable_n > 0){
+      if(rv$variable_n > 1){
         # generate interaction df
+        df_combined <- Reduce(
+          function(x, y) inner_join(x, select(y, patient_id, level), by = "patient_id"),
+          df_list
+        )
+        x_y <- c("x","y")[1:length(df_list)]
+        df_combined[["level"]] <- apply(df_combined %>% select(paste0("level.",x_y)),1,paste0,collapse="_")
+        rv[["df_all"]] <- df_combined
+
+        # no of cases in each group
+        lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
+        df_combined$level <- factor(df_combined$level, levels = lels)
+        lels <- levels(df_combined$level)
+        rv[["lels_all"]] <- lapply(lels, function(x) table(df_combined$level == x)["TRUE"] %>% unname(.))
+        names(rv[["lels_all"]]) <- lels
+        
+        # perform survival analysis
+        rv[["cox_all"]] <- cal_surv_rna(df_combined)
       }
     })
   }

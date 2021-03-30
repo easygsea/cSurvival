@@ -93,14 +93,20 @@ output$ui_results <- renderUI({
 # --------- 1. display the survival curve ---------
 output$cox_plot <- renderPlot({
   withProgress(value = 1, message = "Generating plot ...",{
-    if(input$plot_type == "all"){
-      fit <- survfit(res.cox)
-    }else if(suppressWarnings(!is.na(as.numeric(input$plot_type)))){
+    if(isolate(input$plot_type) == "all"){
+      rv[["title"]] <- rv[["title_all"]]
+      rv[["lels"]] <- rv[["lels_all"]]
+      rv[["cutoff"]] <- paste0(rv[["cutoff_all"]], collapse = "; ")
+      
+      # extract statistics
+      res <- rv[["res"]] <- rv[["cox_all"]]
+    }else if(suppressWarnings(!is.na(as.numeric(isolate(input$plot_type))))){
       x <- input$plot_type
       
-      # the gene(s)/GS(s) as the title
-      rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
-      
+      # # the gene(s)/GS(s) as the title
+      # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
+      rv[["title"]] <- rv[[paste0("title_",x)]]
+        
       # no of cases in each group
       rv[["lels"]] <- rv[[paste0("lels_",x)]]
       
@@ -109,12 +115,10 @@ output$cox_plot <- renderPlot({
 
       # extract statistics
       res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-            
-      # generate figure
-      fig <- plot_surv(res)
     }
-    
-    fig
+
+    # generate figure
+    plot_surv(res)
   })
 })
 

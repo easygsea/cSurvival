@@ -189,6 +189,7 @@ plot_surv <-
                         xlab = "Days",
                         ylab = "Survival probability",
                         conf.int=conf.int, conf.int.style=conf.int.style,
+                        surv.median.line = surv.median.line,            # Add median survival lines
                         risk.table = risk.table, 
                         cumevents = cumevents,                   # Add cumulative No of events table
                         ncensor.plot = ncensor.plot,
