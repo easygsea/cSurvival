@@ -63,7 +63,7 @@ output$ui_results <- renderUI({
           style="display: inline-block;vertical-align:top;",
           downloadBttn(
             size = "sm", color = "danger", style = "material-circle",
-            outputId = "download_vis", label = NULL
+            outputId = "download_plot", label = NULL
           )
           ,bsTooltip("download_btn","Click to download the plot", placement = "top")
         )
@@ -150,6 +150,17 @@ output$plot_gear <- renderUI({
 })
 
 observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
+
+# --------- 1b. download plot -------------
+output$download_plot <- downloadHandler(
+  filename = function(){paste0(rv$cox_km,"_",rv[["title"]],".pdf")},
+  content = function(file) {
+    pdf(file,onefile = TRUE)
+    print(plot_surv(rv[["res"]]),newpage = FALSE)
+    dev.off()
+    # ggsave(file,print(plot_surv(rv[["res"]]),newpage = FALSE), device = "pdf", width = 10, height = 8, dpi = 300, units = "in")
+  }
+)
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({

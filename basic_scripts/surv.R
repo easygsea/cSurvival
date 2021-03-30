@@ -63,6 +63,11 @@ cox.surv <- ggsurvplot(cox.fit,data=new_data,
            # tables.y.text = FALSE               # Hide tables y axis text
 )
 
+# ggsave("test.pdf",print(cox.surv))
+pdf("test.pdf",onefile = TRUE)
+print(cox.surv,newpage = FALSE)
+dev.off()
+
 # cox.surv$table <- km.surv$table + theme_cleantable(
 #   base_size = 18,
 #   font.main = c(18, "plain", "black"),
