@@ -72,6 +72,16 @@ output$cox_plot <- renderPlot({
       fit <- survfit(res.cox)
     }else if(suppressWarnings(!is.na(as.numeric(input$plot_type)))){
       x <- input$plot_type
+      
+      # the gene(s)/GS(s) as the title
+      rv[["title"]] <- input[[paste0("g_",x)]]
+      
+      # no of cases in each group
+      rv[["lels"]] <- rv[[paste0("lels_",x)]]
+      
+      # the cutoff percentile
+      rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
+
       # extract statistics and figure
       # df <- rv[[paste0("df_",x)]]
       res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
@@ -88,6 +98,8 @@ output$cox_plot <- renderPlot({
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
   req(rv[["hr"]])
+  
+  col_w <- 12 / length(rv[["lels"]])
   
   column(12,
     h3("Statistics"),
@@ -114,7 +126,24 @@ output$ui_stats <- renderUI({
     )
     ,boxPad(
       color = "gray",
-      renderPrint({print(rv[["res"]][["stats"]])})
+      column(
+        12, align="center",
+        HTML(paste0("Cutoff percentile: <b>",rv[["cutoff"]],"</b>"))
+      ),
+      tagList(
+        lapply(names(rv[["lels"]]), function(x){
+          no <- rv[["lels"]][[x]]
+          column(
+            col_w,
+            descriptionBlock(
+              header = no,
+              text = x
+              ,rightBorder = F
+            )
+          )
+        })
+      )
+      ,renderPrint({print(rv[["res"]][["stats"]])})
     )
   )
 })

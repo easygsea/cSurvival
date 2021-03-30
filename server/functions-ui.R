@@ -313,7 +313,7 @@ plot_run_ui <- function(n){
                 clow_id,
                 HTML(paste0("Cutoff percentile:",add_help(clow_id_q))),
                 value = rv[[clow_id]],
-                min = 10,max = 90,step=1
+                min = 10,max = 90,step=.5
               )
             )
             

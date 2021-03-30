@@ -67,15 +67,19 @@ observeEvent(input$confirm,{
               clow_id <- paste0("clow_",x)
               cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
               df <- get_df_by_cutoff(data, cutoff)
-              rv[[paste0("cutoff_",x)]] <- input[[clow_id]]
+              rv[[paste0("cutoff_",x)]] <- paste0(input[[clow_id]],"%")
             }
             
             # save df
             rv[[paste0("df_",x)]] <- df
+            
+            # no of cases in each group
+            lels <- levels(df$level)
+            rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
+            names(rv[[paste0("lels_",x)]]) <- lels
 
             # perform survival analysis
             cox_id <- paste0("cox_",x)
-            rv[["title"]] <- input[[paste0("g_",x)]]
             rv[[cox_id]] <- cal_surv_rna(df, title = NULL)
           }
         }
