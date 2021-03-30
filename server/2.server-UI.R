@@ -100,6 +100,8 @@ output$ui_stats <- renderUI({
   req(rv[["hr"]])
   
   col_w <- 12 / length(rv[["lels"]])
+  lel1 <- names(rv[["lels"]])[[length(rv[["lels"]])]]
+  lel2 <- names(rv[["lels"]])[[1]]
   
   column(12,
     h3("Statistics"),
@@ -110,7 +112,7 @@ output$ui_stats <- renderUI({
           6,
           descriptionBlock(
             header = rv[["hr"]],
-            text = "HR (hazard ratio)"
+            text = HTML(paste0("HR (hazard ratio)",add_help("hr_q")))
             ,rightBorder = T
           )
         )
@@ -122,6 +124,9 @@ output$ui_stats <- renderUI({
             ,rightBorder = F
           )
         )
+        ,bsTooltip("hr_q",HTML(paste0("A positive HR value indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
+                                      ," a negative HR value indicates a lower risk of death for the ",lel1," as compared to the ",lel2))
+                   ,placement = "bottom")
       )
     )
     ,boxPad(
