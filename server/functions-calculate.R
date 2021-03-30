@@ -3,9 +3,21 @@ extract_gene_data <- function(x, type){
   if(type == "rna"){
     g_ui_id <- paste0("g_",x)
     a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
-    col_to_drop <- a_range[input[[g_ui_id]] != rv[[paste0("genes",x)]]]
     
-    data <- fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,drop = col_to_drop)
+    # # files
+    infile <- paste0(rv$indir,"df_gene_scale.csv")
+    
+    # # method 1 fread drop columns
+    col_to_drop <- a_range[input[[g_ui_id]] != rv[[paste0("genes",x)]]]
+    data <- fread(infile,sep=",",header=T,drop = col_to_drop)
+    
+    # # # method 2 fread essential columns
+    # ofile <- paste0(rv$indir,"tmp.csv")
+    # unlink(ofile)
+    # col_to_keep <- a_range[input[[g_ui_id]] == rv[[paste0("genes",x)]]]
+    # system(paste0("cut -d',' -f1,",col_to_keep," ",infile," > ",ofile))
+    # data <- fread(ofile,sep=",",header=T)
+
     return(data)
   }
 }

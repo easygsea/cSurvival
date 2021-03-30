@@ -174,7 +174,7 @@ retrieve_genes <- function(x){
   }else if(input[[db_id]] == "rna"){
     fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }else if(input[[db_id]] == "snv"){
-    a <- fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }
 }
 
