@@ -82,18 +82,28 @@ cal_surv_rna <-
   function(
     df
   ){
+    # # 1. KM # #
+    # summary statistics
+    km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = data)
+    p.km <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
+    
     # run KM
     km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
-    # summary statistics
-    km.stats <- summary(km.fit)
     
+    # # 2. Cox # #
     # create new df to seperate effects in Cox regression
     lels <- levels(df$level)
     new_df <- with(df,data.frame(level = lels))
+    
     # run Cox regression
     cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+    
     # summary statistics
     cox.stats <- summary(cox_fit)
+    hr.cox <- cox.stats$coefficients[,2]
+    p.cox <- cox.stats$coefficients[,5]
+
+    # run Cox survival analysis
     cox.fit <- survfit(cox_fit,newdata=new_df)
 
     # save df, fit, and statistics
@@ -102,11 +112,17 @@ cal_surv_rna <-
         df = df,
         fit = km.fit,
         stats = km.stats
+        ,lels = lels
+        ,hr = "NA"
+        ,p = format(as.numeric(p.km), scientific = T, digits = 3)
       )
       ,cox = list(
         df = new_df,
         fit = cox.fit,
         stats = cox.stats
+        ,lels = lels
+        ,hr = round(as.numeric(hr.cox), 2)
+        ,p = format(as.numeric(p.cox), scientific = T, digits = 3)
       )
     )
     return(results)
@@ -125,6 +141,7 @@ plot_surv <-
   ){
     df <- res[[mode]][["df"]]
     fit <- res[[mode]][["fit"]]
+    lels <- res[[mode]][["lels"]]
     
     if(mode == "km"){
       fig <- ggsurvplot(fit, data=df, 

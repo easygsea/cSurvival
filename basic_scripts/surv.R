@@ -9,13 +9,15 @@ lels <- unique(data$level) %>% sort(.,decreasing = T)
 data$level <- factor(data$level, levels = lels)
 new_data <- with(data,data.frame(level = c("low", "high")))
 
+km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = data)
+p <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
 km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = data)
 km.surv <- ggsurvplot(km.fit, data=data, 
                       xlab = "Days",
                       ylab = "Survival probability",
                       legend.labs = c("Low", "High"),  # Change legend labels
                       risk.table = TRUE, 
-                      cumevents = TRUE,                   # Add cumulative No of events table
+                      cumevents = F,                   # Add cumulative No of events table
                       ggtheme = theme_survminer(
                         base_size = 18,
                         font.main = c(20, "plain", "black"),

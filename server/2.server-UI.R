@@ -109,11 +109,7 @@ output$cox_plot <- renderPlot({
 
       # extract statistics
       res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-      stats <- res[[rv[["cox_km"]]]][["stats"]]
-      hr <- stats$coefficients[,2]; p <- stats$coefficients[,5]
-      rv[["hr"]] <- round(as.numeric(hr), 2)
-      rv[["p"]] <- format(as.numeric(p), scientific = T, digits = 3)
-      
+            
       # generate figure
       fig <- plot_surv(res)
     }
@@ -141,8 +137,9 @@ output$plot_gear <- renderUI({
         direction = "horizontal"
       )
       ,bsTooltip("cox_km_q",HTML(paste0("The method for analyzing and summarizing survival data. "
-                                        ,"KM describe the survival according to one factor under investigation. "
-                                        ,"Cox regression model assesses the effect of several risk factors simultaneously."))
+                                        ,"Cox regression model assesses the effect of several risk factors simultaneously,"
+                                        ," while KM describe the survival according to one factor under investigation. "
+                                        ))
                  ,placement = "top")
     )
     # ,conditionalPanel(
@@ -156,11 +153,16 @@ observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
-  req(rv[["hr"]])
+  req(rv[["res"]])
   
   col_w <- 12 / length(rv[["lels"]])
   lel1 <- names(rv[["lels"]])[[length(rv[["lels"]])]]
   lel2 <- names(rv[["lels"]])[[1]]
+  
+  res <- rv[["res"]][[rv$cox_km]]
+  hr <- res[["hr"]]
+  p <- res[["p"]]
+  
   
   column(12,
     h3("Statistics"),
@@ -170,7 +172,7 @@ output$ui_stats <- renderUI({
         column(
           6,
           descriptionBlock(
-            header = rv[["hr"]],
+            header = hr,
             text = HTML(paste0("HR (hazard ratio)",add_help("hr_q")))
             ,rightBorder = T
           )
@@ -178,7 +180,7 @@ output$ui_stats <- renderUI({
         ,column(
           6,
           descriptionBlock(
-            header = rv[["p"]],
+            header = p,
             text = "P-value"
             ,rightBorder = F
           )
@@ -207,7 +209,7 @@ output$ui_stats <- renderUI({
           )
         })
       )
-      ,renderPrint({print(rv[["res"]][[rv$cox_km]][["stats"]])})
+      ,renderPrint({print(res[["stats"]])})
     )
   )
 })

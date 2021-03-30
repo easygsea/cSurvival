@@ -28,7 +28,7 @@ bodyOne <- tabItem(tabName = "one",
                       "Reset project"
                       ,width = "100%"
                     )
-                    ,tags$style(type='text/css', "#reset_project { margin-top: 45px;}"),
+                    ,tags$style(type='text/css', "#reset_project { margin-top: 43.5px;}"),
                   )
                 )
                 ,column(
