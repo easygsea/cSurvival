@@ -10,7 +10,26 @@ data$level <- factor(data$level, levels = lels)
 new_data <- with(data,data.frame(level = c("low", "high")))
 
 km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = data)
-km.surv <- ggsurvplot(km.fit, data=data, risk.table = TRUE, palette = "jco")
+km.surv <- ggsurvplot(km.fit, data=data, 
+                      xlab = "Days",
+                      ylab = "Survival probability",
+                      legend.labs = c("Low", "High"),  # Change legend labels
+                      risk.table = TRUE, 
+                      cumevents = TRUE,                   # Add cumulative No of events table
+                      ggtheme = theme_survminer(
+                        base_size = 18,
+                        font.main = c(20, "plain", "black"),
+                        font.submain = c(18, "plain", "black"),
+                        font.x = c(18, "plain", "black"),
+                        font.y = c(18, "plain", "black"),
+                        font.caption = c(18, "plain", "black"),
+                        font.tickslab = c(16, "plain", "black"),
+                        # legend = c("top", "bottom", "left", "right", "none"),
+                        font.legend = c(18, "plain", "black")
+                      ),
+                      palette = "jco")
+
+km.surv
 
 cox.fit <- survfit(cox_fit,newdata=new_data)
 
@@ -42,13 +61,13 @@ cox.surv <- ggsurvplot(cox.fit,data=new_data,
            # tables.y.text = FALSE               # Hide tables y axis text
 )
 
-cox.surv$table <- km.surv$table + theme_cleantable(
-  base_size = 18,
-  font.main = c(18, "plain", "black"),
-  font.submain = c(18, "plain", "black"),
-  font.caption = c(18, "plain", "black"),
-  font.tickslab = c(16, "plain", "black"),
-  # legend = c("top", "bottom", "left", "right", "none"),
-  font.legend = c(18, "plain", "black")
-)
-print(cox.surv,risk.table.height = 0.3)
+# cox.surv$table <- km.surv$table + theme_cleantable(
+#   base_size = 18,
+#   font.main = c(18, "plain", "black"),
+#   font.submain = c(18, "plain", "black"),
+#   font.caption = c(18, "plain", "black"),
+#   font.tickslab = c(16, "plain", "black"),
+#   # legend = c("top", "bottom", "left", "right", "none"),
+#   font.legend = c(18, "plain", "black")
+# )
+# print(cox.surv,risk.table.height = 0.3)

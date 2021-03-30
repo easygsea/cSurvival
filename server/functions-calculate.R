@@ -78,63 +78,92 @@ get_df_by_cutoff <- function(data, cutoff){
 # combine and generate interaction df
 
 ## Perform survival analysis
-cal_surv_rna <- function(df, title="Survival Curves", conf.int=T, surv.median.line="none", palette="jco", base_size=20){
-  # run KM
-  km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
-  km.surv <- ggsurvplot(km.fit, data=df, risk.table = TRUE, palette = palette)
-  
-  # create new df to seperate effects
-  lels <- levels(df$level)
-  new_df <- with(df,data.frame(level = lels))
-
-  # run Cox regression
-  cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-  cox.fit <- survfit(cox_fit,newdata=new_df)
-  cox.surv <- suppressWarnings(ggsurvplot(cox.fit,data=new_df,
-                         title = title,
-                         xlab = "Days",
-                         ylab = "Survival probability",
-                         conf.int=conf.int,
-                         surv.median.line = surv.median.line,            # Add median survival lines
-                         # legend.title = call_datatype(x),               # Change legend titles
-                         legend.labs = lels,  # Change legend labels
-                         ggtheme = theme_survminer(
-                           base_size = base_size,
-                           font.main = c((base_size + 2), "plain", "black"),
-                           font.submain = c(base_size, "plain", "black"),
-                           font.x = c(base_size, "plain", "black"),
-                           font.y = c(base_size, "plain", "black"),
-                           font.caption = c(base_size, "plain", "black"),
-                           font.tickslab = c((base_size - 2), "plain", "black"),
-                           # legend = c("top", "bottom", "left", "right", "none"),
-                           font.legend = c(base_size, "plain", "black")
-                         ),
-                         palette = palette                    # Use JCO journal color palette
-                         # risk.table = T,                  # Add No at risk table
-                         # cumevents = TRUE,                   # Add cumulative No of events table
-                         # tables.height = 0.15,               # Specify tables height
-                         # tables.theme = theme_cleantable(),  # Clean theme for tables
-                         # tables.y.text = FALSE               # Hide tables y axis text
-  ))
-  
-  # add KM table to Cox table
-  base_size2 <- base_size
-  cox.surv$table <- km.surv$table + theme_cleantable(
-    base_size = base_size2,
-    font.main = c(base_size2, "plain", "black"),
-    font.submain = c(base_size2, "plain", "black"),
-    font.caption = c(base_size2, "plain", "black"),
-    font.tickslab = c((base_size2 - 2), "plain", "black"),
-    # legend = c("top", "bottom", "left", "right", "none"),
-    font.legend = c(base_size2, "plain", "black")
-  )
-  
-  fig <- cox.surv
-  stats <- summary(cox_fit)
-
-  results <- list(
-    stats = stats,
-    fig = fig
-  )
-  return(results)
+cal_surv_rna <- 
+  function(
+    df, title="Survival Curves"
+    , mode="cox"
+    , risk.table = TRUE, cumevents = TRUE # parameters for KM mode
+    , conf.int=T, surv.median.line="none", palette="jco", base_size=20
+  ){
+    if(mode == "km"){
+      # run KM
+      fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+      # summary statistics
+      stats <- summary(fit)
+      # the plot
+      fig <- ggsurvplot(fit, data=df, 
+                        title = title,
+                        xlab = "Days",
+                        ylab = "Survival probability",
+                        conf.int=conf.int,
+                        risk.table = TRUE, 
+                        cumevents = TRUE,                   # Add cumulative No of events table
+                        palette = palette,
+                        legend.labs = lels,  # Change legend labels
+                        ggtheme = theme_survminer(
+                          base_size = base_size,
+                          font.main = c((base_size + 2), "plain", "black"),
+                          font.submain = c(base_size, "plain", "black"),
+                          font.x = c(base_size, "plain", "black"),
+                          font.y = c(base_size, "plain", "black"),
+                          font.caption = c(base_size, "plain", "black"),
+                          font.tickslab = c((base_size - 2), "plain", "black"),
+                          # legend = c("top", "bottom", "left", "right", "none"),
+                          font.legend = c(base_size, "plain", "black")
+                        ),
+                        tables.height = 0.15,               # Specify tables height
+                        tables.theme = theme_cleantable(),  # Clean theme for tables
+                        tables.y.text = FALSE               # Hide tables y axis text
+                        )
+      
+      # adjust Cox table size
+      base_size2 <- base_size
+      fig$table <- fig$table + theme_cleantable(
+        base_size = base_size2,
+        font.main = c(base_size2, "plain", "black"),
+        font.submain = c(base_size2, "plain", "black"),
+        font.caption = c(base_size2, "plain", "black"),
+        font.tickslab = c((base_size2 - 2), "plain", "black"),
+        # legend = c("top", "bottom", "left", "right", "none"),
+        font.legend = c(base_size2, "plain", "black")
+      )
+    }else if(mode == "cox"){
+      # create new df to seperate effects
+      lels <- levels(df$level)
+      new_df <- with(df,data.frame(level = lels))
+      
+      # run Cox regression
+      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      # summary statistics
+      stats <- summary(cox_fit)
+      fit <- survfit(cox_fit,newdata=new_df)
+      # the plot
+      fig <- ggsurvplot(fit,data=new_df,
+                        title = title,
+                        xlab = "Days",
+                        ylab = "Survival probability",
+                        conf.int=conf.int,
+                        surv.median.line = surv.median.line,            # Add median survival lines
+                        legend.title = "",               # Change legend titles
+                        legend.labs = lels,  # Change legend labels
+                        ggtheme = theme_survminer(
+                          base_size = base_size,
+                          font.main = c((base_size + 2), "plain", "black"),
+                          font.submain = c(base_size, "plain", "black"),
+                          font.x = c(base_size, "plain", "black"),
+                          font.y = c(base_size, "plain", "black"),
+                          font.caption = c(base_size, "plain", "black"),
+                          font.tickslab = c((base_size - 2), "plain", "black"),
+                          # legend = c("top", "bottom", "left", "right", "none"),
+                          font.legend = c(base_size, "plain", "black")
+                        ),
+                        palette = palette                    # Use JCO journal color palette
+      )
+    }
+    # save statistics and figure
+    results <- list(
+      stats = stats,
+      fig = fig
+    )
+    return(results)
 }
