@@ -270,8 +270,8 @@ output$ui_stats <- renderUI({
             ,rightBorder = F
           )
         )
-        ,bsTooltip("hr_q",HTML(paste0("Only applicable to regression analysis by Cox PH model. A positive HR value indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
-                                      ," a negative HR value indicates a lower risk of death for the ",lel1," as compared to the ",lel2))
+        ,bsTooltip("hr_q",HTML(paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
+                                      ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2))
                    ,placement = "bottom")
       )
     )
