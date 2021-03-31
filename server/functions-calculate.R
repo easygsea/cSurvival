@@ -1,21 +1,25 @@
 # extract gene expression/mutation data
-extract_gene_data <- function(x, type){
+extract_gene_data <- function(x, type, method="mutect"){
+  df_file <- list(
+    "rna" = "df_gene_scale.csv"
+    ,"lib" = "df_gene_scale.csv"
+    ,"snv" = paste0("df_snv_class_",method,".csv")
+  )
   # all genes in selected project
   a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
   
-  if(type == "rna"){
+  if(type == "rna" | type == "snv"){
     all_genes <- rv[[paste0("genes",x)]]
     # selected gene
     g_ui_id <- paste0("g_",x)
     genes <- input[[g_ui_id]]
-    
-    # infile
-    infile <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(type == "lib"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
-    infile <- paste0(rv$indir,"df_gene_scale.csv")
   }
+  
+  # infile
+  infile <- paste0(rv$indir,df_file[[type]])
   
   # # method 1 fread drop columns
   col_to_drop <- a_range[!all_genes %in% genes]
