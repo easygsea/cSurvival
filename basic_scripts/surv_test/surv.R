@@ -3,6 +3,7 @@ library(survminer) # to plot the survival analysis nicer
 
 setwd("/Users/jeancheng/Documents/cSurvival/")
 
+# ------- 1. basic cox and km fit ---------
 cox_fit <- readRDS("basic_scripts/cox_fit")
 data <- readRDS("basic_scripts/data")
 lels <- unique(data$level) %>% sort(.,decreasing = T)
@@ -79,6 +80,7 @@ dev.off()
 # )
 # print(cox.surv,risk.table.height = 0.3)
 
+# ----------- 2. categorical interaction analysis --------
 df1 <- readRDS("basic_scripts/df_1")
 df2 <- readRDS("basic_scripts/df_2")
 df_list <- list(df1,df2)
@@ -100,3 +102,7 @@ res_km <- res_all[["km"]]
 
 res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x + level.y + level.x*level.y, data =  df_combined)
 summary(res.cox)
+
+# ------------- 3. continuous variable analysis ---------------
+df_exp1 <- readRDS("basic_scripts/df_exp1")
+
