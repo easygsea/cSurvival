@@ -38,7 +38,7 @@ init_rv <- function(x){
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
   rv[[paste0("synonymous_",x)]] <- variant_types_syn
   rv[[paste0("iter_",x)]] <- "iter"
-  rv[[paste0("clow_",x)]] <- 49
+  rv[[paste0("clow_",x)]] <- 50
 }
 
 # update these into rv when selections change
@@ -174,7 +174,7 @@ retrieve_genes <- function(x){
   }else if(input[[db_id]] == "rna"){
     fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }else if(input[[db_id]] == "snv"){
-    a <- fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }
 }
 

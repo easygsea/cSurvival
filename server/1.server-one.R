@@ -155,7 +155,8 @@ observeEvent(lib_input_lst(),{
       
       if(!is.null(gs) & gs != ""){
         genes <- rv[[paste0("gmts",x)]][[gs]]
-        
+        rv[[paste0("gs_genes_",x)]] <- genes
+
         output[[gs_lib_genes_id]] <- renderText({
           paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
         })
@@ -207,12 +208,19 @@ observeEvent(lg_input_btn_lst(),{
           
           # check if valid entry
           genes <- toupper(lgg) %>% gsub(" ","",.) %>% str_split(.,"&") %>% .[[1]] %>% unique()
-          
+          no_genes <- sapply(genes, function(x){
+            str_split(x,"\\|") %>% .[[1]]
+          }) %>% unlist(.) %>% length(.)
+
           if(genes == ""){
             shinyalert("Please enter valid gene(s).")
           }
           
-          if(genes != ""){
+          if(no_genes > 10){
+            shinyalert("We support evaluation up to 10 genes. Please delete less important genes wherever appropriate.")
+          }
+          
+          if(genes != "" & no_genes < 11){
             # retrive gmt data
             gmts <- rv[[paste0("gmts",x)]]
             

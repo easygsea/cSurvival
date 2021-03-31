@@ -189,6 +189,7 @@ plot_ui <- function(n){
               ,value = ""
               ,placeholder = "Type to enter..."
             )
+            ,bsButton(paste0("add_btn_",x),tags$strong("Submit"),style = "warning")
           )
         )
         
@@ -205,7 +206,8 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(gs_lib_id_q, HTML("Search for keywords (e.g. glycolysis, chemokine, tor signaling) and select the one of interest.")
                    ,placement = "right")
-        ,bsTooltip(gs_gene_id_q, HTML("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by \"&\" (and) or \"|\" (or). | is evaluated before &. Example: MYC&TP53|BCL2&BRCA1|BRCA2 is evaluated as MYC&(TP53|BCL2)&(BRCA1|BRCA2), which means MYC and (TP53 or BCL2) and (BRCA1 or BRCA2)")
+        ,bsTooltip(gs_gene_id_q, HTML(paste0("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by \"&\" (and) or \"|\" (or). | is evaluated before &. Example: MYC&TP53|BCL2&BRCA1|BRCA2 is evaluated as MYC&(TP53|BCL2)&(BRCA1|BRCA2), which means MYC and (TP53 or BCL2) and (BRCA1 or BRCA2)."
+                                             ," A maximum of 10 genes are supported."))
                    ,placement = "top")
         ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited.")
                    ,placement = "right")
@@ -313,7 +315,7 @@ plot_run_ui <- function(n){
                 clow_id,
                 HTML(paste0("Cutoff percentile:",add_help(clow_id_q))),
                 value = rv[[clow_id]],
-                min = 10,max = 90,step=1
+                min = 10,max = 90,step=.5
               )
             )
             
