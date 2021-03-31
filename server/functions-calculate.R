@@ -31,17 +31,23 @@ extract_gene_data <- function(x, type){
   return(data)
 }
 
+# original survival df
+original_surv_df <- function(patient_ids){
+  df_o <- rv$df_survival
+  df_o %>% dplyr::filter(patient_id %in% patient_ids)
+  df_o[match(patient_ids,df_o$patient_id),]
+}
+
 # generate survival df
-generate_surv_df <- function(patient_ids, exp, q){
+generate_surv_df <- function(df, patient_ids, exp, q){
   # generate the data from for model first
   gene_quantiles <- exp %>% 
     sapply(function(x) ifelse(x > q, "High", "Low"))
   names(gene_quantiles) <- patient_ids
   
-  # generate survival analysis df
-  df <- rv$df_survival
-  df$level <- gene_quantiles[match(df$patient_id,names(gene_quantiles))]
-  df %>% dplyr::filter(level != "NULL")
+  # # generate survival analysis df
+  # df$level <- gene_quantiles[match(df$patient_id,names(gene_quantiles))]
+  df$level <- gene_quantiles
   lels <- unique(df$level) %>% sort(.,decreasing = T)
   df$level <- factor(df$level, levels = lels)
   return(df)
@@ -63,13 +69,16 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   }else if(mode == "gs"){
     exp <- rowMeans(data[,-1]) %>% unlist(.) %>% unname(.)
   }
+  
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(patient_ids)
 
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s)
 
   for(i in seq_along(quantiles)){
     q <- quantiles[i]
-    df <- generate_surv_df(patient_ids, exp, q)
+    df <- generate_surv_df(df_o, patient_ids, exp, q)
 
     # # test if there is significant difference between high and low level genes
     # if(rv$cox_km == "cox"){
@@ -101,9 +110,12 @@ get_df_by_cutoff <- function(data, cutoff){
   patient_ids <- data$patient_id
   exp <-data[,2] %>% unlist(.) %>% unname(.)
   
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(patient_ids)
+  
   # the quantile we will use to define the level of gene percentages
   q <- quantile(exp, cutoff)
-  df <- generate_surv_df(patient_ids, exp, q)
+  df <- generate_surv_df(df_o, patient_ids, exp, q)
 }
 
 # combine and generate interaction df

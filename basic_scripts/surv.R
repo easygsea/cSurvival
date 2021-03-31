@@ -83,10 +83,13 @@ df1 <- readRDS("basic_scripts/df_1")
 df2 <- readRDS("basic_scripts/df_2")
 df_list <- list(df1,df2)
 df_combined <- Reduce(
-  function(x, y) inner_join(x, select(y, patient_id, level), by = "patient_id"), 
+  function(x, y, ...) inner_join(x, select(y, patient_id, level), by = "patient_id"), 
   df_list
 )
 
 x_y <- c("x","y")[1:length(df_list)]
 
 df_combined[["level"]] <- apply(df_combined %>% select(paste0("level.",x_y)),1,paste0,collapse="_")
+lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
+df_combined$level <- factor(df_combined$level, levels = lels)
+lels <- levels(df_combined$level)
