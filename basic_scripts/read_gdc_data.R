@@ -17,18 +17,70 @@ select <- dplyr::select
 # setwd("/Users/jeancheng/Documents/KMplot/LUAD_V2_TCGAbiolink")
 df_gdc_projects <- getGDCprojects() %>%
   filter(grepl("TCGA", id))
-# -------- step 1. read in TCGA projects -----------
-project_names <- c("TCGA-BRCA", "TCGA-GBM", "TCGA-OV", "TCGA-LUAD",
-                   "TCGA-UCEC", "TCGA-KIRC", "TCGA-HNSC", "TCGA-LGG",
-                   "TCGA-THCA", "TCGA-LUSC", "TCGA-PRAD", "TCGA-SKCM",
-                   "TCGA-COAD", "TCGA-STAD", "TCGA-BLCA", "TCGA-LIHC",
-                   "TCGA-CESC", "TCGA-KIRP", "TCGA-SARC", "TCGA-LAML",
-                   "TCGA-PAAD", "TCGA-ESCA", "TCGA-PCPG", "TCGA-READ",
-                   "TCGA-TGCT", "TCGA-THYM", "TCGA-KICH", "TCGA-ACC",
-                   "TCGA-MESO", "TCGA-UVM", "TCGA-DLBC", "TCGA-UCS",
-                   "TCGA-CHOL")
+
+
+# --------------------
+
+# generate the table containing the full name of all genes using the id conversion table
+# input: a vector of gene id, each element starts with "ENSG..."
+# output: a full name conversion table
+generate_full_name_table <- function(gene_ids_ensg){
+  # create individual tables using org.Hs
+  egENS <- toTable(org.Hs.egENSEMBL)
+  egSYMBOL <- toTable(org.Hs.egSYMBOL)
+  
+  # bind the tables
+  id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
+  
+  # extract the gene ids from df_gene and find their names from id conversion table
+  gene_ids <- as_tibble_col(gene_ids_ensg, column_name = "ensembl_id")
+  gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
+  
+  # extract the ids that do not exist in the id conversion table
+  gene_na_table <- gene_ids_table %>%
+    filter(is.na(gene_id)) %>%
+    mutate(full_name = ensembl_id)
+  # extract the ids that exist in the id conversion table
+  gene_not_na <- gene_ids_table %>%
+    filter(!is.na(gene_id))
+  # summarise the duplicated gene_ids and symbols in the df
+  unique_ids_symbols <-
+    aggregate(x= tibble(gene_not_na["gene_id"], gene_not_na["symbol"]),
+              by=gene_not_na["ensembl_id"],
+              FUN = function(X) paste(unique(X), collapse="|")) %>%
+    mutate(full_name = paste(symbol, gene_id, ensembl_id, sep = "|"))
+  # the table that contains all the full name of "ENSG...."
+  full_name_table <- rbind(unique_ids_symbols, gene_na_table)
+}
 # the name of the cancer project
 project_name <- "TCGA-LUAD"
+# the query to download the data related to .cnv file
+query_cnv <- try(
+  GDCquery(project = project_name,
+           data.category = "Copy Number Variation",
+           data.type = "Gene Level Copy Number Scores",
+           experimental.strategy = "Genotyping Array",
+           platform = "Affymetrix SNP 6.0")
+)
+# download the corresponding cnv data
+GDCdownload(query_cnv, method = "api", directory = paste0(project_name, "/", "cnv_data"))
+# read the file and clean up the gene ids
+filename_cnv <- list.files(pattern = query_cnv[[1]][[1]]$file_name[1], recursive = T)
+df_cnv <- fread(filename_cnv) %>%
+  mutate(`Gene Symbol` = gsub("[.]\\d+$","",`Gene Symbol`)) %>%
+  rename(`Gene Symbol` = 'full_name')
+# convert the gene ids into the full names of genes
+full_names_cnv <- left_join(as_tibble_col(df_cnv$full_name, column_name = "full_name"),
+                                 generate_full_name_table(df_cnv$full_name),
+                                 by = c("full_name" = "ensembl_id"))$full_name.y
+df_cnv <- df_cnv %>%
+  mutate(full_name = full_names_cnv)
+
+#------------------------------------------------------------------------------------------------
+
+
+
+
 
 # create a query that downloads all the snv data
 query_snv <- try(
@@ -450,7 +502,7 @@ df_gmt[[1]]
 df_gdc_projects <- getGDCprojects() %>%
   filter(grepl("TARGET", id))
 
-project_name <- "TARGET-AML"
+project_name <- "TARGET-ALL-P2"
 
 # The path for reading and writing the patient data frames
 dir.create(project_name)
