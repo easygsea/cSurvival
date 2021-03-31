@@ -112,8 +112,8 @@ df_exp1 <- readRDS("basic_scripts/surv_test/df_exp1")
 df_exp2 <- readRDS("basic_scripts/surv_test/df_exp2")
 
 df_exp_combined <- Reduce(
-  function(x, y, ...) inner_join(x, select(y, patient_id, level, exp), by = "patient_id", ...), 
-  list(df_exp1,df_exp1)
+  function(x, y) inner_join(x, select(y, patient_id, level, exp), by = "patient_id"), 
+  list(df_exp1,df_exp2)
 )
 
 # test if non-linear
@@ -125,6 +125,7 @@ summary(cox_exp)
 # interaction linear
 cox_exp <- coxph(Surv(survival_days, censoring_status) ~ exp.x*exp.y, data = df_exp_combined)
 summary(cox_exp)
+estimate(cox_exp,rbind(c(1,-1,0)))
 
 # fit curves
 cox_exp_fit <- survfit(cox_exp)
