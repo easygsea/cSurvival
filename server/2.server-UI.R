@@ -2,15 +2,15 @@
 output$ui_results <- renderUI({
   req(!is.null(rv[["cox_1"]]))
   
-  if(rv$variable_n == 1){
+  if(rv$variable_nr == 1){
     types <- list(
       "Surv plot #1" = 1
       ,"Distribution in TCGA"
       ,"Distribution in TARGET"
     )
   }else{
-    indi <- as.list(1:rv$variable_n)
-    names(indi) <- paste0("Surv plot #",1:rv$variable_n)
+    indi <- as.list(1:rv$variable_nr)
+    names(indi) <- paste0("Surv plot #",1:rv$variable_nr)
     types <- list(
       "Interaction Surv plot" = "all"
     ) %>% c(.,indi,list(

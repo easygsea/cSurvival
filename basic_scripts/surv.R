@@ -93,3 +93,7 @@ df_combined[["level"]] <- apply(df_combined %>% select(paste0("level.",x_y)),1,p
 lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
 df_combined$level <- factor(df_combined$level, levels = lels)
 lels <- levels(df_combined$level)
+
+res_all <- readRDS("basic_scripts/cox_all")
+res_cox <- res_all[["cox"]]
+res_km <- res_all[["km"]]

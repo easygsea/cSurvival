@@ -39,7 +39,9 @@ observeEvent(input$confirm,{
     }
     
     req(is.null(error_g) & is.null(error_lib) & is.null(error_gs))
+    
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
+      rv$variable_nr <- rv$variable_n
       df_list <- list()
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""
@@ -53,7 +55,11 @@ observeEvent(input$confirm,{
         if((input[[cat_id]] == "g" & !is.null(input[[db_id]])) | (input[[cat_id]] == "gs" & !is.null(input[[gs_mode_id]]))){
           extract_mode <- ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
           rv[[paste0("title_",x)]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
-          rv[["title_all"]] <- paste0(c(rv[["title_all"]],rv[[paste0("title_",x)]]),collapse = " vs ")
+          if(rv[["title_all"]] == ""){
+            rv[["title_all"]] <- rv[[paste0("title_",x)]]
+          }else{
+            rv[["title_all"]] <- paste0(c(rv[["title_all"]],rv[[paste0("title_",x)]]),collapse = " vs ")
+          }
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)
 
@@ -91,7 +97,7 @@ observeEvent(input$confirm,{
 
             # perform survival analysis
             cox_id <- paste0("cox_",x)
-            rv[[cox_id]] <- cal_surv_rna(df)
+            rv[[cox_id]] <- cal_surv_rna(df,1)
           }
         }
       }
@@ -115,7 +121,8 @@ observeEvent(input$confirm,{
         names(rv[["lels_all"]]) <- lels
         
         # perform survival analysis
-        rv[["cox_all"]] <- cal_surv_rna(df_combined)
+        rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n)
+        # saveRDS(rv[["cox_all"]], "cox_all")
       }
     })
   }

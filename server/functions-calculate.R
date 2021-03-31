@@ -123,11 +123,11 @@ get_df_by_cutoff <- function(data, cutoff){
 ## Perform survival analysis
 cal_surv_rna <- 
   function(
-    df
+    df,n
   ){
     # # 1. KM # #
     # summary statistics
-    km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = data)
+    km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
     p.km <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
     
     # run KM
@@ -136,11 +136,20 @@ cal_surv_rna <-
     # # 2. Cox # #
     # create new df to seperate effects in Cox regression
     lels <- levels(df$level)
-    new_df <- with(df,data.frame(level = lels))
-    
-    # run Cox regression
-    cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-    
+    if(n == 1){
+      new_df <- with(df,data.frame(level = lels))
+      
+      # run Cox regression
+      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+    }else if(n == 2){
+      lels_x <- levels(df$`level.x`)
+      lels_y <- levels(df$`level.y`)
+      new_df <- with(df,data.frame(level = lels, level.x = lels_x, level.y = lels_y))
+      
+      # run Cox regression
+      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x + level.y + level, data = df)
+    }
+
     # summary statistics
     cox.stats <- summary(cox_fit)
     hr.cox <- cox.stats$coefficients[,2]
