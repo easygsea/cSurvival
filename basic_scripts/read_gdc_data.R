@@ -10,8 +10,10 @@ library(microbenchmark) # test the time spent on a command
 library(fgsea) # use the function gmtpathways
 library("org.Hs.eg.db") # generate the id conversion table
 library(maftools)
+library(TCGAutils) # aliquot UUID to patient barcode conversion
 
 select <- dplyr::select
+filter <- dplyr::filter
 # setwd("C:/Users/15067/Desktop/WORK!!!!!!!!1/gdc_data")
 # setwd("~/Desktop/cSurvival/basic_scripts")
 # setwd("/Users/jeancheng/Documents/KMplot/LUAD_V2_TCGAbiolink")
@@ -74,7 +76,22 @@ full_names_cnv <- left_join(as_tibble_col(df_cnv$full_name, column_name = "full_
                                  generate_full_name_table(df_cnv$full_name),
                                  by = c("full_name" = "ensembl_id"))$full_name.y
 df_cnv <- df_cnv %>%
-  mutate(full_name = full_names_cnv)
+  mutate(full_name = paste0(full_names_cnv, "|", df_cnv$Cytoband))
+
+# all aliquot UUIDs
+uuids <- colnames(df_cnv)[-3:-1]
+
+# convert to patient barcodes
+patient_ids <- UUIDtoBarcode(uuids, from_type = "aliquot_ids") %>% .[,2]
+
+# column names
+col_names <- c("patient_id",patient_ids)
+
+# remove useless Gene ID and Cytoband columns
+df_cnv <- df_cnv[,c(-2,-3)]
+colnames(df_cnv) <- col_names
+
+# transpose df and extract patient IDs
 
 #------------------------------------------------------------------------------------------------
 
