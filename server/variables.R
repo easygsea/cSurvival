@@ -1,5 +1,5 @@
 # ------- survival analysis methods ---------
-surv_methods <- c("Cox proportional-hazards (PH) model"="cox", "Kaplan-Meier (KM) logrank"="km")
+surv_methods <- c("Cox proportional-hazards (PH) model"="cox", "Kaplan-Meier (KM) log rank"="km")
 
 # ------- TCGA data types, e.g expression, snv ---------
 data_types <- c("Expression"="rna", 

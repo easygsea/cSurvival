@@ -97,3 +97,6 @@ lels <- levels(df_combined$level)
 res_all <- readRDS("basic_scripts/cox_all")
 res_cox <- res_all[["cox"]]
 res_km <- res_all[["km"]]
+
+res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x + level.y + level.x*level.y, data =  df_combined)
+summary(res.cox)
