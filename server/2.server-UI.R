@@ -126,8 +126,7 @@ output$plot_gear <- renderUI({
       radioGroupButtons(
         inputId = "cox_km",
         label = HTML(paste0("Survival analysis method:"),add_help(paste0("cox_km_q"))),
-        choiceNames = c("Cox proportional-hazards model (Cox)", "Kaplan-Meier logrank (KM)"),
-        choiceValues = c("cox","km"),
+        choices = surv_methods,
         selected = rv[["cox_km"]],
         size = "sm",
         checkIcon = list(
@@ -251,7 +250,7 @@ output$ui_stats <- renderUI({
   
   
   column(12,
-    h3("Statistics"),
+    h3(paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])),
     boxPad(
       color = "light-blue",
       fluidRow(
@@ -271,7 +270,7 @@ output$ui_stats <- renderUI({
             ,rightBorder = F
           )
         )
-        ,bsTooltip("hr_q",HTML(paste0("Only applicable to Cox regression analysis. A positive HR value indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
+        ,bsTooltip("hr_q",HTML(paste0("Only applicable to regression analysis by Cox PH model. A positive HR value indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                                       ," a negative HR value indicates a lower risk of death for the ",lel1," as compared to the ",lel2))
                    ,placement = "bottom")
       )
