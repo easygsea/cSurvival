@@ -267,7 +267,7 @@ observeEvent(lg_input_btn_lst(),{
                 session,
                 gs_db_id
                 ,choices = names(filtered_gmts)
-                ,selected=rv[[gs_db_id]]
+                ,selected="" #rv[[gs_db_id]]
                 ,options = list(
                   # `live-search` = TRUE,
                   placeholder = rv[[paste0("gs_placeholder",x)]]
