@@ -190,6 +190,7 @@ get_df_snv <- function(data, nons){
 cal_surv_rna <- 
   function(
     df,n
+    ,p.adjust.method = "hommel"
   ){
     # # 1. KM # #
     # summary statistics
@@ -207,17 +208,26 @@ cal_surv_rna <-
       
       # run Cox regression
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      # summary statistics
+      cox.stats <- summary(cox_fit)
     }else if(n == 2){
+      km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method)
+      km.stats <- list(km.stats,km2)
+      
       lels_x <- levels(df$`level.x`)
       lels_y <- levels(df$`level.y`)
       new_df <- with(df,data.frame(level = lels, level.x = lels_x, level.y = lels_y))
       
       # run Cox regression
+      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+      # summary statistics
+      cox.stats <- summary(cox_fit)
+      # run Cox regression for visualization purpose
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x + level.y + level, data = df)
     }
+    
+    print(cox.stats)
 
-    # summary statistics
-    cox.stats <- summary(cox_fit)
     hr.cox <- cox.stats$coefficients[,2]
     p.cox <- cox.stats$coefficients[,5]
 
@@ -333,7 +343,7 @@ plot_surv <-
                         palette = palette                    # Use JCO journal color palette
       )
     }
-    print(two_rows)
+    
     if(two_rows=="all"){
       fig <- fig + guides(col = guide_legend(nrow=2,byrow=TRUE))
     }

@@ -102,6 +102,7 @@ lels <- levels(df_combined$level)
 # res_all <- readRDS("basic_scripts/surv_test/cox_all")
 # res_cox <- res_all[["cox"]]
 # res_km <- res_all[["km"]]
+res.km <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined, p.adjust.method = "hommel")
 
 res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x, data =  df_combined)
 summary(res.cox)
