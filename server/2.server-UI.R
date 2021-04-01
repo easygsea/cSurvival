@@ -277,11 +277,13 @@ output$ui_stats <- renderUI({
     )
     ,boxPad(
       color = "gray",
-      column(
-        12, align="center",
-        HTML(paste0("Cutoff percentile: <b>",rv[["cutoff"]],"</b>"))
-      ),
-      tagList(
+      if(rv[["cutoff"]] != "NA"){
+        column(
+          12, align="center",
+          HTML(paste0("Cutoff percentile: <b>",rv[["cutoff"]],"</b>"))
+        )
+      }
+      ,tagList(
         lapply(names(rv[["lels"]]), function(x){
           no <- rv[["lels"]][[x]]
           column(

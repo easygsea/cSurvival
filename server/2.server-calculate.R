@@ -118,20 +118,8 @@ observeEvent(input$confirm,{
               rv[[paste0("cutoff_",x)]] <- paste0(input[[clow_id]],"%")
             }
             
-            # save df
-            df_list[[x]] <- df
-            rv[[paste0("df_",x)]] <- df
-
-            # no of cases in each group
-            lels <- levels(df$level)
-            rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
-            names(rv[[paste0("lels_",x)]]) <- lels
-
-            # perform survival analysis
-            cox_id <- paste0("cox_",x)
-            rv[[cox_id]] <- cal_surv_rna(df,1)
+          # survival analysis on SNVs
           }else if(input[[db_id]] == "snv"){
-            # survival analysis on SNVs
             # non-synonymous
             non_id <- paste0("nonsynonymous_",x)
             nons <- ifelse_rv(non_id)
@@ -151,7 +139,21 @@ observeEvent(input$confirm,{
             
             # create df for survival analysis
             df <- get_df_snv(data, nons)
+            rv[[paste0("cutoff_",x)]] <- "NA"
           }
+          
+          # save df
+          df_list[[x]] <- df
+          rv[[paste0("df_",x)]] <- df
+          
+          # no of cases in each group
+          lels <- levels(df[,4])
+          rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df[,4] == x)["TRUE"] %>% unname(.))
+          names(rv[[paste0("lels_",x)]]) <- lels
+          
+          # perform survival analysis
+          cox_id <- paste0("cox_",x)
+          rv[[cox_id]] <- cal_surv_rna(df,1)
         }
       }
       
