@@ -113,6 +113,15 @@ req_filter_on <- function(namespaces, filter="", target="rv", mode="equal"){ # n
   )
 }
 
+# pass value rv if input is.null
+ifelse_rv <- function(id){
+  if(is.null(input[[id]])){
+    rv[[id]]
+  }else{
+    input[[id]]
+  }
+}
+
 # # specific function to handle the bug when second panel is initiated but not responding to UI update
 # check_array <- function(lst){
 #   # lst_u <- lst %>% unlist() %>% unique()

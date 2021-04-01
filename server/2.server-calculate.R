@@ -130,6 +130,24 @@ observeEvent(input$confirm,{
             # perform survival analysis
             cox_id <- paste0("cox_",x)
             rv[[cox_id]] <- cal_surv_rna(df,1)
+          }else if(input[[db_id]] == "snv"){
+            # survival analysis on SNVs
+            # non-synonymous
+            non_id <- paste0("nonsynonymous_",x)
+            nons <- ifelse_rv(non_id)
+            # synonymous
+            syn_id <- paste0("synonymous_",x)
+            syns <- ifelse_rv(syn_id)
+
+            # render an error if a mutation class is selected twice
+            error <- 0
+            if(any(nons %in% syns)){
+              error <- error + 1
+              ol <- nons[nons %in% syns]
+              shinyalert(paste0("You have selected ",paste0(ol,collapse = ", ")," in both non- and synonymous mutations in Analysis #",x,". Please refine your selection."))
+            }
+            
+            req(error == 0)
           }
         }
       }
