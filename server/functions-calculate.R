@@ -175,7 +175,7 @@ get_df_snv <- function(data, nons){
   colnames(data) <- col_names
   
   # reset levels
-  lels <- unique(data$level) %>% sort(.,decreasing = F)
+  lels <- unique(data$level) %>% sort(.,decreasing = T)
   data$level <- factor(data$level, levels = lels)
 
   # retrieve survival analysis df_o
