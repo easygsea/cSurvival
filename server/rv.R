@@ -14,5 +14,5 @@ rv <- reactiveValues(
   ,confi = T,confi_opt = "ribbon"
   ,risk_table = T,cum_table=T
   
-  ,scatter_log_x=T,scatter_log_y=T
+  ,scatter_log_x=T,scatter_log_y=T,scatter_lm=T
 )

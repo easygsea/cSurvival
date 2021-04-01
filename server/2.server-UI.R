@@ -261,6 +261,14 @@ output$plot_gear <- renderUI({
         )
         ,bsTooltip("scatter_log_y_q",HTML(paste0("If TRUE, gene expression values (FPKM, y-axis) are log2 transformed"))
                    ,placement = "top")
+        ,materialSwitch(
+          inputId = "scatter_lm",
+          label = HTML(paste0("<b>Draw a regression line?</b>",add_help("scatter_lm_q"))),
+          value = rv$scatter_lm, inline = F, width = "100%",
+          status = "danger"
+        )
+        ,bsTooltip("scatter_lm_q",HTML(paste0("If TRUE, draw a regerssion line"))
+                   ,placement = "top")
       )
     )
   }
@@ -272,6 +280,11 @@ observeEvent(input$confi,{rv$confi <- input$confi})
 observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})
 observeEvent(input$risk_table,{rv$risk_table <- input$risk_table})
 observeEvent(input$cum_table,{rv$cum_table <- input$cum_table})
+
+observeEvent(input$scatter_log_x,{rv$scatter_log_x <- input$scatter_log_x})
+observeEvent(input$scatter_log_y,{rv$scatter_log_y <- input$scatter_log_y})
+observeEvent(input$scatter_lm,{rv$scatter_lm <- input$scatter_lm})
+
 
 # --------- 1b. download plot -------------
 output$download_plot <- downloadHandler(
@@ -434,6 +447,8 @@ output$scatter_plot <- renderPlotly({
     df_y <- df$exp
     ylab <- "Gene expression value (FPKM)"
   }
+  
+  # draw the figure
   fig <- ggplot(df
                 ,aes(x=df_x, y=df_y
                      ,text=paste0(
@@ -443,9 +458,13 @@ output$scatter_plot <- renderPlotly({
                      )
                 )) +
     geom_point(color="#939597") + 
-    geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y)) +
     xlab(xlab) +
     ylab(ylab)
+  
+  # draw a regression line
+  if(rv$scatter_lm){
+    fig <- fig + geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
+  }
   
   rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
 })
