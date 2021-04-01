@@ -152,6 +152,7 @@ get_df_by_cutoff <- function(data, cutoff){
 
 # generate df if SNV mutation data
 get_df_snv <- function(data, nons){
+  nons <- tolower(nons)
   # extract patients' IDs and mutation data
   patient_ids <- data$patient_id
   mutations <- data[,2] %>% unlist(.) %>% unname(.)
@@ -159,7 +160,7 @@ get_df_snv <- function(data, nons){
   mm <- mutations[!is.na(mutations)]
   mm <- sapply(mm, function(x){
     x <- strsplit(x, "\\|")[[1]]
-    if(any(x %in% nons)){
+    if(any(tolower(x) %in% nons)){
       "Nonsynonymous"
     }else{
       "Synonymous"
