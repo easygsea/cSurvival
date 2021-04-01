@@ -80,7 +80,7 @@ observeEvent(input$confirm,{
           }
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)
-          
+
           # check if manually input genes exist in database
           if(extract_mode == "manual"){
             n_col <- ncol(data) - 1

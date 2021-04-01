@@ -1,19 +1,43 @@
 # extract gene expression/mutation data
-extract_gene_data <- function(x, type, method="mutect"){
+extract_gene_data <- function(x, type){
   df_file <- list(
     "rna" = "df_gene_scale.csv"
     ,"lib" = "df_gene_scale.csv"
     ,"manual" = "df_gene_scale.csv"
-    ,"snv" = paste0("df_snv_class_",method,".csv")
   )
   # all genes in selected project
   a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
   
-  if(type == "rna" | type == "snv"){
+  if(type == "rna"){
     all_genes <- rv[[paste0("genes",x)]]
     # selected gene
     g_ui_id <- paste0("g_",x)
     genes <- input[[g_ui_id]]
+  }else if(type == "snv"){
+    all_genes <- rv[[paste0("genes",x)]]
+    # selected gene
+    g_ui_id <- paste0("g_",x)
+    genes <- input[[g_ui_id]]
+    
+    # detect mutation method
+    if(rv$tcga){
+      snv_id <- paste0("snv_method_",x)
+      if(is.null(input[[snv_id]])){
+        method <- rv[[snv_id]]
+      }else{
+        method <- input[[snv_id]]
+      }
+      df_file <- c(
+        df_file
+        ,"snv" = paste0("df_snv_class_",method,".csv")
+      )
+    }else{
+      df_file <- c(
+        df_file
+        ,"snv" = paste0("df_snv_class.csv")
+      )
+    }
+    
   }else if(type == "lib"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])

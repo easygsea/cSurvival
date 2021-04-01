@@ -21,6 +21,7 @@ observeEvent(input$project,{
   
   withProgress(value = 1, message = "Retrieving data from project .... ",{
     project <- rv$project <- input$project
+    if(grepl("^TCGA",project)){rv$tcga <- T}else{rv$tcga <- F}
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     rv$df_survival <- fread(paste0(rv$indir,"df_survival.csv"),sep=",",header=T) %>%
       dplyr::select(patient_id,survival_days,censoring_status)
@@ -106,7 +107,7 @@ gmt_input_lst <- reactive({
 })
 
 observeEvent(gmt_input_lst(),{
-  lst <- gmt_input_lst()
+  # lst <- gmt_input_lst()
   array <- 1:rv$variable_n #check_array(lst)
   namespaces <- paste0("gs_db_",array)
   req(req_diff_rv(namespaces))
@@ -369,6 +370,32 @@ observeEvent(manual_lst(),{
             }
           }
         }
+      }
+    })
+  })
+},ignoreInit = T)
+
+# ------- [1F] update loaded genes when user changed to other mutation callers ---------
+manual_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    snv_id <- paste0("snv_method_",x)
+    input[[snv_id]]
+  })
+})
+
+observeEvent(manual_lst(),{
+  array <- 1:rv$variable_n #check_array(lst)
+  namespaces <- paste0("snv_method_",array)
+  req(req_diff_rv(namespaces))
+  withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
+    lapply(array, function(x) {
+      snv_id <- paste0("snv_method_",x)
+      if(rv[[snv_id]] != input[[snv_id]]){
+        # update SNV calling method stored in RV
+        rv[[snv_id]] <- input[[snv_id]]
+        
+        # update loaded genes
+        update_genes_ui()
       }
     })
   })

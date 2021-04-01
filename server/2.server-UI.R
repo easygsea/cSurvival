@@ -5,8 +5,8 @@ output$ui_results <- renderUI({
   if(rv$variable_nr == 1){
     types <- list(
       "Surv plot #1" = 1
-      ,"Distribution in TCGA"
-      ,"Distribution in TARGET"
+      ,"Gender effect plot" = "gender"
+      ,"Scatter plot" = "scatter"
     )
   }else{
     indi <- as.list(1:rv$variable_nr)

@@ -170,7 +170,7 @@ update_gs_by_db <- function(x, mode="nil"){
 # retrieve genes from a project
 retrieve_genes <- function(x){
   db_id <- paste0("db_",x)
-  method <- rv[[paste0("snv_method_",x)]]
+  method <- ifelse(is.null(input[[paste0("snv_method_",x)]]),"mutect",input[[paste0("snv_method_",x)]])
 
   if(is.null(input[[db_id]])){
     fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
