@@ -193,7 +193,7 @@ get_df_snv <- function(data, nons){
 cal_surv_rna <- 
   function(
     df,n
-    ,p.adjust.method = "hommel"
+    ,p.adjust.method = rv[["km_mul"]]
   ){
     # # 1. KM # #
     # summary statistics

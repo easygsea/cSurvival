@@ -9,6 +9,7 @@ rv <- reactiveValues(
   ,plot_type="all"
   
   ,cox_km = "cox"
+  ,km_mul = "hommel" # multiple correction method
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"
   ,risk_table = T,cum_table=T

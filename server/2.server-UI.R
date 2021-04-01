@@ -284,6 +284,23 @@ output$ui_stats <- renderUI({
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     h3(paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])),
+    conditionalPanel(
+      'input.plot_type == "all" & input.cox_km == "km"',
+      selectizeInput(
+        "km_mul",
+        NULL,
+        choices = list(
+          "Multiple comparisons test by Holm (1979)" = "holm"
+          ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
+          ,"Multiple comparisons test by Hommel (1988)" = "hommel"
+          ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
+          ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
+          ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
+          ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
+        )
+        ,selected = rv[["km_mul"]]
+      )
+    ),
     boxPad(
       color = "light-blue",
       fluidRow(
@@ -332,3 +349,18 @@ output$ui_stats <- renderUI({
     )
   )
 })
+
+# ------------- 3. detailed statistics output -------
+observeEvent(input$km_mul,{
+  req(input$km_mul != "")
+  req(input$km_mul != rv$km_mul)
+  rv$km_mul <- input$km_mul
+  
+  # retrieve df for survival analysis
+  df <- rv[[paste0("df_",rv$plot_type)]]
+  
+  # update statistics
+  km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
+  rv[["res"]][[rv$cox_km]][["stats"]][[2]] <- km2
+  
+},ignoreInit = T)
