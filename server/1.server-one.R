@@ -317,6 +317,20 @@ observeEvent(lg_input_clearbtn_lst(),{
   })
 }, ignoreInit = T)
 
+# ------- [1E] read and process user input gene list ---------
+manual_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    db_id <- paste0("add_btn_",x)
+    input[[db_id]]
+  })
+})
+
+observeEvent(manual_lst(),{
+  array <- 1:rv$variable_n
+  namespaces <- paste0("add_btn_",array)
+  req(req_diff_rv_btn(namespaces))
+})
+
 # ----- 1.2. run parameters -------
 observe({
   rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)

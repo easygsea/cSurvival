@@ -99,11 +99,11 @@ lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
 df_combined$level <- factor(df_combined$level, levels = lels)
 lels <- levels(df_combined$level)
 
-res_all <- readRDS("basic_scripts/surv_test/cox_all")
-res_cox <- res_all[["cox"]]
-res_km <- res_all[["km"]]
+# res_all <- readRDS("basic_scripts/surv_test/cox_all")
+# res_cox <- res_all[["cox"]]
+# res_km <- res_all[["km"]]
 
-res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x*level.y, data =  df_combined)
+res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x, data =  df_combined)
 summary(res.cox)
 estimate(res.cox,rbind(c(0,0,1)))
 

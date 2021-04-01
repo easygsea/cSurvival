@@ -186,7 +186,7 @@ plot_ui <- function(n){
             textAreaInput(
               gs_manual_id,
               HTML(paste0(x,".3. Enter your genes:"),add_help(gs_manual_id_q))
-              ,value = ""
+              ,value = rv[[gs_manual_id]]
               ,placeholder = "Type to enter..."
             )
             ,bsButton(paste0("add_btn_",x),tags$strong("Submit"),style = "warning")

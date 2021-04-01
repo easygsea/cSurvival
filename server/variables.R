@@ -51,6 +51,7 @@ dyn_list <- function(x){
     ,gs_gene_genes_id <- paste0("gs_lgg_",x) # verbtxt
     # manual gene input
     ,gs_manual_id <- paste0("gs_m_",x)
+    ,gs_manual_btn <- paste0("add_btn_",x)
     ,gs_genes_id <- paste0("gs_mg_",x)
     ,lower_id <- paste0("lower_",x)
     ,higher_id <- paste0("upper_",x)
