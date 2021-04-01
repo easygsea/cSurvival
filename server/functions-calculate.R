@@ -85,7 +85,8 @@ extract_gene_data <- function(x, type){
     # save original expression data
     rv[[paste0("exprs_",x)]] <- data
   }else if(type == "snv"){
-    rv[[paste0("mutations_",x)]] <- data[,2] %>% unlist(.) %>% unname(.)
+    rv[[paste0("mutations_",x)]] <- data[,2] %>% unlist(.)
+    names(rv[[paste0("mutations_",x)]]) <- data$patient_id
   }else if(type == "lib" | type == "manual"){
     # save original FPKM data
     rv[[paste0("exprs_",x)]] <- data

@@ -14,3 +14,18 @@ col_to_drop <- (1:length(all_genes))[all_genes != genes] %>% .[-1]
 data_o <- fread(all_file,sep=",",header=T,drop = col_to_drop)
 exp_scale <- scale(data_o[,2])[,1]
 data_o[,2] <- exp_scale
+
+#--------------------
+
+muts <- c(rep("3'UTR",3),rep("Missense_Mutation",7))
+stats <- table(muts)
+
+dat <- data.frame(
+  Mutation = names(stats),
+  Frequency = as.numeric(stats)
+) %>% dplyr::arrange(Frequency)
+
+dat$Mutation <- factor(dat$Mutation, levels = unique(dat$Mutation))
+
+fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency)) + geom_bar(stat="identity")
+ggplotly(fig)

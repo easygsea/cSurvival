@@ -15,7 +15,7 @@ output$ui_results <- renderUI({
       l_plot <- list("Scatter plot" = "scatter")
     }
     
-    types <- c(types, l_plot)
+    types <- c(types, l_plot, list("Violin" = "violin_1"))
   }else{
     indi <- as.list(1:x)
     names(indi) <- paste0("Survival plot #",1:x)
@@ -34,6 +34,13 @@ output$ui_results <- renderUI({
   
   # check if to generate survival curves
   surv_yn <- if_surv()
+  
+  # width for the plot area
+  if(rv$plot_type != "snv_stats"){
+    area_w <- 7
+  }else{
+    area_w <- 12
+  }
 
   box(
     width = 12, status = "danger",
@@ -80,12 +87,14 @@ output$ui_results <- renderUI({
         )
       }
       ,column(
-        7, align = "left",
+        area_w, align = "left",
         h3(rv[["title"]]),
         if(surv_yn){
           plotOutput("cox_plot",height = h_plot)
         }else if(rv$plot_type == "scatter"){
           plotlyOutput("scatter_plot", height = "585px")
+        }else if(rv$plot_type == "snv_stats"){
+          plotlyOutput("snv_stats_plot", height = "585px")
         }
         ,div(
           align = "left",
@@ -113,9 +122,12 @@ output$ui_results <- renderUI({
           )
         )
       )
-      ,column(
-        5, align="left",
-        uiOutput("ui_stats")
+      ,conditionalPanel(
+        'input.plot_type != "snv_stats"',
+        column(
+          5, align="left",
+          uiOutput("ui_stats")
+        )
       )
     )
     ,absolutePanel(
@@ -327,6 +339,7 @@ output$download_plot <- downloadHandler(
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
+  req(rv$plot_type != "snv_stats")
   if(if_surv()){
     req(!is.null(rv[["res"]]))
     
@@ -482,7 +495,7 @@ observeEvent(input$km_mul,{
   
 },ignoreInit = T)
 
-# ----------- 4A. expression-survidal days scatter plot ---------------
+# ----------- 4[A]. expression-survidal days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
   df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
   df <- rv[["exprs_1"]]
@@ -545,3 +558,38 @@ output$scatter_plot <- renderPlotly({
 # change method of correlation calculation when prompted
 observeEvent(input$lm_method,{rv$lm_method <- input$lm_method})
 observeEvent(input$cor_method,{rv$cor_method <- input$cor_method})
+
+# ----------- 4[B]. expression-survidal days scatter plot ---------------
+output$snv_stats_plot <- renderPlotly({
+  # calculated statistics
+  muts <- rv[["mutations_1"]]
+  stats <- table(muts)
+
+  stats <- table(muts)
+  
+  dat <- data.frame(
+    Mutation = names(stats),
+    Frequency = as.numeric(stats)
+  )
+  
+  # non-synonymous
+  non_id <- "nonsynonymous_1"
+  nons <- ifelse_rv(non_id) %>% tolower(.)
+  nons_cat <- sapply(dat$Mutation, function(x){
+    if(tolower(x) %in% nons){
+      "Nonsynonymous"
+    }else{
+      "Synonymous"
+    }
+  }) %>% unname(.)
+  
+  # patients that have each mutation
+
+  dat$Category <- nons_cat
+  dat <- dat %>% dplyr::arrange(Category,Frequency)
+  # dat$Category <- factor(dat$Category, levels = c("Nonsynonymous","Synonymous"))
+  dat$Mutation <- factor(dat$Mutation, levels = dat$Mutation)
+  
+  fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category)) + geom_bar(stat="identity")
+  ggplotly(fig)
+})
