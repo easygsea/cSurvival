@@ -309,65 +309,89 @@ output$download_plot <- downloadHandler(
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
-  req(rv[["res"]])
-  
-  n_lels <- length(rv[["lels"]])
-  col_w <- 12 / n_lels
-  lel1 <- names(rv[["lels"]])[[n_lels]]
-  lel2 <- names(rv[["lels"]])[[1]]
-  
-  res <- rv[["res"]][[rv$cox_km]]
-  hr <- res[["hr"]]
-  p <- res[["p"]]
-  
-  if(rv$cox_km == "cox"){
-    p_w <- 6
-  }else{
-    p_w <- 12
-  }
-
-  if(rv$cox_km == "cox" & rv$plot_type == "all"){
-    hr_title <- "HR (hazard ratios)"
-    p_title <- "P-values"
-    lel1 <- gsub("_"," and/or ",lel1)
-    lel2 <- gsub("_"," and/or ",lel2)
-  }else{
-    hr_title <- "HR (hazard ratio)"
+  if(if_surv()){
+    req(!is.null(rv[["res"]]))
+    
+    n_lels <- length(rv[["lels"]])
+    col_w <- 12 / n_lels
+    lel1 <- names(rv[["lels"]])[[n_lels]]
+    lel2 <- names(rv[["lels"]])[[1]]
+    
+    res <- rv[["res"]][[rv$cox_km]]
+    hr <- res[["hr"]]
+    p <- res[["p"]]
+    
+    if(rv$cox_km == "cox"){
+      p_w <- 6
+    }else{
+      p_w <- 12
+    }
+    
+    if(rv$cox_km == "cox" & rv$plot_type == "all"){
+      hr_title <- "HR (hazard ratios)"
+      p_title <- "P-values"
+      lel1 <- gsub("_"," and/or ",lel1)
+      lel2 <- gsub("_"," and/or ",lel2)
+    }else{
+      hr_title <- "HR (hazard ratio)"
+      p_title <- "P-value"
+    }
+    
+    hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
+                   ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
+    stats_title <- paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])
+  }else if(rv$plot_type == "scatter"){
+    req(!is.null(rv[["res_scatter"]]))
+    stats_title <- "Correlation statistics"
+    res <- rv[["res_scatter"]]
+    hr <- round(res$estimate, 2)
+    hr_title <- "Coefficient"
+    p <- format(as.numeric(res$p.value), scientific = T, digits = 3)
     p_title <- "P-value"
+    p_w <- 6
   }
-  
-  hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
-                 ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
   
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
-    h3(paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])),
-    conditionalPanel(
-      'input.plot_type == "all" & input.cox_km == "km"',
-      selectizeInput(
-        "km_mul",
-        NULL,
-        choices = list(
-          "Multiple comparisons test by Holm (1979)" = "holm"
-          ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
-          ,"Multiple comparisons test by Hommel (1988)" = "hommel"
-          ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
-          ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
-          ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
-          ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
+    h3(stats_title),
+    if(if_surv()){
+      conditionalPanel(
+        'input.plot_type == "all" & input.cox_km == "km"',
+        selectizeInput(
+          "km_mul",
+          NULL,
+          choices = list(
+            "Multiple comparisons test by Holm (1979)" = "holm"
+            ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
+            ,"Multiple comparisons test by Hommel (1988)" = "hommel"
+            ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
+            ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
+            ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
+            ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
+          )
+          ,selected = rv[["km_mul"]]
         )
-        ,selected = rv[["km_mul"]]
       )
-    ),
-    boxPad(
+    }
+    ,boxPad(
       color = "light-blue",
       fluidRow(
-        if(rv$cox_km == "cox"){
+        if(if_surv() & rv$cox_km == "cox"){
           column(
             6,
             descriptionBlock(
               header = hr,
               text = HTML(paste0(hr_title,add_help("hr_q")))
+              ,rightBorder = T
+            )
+            ,bsTooltip("hr_q",HTML(hr_q),placement = "bottom")
+          )
+        }else if(rv$plot_type == "scatter"){
+          column(
+            6,
+            descriptionBlock(
+              header = hr,
+              text = hr_title
               ,rightBorder = T
             )
           )
@@ -380,32 +404,36 @@ output$ui_stats <- renderUI({
             ,rightBorder = F
           )
         )
-        ,bsTooltip("hr_q",HTML(hr_q)
-                   ,placement = "bottom")
       )
     )
     ,boxPad(
       color = "gray",
-      if(rv[["cutoff"]] != ""){
-        column(
-          12, align="center",
-          HTML(paste0("Cutoff percentile: ",rv[["cutoff"]]))
+      if(if_surv()){
+        if(rv[["cutoff"]] != ""){
+          column(
+            12, align="center",
+            HTML(paste0("Cutoff percentile: ",rv[["cutoff"]]))
+          )
+        }
+        tagList(
+          lapply(names(rv[["lels"]]), function(x){
+            no <- rv[["lels"]][[x]]
+            column(
+              col_w,
+              descriptionBlock(
+                header = no,
+                text = x
+                ,rightBorder = F
+              )
+            )
+          })
         )
       }
-      ,tagList(
-        lapply(names(rv[["lels"]]), function(x){
-          no <- rv[["lels"]][[x]]
-          column(
-            col_w,
-            descriptionBlock(
-              header = no,
-              text = x
-              ,rightBorder = F
-            )
-          )
-        })
-      )
-      ,renderPrint({print(res[["stats"]])})
+      ,if(if_surv()){
+        renderPrint({print(res[["stats"]])})
+      }else if(rv$plot_type == "scatter"){
+        renderPrint({print(res)})
+      }
     )
   )
 })
@@ -447,6 +475,9 @@ output$scatter_plot <- renderPlotly({
     df_y <- df$exp
     ylab <- "Gene expression value (FPKM)"
   }
+  
+  # calculate correlation
+  rv[["res_scatter"]] <- cor.test(df_x, df_y, method = "pearson")
   
   # draw the figure
   fig <- ggplot(df
