@@ -33,7 +33,7 @@ output$ui_results <- renderUI({
   }
   
   # check if to generate survival curves
-  surv_yn <- if_surv(rv$plot_type)
+  surv_yn <- if_surv()
 
   box(
     width = 12, status = "danger",
@@ -137,7 +137,7 @@ output$ui_results <- renderUI({
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
 observeEvent(input$plot_type,{
   x <- rv$plot_type <- input$plot_type
-  req(if_surv(x))
+  req(if_surv())
   output$cox_plot <- renderPlot({
     withProgress(value = 1, message = "Generating plot ...",{
       # # the gene(s)/GS(s) as the title
@@ -162,84 +162,108 @@ observeEvent(input$plot_type,{
 
 # --------- 1a. plot parameters -------------
 output$plot_gear <- renderUI({
-  fluidRow(
-    column(
-      12,
-      # median thresholds
-      checkboxGroupButtons(
-        inputId = "median",
-        label = HTML(paste0("Draw line(s) at median survival?",add_help("median_q"))),
-        choices = c("Horizontal"="h",
-                    "Vertical"="v"
-                    ),
-        selected = rv$median,
-        size="s",
-        checkIcon = list(
-          no = tags$i(class = "fa fa-times",
-                      style = "color: crimson"),
-          yes = tags$i(class = "fa fa-check",
-                       style = "color: green"))
-      )
-      ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
-      ))
-      ,placement = "top")
-      # confidence intervals
-      ,materialSwitch(
-        inputId = "confi",
-        label = HTML(paste0("<b>Plot confidence intervals?</b>",add_help("confi_q"))),
-        value = rv$confi, inline = F, width = "100%",
-        status = "danger"
-      )
-      ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
-                 ,placement = "top")
-    )
-    ,conditionalPanel(
-      'input.confi',
+  if(if_surv()){
+    fluidRow(
       column(
         12,
-        radioGroupButtons(
-          inputId = "confi_opt",
-          label = HTML(paste0("Confidence interval style:"),add_help(paste0("confi_opt_q"))),
-          choiceNames = c("Ribbon", "Step"),
-          choiceValues = c("ribbon","step"),
-          selected = rv$confi_opt,
-          size = "sm",
-          checkIcon = list(
-            yes = icon("check-square"),
-            no = icon("square-o")
+        # median thresholds
+        checkboxGroupButtons(
+          inputId = "median",
+          label = HTML(paste0("Draw line(s) at median survival?",add_help("median_q"))),
+          choices = c("Horizontal"="h",
+                      "Vertical"="v"
           ),
-          direction = "horizontal"
+          selected = rv$median,
+          size="s",
+          checkIcon = list(
+            no = tags$i(class = "fa fa-times",
+                        style = "color: crimson"),
+            yes = tags$i(class = "fa fa-check",
+                         style = "color: green"))
         )
-        ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
-                                             ," <b>Step</b> plots boundaries."
+        ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
         ))
         ,placement = "top")
+        # confidence intervals
+        ,materialSwitch(
+          inputId = "confi",
+          label = HTML(paste0("<b>Plot confidence intervals?</b>",add_help("confi_q"))),
+          value = rv$confi, inline = F, width = "100%",
+          status = "danger"
+        )
+        ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
+                   ,placement = "top")
+      )
+      ,conditionalPanel(
+        'input.confi',
+        column(
+          12,
+          radioGroupButtons(
+            inputId = "confi_opt",
+            label = HTML(paste0("Confidence interval style:"),add_help(paste0("confi_opt_q"))),
+            choiceNames = c("Ribbon", "Step"),
+            choiceValues = c("ribbon","step"),
+            selected = rv$confi_opt,
+            size = "sm",
+            checkIcon = list(
+              yes = icon("check-square"),
+              no = icon("square-o")
+            ),
+            direction = "horizontal"
+          )
+          ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
+                                               ," <b>Step</b> plots boundaries."
+          ))
+          ,placement = "top")
+        )
+      )
+      # toggle tables for KM plot
+      ,conditionalPanel(
+        'input.cox_km == "km"',
+        column(
+          12,
+          materialSwitch(
+            inputId = "risk_table",
+            label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
+            value = rv$risk_table, inline = F, width = "100%",
+            status = "danger"
+          )
+          ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
+                     ,placement = "top")
+          , materialSwitch(
+            inputId = "cum_table",
+            label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
+            value = rv$cum_table, inline = F, width = "100%",
+            status = "danger"
+          )
+          ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+                     ,placement = "top")
+        )
       )
     )
-    # toggle tables for KM plot
-    ,conditionalPanel(
-      'input.cox_km == "km"',
+  }else if(rv$plot_type == "scatter"){
+    fluidRow(
       column(
         12,
         materialSwitch(
-          inputId = "risk_table",
-          label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
-          value = rv$risk_table, inline = F, width = "100%",
+          inputId = "scatter_log_x",
+          label = HTML(paste0("<b>Log2 transform survival days?</b>",add_help("scatter_log_x_q"))),
+          value = rv$scatter_log_x, inline = F, width = "100%",
           status = "danger"
         )
-        ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
+        ,bsTooltip("scatter_log_x_q",HTML(paste0("If TRUE, survival days (x-axis) are log2 transformed"))
                    ,placement = "top")
-        , materialSwitch(
-          inputId = "cum_table",
-          label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
-          value = rv$cum_table, inline = F, width = "100%",
+        ,materialSwitch(
+          inputId = "scatter_log_y",
+          label = HTML(paste0("<b>Log2 transform gene expression values?</b>",add_help("scatter_log_y_q"))),
+          value = rv$scatter_log_y, inline = F, width = "100%",
           status = "danger"
         )
-        ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+        ,bsTooltip("scatter_log_y_q",HTML(paste0("If TRUE, gene expression values (FPKM, y-axis) are log2 transformed"))
                    ,placement = "top")
       )
     )
-  )
+  }
 })
 
 observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
@@ -378,7 +402,7 @@ observeEvent(input$km_mul,{
   
 },ignoreInit = T)
 
-# ----------- 4. expression-survidal days scatter plot ---------------
+# ----------- 4A. expression-survidal days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
   df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
   df <- rv[["exprs_1"]]
@@ -386,8 +410,20 @@ output$scatter_plot <- renderPlotly({
   df <- df_survival %>% inner_join(df, by="patient_id")
   colnames(df) <- c("patient_id","survival_days","exp")
    
-  df_x <- log10(df$survival_days+1)
-  df_y <- df$exp
+  if(rv$scatter_log_x){
+    df_x <- log2(df$survival_days+1)
+    xlab <- "Log2 (survival days + 1)"
+  }else{
+    df_x <- df$survival_days
+    xlab <- "Survival days"
+  }
+  if(rv$scatter_log_y){
+    df_y <- log2(df$exp+1)
+    ylab <- "Log2 (FPKM + 1)"
+  }else{
+    df_y <- df$exp
+    ylab <- "Gene expression value (FPKM)"
+  }
   fig <- ggplot(df
                 ,aes(x=df_x, y=df_y
                      ,text=paste0(
@@ -398,8 +434,8 @@ output$scatter_plot <- renderPlotly({
                 )) +
     geom_point(color="#939597") + 
     geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y)) +
-    xlab("Log10-transformed suvival days") +
-    ylab("Z-score transformed expression values")
+    xlab(xlab) +
+    ylab(ylab)
   
   suppressWarnings(ggplotly(fig,tooltip = "text"))
 })
