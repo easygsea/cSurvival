@@ -140,7 +140,7 @@ get_df_by_cutoff <- function(data, cutoff){
   cutoff <- cutoff/100
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
-  exp <-data[,2] %>% unlist(.) %>% unname(.)
+  exp <- data[,2] %>% unlist(.) %>% unname(.)
   
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)
@@ -148,6 +148,31 @@ get_df_by_cutoff <- function(data, cutoff){
   # the quantile we will use to define the level of gene percentages
   q <- quantile(exp, cutoff)
   df <- generate_surv_df(df_o, patient_ids, exp, q)
+}
+
+# generate df if SNV mutation data
+get_df_snv <- function(data, nons){
+  # extract patients' IDs and mutation data
+  patient_ids <- data$patient_id
+  mutations <- data[,2] %>% unlist(.) %>% unname(.)
+  # check if nonsyn
+  mm <- mutations[!is.na(mutations)]
+  mm <- sapply(mm, function(x){
+    x <- strsplit(x, "\\|")[[1]]
+    if(any(x %in% nons)){
+      "Nonsynonymous"
+    }else{
+      "Synonymous"
+    }
+  })
+  mutations[!is.na(mutations)] <- mm
+  mutations[is.na(mutations)] <- "Synonymous"
+  data[,2] <- mutations
+
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(patient_ids)
+  
+  df <- df_o %>% inner_join(data, by = "patient_id")
 }
 
 # combine and generate interaction df

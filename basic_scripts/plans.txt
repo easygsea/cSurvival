@@ -22,5 +22,5 @@ Establish df collections for
 
 nSurvival
 1. CNV: 生成df
-2. SNV: patient ID missing problem; if duplicates, keep both if different
+2. SNV: patient ID missing problem; if duplicates, keep both if different; change patient to patient_id
 3. df_patient: extract gender

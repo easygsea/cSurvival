@@ -368,16 +368,16 @@ plot_run_ui <- function(n){
             ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
                        ,placement = "top")
             
-            # silent variants classifications
-            ,selectizeInput(
-              syn_id
-              ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
-              ,choices = variant_types
-              ,selected = rv[[syn_id]]
-              ,multiple = T
-            )
-            ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
-                       ,placement = "top")
+            # # silent variants classifications
+            # ,selectizeInput(
+            #   syn_id
+            #   ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
+            #   ,choices = variant_types
+            #   ,selected = rv[[syn_id]]
+            #   ,multiple = T
+            # )
+            # ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+            #            ,placement = "top")
             
             ,if(x == 1 & rv$variable_n > 1){
               if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){

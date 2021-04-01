@@ -135,19 +135,22 @@ observeEvent(input$confirm,{
             # non-synonymous
             non_id <- paste0("nonsynonymous_",x)
             nons <- ifelse_rv(non_id)
-            # synonymous
-            syn_id <- paste0("synonymous_",x)
-            syns <- ifelse_rv(syn_id)
-
-            # render an error if a mutation class is selected twice
-            error <- 0
-            if(any(nons %in% syns)){
-              error <- error + 1
-              ol <- nons[nons %in% syns]
-              shinyalert(paste0("You have selected ",paste0(ol,collapse = ", ")," in both non- and synonymous mutations in Analysis #",x,". Please refine your selection."))
-            }
+            # # synonymous
+            # syn_id <- paste0("synonymous_",x)
+            # syns <- ifelse_rv(syn_id)
+            # 
+            # # render an error if a mutation class is selected twice
+            # error <- 0
+            # if(any(nons %in% syns)){
+            #   error <- error + 1
+            #   ol <- nons[nons %in% syns]
+            #   shinyalert(paste0("You have selected ",paste0(ol,collapse = ", ")," in both non- and synonymous mutations in Analysis #",x,". Please refine your selection."))
+            # }
+            # 
+            # req(error == 0)
             
-            req(error == 0)
+            # create df for survival analysis
+            df <- get_df_snv(data, nons)
           }
         }
       }
