@@ -1,16 +1,24 @@
 # ------------ Plots area ------------
 output$ui_results <- renderUI({
   req(!is.null(rv[["cox_1"]]))
-  
-  if(rv$variable_nr == 1){
+  x <- rv$variable_nr
+  if(x == 1){
     types <- list(
       "Survival plot #1" = 1
       ,"Gender effect plot" = "gender"
-      ,"Scatter plot" = "scatter"
     )
+    
+    dtype1 <- rv[["data_type_1"]]
+    if(dtype1 == "snv"){
+      l_plot <- list("Mutation statistics"="snv_stats")
+    }else{
+      l_plot <- list("Scatter plot" = "scatter")
+    }
+    
+    types <- c(types, l_plot)
   }else{
-    indi <- as.list(1:rv$variable_nr)
-    names(indi) <- paste0("Survival plot #",1:rv$variable_nr)
+    indi <- as.list(1:x)
+    names(indi) <- paste0("Survival plot #",1:x)
     types <- list(
       "Interaction Survival plot" = "all"
     ) %>% c(.,indi,list(

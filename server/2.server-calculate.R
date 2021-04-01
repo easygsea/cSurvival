@@ -165,6 +165,9 @@ observeEvent(input$confirm,{
           # perform survival analysis
           cox_id <- paste0("cox_",x)
           rv[[cox_id]] <- cal_surv_rna(df,1)
+          
+          # save data type to rv
+          rv[[paste0("data_type_",x)]] <- extract_mode
         }
       }
       
