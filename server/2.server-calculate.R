@@ -114,11 +114,11 @@ observeEvent(input$confirm,{
               
               # extract most significant df
               df <- results[["df"]]
-              rv[[paste0("cutoff_",x)]] <- results[["cutoff"]]
+              rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
               if(rv[["cutoff_all"]] == ""){
-                rv[["cutoff_all"]] <- paste0("#",x,": ",results[["cutoff"]])
+                rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
               }else{
-                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",results[["cutoff"]])
+                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
               }
             }else{
               clow_id <- paste0("clow_",x)

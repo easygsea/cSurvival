@@ -4,21 +4,21 @@ output$ui_results <- renderUI({
   
   if(rv$variable_nr == 1){
     types <- list(
-      "Surv plot #1" = 1
+      "Survival plot #1" = 1
       ,"Gender effect plot" = "gender"
       ,"Scatter plot" = "scatter"
     )
   }else{
     indi <- as.list(1:rv$variable_nr)
-    names(indi) <- paste0("Surv plot #",1:rv$variable_nr)
+    names(indi) <- paste0("Survival plot #",1:rv$variable_nr)
     types <- list(
-      "Interaction Surv plot" = "all"
+      "Interaction Survival plot" = "all"
     ) %>% c(.,indi,list(
       "Violin" = "violin"
     ))
   }
   
-  if(rv$cox_km == "km" & rv$plot_type == "all" & (rv$risk_table | rv$cum_table)){
+  if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
     h_plot <- "725px"
   }else{
     h_plot <- "580px"
@@ -45,7 +45,28 @@ output$ui_results <- renderUI({
         direction = "horizontal"
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
+      ,if(rv$plot_type == "all" | suppressWarnings(!is.na(as.numeric(rv$plot_type)))){
+        # survival analysis method
+        radioGroupButtons(
+          inputId = "cox_km",
+          label = HTML(paste0("Select survival analysis method:"),add_help(paste0("cox_km_q"))),
+          choices = surv_methods,
+          selected = rv[["cox_km"]],
+          status = "danger",
+          # size = "sm",
+          checkIcon = list(
+            yes = icon("check-square"),
+            no = icon("square-o")
+          ),
+          direction = "horizontal"
+        )
+      }
     )
+    ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
+                                      ,"Cox regression model assesses the effect of several risk factors simultaneously,"
+                                      ," while KM describe the survival according to one factor under investigation. "
+    ))
+    ,placement = "top")
     ,column(
       7,
       h3(rv[["title"]]),
@@ -129,27 +150,8 @@ output$plot_gear <- renderUI({
   fluidRow(
     column(
       12,
-      # survival analysis method
-      radioGroupButtons(
-        inputId = "cox_km",
-        label = HTML(paste0("Survival analysis method:"),add_help(paste0("cox_km_q"))),
-        choices = surv_methods,
-        selected = rv[["cox_km"]],
-        size = "sm",
-        checkIcon = list(
-          yes = icon("check-square"),
-          no = icon("square-o")
-        ),
-        direction = "horizontal"
-      )
-      ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
-                                        ,"Cox regression model assesses the effect of several risk factors simultaneously,"
-                                        ," while KM describe the survival according to one factor under investigation. "
-                                        ))
-                 ,placement = "top")
-      
       # median thresholds
-      ,checkboxGroupButtons(
+      checkboxGroupButtons(
         inputId = "median",
         label = HTML(paste0("Draw line(s) at median survival?",add_help("median_q"))),
         choices = c("Horizontal"="h",
@@ -300,7 +302,7 @@ output$ui_stats <- renderUI({
       if(rv[["cutoff"]] != ""){
         column(
           12, align="center",
-          HTML(paste0("Cutoff percentile: <b>",rv[["cutoff"]],"</b>"))
+          HTML(paste0("Cutoff percentile: ",rv[["cutoff"]]))
         )
       }
       ,tagList(
