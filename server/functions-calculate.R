@@ -249,7 +249,7 @@ cal_surv_rna <-
 ## Plot survival results
 plot_surv <- 
   function(
-    res, mode=rv$cox_km
+    res, mode=rv$cox_km, two_rows="one"
     , title=NULL
     , risk.table = rv$risk_table, cumevents = rv$cum_table, ncensor.plot = FALSE # parameters for KM mode
     , conf.int=rv$confi, conf.int.style = rv$confi_opt# "ribbon" "step"
@@ -299,7 +299,7 @@ plot_surv <-
                         tables.y.text = FALSE               # Hide tables y axis text
       )
       
-      # adjust Cox table size
+      # adjust KM table size
       base_size2 <- base_size
       fig$table <- fig$table + theme_cleantable(
         base_size = base_size2,
@@ -333,6 +333,9 @@ plot_surv <-
                         palette = palette                    # Use JCO journal color palette
       )
     }
-    
+    print(two_rows)
+    if(two_rows=="all"){
+      fig <- fig + guides(col = guide_legend(nrow=2,byrow=TRUE))
+    }
     return(fig)
   }

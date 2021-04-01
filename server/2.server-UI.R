@@ -113,7 +113,7 @@ output$cox_plot <- renderPlot({
     }
 
     # generate figure
-    plot_surv(res)
+    plot_surv(res,two_rows=ppl)
   })
 })
 

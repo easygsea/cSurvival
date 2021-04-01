@@ -33,7 +33,7 @@ km.surv <- ggsurvplot(km.fit, data=data,
                       ),
                       palette = "jco")
 
-km.surv
+km.surv + guides(col = guide_legend(nrow=2,byrow=TRUE))
 
 cox.fit <- survfit(cox_fit,newdata=new_data)
 
