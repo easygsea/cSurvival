@@ -112,6 +112,11 @@ output$ui_results <- renderUI({
             uiOutput("ui_stats")
           )
         )
+      }else if(rv$plot_type == "scatter"){
+        column(
+          12,align="center",
+          plotlyOutput("scatter_plot")
+        )
       }
     )
     ,absolutePanel(
@@ -372,3 +377,16 @@ observeEvent(input$km_mul,{
   rv[["res"]][[rv$cox_km]][["stats"]][[2]] <- km2
   
 },ignoreInit = T)
+
+# ----------- 4. expression-survidal days scatter plot ---------------
+output$scatter_plot <- renderPlotly({
+  df <- rv[["df_1"]]
+  exprs <- rv[["exprs_1"]]
+  df$exprs <- exprs
+  
+  fig <- ggplot(df, aes(x=survival_days, y=exprs, color="salmon")) +
+    geom_point() + 
+    geom_smooth(method=lm)
+  
+  ggplotly(fig)
+})

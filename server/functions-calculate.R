@@ -1,7 +1,7 @@
 # extract gene expression/mutation data
 extract_gene_data <- function(x, type){
   df_file <- list(
-    "rna" = "df_gene_scale.csv"
+    "rna" = "df_gene.csv"
     ,"lib" = "df_gene_scale.csv"
     ,"manual" = "df_gene_scale.csv"
   )
@@ -9,10 +9,25 @@ extract_gene_data <- function(x, type){
   a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
   
   if(type == "rna"){
-    all_genes <- rv[[paste0("genes",x)]]
+    # original file that stores raw FPKM values
+    all_file <- paste0(rv$indir,"df_gene.csv")
+    # read in all genes
+    all_genes <- fread(all_file,sep=",",header=T,nrows=0) %>% names(.)
+    # all_genes <- sapply(all_genes, function(x){
+    #   x <- strsplit(x,"\\|")[[1]]
+    #   if(length(x) == 1){x}else{x[-1]}
+    # }) %>% unname(.)
+    all_genes <- all_genes[-1]
+    
+    # change a_range
+    a_range <- 2:(length(all_genes)+1)
+    
     # selected gene
     g_ui_id <- paste0("g_",x)
     genes <- input[[g_ui_id]]
+    # extract ENSG info
+    genes <- strsplit(genes,"\\|")[[1]]
+    if(length(genes) == 1){genes <- genes}else{genes <- genes[-1]}
   }else if(type == "snv"){
     all_genes <- rv[[paste0("genes",x)]]
     # selected gene
@@ -61,7 +76,17 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
   
   # save original mutation data, if applicable
-  if(type == "snv"){rv[[paste0("mutations_",x)]] <- data[,2] %>% unlist(.) %>% unname(.)}
+  if(type == "rna"){
+    # save original expression data
+    rv[[paste0("exprs_",x)]] <- data
+  }else if(type == "snv"){
+    rv[[paste0("mutations_",x)]] <- data[,2] %>% unlist(.) %>% unname(.)
+  }else if(type == "lib" | type == "manual"){
+    # z score transform expression values
+    exp_scale <- scale(data[,2])[,1]
+    data[,2] <- exp_scale
+  }
+  
   return(data)
 }
 

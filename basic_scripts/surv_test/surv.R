@@ -157,3 +157,19 @@ ggsurvplot(cox_exp_fit,data=df_exp_combined,
            # tables.theme = theme_cleantable(),  # Clean theme for tables
            # tables.y.text = FALSE               # Hide tables y axis text
 )
+
+# -------- 3.2. scatter plot on continuous variable -----------
+fig <- ggplot(df_exp1
+              ,aes(x=log10(survival_days+1), y=exp
+                   ,text=paste0(
+                     "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                     "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                     "Expression (FPKM): <b>",signif(.data[["exp"]],digits=3),"</b>"
+                   )
+              )) +
+  geom_point(color="#939597") + 
+  geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(log10(survival_days+1), exp)) +
+  xlab("Log10-transformed suvival days") +
+  ylab("Z-score transformed expression values")
+
+ggplotly(fig,tooltip = "text")
