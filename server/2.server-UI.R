@@ -269,6 +269,24 @@ output$plot_gear <- renderUI({
         )
         ,bsTooltip("scatter_lm_q",HTML(paste0("If TRUE, draw a regerssion line"))
                    ,placement = "top")
+        ,conditionalPanel(
+          'input.scatter_lm',
+          div(
+            selectizeInput(
+              "lm_method",
+              HTML(paste0("Smoothing method:",add_help("lm_method_q"))),
+              choices=list(
+                "Linear regression model (lm)"="lm"
+                ,"Generalized linear model (glm)"="glm"
+                ,"Generalized additive model (gam)"="gam"
+                ,"Local regression (loess)"="loess"
+              )
+              ,selected=rv$lm_method
+            )
+            ,bsTooltip("lm_method_q",HTML("Select the method to draw the regression line")
+                       ,placement = "top")
+          )
+        )
       )
     )
   }
@@ -377,9 +395,9 @@ output$ui_stats <- renderUI({
         "cor_method",
         NULL,
         choices = list(
-          "Pearson's correlation" = "pearson"
-          ,"Kendall's rank correlation" = "kendall"
-          ,"Spearman's rank correlation)" = "spearman"
+          "Pearson's product-moment correlation" = "pearson"
+          ,"Kendall's rank correlation tau" = "kendall"
+          ,"Spearman's rank correlation rho" = "spearman"
         )
         ,selected = rv[["cor_method"]]
       )
@@ -505,11 +523,12 @@ output$scatter_plot <- renderPlotly({
   
   # draw a regression line
   if(rv$scatter_lm){
-    fig <- fig + geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
+    fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
   }
   
   rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
 })
 
 # change method of correlation calculation when prompted
+observeEvent(input$lm_method,{rv$lm_method <- input$lm_method})
 observeEvent(input$cor_method,{rv$cor_method <- input$cor_method})
