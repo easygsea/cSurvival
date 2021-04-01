@@ -77,47 +77,46 @@ output$ui_results <- renderUI({
                                             ," while KM describe the survival according to one factor under investigation. "
           ))
           ,placement = "top")
-          ,column(
-            7, align = "left",
-            h3(rv[["title"]]),
-            plotOutput("cox_plot",height = h_plot)
-            ,div(
-              align = "left",
-              style = "position: absolute; right: 3.5em; top: 2.5em;",
-              # add a id for the gear button in introjs
-              div(
-                id = "gear_btn",
-                style="display: inline-block;vertical-align:top;",
-                dropdown(
-                  uiOutput("plot_gear"),
-                  circle = TRUE, status = "danger", style = "material-circle",
-                  size="sm", right = T,
-                  icon = icon("gear"), width = "300px",
-                  tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-                )  
-              ),
-              div(
-                id="download_btn",
-                style="display: inline-block;vertical-align:top;",
-                downloadBttn(
-                  size = "sm", color = "danger", style = "material-circle",
-                  outputId = "download_plot", label = NULL
-                )
-                ,bsTooltip("download_btn","Click to download the plot", placement = "top")
-              )
-            )
-          )
-          ,column(
-            5, align="left",
-            uiOutput("ui_stats")
-          )
-        )
-      }else if(rv$plot_type == "scatter"){
-        column(
-          12,align="center",
-          plotlyOutput("scatter_plot", height = "585px")
         )
       }
+      ,column(
+        7, align = "left",
+        h3(rv[["title"]]),
+        if(surv_yn){
+          plotOutput("cox_plot",height = h_plot)
+        }else if(rv$plot_type == "scatter"){
+          plotlyOutput("scatter_plot", height = "585px")
+        }
+        ,div(
+          align = "left",
+          style = "position: absolute; right: 3.5em; top: 1.5em;",
+          # add a id for the gear button in introjs
+          div(
+            id = "gear_btn",
+            style="display: inline-block;vertical-align:top;",
+            dropdown(
+              uiOutput("plot_gear"),
+              circle = TRUE, status = "danger", style = "material-circle",
+              size="sm", right = T,
+              icon = icon("gear"), width = "300px",
+              tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+            )  
+          ),
+          div(
+            id="download_btn",
+            style="display: inline-block;vertical-align:top;",
+            downloadBttn(
+              size = "sm", color = "danger", style = "material-circle",
+              outputId = "download_plot", label = NULL
+            )
+            ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+          )
+        )
+      )
+      ,column(
+        5, align="left",
+        uiOutput("ui_stats")
+      )
     )
     ,absolutePanel(
       actionBttn(
