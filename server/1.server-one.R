@@ -331,32 +331,42 @@ observeEvent(manual_lst(),{
   req(req_diff_rv_btn(namespaces))
   withProgress(value = 1, message = "Processing input genes ...",{
     lapply(array, function(x){
-      gs_manual_id <- paste0("gs_m_",x)
-      gs_genes_id <- paste0("gs_mg_",x)
+      add_btn_id <- paste0("add_btn_",x)
       
-      e_msg <- "Please input a valid gene list, delimited by newline, space or comma."
-      
-      if(input[[gs_manual_id]] == ""){
-        shinyalert(e_msg)
-      }else{
-        genelist <- as.character(input[[gs_manual_id]])
-        genelist = gsub("\"","",genelist)
-        if(length(genelist) == 1 & genelist==""){shinyalert(e_msg)}else{
-          # genelist = unlist(lapply(genelist, function(x) strsplit(x,'\\s*,\\s*')))
-          genelist = strsplit(genelist,"\n") %>% unlist(.)
-          genelist = unlist(strsplit(genelist,"\\s*,\\s*"))
-          genelist = unlist(strsplit(genelist,"\t"))
-          genelist = unlist(strsplit(genelist," "))
-          genelist = unique(genelist) %>% toupper(.)
-          
-          if(length(genelist) == 1 & genelist==""){
-            shinyalert(e_msg)
-          }else{
-            genelist <- genelist[genelist!=""]
-            rv[[gs_manual_id]] <- genelist
-            output[[gs_genes_id]] <- renderText({
-              paste0("Input genes (n=",length(genelist),"): ", paste0(genelist, collapse = " "))
-            })
+      if(rv[[add_btn_id]] < input[[add_btn_id]][1]){
+        # update the Submit button value
+        rv[[add_btn_id]] <- input[[add_btn_id]][1]
+        # read in the gene list
+        gs_manual_id <- paste0("gs_m_",x)
+        gs_genes_id <- paste0("gs_mg_",x)
+        
+        
+        e_msg <- paste0("Please input a valid gene list in Analysis #",x)
+        
+        if(input[[gs_manual_id]] == ""){
+          shinyalert(e_msg)
+        }else{
+          genelist <- as.character(input[[gs_manual_id]])
+          genelist = gsub("\"","",genelist)
+          if(length(genelist) == 1 & genelist==""){shinyalert(e_msg)}else{
+            # genelist = unlist(lapply(genelist, function(x) strsplit(x,'\\s*,\\s*')))
+            genelist = strsplit(genelist,"\n") %>% unlist(.)
+            genelist = unlist(strsplit(genelist,"\\s*,\\s*"))
+            genelist = unlist(strsplit(genelist,"\t"))
+            genelist = unlist(strsplit(genelist," "))
+            genelist = unique(genelist) %>% toupper(.)
+            
+            if(length(genelist) == 1 & genelist==""){
+              shinyalert(e_msg)
+            }else if(length(genelist)>1000){
+              shinyalert("We currently support analysis of up to 1000 genes. Please revise your input. Thank you.")
+            }else{
+              genelist <- genelist[genelist!=""]
+              rv[[gs_manual_id]] <- genelist
+              output[[gs_genes_id]] <- renderText({
+                paste0("Input genes (n=",length(genelist),"): ", paste0(genelist, collapse = " "))
+              })
+            }
           }
         }
       }
