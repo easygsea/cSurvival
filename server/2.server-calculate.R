@@ -55,6 +55,11 @@ observeEvent(input$confirm,{
     
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
       rv$variable_nr <- rv$variable_n
+      if(rv$variable_nr == 1){
+        rv$plot_type <- "1"
+      }else{
+        rv$plot_type <- "all"
+      }
       df_list <- list()
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""

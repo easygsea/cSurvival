@@ -17,11 +17,7 @@ output$ui_results <- renderUI({
       "Violin" = "violin"
     ))
   }
-  
-  if(!rv$plot_type %in% types){
-    rv$plot_type <- types[[1]]
-  }
-  
+
   box(
     width = 12, status = "danger",
     tags$script(HTML(
@@ -245,14 +241,27 @@ output$download_plot <- downloadHandler(
 output$ui_stats <- renderUI({
   req(rv[["res"]])
   
-  col_w <- 12 / length(rv[["lels"]])
-  lel1 <- names(rv[["lels"]])[[length(rv[["lels"]])]]
+  n_lels <- length(rv[["lels"]])
+  col_w <- 12 / n_lels
+  lel1 <- names(rv[["lels"]])[[n_lels]]
   lel2 <- names(rv[["lels"]])[[1]]
   
   res <- rv[["res"]][[rv$cox_km]]
   hr <- res[["hr"]]
   p <- res[["p"]]
+
+  if(rv$plot_type == "all"){
+    hr_title <- "HR (hazard ratios)"
+    p_title <- "P-values"
+    lel1 <- gsub("_"," and/or ",lel1)
+    lel2 <- gsub("_"," and/or ",lel2)
+  }else{
+    hr_title <- "HR (hazard ratio)"
+    p_title <- "P-value"
+  }
   
+  hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
+                 ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
   
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
@@ -264,7 +273,7 @@ output$ui_stats <- renderUI({
           6,
           descriptionBlock(
             header = hr,
-            text = HTML(paste0("HR (hazard ratio)",add_help("hr_q")))
+            text = HTML(paste0(hr_title,add_help("hr_q")))
             ,rightBorder = T
           )
         )
@@ -272,12 +281,11 @@ output$ui_stats <- renderUI({
           6,
           descriptionBlock(
             header = p,
-            text = "P-value"
+            text = p_title
             ,rightBorder = F
           )
         )
-        ,bsTooltip("hr_q",HTML(paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
-                                      ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2))
+        ,bsTooltip("hr_q",HTML(hr_q)
                    ,placement = "bottom")
       )
     )
