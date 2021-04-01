@@ -147,8 +147,8 @@ observeEvent(input$confirm,{
           rv[[paste0("df_",x)]] <- df
           
           # no of cases in each group
-          lels <- levels(df[,4])
-          rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df[,4] == x)["TRUE"] %>% unname(.))
+          lels <- levels(df$level)
+          rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
           names(rv[[paste0("lels_",x)]]) <- lels
           
           # perform survival analysis

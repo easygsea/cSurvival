@@ -168,6 +168,15 @@ get_df_snv <- function(data, nons){
   mutations[!is.na(mutations)] <- mm
   mutations[is.na(mutations)] <- "Synonymous"
   data[,2] <- mutations
+  
+  # rename columns
+  col_names <- colnames(data)
+  col_names[length(col_names)] <- "level"
+  colnames(data) <- col_names
+  
+  # reset levels
+  lels <- unique(data$level) %>% sort(.,decreasing = F)
+  data$level <- factor(data$level, levels = lels)
 
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)
