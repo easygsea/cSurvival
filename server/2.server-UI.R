@@ -17,6 +17,12 @@ output$ui_results <- renderUI({
       "Violin" = "violin"
     ))
   }
+  
+  if(rv$cox_km == "km" & rv$plot_type == "all" & (rv$risk_table | rv$cum_table)){
+    h_plot <- "725px"
+  }else{
+    h_plot <- "580px"
+  }
 
   box(
     width = 12, status = "danger",
@@ -43,7 +49,7 @@ output$ui_results <- renderUI({
     ,column(
       7,
       h3(rv[["title"]]),
-      plotOutput("cox_plot",height = "580px")
+      plotOutput("cox_plot",height = h_plot)
       ,div(
         align = "left",
         style = "position: absolute; right: 3.5em; top: 2.5em;",
