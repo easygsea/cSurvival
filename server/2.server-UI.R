@@ -249,7 +249,8 @@ output$ui_stats <- renderUI({
   p <- res[["p"]]
   
   
-  column(12,
+  column(
+    12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     h3(paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])),
     boxPad(
       color = "light-blue",
@@ -277,7 +278,7 @@ output$ui_stats <- renderUI({
     )
     ,boxPad(
       color = "gray",
-      if(rv[["cutoff"]] != "NA"){
+      if(rv[["cutoff"]] != ""){
         column(
           12, align="center",
           HTML(paste0("Cutoff percentile: <b>",rv[["cutoff"]],"</b>"))

@@ -143,7 +143,7 @@ observeEvent(input$confirm,{
             
             # create df for survival analysis
             df <- get_df_snv(data, nons)
-            rv[[paste0("cutoff_",x)]] <- "NA"
+            rv[[paste0("cutoff_",x)]] <- ""
           }
           
           # save df
