@@ -25,6 +25,8 @@ init_rv <- function(x){
   rv[[paste0("gs_lgg_",x)]] <- ""
   # manual gene input
   rv[[paste0("gs_m_",x)]] <- ""
+  rv[[paste0("gs_mg_",x)]] <- ""
+  rv[[paste0("add_btn_",x)]] <- 0
   # feedback on manual gene input
   rv[[paste0("gs_mg_",x)]] <- ""
   # lower bound for quantile loop
@@ -36,7 +38,7 @@ init_rv <- function(x){
   # parameters for SNV mutation analysis
   rv[[paste0("snv_method_",x)]] <- "mutect"
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
-  rv[[paste0("synonymous_",x)]] <- variant_types_syn
+  # rv[[paste0("synonymous_",x)]] <- variant_types_syn
   rv[[paste0("iter_",x)]] <- "iter"
   rv[[paste0("clow_",x)]] <- 50
 }
@@ -111,6 +113,15 @@ req_filter_on <- function(namespaces, filter="", target="rv", mode="equal"){ # n
   )
 }
 
+# pass value rv if input is.null
+ifelse_rv <- function(id){
+  if(is.null(input[[id]])){
+    rv[[id]]
+  }else{
+    input[[id]]
+  }
+}
+
 # # specific function to handle the bug when second panel is initiated but not responding to UI update
 # check_array <- function(lst){
 #   # lst_u <- lst %>% unlist() %>% unique()
@@ -133,7 +144,7 @@ call_datatype <- function(x){
 }
 
 # return all GSs when a db is selected
-update_gs_by_db <- function(x){
+update_gs_by_db <- function(x, mode="nil"){
   gs_db_id <- paste0("gs_db_",x)
   gs_lib_id <- paste0("gs_l_",x)
   
@@ -149,12 +160,13 @@ update_gs_by_db <- function(x){
     # update placeholder
     rv[[paste0("gs_placeholder",x)]] <- sprintf('(Total n=%s) Type to search ...',length(gmt))
     
+    if(mode == "nil"){gg=""}else{gg=rv[[gs_lib_id]]}
     # update gene set UI
     updateSelectizeInput(
       session,
       gs_lib_id
       ,choices = names(gmt)
-      ,selected=rv[[gs_lib_id]]
+      ,selected=gg
       ,options = list(
         # `live-search` = TRUE,
         placeholder = rv[[paste0("gs_placeholder",x)]]
@@ -167,7 +179,7 @@ update_gs_by_db <- function(x){
 # retrieve genes from a project
 retrieve_genes <- function(x){
   db_id <- paste0("db_",x)
-  method <- rv[[paste0("snv_method_",x)]]
+  method <- ifelse(is.null(input[[paste0("snv_method_",x)]]),"mutect",input[[paste0("snv_method_",x)]])
 
   if(is.null(input[[db_id]])){
     fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]

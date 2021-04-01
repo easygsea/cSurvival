@@ -33,7 +33,7 @@ km.surv <- ggsurvplot(km.fit, data=data,
                       ),
                       palette = "jco")
 
-km.surv
+km.surv + guides(col = guide_legend(nrow=2,byrow=TRUE))
 
 cox.fit <- survfit(cox_fit,newdata=new_data)
 
@@ -99,12 +99,13 @@ lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
 df_combined$level <- factor(df_combined$level, levels = lels)
 lels <- levels(df_combined$level)
 
-res_all <- readRDS("basic_scripts/surv_test/cox_all")
-res_cox <- res_all[["cox"]]
-res_km <- res_all[["km"]]
+# res_all <- readRDS("basic_scripts/surv_test/cox_all")
+# res_cox <- res_all[["cox"]]
+# res_km <- res_all[["km"]]
+res.km <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined, p.adjust.method = "hommel")
 
 res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x*level.y, data =  df_combined)
-summary(res.cox)
+res <- summary(res.cox)
 estimate(res.cox,rbind(c(0,0,1)))
 
 # ------------- 3. continuous variable analysis ---------------

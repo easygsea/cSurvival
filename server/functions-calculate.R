@@ -1,5 +1,10 @@
 # extract gene expression/mutation data
 extract_gene_data <- function(x, type){
+  df_file <- list(
+    "rna" = "df_gene_scale.csv"
+    ,"lib" = "df_gene_scale.csv"
+    ,"manual" = "df_gene_scale.csv"
+  )
   # all genes in selected project
   a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
   
@@ -8,14 +13,41 @@ extract_gene_data <- function(x, type){
     # selected gene
     g_ui_id <- paste0("g_",x)
     genes <- input[[g_ui_id]]
+  }else if(type == "snv"){
+    all_genes <- rv[[paste0("genes",x)]]
+    # selected gene
+    g_ui_id <- paste0("g_",x)
+    genes <- input[[g_ui_id]]
     
-    # infile
-    infile <- paste0(rv$indir,"df_gene_scale.csv")
+    # detect mutation method
+    if(rv$tcga){
+      snv_id <- paste0("snv_method_",x)
+      if(is.null(input[[snv_id]])){
+        method <- rv[[snv_id]]
+      }else{
+        method <- input[[snv_id]]
+      }
+      df_file <- c(
+        df_file
+        ,"snv" = paste0("df_snv_class_",method,".csv")
+      )
+    }else{
+      df_file <- c(
+        df_file
+        ,"snv" = paste0("df_snv_class.csv")
+      )
+    }
+    
   }else if(type == "lib"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
-    infile <- paste0(rv$indir,"df_gene_scale.csv")
+  }else if(type == "manual"){
+    all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+    genes <- toupper(rv[[paste0("gs_m_",x)]])
   }
+  
+  # infile
+  infile <- paste0(rv$indir,df_file[[type]])
   
   # # method 1 fread drop columns
   col_to_drop <- a_range[!all_genes %in% genes]
@@ -108,7 +140,7 @@ get_df_by_cutoff <- function(data, cutoff){
   cutoff <- cutoff/100
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
-  exp <-data[,2] %>% unlist(.) %>% unname(.)
+  exp <- data[,2] %>% unlist(.) %>% unname(.)
   
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)
@@ -118,12 +150,48 @@ get_df_by_cutoff <- function(data, cutoff){
   df <- generate_surv_df(df_o, patient_ids, exp, q)
 }
 
+# generate df if SNV mutation data
+get_df_snv <- function(data, nons){
+  nons <- tolower(nons)
+  # extract patients' IDs and mutation data
+  patient_ids <- data$patient_id
+  mutations <- data[,2] %>% unlist(.) %>% unname(.)
+  # check if nonsyn
+  mm <- mutations[!is.na(mutations)]
+  mm <- sapply(mm, function(x){
+    x <- strsplit(x, "\\|")[[1]]
+    if(any(tolower(x) %in% nons)){
+      "Nonsynonymous"
+    }else{
+      "Synonymous"
+    }
+  })
+  mutations[!is.na(mutations)] <- mm
+  mutations[is.na(mutations)] <- "Synonymous"
+  data[,2] <- mutations
+  
+  # rename columns
+  col_names <- colnames(data)
+  col_names[length(col_names)] <- "level"
+  colnames(data) <- col_names
+  
+  # reset levels
+  lels <- unique(data$level) %>% sort(.,decreasing = T)
+  data$level <- factor(data$level, levels = lels)
+
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(patient_ids)
+  
+  df <- df_o %>% inner_join(data, by = "patient_id")
+}
+
 # combine and generate interaction df
 
 ## Perform survival analysis
 cal_surv_rna <- 
   function(
     df,n
+    ,p.adjust.method = "hommel"
   ){
     # # 1. KM # #
     # summary statistics
@@ -141,19 +209,30 @@ cal_surv_rna <-
       
       # run Cox regression
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      # summary statistics
+      cox.stats <- summary(cox_fit)
     }else if(n == 2){
+      km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method)
+      km.stats <- list(km.stats,km2)
+      
       lels_x <- levels(df$`level.x`)
       lels_y <- levels(df$`level.y`)
       new_df <- with(df,data.frame(level = lels, level.x = lels_x, level.y = lels_y))
       
       # run Cox regression
-      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x + level.y + level, data = df)
+      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+      # summary statistics
+      cox.stats <- summary(cox_fit)
+      # run Cox regression for visualization purpose
+      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
     }
 
-    # summary statistics
-    cox.stats <- summary(cox_fit)
-    hr.cox <- cox.stats$coefficients[,2]
-    p.cox <- cox.stats$coefficients[,5]
+    hr.cox <- sapply(cox.stats$coefficients[,2], function(x){
+      round(as.numeric(x), 2)
+    }) %>% paste0(.,collapse = ", ")
+    p.cox <- sapply(cox.stats$coefficients[,5], function(x){
+      format(as.numeric(x), scientific = T, digits = 3)
+    }) %>% paste0(.,collapse = ", ")
 
     # run Cox survival analysis
     cox.fit <- survfit(cox_fit,newdata=new_df)
@@ -173,8 +252,8 @@ cal_surv_rna <-
         fit = cox.fit,
         stats = cox.stats
         ,lels = lels
-        ,hr = round(as.numeric(hr.cox), 2)
-        ,p = format(as.numeric(p.cox), scientific = T, digits = 3)
+        ,hr = hr.cox
+        ,p = p.cox
       )
     )
     return(results)
@@ -183,7 +262,7 @@ cal_surv_rna <-
 ## Plot survival results
 plot_surv <- 
   function(
-    res, mode=rv$cox_km
+    res, mode=rv$cox_km, two_rows="one"
     , title=NULL
     , risk.table = rv$risk_table, cumevents = rv$cum_table, ncensor.plot = FALSE # parameters for KM mode
     , conf.int=rv$confi, conf.int.style = rv$confi_opt# "ribbon" "step"
@@ -233,7 +312,7 @@ plot_surv <-
                         tables.y.text = FALSE               # Hide tables y axis text
       )
       
-      # adjust Cox table size
+      # adjust KM table size
       base_size2 <- base_size
       fig$table <- fig$table + theme_cleantable(
         base_size = base_size2,
@@ -268,5 +347,8 @@ plot_surv <-
       )
     }
     
+    if(two_rows=="all"){
+      fig <- fig + guides(col = guide_legend(nrow=2,byrow=TRUE))
+    }
     return(fig)
   }

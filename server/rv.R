@@ -4,6 +4,10 @@ rv <- reactiveValues(
   ,verbTxtStyle1 = "box-shadow: 0 0 .2em #F5DF4D;color: red;"
   ,verbTxtStyle2 = ""
   
+  ,tcga=T # check if TCGA project
+  
+  ,plot_type="all"
+  
   ,cox_km = "cox"
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"

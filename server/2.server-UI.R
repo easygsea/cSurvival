@@ -4,20 +4,26 @@ output$ui_results <- renderUI({
   
   if(rv$variable_nr == 1){
     types <- list(
-      "Surv plot #1" = 1
-      ,"Distribution in TCGA"
-      ,"Distribution in TARGET"
+      "Survival plot #1" = 1
+      ,"Gender effect plot" = "gender"
+      ,"Scatter plot" = "scatter"
     )
   }else{
     indi <- as.list(1:rv$variable_nr)
-    names(indi) <- paste0("Surv plot #",1:rv$variable_nr)
+    names(indi) <- paste0("Survival plot #",1:rv$variable_nr)
     types <- list(
-      "Interaction Surv plot" = "all"
+      "Interaction Survival plot" = "all"
     ) %>% c(.,indi,list(
       "Violin" = "violin"
     ))
   }
   
+  if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
+    h_plot <- "725px"
+  }else{
+    h_plot <- "580px"
+  }
+
   box(
     width = 12, status = "danger",
     tags$script(HTML(
@@ -29,6 +35,7 @@ output$ui_results <- renderUI({
         inputId = "plot_type",
         label = NULL,
         choices = types,
+        selected = rv$plot_type,
         # size = "sm",
         checkIcon = list(
           yes = icon("check-square"),
@@ -38,11 +45,32 @@ output$ui_results <- renderUI({
         direction = "horizontal"
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
+      ,if(rv$plot_type == "all" | suppressWarnings(!is.na(as.numeric(rv$plot_type)))){
+        # survival analysis method
+        radioGroupButtons(
+          inputId = "cox_km",
+          label = HTML(paste0("Select survival analysis method:"),add_help(paste0("cox_km_q"))),
+          choices = surv_methods,
+          selected = rv[["cox_km"]],
+          status = "danger",
+          # size = "sm",
+          checkIcon = list(
+            yes = icon("check-square"),
+            no = icon("square-o")
+          ),
+          direction = "horizontal"
+        )
+      }
     )
+    ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
+                                      ,"Cox regression model assesses the effect of several risk factors simultaneously,"
+                                      ," while KM describe the survival according to one factor under investigation. "
+    ))
+    ,placement = "top")
     ,column(
       7,
       h3(rv[["title"]]),
-      plotOutput("cox_plot",height = "580px")
+      plotOutput("cox_plot",height = h_plot)
       ,div(
         align = "left",
         style = "position: absolute; right: 3.5em; top: 2.5em;",
@@ -89,31 +117,31 @@ output$ui_results <- renderUI({
   )
 })
 
-
 # --------- 1. display the survival curve ---------
-output$cox_plot <- renderPlot({
-  ppl <- isolate(input$plot_type)
-  withProgress(value = 1, message = "Generating plot ...",{
-    if(ppl == "all" | suppressWarnings(!is.na(as.numeric(ppl)))){
-      x <- input$plot_type
+observeEvent(input$plot_type,{
+  rv$plot_type <- input$plot_type
+  output$cox_plot <- renderPlot({
+    x <- rv$plot_type
+    withProgress(value = 1, message = "Generating plot ...",{
+      if(x == "all" | suppressWarnings(!is.na(as.numeric(x)))){
+        # # the gene(s)/GS(s) as the title
+        # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
+        rv[["title"]] <- rv[[paste0("title_",x)]]
+        
+        # no of cases in each group
+        rv[["lels"]] <- rv[[paste0("lels_",x)]]
+        
+        # the cutoff percentile
+        rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
+        
+        
+        # extract statistics
+        res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
+      }
       
-      # # the gene(s)/GS(s) as the title
-      # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
-      rv[["title"]] <- rv[[paste0("title_",x)]]
-      
-      # no of cases in each group
-      rv[["lels"]] <- rv[[paste0("lels_",x)]]
-      
-      # the cutoff percentile
-      rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
-      
-
-      # extract statistics
-      res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-    }
-
-    # generate figure
-    plot_surv(res)
+      # generate figure
+      plot_surv(res,two_rows=x)
+    })
   })
 })
 
@@ -122,27 +150,8 @@ output$plot_gear <- renderUI({
   fluidRow(
     column(
       12,
-      # survival analysis method
-      radioGroupButtons(
-        inputId = "cox_km",
-        label = HTML(paste0("Survival analysis method:"),add_help(paste0("cox_km_q"))),
-        choices = surv_methods,
-        selected = rv[["cox_km"]],
-        size = "sm",
-        checkIcon = list(
-          yes = icon("check-square"),
-          no = icon("square-o")
-        ),
-        direction = "horizontal"
-      )
-      ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
-                                        ,"Cox regression model assesses the effect of several risk factors simultaneously,"
-                                        ," while KM describe the survival according to one factor under investigation. "
-                                        ))
-                 ,placement = "top")
-      
       # median thresholds
-      ,checkboxGroupButtons(
+      checkboxGroupButtons(
         inputId = "median",
         label = HTML(paste0("Draw line(s) at median survival?",add_help("median_q"))),
         choices = c("Horizontal"="h",
@@ -240,16 +249,30 @@ output$download_plot <- downloadHandler(
 output$ui_stats <- renderUI({
   req(rv[["res"]])
   
-  col_w <- 12 / length(rv[["lels"]])
-  lel1 <- names(rv[["lels"]])[[length(rv[["lels"]])]]
+  n_lels <- length(rv[["lels"]])
+  col_w <- 12 / n_lels
+  lel1 <- names(rv[["lels"]])[[n_lels]]
   lel2 <- names(rv[["lels"]])[[1]]
   
   res <- rv[["res"]][[rv$cox_km]]
   hr <- res[["hr"]]
   p <- res[["p"]]
+
+  if(rv$plot_type == "all"){
+    hr_title <- "HR (hazard ratios)"
+    p_title <- "P-values"
+    lel1 <- gsub("_"," and/or ",lel1)
+    lel2 <- gsub("_"," and/or ",lel2)
+  }else{
+    hr_title <- "HR (hazard ratio)"
+    p_title <- "P-value"
+  }
   
+  hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
+                 ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
   
-  column(12,
+  column(
+    12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     h3(paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])),
     boxPad(
       color = "light-blue",
@@ -258,7 +281,7 @@ output$ui_stats <- renderUI({
           6,
           descriptionBlock(
             header = hr,
-            text = HTML(paste0("HR (hazard ratio)",add_help("hr_q")))
+            text = HTML(paste0(hr_title,add_help("hr_q")))
             ,rightBorder = T
           )
         )
@@ -266,22 +289,23 @@ output$ui_stats <- renderUI({
           6,
           descriptionBlock(
             header = p,
-            text = "P-value"
+            text = p_title
             ,rightBorder = F
           )
         )
-        ,bsTooltip("hr_q",HTML(paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
-                                      ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2))
+        ,bsTooltip("hr_q",HTML(hr_q)
                    ,placement = "bottom")
       )
     )
     ,boxPad(
       color = "gray",
-      column(
-        12, align="center",
-        HTML(paste0("Cutoff percentile: <b>",rv[["cutoff"]],"</b>"))
-      ),
-      tagList(
+      if(rv[["cutoff"]] != ""){
+        column(
+          12, align="center",
+          HTML(paste0("Cutoff percentile: ",rv[["cutoff"]]))
+        )
+      }
+      ,tagList(
         lapply(names(rv[["lels"]]), function(x){
           no <- rv[["lels"]][[x]]
           column(
