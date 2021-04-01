@@ -582,14 +582,18 @@ output$snv_stats_plot <- renderPlotly({
       "Synonymous"
     }
   }) %>% unname(.)
-  
-  # patients that have each mutation
 
   dat$Category <- nons_cat
   dat <- dat %>% dplyr::arrange(Category,Frequency)
-  # dat$Category <- factor(dat$Category, levels = c("Nonsynonymous","Synonymous"))
+  # patient cases that have each mutation
+  Cases <- lapply(dat$Mutation, function(x){
+    names(muts)[muts == x] %>% paste0(., collapse = ", ") %>% addlinebreaks(.)
+  })
+  
+  # set Mutation data as factor for ordering in ggplotly
   dat$Mutation <- factor(dat$Mutation, levels = dat$Mutation)
   
-  fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category)) + geom_bar(stat="identity")
-  ggplotly(fig)
+  fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category, Cases=Cases)) + 
+    geom_bar(stat="identity")
+  ggplotly(fig, tooltip = c("Mutation","Frequency","Category","Cases"))
 })

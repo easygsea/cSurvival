@@ -138,6 +138,11 @@ ifelse_rv <- function(id){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+addlinebreaks <- function(x, max=50, lbtype="<br>"){
+  x = gsub(paste0('(.{1,',max,'})(\\s|$)'), paste0('\\1',lbtype), x)
+  return(x)
+}
+
 # call the data type
 call_datatype <- function(x){
   names(data_types)[match(input[[paste0("db_",x)]], data_types)]
