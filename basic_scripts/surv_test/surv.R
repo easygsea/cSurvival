@@ -179,4 +179,17 @@ ggplotly(fig,tooltip = "text")
 res <- cor.test(df_x, df_y, 
                 method = "pearson")
 
+# -------- 3.2b scatter on GS -------
+df <- readRDS("basic_scripts/surv_test/df_lib")
+# hist(as.numeric(unlist((df[,3]))[c(-1,-2)]))
 
+# convert to a longer table
+df <- df %>% pivot_longer(!c(patient_id,survival_days), names_to="gene", values_to="exp")
+df$gene <- as.factor(df$gene)
+ggplot(df,aes(x=survival_days, y=exp, color=gene)) +
+  geom_point() + 
+  # geom_smooth(method=lm,fill="#F5DF4D") +
+  xlab("Log10-transformed suvival days") +
+  ylab("Z-score transformed expression values")
+
+ggplotly(fig,tooltip = "text")

@@ -486,10 +486,30 @@ observeEvent(input$km_mul,{
 output$scatter_plot <- renderPlotly({
   df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
   df <- rv[["exprs_1"]]
-
-  df <- df_survival %>% inner_join(df, by="patient_id")
-  colnames(df) <- c("patient_id","survival_days","exp")
-   
+  
+  df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
+  if(ncol(df) == 3){
+    colnames(df) <- c("patient_id","survival_days","exp")
+    rv[["gs_no"]] = T; exp_type = "FPKM"
+    if(rv$scatter_log_y){
+      df_y <- log2(df$exp+1)
+      ylab <- "Log2 (FPKM + 1)"
+    }else{
+      df_y <- df$exp
+      ylab <- "Gene expression value (FPKM)"
+    }
+  }else{
+    rv[["gs_no"]] = F; exp_type = "mean of Z scores"
+    df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
+    if(rv$scatter_log_y){
+      z_min <- min(df_y)
+      df_y <- log2(df_y - z_min + 1)
+      ylab <- "Log2 (Z score - min(Z scores) + 1)"
+    }else{
+      ylab <- "Average of gene expression Z scores"
+    }
+  }
+  
   if(rv$scatter_log_x){
     df_x <- log2(df$survival_days+1)
     xlab <- "Log2 (survival days + 1)"
@@ -497,14 +517,7 @@ output$scatter_plot <- renderPlotly({
     df_x <- df$survival_days
     xlab <- "Survival days"
   }
-  if(rv$scatter_log_y){
-    df_y <- log2(df$exp+1)
-    ylab <- "Log2 (FPKM + 1)"
-  }else{
-    df_y <- df$exp
-    ylab <- "Gene expression value (FPKM)"
-  }
-  
+
   # calculate correlation
   rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
   
@@ -514,7 +527,7 @@ output$scatter_plot <- renderPlotly({
                      ,text=paste0(
                        "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
                        "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                       "Expression (FPKM): <b>",signif(.data[["exp"]],digits=3),"</b>"
+                       "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
                      )
                 )) +
     geom_point(color="#939597") + 

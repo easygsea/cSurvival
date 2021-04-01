@@ -87,9 +87,12 @@ extract_gene_data <- function(x, type){
   }else if(type == "snv"){
     rv[[paste0("mutations_",x)]] <- data[,2] %>% unlist(.) %>% unname(.)
   }else if(type == "lib" | type == "manual"){
+    # save original FPKM data
+    rv[[paste0("exprs_",x)]] <- data
     # z score transform expression values
-    exp_scale <- scale(data[,2])[,1]
-    data[,2] <- exp_scale
+    n_col <- ncol(data)
+    exp_scale <- apply(data[,2:n_col], 2, scale)
+    data <- cbind(data[,1,drop=F],exp_scale)
   }
   
   return(data)
