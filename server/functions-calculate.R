@@ -223,13 +223,15 @@ cal_surv_rna <-
       # summary statistics
       cox.stats <- summary(cox_fit)
       # run Cox regression for visualization purpose
-      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x + level.y + level, data = df)
+      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
     }
-    
-    print(cox.stats)
 
-    hr.cox <- cox.stats$coefficients[,2]
-    p.cox <- cox.stats$coefficients[,5]
+    hr.cox <- sapply(cox.stats$coefficients[,2], function(x){
+      round(as.numeric(x), 2)
+    }) %>% paste0(.,collapse = ", ")
+    p.cox <- sapply(cox.stats$coefficients[,5], function(x){
+      format(as.numeric(x), scientific = T, digits = 3)
+    }) %>% paste0(.,collapse = ", ")
 
     # run Cox survival analysis
     cox.fit <- survfit(cox_fit,newdata=new_df)
@@ -249,8 +251,8 @@ cal_surv_rna <-
         fit = cox.fit,
         stats = cox.stats
         ,lels = lels
-        ,hr = round(as.numeric(hr.cox), 2)
-        ,p = format(as.numeric(p.cox), scientific = T, digits = 3)
+        ,hr = hr.cox
+        ,p = p.cox
       )
     )
     return(results)

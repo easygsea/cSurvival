@@ -113,7 +113,7 @@ observeEvent(input$confirm,{
               if(rv[["cutoff_all"]] == ""){
                 rv[["cutoff_all"]] <- paste0("#",x,": ",results[["cutoff"]])
               }else{
-                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],"; #",x,": ",results[["cutoff"]])
+                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",results[["cutoff"]])
               }
             }else{
               clow_id <- paste0("clow_",x)

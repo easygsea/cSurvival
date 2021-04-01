@@ -104,8 +104,8 @@ lels <- levels(df_combined$level)
 # res_km <- res_all[["km"]]
 res.km <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined, p.adjust.method = "hommel")
 
-res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x, data =  df_combined)
-summary(res.cox)
+res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x*level.y, data =  df_combined)
+res <- summary(res.cox)
 estimate(res.cox,rbind(c(0,0,1)))
 
 # ------------- 3. continuous variable analysis ---------------
