@@ -33,7 +33,7 @@ output$ui_results <- renderUI({
   }
   
   # check if to generate survival curves
-  surv_yn <- rv$plot_type == "all" | suppressWarnings(!is.na(as.numeric(rv$plot_type)))
+  surv_yn <- if_surv(rv$plot_type)
 
   box(
     width = 12, status = "danger",
@@ -138,7 +138,7 @@ output$ui_results <- renderUI({
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
 observeEvent(input$plot_type,{
   x <- rv$plot_type <- input$plot_type
-  req(x == "all" | suppressWarnings(!is.na(as.numeric(x))))
+  req(if_surv(x))
   output$cox_plot <- renderPlot({
     withProgress(value = 1, message = "Generating plot ...",{
       # # the gene(s)/GS(s) as the title
