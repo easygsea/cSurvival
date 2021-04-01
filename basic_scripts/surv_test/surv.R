@@ -159,8 +159,10 @@ ggsurvplot(cox_exp_fit,data=df_exp_combined,
 )
 
 # -------- 3.2. scatter plot on continuous variable -----------
+df_x <- log10(df_exp1$survival_days+1)
+df_y <- df_exp1$exp
 fig <- ggplot(df_exp1
-              ,aes(x=log10(survival_days+1), y=exp
+              ,aes(x=df_x, y=df_y
                    ,text=paste0(
                      "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
                      "Survival days: <b>",.data[["survival_days"]],"</b>\n",
@@ -168,8 +170,11 @@ fig <- ggplot(df_exp1
                    )
               )) +
   geom_point(color="#939597") + 
-  geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(log10(survival_days+1), exp)) +
+  geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y)) +
   xlab("Log10-transformed suvival days") +
   ylab("Z-score transformed expression values")
 
 ggplotly(fig,tooltip = "text")
+
+res <- cor.test(df_x, df_y, 
+                method = "pearson")

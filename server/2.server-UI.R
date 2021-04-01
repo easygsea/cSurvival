@@ -115,7 +115,7 @@ output$ui_results <- renderUI({
       }else if(rv$plot_type == "scatter"){
         column(
           12,align="center",
-          plotlyOutput("scatter_plot")
+          plotlyOutput("scatter_plot", height = "585px")
         )
       }
     )
@@ -138,6 +138,7 @@ output$ui_results <- renderUI({
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
 observeEvent(input$plot_type,{
   x <- rv$plot_type <- input$plot_type
+  req(x == "all" | suppressWarnings(!is.na(as.numeric(x))))
   output$cox_plot <- renderPlot({
     withProgress(value = 1, message = "Generating plot ...",{
       # # the gene(s)/GS(s) as the title
@@ -380,13 +381,26 @@ observeEvent(input$km_mul,{
 
 # ----------- 4. expression-survidal days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
-  df <- rv[["df_1"]]
-  exprs <- rv[["exprs_1"]]
-  df$exprs <- exprs
+  df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
+  df <- rv[["exprs_1"]]
+
+  df <- df_survival %>% inner_join(df, by="patient_id")
+  colnames(df) <- c("patient_id","survival_days","exp")
+   
+  df_x <- log10(df$survival_days+1)
+  df_y <- df$exp
+  fig <- ggplot(df
+                ,aes(x=df_x, y=df_y
+                     ,text=paste0(
+                       "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                       "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                       "Expression (FPKM): <b>",signif(.data[["exp"]],digits=3),"</b>"
+                     )
+                )) +
+    geom_point(color="#939597") + 
+    geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y)) +
+    xlab("Log10-transformed suvival days") +
+    ylab("Z-score transformed expression values")
   
-  fig <- ggplot(df, aes(x=survival_days, y=exprs, color="salmon")) +
-    geom_point() + 
-    geom_smooth(method=lm)
-  
-  ggplotly(fig)
+  suppressWarnings(ggplotly(fig,tooltip = "text"))
 })
