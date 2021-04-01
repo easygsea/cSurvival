@@ -267,8 +267,14 @@ output$ui_stats <- renderUI({
   res <- rv[["res"]][[rv$cox_km]]
   hr <- res[["hr"]]
   p <- res[["p"]]
+  
+  if(rv$cox_km == "cox"){
+    p_w <- 6
+  }else{
+    p_w <- 12
+  }
 
-  if(rv$plot_type == "all"){
+  if(rv$cox_km == "cox" & rv$plot_type == "all"){
     hr_title <- "HR (hazard ratios)"
     p_title <- "P-values"
     lel1 <- gsub("_"," and/or ",lel1)
@@ -304,16 +310,18 @@ output$ui_stats <- renderUI({
     boxPad(
       color = "light-blue",
       fluidRow(
-        column(
-          6,
-          descriptionBlock(
-            header = hr,
-            text = HTML(paste0(hr_title,add_help("hr_q")))
-            ,rightBorder = T
+        if(rv$cox_km == "cox"){
+          column(
+            6,
+            descriptionBlock(
+              header = hr,
+              text = HTML(paste0(hr_title,add_help("hr_q")))
+              ,rightBorder = T
+            )
           )
-        )
+        }
         ,column(
-          6,
+          p_w,
           descriptionBlock(
             header = p,
             text = p_title
