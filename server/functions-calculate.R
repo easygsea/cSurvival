@@ -59,7 +59,9 @@ extract_gene_data <- function(x, type){
   # col_to_keep <- a_range[input[[g_ui_id]] == rv[[paste0("genes",x)]]]
   # system(paste0("cut -d',' -f1,",col_to_keep," ",infile," > ",ofile))
   # data <- fread(ofile,sep=",",header=T)
-
+  
+  # save original mutation data, if applicable
+  if(type == "snv"){rv[[paste0("mutations_",x)]] <- data[,2] %>% unlist(.) %>% unname(.)}
   return(data)
 }
 

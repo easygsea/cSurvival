@@ -64,6 +64,8 @@ observeEvent(input$confirm,{
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""
       for(x in 1:rv$variable_n){
+        # clear previous RVs
+        rv[[paste0("mutations_",x)]] <- NULL
         # perform analysis according to input type
         cat_id <- paste0("cat_",x)
         db_id <- paste0("db_",x)
