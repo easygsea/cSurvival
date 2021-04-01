@@ -18,6 +18,10 @@ output$ui_results <- renderUI({
     ))
   }
   
+  if(!rv$plot_type %in% types){
+    rv$plot_type <- types[[1]]
+  }
+  
   box(
     width = 12, status = "danger",
     tags$script(HTML(
@@ -29,6 +33,7 @@ output$ui_results <- renderUI({
         inputId = "plot_type",
         label = NULL,
         choices = types,
+        selected = rv$plot_type,
         # size = "sm",
         checkIcon = list(
           yes = icon("check-square"),
@@ -89,31 +94,31 @@ output$ui_results <- renderUI({
   )
 })
 
-
 # --------- 1. display the survival curve ---------
-output$cox_plot <- renderPlot({
-  ppl <- isolate(input$plot_type)
-  withProgress(value = 1, message = "Generating plot ...",{
-    if(ppl == "all" | suppressWarnings(!is.na(as.numeric(ppl)))){
-      x <- input$plot_type
+observeEvent(input$plot_type,{
+  rv$plot_type <- input$plot_type
+  output$cox_plot <- renderPlot({
+    x <- rv$plot_type
+    withProgress(value = 1, message = "Generating plot ...",{
+      if(x == "all" | suppressWarnings(!is.na(as.numeric(x)))){
+        # # the gene(s)/GS(s) as the title
+        # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
+        rv[["title"]] <- rv[[paste0("title_",x)]]
+        
+        # no of cases in each group
+        rv[["lels"]] <- rv[[paste0("lels_",x)]]
+        
+        # the cutoff percentile
+        rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
+        
+        
+        # extract statistics
+        res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
+      }
       
-      # # the gene(s)/GS(s) as the title
-      # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
-      rv[["title"]] <- rv[[paste0("title_",x)]]
-      
-      # no of cases in each group
-      rv[["lels"]] <- rv[[paste0("lels_",x)]]
-      
-      # the cutoff percentile
-      rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
-      
-
-      # extract statistics
-      res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-    }
-
-    # generate figure
-    plot_surv(res,two_rows=ppl)
+      # generate figure
+      plot_surv(res,two_rows=x)
+    })
   })
 })
 
