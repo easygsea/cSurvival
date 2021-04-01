@@ -89,7 +89,7 @@ output$ui_results <- renderUI({
         }
         ,div(
           align = "left",
-          style = "position: absolute; right: 3.5em; top: 1.5em;",
+          style = "position: absolute; right: 2.5em; top: 1.5em;",
           # add a id for the gear button in introjs
           div(
             id = "gear_btn",
@@ -275,12 +275,22 @@ observeEvent(input$cum_table,{rv$cum_table <- input$cum_table})
 
 # --------- 1b. download plot -------------
 output$download_plot <- downloadHandler(
-  filename = function(){paste0(rv$cox_km,"_",rv[["title"]],".pdf")},
+  filename = function(){
+    if(if_surv()){
+      paste0(rv$cox_km,"_",rv[["title"]],".pdf")
+    }else if(rv$plot_type == "scatter"){
+      paste0("scatter_",rv[["title"]],".html")
+    }
+  },
   content = function(file) {
-    pdf(file,onefile = TRUE)
-    print(plot_surv(rv[["res"]]),newpage = FALSE)
-    dev.off()
-    # ggsave(file,print(plot_surv(rv[["res"]]),newpage = FALSE), device = "pdf", width = 10, height = 8, dpi = 300, units = "in")
+    if(if_surv()){
+      pdf(file,onefile = TRUE)
+      print(plot_surv(rv[["res"]]),newpage = FALSE)
+      dev.off()
+      # ggsave(file,print(plot_surv(rv[["res"]]),newpage = FALSE), device = "pdf", width = 10, height = 8, dpi = 300, units = "in")
+    }else if(rv$plot_type == "scatter"){
+      saveWidget(as_widget(rv[["scatter_plot"]] ), file, selfcontained = TRUE)
+    }
   }
 )
 
@@ -437,5 +447,5 @@ output$scatter_plot <- renderPlotly({
     xlab(xlab) +
     ylab(ylab)
   
-  suppressWarnings(ggplotly(fig,tooltip = "text"))
+  rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
 })
