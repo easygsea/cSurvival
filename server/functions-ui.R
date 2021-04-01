@@ -53,6 +53,7 @@ plot_ui <- function(n){
     gs_gene_genes_id <- paste0("gs_lgg_",x) # verbatimTextOutput on input genes to filter GS
     # manual gene input
     gs_manual_id <- paste0("gs_m_",x); gs_manual_id_q <- paste0(gs_manual_id,"_q")
+    gs_manual_btn_id <- paste0("add_btn_",x)
     gs_genes_id <- paste0("gs_mg_",x)
 
     # the UI
@@ -168,8 +169,7 @@ plot_ui <- function(n){
                     conditionalPanel(
                       condition = sprintf("input.%s != ''", gs_lib_id),
                       span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
-                      # ,uiOutput(paste0(gs_lib_genes_id,"_tag"))
-                  )
+                    )
               )
               ,column(
                   4,
@@ -189,7 +189,8 @@ plot_ui <- function(n){
               ,value = rv[[gs_manual_id]]
               ,placeholder = "Type to enter..."
             )
-            ,bsButton(paste0("add_btn_",x),tags$strong("Submit"),style = "warning")
+            ,span(verbatimTextOutput(gs_genes_id), style = paste0(rv$verbTxtStyle1))
+            ,bsButton(gs_manual_btn_id,tags$strong("Submit"),style = "warning")
           )
         )
         
@@ -209,7 +210,7 @@ plot_ui <- function(n){
         ,bsTooltip(gs_gene_id_q, HTML(paste0("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by \"&\" (and) or \"|\" (or). | is evaluated before &. Example: MYC&TP53|BCL2&BRCA1|BRCA2 is evaluated as MYC&(TP53|BCL2)&(BRCA1|BRCA2), which means MYC and (TP53 or BCL2) and (BRCA1 or BRCA2)."
                                              ," A maximum of 10 genes are supported."))
                    ,placement = "top")
-        ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited.")
+        ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited")
                    ,placement = "right")
         ,radioTooltip(id = db_id, choice = "rna", title = HTML("Gene expression level quantified by RNA-seq"))
         ,radioTooltip(id = db_id, choice = "snv", title = HTML("Simple Nucleotide Variation (SNV)"))

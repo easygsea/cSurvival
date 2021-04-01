@@ -25,6 +25,7 @@ init_rv <- function(x){
   rv[[paste0("gs_lgg_",x)]] <- ""
   # manual gene input
   rv[[paste0("gs_m_",x)]] <- ""
+  rv[[paste0("gs_mg_",x)]] <- ""
   rv[[paste0("add_btn_",x)]] <- 0
   # feedback on manual gene input
   rv[[paste0("gs_mg_",x)]] <- ""

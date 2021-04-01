@@ -329,7 +329,40 @@ observeEvent(manual_lst(),{
   array <- 1:rv$variable_n
   namespaces <- paste0("add_btn_",array)
   req(req_diff_rv_btn(namespaces))
-})
+  withProgress(value = 1, message = "Processing input genes ...",{
+    lapply(array, function(x){
+      gs_manual_id <- paste0("gs_m_",x)
+      gs_genes_id <- paste0("gs_mg_",x)
+      
+      e_msg <- "Please input a valid gene list, delimited by newline, space or comma."
+      
+      if(input[[gs_manual_id]] == ""){
+        shinyalert(e_msg)
+      }else{
+        genelist <- as.character(input[[gs_manual_id]])
+        genelist = gsub("\"","",genelist)
+        if(length(genelist) == 1 & genelist==""){shinyalert(e_msg)}else{
+          # genelist = unlist(lapply(genelist, function(x) strsplit(x,'\\s*,\\s*')))
+          genelist = strsplit(genelist,"\n") %>% unlist(.)
+          genelist = unlist(strsplit(genelist,"\\s*,\\s*"))
+          genelist = unlist(strsplit(genelist,"\t"))
+          genelist = unlist(strsplit(genelist," "))
+          genelist = unique(genelist) %>% toupper(.)
+          
+          if(length(genelist) == 1 & genelist==""){
+            shinyalert(e_msg)
+          }else{
+            genelist <- genelist[genelist!=""]
+            rv[[gs_manual_id]] <- genelist
+            output[[gs_genes_id]] <- renderText({
+              paste0("Input genes (n=",length(genelist),"): ", paste0(genelist, collapse = " "))
+            })
+          }
+        }
+      }
+    })
+  })
+},ignoreInit = T)
 
 # ----- 1.2. run parameters -------
 observe({

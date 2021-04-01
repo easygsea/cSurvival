@@ -3,6 +3,7 @@ extract_gene_data <- function(x, type, method="mutect"){
   df_file <- list(
     "rna" = "df_gene_scale.csv"
     ,"lib" = "df_gene_scale.csv"
+    ,"manual" = "df_gene_scale.csv"
     ,"snv" = paste0("df_snv_class_",method,".csv")
   )
   # all genes in selected project
@@ -16,6 +17,9 @@ extract_gene_data <- function(x, type, method="mutect"){
   }else if(type == "lib"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
+  }else if(type == "manual"){
+    all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+    genes <- toupper(rv[[paste0("gs_m_",x)]])
   }
   
   # infile
