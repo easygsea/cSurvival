@@ -31,6 +31,9 @@ output$ui_results <- renderUI({
   }else{
     h_plot <- "580px"
   }
+  
+  # check if to generate survival curves
+  surv_yn <- rv$plot_type == "all" | suppressWarnings(!is.na(as.numeric(rv$plot_type)))
 
   box(
     width = 12, status = "danger",
@@ -53,61 +56,63 @@ output$ui_results <- renderUI({
         direction = "horizontal"
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
-      ,if(rv$plot_type == "all" | suppressWarnings(!is.na(as.numeric(rv$plot_type)))){
-        # survival analysis method
-        radioGroupButtons(
-          inputId = "cox_km",
-          label = HTML(paste0("Select survival analysis method:"),add_help(paste0("cox_km_q"))),
-          choices = surv_methods,
-          selected = rv[["cox_km"]],
-          status = "danger",
-          # size = "sm",
-          checkIcon = list(
-            yes = icon("check-square"),
-            no = icon("square-o")
-          ),
-          direction = "horizontal"
+      ,if(surv_yn){
+        div(
+          # survival analysis method
+          radioGroupButtons(
+            inputId = "cox_km",
+            label = HTML(paste0("Select survival analysis method:"),add_help(paste0("cox_km_q"))),
+            choices = surv_methods,
+            selected = rv[["cox_km"]],
+            status = "danger",
+            # size = "sm",
+            checkIcon = list(
+              yes = icon("check-square"),
+              no = icon("square-o")
+            ),
+            direction = "horizontal"
+          )
+          ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
+                                            ,"Cox regression model assesses the effect of several risk factors simultaneously,"
+                                            ," while KM describe the survival according to one factor under investigation. "
+          ))
+          ,placement = "top")
+          ,column(
+            7, align = "left",
+            h3(rv[["title"]]),
+            plotOutput("cox_plot",height = h_plot)
+            ,div(
+              align = "left",
+              style = "position: absolute; right: 3.5em; top: 2.5em;",
+              # add a id for the gear button in introjs
+              div(
+                id = "gear_btn",
+                style="display: inline-block;vertical-align:top;",
+                dropdown(
+                  uiOutput("plot_gear"),
+                  circle = TRUE, status = "danger", style = "material-circle",
+                  size="sm", right = T,
+                  icon = icon("gear"), width = "300px",
+                  tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                )  
+              ),
+              div(
+                id="download_btn",
+                style="display: inline-block;vertical-align:top;",
+                downloadBttn(
+                  size = "sm", color = "danger", style = "material-circle",
+                  outputId = "download_plot", label = NULL
+                )
+                ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+              )
+            )
+          )
+          ,column(
+            5, align="left",
+            uiOutput("ui_stats")
+          )
         )
       }
-    )
-    ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
-                                      ,"Cox regression model assesses the effect of several risk factors simultaneously,"
-                                      ," while KM describe the survival according to one factor under investigation. "
-    ))
-    ,placement = "top")
-    ,column(
-      7,
-      h3(rv[["title"]]),
-      plotOutput("cox_plot",height = h_plot)
-      ,div(
-        align = "left",
-        style = "position: absolute; right: 3.5em; top: 2.5em;",
-        # add a id for the gear button in introjs
-        div(
-          id = "gear_btn",
-          style="display: inline-block;vertical-align:top;",
-          dropdown(
-            uiOutput("plot_gear"),
-            circle = TRUE, status = "danger", style = "material-circle",
-            size="sm", right = T,
-            icon = icon("gear"), width = "300px",
-            tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-          )  
-        ),
-        div(
-          id="download_btn",
-          style="display: inline-block;vertical-align:top;",
-          downloadBttn(
-            size = "sm", color = "danger", style = "material-circle",
-            outputId = "download_plot", label = NULL
-          )
-          ,bsTooltip("download_btn","Click to download the plot", placement = "top")
-        )
-      )
-    )
-    ,column(
-      5,
-      uiOutput("ui_stats")
     )
     ,absolutePanel(
       actionBttn(
@@ -125,29 +130,26 @@ output$ui_results <- renderUI({
   )
 })
 
-# --------- 1. display the survival curve ---------
+# --------- 1. display the survival curve / scatter plot / mutation statistics ---------
 observeEvent(input$plot_type,{
-  rv$plot_type <- input$plot_type
+  x <- rv$plot_type <- input$plot_type
   output$cox_plot <- renderPlot({
-    x <- rv$plot_type
     withProgress(value = 1, message = "Generating plot ...",{
-      if(x == "all" | suppressWarnings(!is.na(as.numeric(x)))){
-        # # the gene(s)/GS(s) as the title
-        # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
-        rv[["title"]] <- rv[[paste0("title_",x)]]
-        
-        # no of cases in each group
-        rv[["lels"]] <- rv[[paste0("lels_",x)]]
-        
-        # the cutoff percentile
-        rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
-        
-        
-        # extract statistics
-        res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-      }
+      # # the gene(s)/GS(s) as the title
+      # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
+      rv[["title"]] <- rv[[paste0("title_",x)]]
       
-      # generate figure
+      # no of cases in each group
+      rv[["lels"]] <- rv[[paste0("lels_",x)]]
+      
+      # the cutoff percentile
+      rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
+      
+      
+      # extract statistics
+      res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
+      
+      # generate survival curve
       plot_surv(res,two_rows=x)
     })
   })
