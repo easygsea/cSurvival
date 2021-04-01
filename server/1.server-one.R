@@ -311,7 +311,7 @@ observeEvent(lg_input_clearbtn_lst(),{
         # update the search button value
         rv[[lgg_btn_id]] <- input[[lgg_btn_id]][1]
         # update the GS
-        update_gs_by_db(x)
+        update_gs_by_db(x, mode="nil")
       }
     })
   })

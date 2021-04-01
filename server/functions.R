@@ -134,7 +134,7 @@ call_datatype <- function(x){
 }
 
 # return all GSs when a db is selected
-update_gs_by_db <- function(x){
+update_gs_by_db <- function(x, mode="nil"){
   gs_db_id <- paste0("gs_db_",x)
   gs_lib_id <- paste0("gs_l_",x)
   
@@ -150,12 +150,13 @@ update_gs_by_db <- function(x){
     # update placeholder
     rv[[paste0("gs_placeholder",x)]] <- sprintf('(Total n=%s) Type to search ...',length(gmt))
     
+    if(mode == "nil"){gg=""}else{gg=rv[[gs_lib_id]]}
     # update gene set UI
     updateSelectizeInput(
       session,
       gs_lib_id
       ,choices = names(gmt)
-      ,selected=rv[[gs_lib_id]]
+      ,selected=gg
       ,options = list(
         # `live-search` = TRUE,
         placeholder = rv[[paste0("gs_placeholder",x)]]
