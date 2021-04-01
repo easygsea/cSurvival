@@ -372,6 +372,17 @@ output$ui_stats <- renderUI({
           ,selected = rv[["km_mul"]]
         )
       )
+    }else if(rv$plot_type == "scatter"){
+      selectizeInput(
+        "cor_method",
+        NULL,
+        choices = list(
+          "Pearson's correlation" = "pearson"
+          ,"Kendall's rank correlation" = "kendall"
+          ,"Spearman's rank correlation)" = "spearman"
+        )
+        ,selected = rv[["cor_method"]]
+      )
     }
     ,boxPad(
       color = "light-blue",
@@ -477,7 +488,7 @@ output$scatter_plot <- renderPlotly({
   }
   
   # calculate correlation
-  rv[["res_scatter"]] <- cor.test(df_x, df_y, method = "pearson")
+  rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
   
   # draw the figure
   fig <- ggplot(df
@@ -499,3 +510,6 @@ output$scatter_plot <- renderPlotly({
   
   rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
 })
+
+# change method of correlation calculation when prompted
+observeEvent(input$cor_method,{rv$cor_method <- input$cor_method})
