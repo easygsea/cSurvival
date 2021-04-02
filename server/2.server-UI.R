@@ -572,8 +572,6 @@ output$snv_stats_plot <- renderPlotly({
   muts <- rv[["mutations_1"]]
   stats <- table(muts)
 
-  stats <- table(muts)
-  
   dat <- data.frame(
     Mutation = names(stats),
     Frequency = as.numeric(stats)
