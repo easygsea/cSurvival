@@ -359,8 +359,8 @@ observeEvent(manual_lst(),{
             
             if(length(genelist) == 1 & genelist==""){
               shinyalert(e_msg)
-            }else if(length(genelist)>1000){
-              shinyalert("We currently support analysis of up to 1000 genes. Please revise your input. Thank you.")
+            }else if(length(genelist)>100){
+              shinyalert("We currently support analysis of up to 100 genes. Please revise your input. Thank you.")
             }else{
               genelist <- genelist[genelist!=""]
               rv[[gs_manual_id]] <- genelist

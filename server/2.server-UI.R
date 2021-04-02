@@ -99,19 +99,20 @@ output$ui_results <- renderUI({
         ,div(
           align = "left",
           style = "position: absolute; right: 2.5em; top: 1.5em;",
-          # add a id for the gear button in introjs
           div(
             id = "gear_btn",
             style="display: inline-block;vertical-align:top;",
-            dropdown(
-              uiOutput("plot_gear"),
-              circle = TRUE, status = "danger", style = "material-circle",
-              size="sm", right = T,
-              icon = icon("gear"), width = "300px",
-              tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-            )  
-          ),
-          div(
+            if(rv$plot_type != "snv_stats"){
+              dropdown(
+                uiOutput("plot_gear"),
+                circle = TRUE, status = "danger", style = "material-circle",
+                size="sm", right = T,
+                icon = icon("gear"), width = "300px",
+                tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+              )  
+            }
+          )
+          ,div(
             id="download_btn",
             style="display: inline-block;vertical-align:top;",
             downloadBttn(
@@ -320,9 +321,11 @@ observeEvent(input$scatter_lm,{rv$scatter_lm <- input$scatter_lm})
 output$download_plot <- downloadHandler(
   filename = function(){
     if(if_surv()){
-      paste0(rv$cox_km,"_",rv[["title"]],".pdf")
+      paste0(toupper(rv$cox_km),"_",rv[["title"]],".pdf")
     }else if(rv$plot_type == "scatter"){
-      paste0("scatter_",rv[["title"]],".html")
+      paste0("Scatter_",rv[["title"]],".html")
+    }else if(rv$plot_type == "snv_stats"){
+      paste0("Mutation_",rv[["title"]],".html")
     }
   },
   content = function(file) {
@@ -333,6 +336,8 @@ output$download_plot <- downloadHandler(
       # ggsave(file,print(plot_surv(rv[["res"]]),newpage = FALSE), device = "pdf", width = 10, height = 8, dpi = 300, units = "in")
     }else if(rv$plot_type == "scatter"){
       saveWidget(as_widget(rv[["scatter_plot"]] ), file, selfcontained = TRUE)
+    }else if(rv$plot_type == "snv_stats"){
+      saveWidget(as_widget(rv[["snv_stats_fig"]] ), file, selfcontained = TRUE)
     }
   }
 )
@@ -497,69 +502,71 @@ observeEvent(input$km_mul,{
 
 # ----------- 4[A]. expression-survidal days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
-  df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
-  df <- rv[["exprs_1"]]
-  
-  df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
-  if(ncol(df) == 3){
-    colnames(df) <- c("patient_id","survival_days","exp")
-    rv[["gs_no"]] = T; exp_type = "FPKM"
-    if(rv$scatter_log_y){
-      df_y <- log2(df$exp+1)
-      ylab <- "Log2 (FPKM + 1)"
+  withProgress(value = 1,message = "Updating plot ...",{
+    df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
+    df <- rv[["exprs_1"]]
+    
+    df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
+    if(ncol(df) == 3){
+      colnames(df) <- c("patient_id","survival_days","exp")
+      rv[["gs_no"]] = T; exp_type = "FPKM"
+      if(rv$scatter_log_y){
+        df_y <- log2(df$exp+1)
+        ylab <- "Log2 (FPKM + 1)"
+      }else{
+        df_y <- df$exp
+        ylab <- "Gene expression value (FPKM)"
+      }
     }else{
-      df_y <- df$exp
-      ylab <- "Gene expression value (FPKM)"
+      rv[["gs_no"]] = F; exp_type = "mean of Z scores"
+      df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
+      if(rv$scatter_log_y){
+        z_min <- min(df_y)
+        df_y <- log2(df_y - z_min + 1)
+        ylab <- "Log2 (Z score - min(Z scores) + 1)"
+      }else{
+        ylab <- "Average of gene expression Z scores"
+      }
     }
-  }else{
-    rv[["gs_no"]] = F; exp_type = "mean of Z scores"
-    df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
-    if(rv$scatter_log_y){
-      z_min <- min(df_y)
-      df_y <- log2(df_y - z_min + 1)
-      ylab <- "Log2 (Z score - min(Z scores) + 1)"
+    
+    if(rv$scatter_log_x){
+      df_x <- log2(df$survival_days+1)
+      xlab <- "Log2 (survival days + 1)"
     }else{
-      ylab <- "Average of gene expression Z scores"
+      df_x <- df$survival_days
+      xlab <- "Survival days"
     }
-  }
-  
-  if(rv$scatter_log_x){
-    df_x <- log2(df$survival_days+1)
-    xlab <- "Log2 (survival days + 1)"
-  }else{
-    df_x <- df$survival_days
-    xlab <- "Survival days"
-  }
-
-  # calculate correlation
-  rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
-  
-  # draw the figure
-  fig <- ggplot(df
-                ,aes(x=df_x, y=df_y
-                     ,text=paste0(
-                       "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                       "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                       "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
-                     )
-                )) +
-    geom_point(color="#939597") + 
-    xlab(xlab) +
-    ylab(ylab)
-  
-  # draw a regression line
-  if(rv$scatter_lm){
-    fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
-  }
-  
-  rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
+    
+    # calculate correlation
+    rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
+    
+    # draw the figure
+    fig <- ggplot(df
+                  ,aes(x=df_x, y=df_y
+                       ,text=paste0(
+                         "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                         "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                         "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
+                       )
+                  )) +
+      geom_point(color="#939597") + 
+      xlab(xlab) +
+      ylab(ylab)
+    
+    # draw a regression line
+    if(rv$scatter_lm){
+      fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
+    }
+    
+    rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
+  })
 })
 
 # change method of correlation calculation when prompted
 observeEvent(input$lm_method,{rv$lm_method <- input$lm_method})
 observeEvent(input$cor_method,{rv$cor_method <- input$cor_method})
 
-# ----------- 4[B]. expression-survidal days scatter plot ---------------
+# ----------- 4[B]. SNV statistics bar plot ---------------
 output$snv_stats_plot <- renderPlotly({
   # calculated statistics
   muts <- rv[["mutations_1"]]
@@ -595,5 +602,5 @@ output$snv_stats_plot <- renderPlotly({
   
   fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category, Cases=Cases)) + 
     geom_bar(stat="identity")
-  ggplotly(fig, tooltip = c("Mutation","Frequency","Category","Cases"))
+  rv[["snv_stats_fig"]] <- ggplotly(fig, tooltip = c("Mutation","Frequency","Category","Cases"))
 })
