@@ -64,7 +64,7 @@ output$ui_results <- renderUI({
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
       ,if(surv_yn){
-        div(
+        column(12,align="left",
           # survival analysis method
           radioGroupButtons(
             inputId = "cox_km",
