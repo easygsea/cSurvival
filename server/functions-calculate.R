@@ -81,17 +81,21 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
   
   # save original mutation data, if applicable
-  if(type == "rna"){
-    # save original expression data
-    rv[[paste0("exprs_",x)]] <- data
-  }else if(type == "snv"){
-    muts <- data[,2] %>% unlist(.)
-    names(muts) <- data$patient_id
-    muts <- muts[!is.na(muts)]
-    rv[[paste0("mutations_",x)]] <- muts
-  }else if(type == "lib" | type == "manual"){
+  if(x == 1){
+    if(type == "rna"){
+      # save original expression data
+      rv[[paste0("exprs_",x)]] <- data
+    }else if(type == "snv"){
+      muts <- data[,2] %>% unlist(.)
+      names(muts) <- data$patient_id
+      muts <- muts[!is.na(muts)]
+      rv[[paste0("mutations_",x)]] <- muts
+    }
+  }
+  if(type == "lib" | type == "manual"){
     # save original FPKM data
-    rv[[paste0("exprs_",x)]] <- data
+    if(x == 1){rv[[paste0("exprs_",x)]] <- data}
+    
     # z score transform expression values
     n_col <- ncol(data)
     exp_scale <- apply(data[,2:n_col], 2, scale)
@@ -141,7 +145,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   }
   
   # retrieve survival analysis df_o
-  df_o <- original_surv_df(patient_ids)
+  df_o <- original_surv_df(patient_ids) %>% dplyr::select(-gender)
 
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s)

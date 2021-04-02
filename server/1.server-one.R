@@ -24,7 +24,7 @@ observeEvent(input$project,{
     if(grepl("^TCGA",project)){rv$tcga <- T}else{rv$tcga <- F}
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     rv$df_survival <- fread(paste0(rv$indir,"df_survival.csv"),sep=",",header=T) %>%
-      dplyr::select(patient_id,survival_days,censoring_status)
+      dplyr::select(patient_id,survival_days,censoring_status,gender)
     update_genes_ui(opt="nil")
   })
   
