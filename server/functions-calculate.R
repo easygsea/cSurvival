@@ -1,6 +1,6 @@
 # determine if plot_type is for a survival curve
 if_surv <- function(plot_type=rv$plot_type){
-  plot_type == "all" | suppressWarnings(!is.na(as.numeric(plot_type)))
+  plot_type == "all" | suppressWarnings(!is.na(as.numeric(plot_type))) | plot_type == "gender" 
 }
 
 # extract gene expression/mutation data
@@ -109,7 +109,7 @@ extract_gene_data <- function(x, type){
 original_surv_df <- function(patient_ids){
   df_o <- rv$df_survival
   df_o %>% dplyr::filter(patient_id %in% patient_ids)
-  df_o[match(patient_ids,df_o$patient_id),]
+  df_o[match(patient_ids,df_o$patient_id),] %>% dplyr::select(-gender)
 }
 
 # generate survival df
@@ -145,7 +145,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   }
   
   # retrieve survival analysis df_o
-  df_o <- original_surv_df(patient_ids) %>% dplyr::select(-gender)
+  df_o <- original_surv_df(patient_ids)
 
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s)
@@ -256,11 +256,7 @@ cal_surv_rna <-
     }else if(n == 2){
       km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method)
       km.stats <- list(km.stats,km2)
-      
-      lels_x <- levels(df$`level.x`)
-      lels_y <- levels(df$`level.y`)
-      new_df <- with(df,data.frame(level = lels, level.x = lels_x, level.y = lels_y))
-      
+
       # run Cox regression
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
       # summary statistics
@@ -277,6 +273,10 @@ cal_surv_rna <-
     }) %>% paste0(.,collapse = ", ")
 
     # run Cox survival analysis
+    lels_x <- levels(df$`level.x`)
+    lels_y <- levels(df$`level.y`)
+    # lels <- apply(expand.grid(lels_x,lels_y),1,paste0,collapse="_")
+    new_df <- with(df,data.frame(level = lels))
     cox.fit <- survfit(cox_fit,newdata=new_df)
 
     # save df, fit, and statistics
