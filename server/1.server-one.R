@@ -43,18 +43,6 @@ observeEvent(input$reset_project,{
   )
 })
 
-## update gene selection UI
-genes_lst <- reactive({
-  lapply(1:rv$variable_n, function(x){
-   input[[paste0("db_",x)]]
-  })
-})
-
-observeEvent(genes_lst(),{
-  req(rv$project != "")
-  update_genes_ui(opt="nil")
-},ignoreInit = T)
-
 #======================================================================#
 ####                          STEP 1. parameters                   ####
 #======================================================================#
@@ -83,14 +71,28 @@ observeEvent(input$variable_n,{
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
   }
   
-  if(input$variable_n==1){
+  if(rv$variable_n_reached==0){
     load()
   }else{
     withProgress(value = 1, message = "Loading parameters ...",{
       load()
+      lapply(1:rv$variable_n, function(x){
+        rv[[paste0("genes",x)]] <- retrieve_genes(x)
+        g_ui_id <- paste0("g_",x)
+        updateSelectizeInput(
+          session,
+          g_ui_id,
+          choices = rv[[paste0("genes",x)]]
+          ,selected = rv[[g_ui_id]]
+          ,server = TRUE
+          ,options = list(
+            placeholder = 'Type to search ...'
+          )
+        )
+      })
     })
   }
-  
+  rv$variable_n_reached <- rv$variable_n_reached + 1
 })
 
 # main panels for user inputs
@@ -384,7 +386,7 @@ manual_lst <- reactive({
 })
 
 observeEvent(manual_lst(),{
-  array <- 1:rv$variable_n #check_array(lst)
+  array <- 1:rv$variable_n
   namespaces <- paste0("snv_method_",array)
   req(req_diff_rv(namespaces))
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
@@ -398,6 +400,38 @@ observeEvent(manual_lst(),{
         update_genes_ui()
       }
     })
+  })
+},ignoreInit = T)
+
+# ---------- 1[G]. upate loaded genes ---------
+## update gene selection UI
+genes_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    input[[paste0("db_",x)]]
+  })
+})
+
+observeEvent(genes_lst(),{
+  req(rv$project != "")
+  array <- 1:rv$variable_n
+  namespaces <- paste0("db_",array)
+  req(req_diff_rv(namespaces))
+  lapply(array, function(x){
+    db_id <- paste0("db_",x)
+    if(rv[[db_id]] != input[[db_id]]){
+      rv[[db_id]] <- input[[db_id]]
+      rv[[paste0("genes",x)]] <- retrieve_genes(x)
+      updateSelectizeInput(
+        session,
+        paste0("g_",x),
+        choices = rv[[paste0("genes",x)]]
+        ,selected = ""
+        ,server = TRUE
+        ,options = list(
+          placeholder = 'Type to search ...'
+        )
+      )
+    }
   })
 },ignoreInit = T)
 
