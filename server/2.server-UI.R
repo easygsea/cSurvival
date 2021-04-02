@@ -456,24 +456,21 @@ output$ui_stats <- renderUI({
     ,boxPad(
       color = "gray",
       if(if_surv()){
-        if(rv[["cutoff"]] != ""){
-          column(
-            12, align="center",
-            HTML(paste0("Cutoff percentile: ",rv[["cutoff"]]))
-          )
-        }
-        tagList(
-          lapply(names(rv[["lels"]]), function(x){
-            no <- rv[["lels"]][[x]]
-            column(
-              col_w,
-              descriptionBlock(
-                header = no,
-                text = x
-                ,rightBorder = F
+        div(
+          uiOutput("ui_cutoff")
+          ,tagList(
+            lapply(names(rv[["lels"]]), function(x){
+              no <- rv[["lels"]][[x]]
+              column(
+                col_w,
+                descriptionBlock(
+                  header = no,
+                  text = x
+                  ,rightBorder = F
+                )
               )
-            )
-          })
+            })
+          )
         )
       }
       ,if(if_surv()){
@@ -482,6 +479,16 @@ output$ui_stats <- renderUI({
         renderPrint({print(res)})
       }
     )
+  )
+})
+
+# cutoffs
+output$ui_cutoff <- renderUI({
+  cutoff <- rv[[paste0("cutoff_",rv$plot_type)]]
+  req(cutoff != "")
+  column(
+    12, align="center",
+    HTML(paste0("Cutoff percentile: ",cutoff))
   )
 })
 
