@@ -175,11 +175,12 @@ observeEvent(input$confirm,{
       if(rv$variable_n > 1){
         # generate interaction df
         df_combined <- Reduce(
-          function(x, y) inner_join(x, select(y, patient_id, level), by = "patient_id"),
+          function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
           df_list
         )
+        
         x_y <- c("x","y")[1:length(df_list)]
-        df_combined[["level"]] <- apply(df_combined %>% select(paste0("level.",x_y)),1,paste0,collapse="_")
+        df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
         rv[["df_all"]] <- df_combined
 
         # no of cases in each group
