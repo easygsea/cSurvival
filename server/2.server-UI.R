@@ -2,6 +2,8 @@
 output$ui_results <- renderUI({
   req(!is.null(rv[["cox_1"]]))
   x <- rv$variable_nr
+  rv[["dtypes"]] <- ""
+  
   if(x == 1){
     types <- list(
       "Survival plot #1" = 1
@@ -15,15 +17,31 @@ output$ui_results <- renderUI({
       l_plot <- list("Scatter plot" = "scatter")
     }
     
-    types <- c(types, l_plot, list("Violin" = "violin_1"))
+    types <- c(types, l_plot)
   }else{
     indi <- as.list(1:x)
     names(indi) <- paste0("Survival plot #",1:x)
     types <- list(
       "Interaction Survival plot" = "all"
-    ) %>% c(.,indi,list(
-      "Violin" = "violin"
-    ))
+    ) %>% c(.,indi)
+    
+    # check data types
+    dtypes <- grep("^data_type_",{names(rv)},value=T)
+    dtypes <- sapply(dtypes,function(x) rv[[x]])
+    
+    # check if both SNV, a single SNV; then decide plot type and add to pre-set plot options
+    if(unique(dtypes) == "snv"){
+      l_plot <- list("Mutation statistics"="snv_stats")
+    }else if("snv" %in% dtypes){
+      l_plot <- list("Violin plot"="violin")
+    }else{
+      l_plot <- list("Scatter plot"="scatter2")
+    }
+    types <- c(types, l_plot)
+    
+    # save to rv
+    names(dtypes) <- sapply(names(dtypes), function(x) strsplit(x,"_")[[1]] %>% tail(., n=1))
+    rv[["dtypes"]] <- dtypes
   }
   
   if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
