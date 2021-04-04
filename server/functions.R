@@ -148,6 +148,10 @@ call_datatype <- function(x){
   names(data_types)[match(input[[paste0("db_",x)]], data_types)]
 }
 
+call_datatype_from_rv <- function(x){
+  names(data_types)[match(x, data_types)]
+}
+
 # return all GSs when a db is selected
 update_gs_by_db <- function(x, mode="nil"){
   gs_db_id <- paste0("gs_db_",x)

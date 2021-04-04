@@ -11,10 +11,14 @@ output$ui_results <- renderUI({
     )
     
     dtype1 <- rv[["data_type_1"]]
+    dtype1_name <- call_datatype_from_rv(dtype1)
+    dtype1_scatter <- as.list("scatter")
+    names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
+    print(dtype1_scatter)
     if(dtype1 == "snv"){
       l_plot <- list("Mutation statistics"="snv_stats")
     }else{
-      l_plot <- list("Scatter plot" = "scatter")
+      l_plot <- dtype1_scatter
     }
     
     types <- c(types, l_plot)
