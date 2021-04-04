@@ -158,7 +158,7 @@ observeEvent(input$confirm,{
           
           # save df
           df_list[[x]] <- df
-          if(x == 1){rv[[paste0("df_",x)]] <- df}
+          rv[[paste0("df_",x)]] <- df
 
           # no of cases in each group
           lels <- levels(df$level)
@@ -221,7 +221,7 @@ observeEvent(input$confirm,{
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2)
           rv[["title_gender"]] <- paste0(rv[["title_1"]]," vs Gender")
         }else{
-          rv[["df_gender"]] <- ""
+          rv[["df_gender"]] <- unique(rv$df_survival[["gender"]])
         }
       }
     })

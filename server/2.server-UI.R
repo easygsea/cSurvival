@@ -14,7 +14,7 @@ output$ui_results <- renderUI({
     dtype1_name <- call_datatype_from_rv(dtype1)
     dtype1_scatter <- as.list("scatter")
     names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
-    print(dtype1_scatter)
+    
     if(dtype1 == "snv"){
       l_plot <- list("Mutation statistics"="snv_stats")
     }else{
@@ -44,7 +44,10 @@ output$ui_results <- renderUI({
     types <- c(types, l_plot)
     
     # save to rv
-    names(dtypes) <- sapply(names(dtypes), function(x) strsplit(x,"_")[[1]] %>% tail(., n=1))
+    names(dtypes) <- sapply(names(dtypes), function(x) {
+      dtype <- strsplit(x,"_")[[1]] %>% tail(., n=1)
+      call_datatype_from_rv(dtype)
+      })
     rv[["dtypes"]] <- dtypes
   }
   
@@ -85,7 +88,7 @@ output$ui_results <- renderUI({
         direction = "horizontal"
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
-      ,if(surv_yn){
+      ,if(surv_yn & typeof(rv[[paste0("df_",input$plot_type)]]) == "list"){
         column(12,align="left",
           # survival analysis method
           radioGroupButtons(
@@ -108,50 +111,59 @@ output$ui_results <- renderUI({
           ,placement = "top")
         )
       }
-      ,column(
-        area_w, align = "left",
-        h3(rv[["title"]]),
-        if(surv_yn){
-          plotOutput("cox_plot",height = h_plot)
-        }else if(rv$plot_type == "scatter"){
-          plotlyOutput("scatter_plot", height = "585px")
-        }else if(rv$plot_type == "snv_stats"){
-          plotlyOutput("snv_stats_plot", height = "585px")
-        }
-        ,div(
-          align = "left",
-          style = "position: absolute; right: 2.5em; top: 1.5em;",
-          div(
-            id = "gear_btn",
-            style="display: inline-block;vertical-align:top;",
-            if(rv$plot_type != "snv_stats"){
-              dropdown(
-                uiOutput("plot_gear"),
-                circle = TRUE, status = "danger", style = "material-circle",
-                size="sm", right = T,
-                icon = icon("gear"), width = "300px",
-                tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-              )  
-            }
-          )
-          ,div(
-            id="download_btn",
-            style="display: inline-block;vertical-align:top;",
-            downloadBttn(
-              size = "sm", color = "danger", style = "material-circle",
-              outputId = "download_plot", label = NULL
-            )
-            ,bsTooltip("download_btn","Click to download the plot", placement = "top")
-          )
-        )
-      )
-      ,conditionalPanel(
-        'input.plot_type != "snv_stats"',
+      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list"){
         column(
-          5, align="left",
-          uiOutput("ui_stats")
+          12, align="center",
+          uiOutput("ui_error")
         )
-      )
+      }else{
+        div(
+          column(
+            area_w, align = "left",
+            h3(rv[["title"]]),
+            if(surv_yn){
+              plotOutput("cox_plot",height = h_plot)
+            }else if(rv$plot_type == "scatter"){
+              plotlyOutput("scatter_plot", height = "585px")
+            }else if(rv$plot_type == "snv_stats"){
+              plotlyOutput("snv_stats_plot", height = "585px")
+            }
+            ,div(
+              align = "left",
+              style = "position: absolute; right: 2.5em; top: 1.5em;",
+              div(
+                id = "gear_btn",
+                style="display: inline-block;vertical-align:top;",
+                if(rv$plot_type != "snv_stats"){
+                  dropdown(
+                    uiOutput("plot_gear"),
+                    circle = TRUE, status = "danger", style = "material-circle",
+                    size="sm", right = T,
+                    icon = icon("gear"), width = "300px",
+                    tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                  )  
+                }
+              )
+              ,div(
+                id="download_btn",
+                style="display: inline-block;vertical-align:top;",
+                downloadBttn(
+                  size = "sm", color = "danger", style = "material-circle",
+                  outputId = "download_plot", label = NULL
+                )
+                ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+              )
+            )
+          )
+          ,conditionalPanel(
+            'input.plot_type != "snv_stats"',
+            column(
+              5, align="left",
+              uiOutput("ui_stats")
+            )
+          )
+        )
+      }
     )
     ,absolutePanel(
       actionBttn(
@@ -172,7 +184,7 @@ output$ui_results <- renderUI({
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
 observeEvent(input$plot_type,{
   x <- rv$plot_type <- input$plot_type
-  req(if_surv())
+  req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
   output$cox_plot <- renderPlot({
     withProgress(value = 1, message = "Generating plot ...",{
       # # the gene(s)/GS(s) as the title
@@ -630,4 +642,26 @@ output$snv_stats_plot <- renderPlotly({
   fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category, Cases=Cases)) + 
     geom_bar(stat="identity")
   rv[["snv_stats_fig"]] <- ggplotly(fig, tooltip = c("Mutation","Frequency","Category","Cases"))
+})
+
+#------------- 5. Error UI -------------
+output$ui_error <- renderUI({
+  if(input$plot_type == "gender"){
+    div(
+      br(),
+      p(style="color:gray;font-size:120%;","Unable to assess for gender effect. The selected project(s) only contain(s) ",rv[["df_gender"]]," data.")
+      ,br()
+    )
+  }#else if(rv$plot_type == "1" | rv$plot_type == "2"){
+  #   df_name <- paste0("df_",rv$plot_type)
+  #   df <- rv[[df_name]]
+  #   print(head(df))
+  #   lels <- levels(df$level)
+  #   i <- rv$plot_type
+  #   dtype <- rv[["data_type_"]][[i]]
+  #   dtype_name <- call_datatype_from_rv(dtype)
+  #   p(style="color:gray;",paste0("Unable to perform survival analysis on the "
+  #                                ,dtype_name," data of ", paste0(rv$project, collapse = ", ")
+  #                                ,". The selected project(s) only contain(s) ",lels," data."))
+  # }
 })
