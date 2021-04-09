@@ -111,7 +111,7 @@ output$ui_results <- renderUI({
           ,placement = "top")
         )
       }
-      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list"){
+      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter"){
         column(
           12, align="center",
           uiOutput("ui_error")
