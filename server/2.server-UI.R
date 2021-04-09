@@ -46,10 +46,7 @@ output$ui_results <- renderUI({
     types <- c(types, l_plot)
     
     # save to rv
-    names(dtypes) <- sapply(names(dtypes), function(x) {
-      dtype <- strsplit(x,"_")[[1]] %>% tail(., n=1)
-      call_datatype_from_rv(dtype)
-      })
+    names(dtypes) <- dtypes_names
     rv[["dtypes"]] <- dtypes
   }
   
