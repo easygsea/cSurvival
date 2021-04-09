@@ -32,14 +32,16 @@ output$ui_results <- renderUI({
     # check data types
     dtypes <- grep("^data_type_",{names(rv)},value=T)
     dtypes <- sapply(dtypes,function(x) rv[[x]])
-    
+    dtypes_names <- call_datatype_from_rv(dtypes)
+
     # check if both SNV, a single SNV; then decide plot type and add to pre-set plot options
     if(unique(dtypes) == "snv"){
       l_plot <- list("Mutation statistics"="snv_stats")
     }else if("snv" %in% dtypes){
       l_plot <- list("Violin plot"="violin")
     }else{
-      l_plot <- list("Scatter plot"="scatter2")
+      l_plot <- as.list("scatter2")
+      names(l_plot) <- paste0(paste0(dtypes_names,collapse = "-")," scatter")
     }
     types <- c(types, l_plot)
     
@@ -410,7 +412,7 @@ output$ui_stats <- renderUI({
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                    ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
     stats_title <- paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])
-  }else if(rv$plot_type == "scatter"){
+  }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
     req(!is.null(rv[["res_scatter"]]))
     stats_title <- "Correlation statistics"
     res <- rv[["res_scatter"]]
@@ -541,7 +543,7 @@ observeEvent(input$km_mul,{
   
 },ignoreInit = T)
 
-# ----------- 4[A]. expression-survidal days scatter plot ---------------
+# ----------- 4[A]. expression-survival days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
   withProgress(value = 1,message = "Updating plot ...",{
     df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
