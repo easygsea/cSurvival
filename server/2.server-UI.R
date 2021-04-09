@@ -581,6 +581,13 @@ output$scatter_plot <- renderPlotly({
     # calculate correlation
     rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
     
+    # convert into ranks in necessary
+    if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
+      df_x <- rank(df_x,ties.method = "first")
+      df_y <- rank(df_y,ties.method = "first")
+      xlab <- "Ranks in survival days"; ylab <- "Ranks in FPKM expression"
+    }
+
     # draw the figure
     fig <- ggplot(df
                   ,aes(x=df_x, y=df_y
