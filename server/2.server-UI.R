@@ -183,13 +183,13 @@ output$ui_results <- renderUI({
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
 observeEvent(input$plot_type,{
   x <- rv$plot_type <- input$plot_type
+  if(x == "scatter"){x <- 1}
+  rv[["title"]] <- rv[[paste0("title_",x)]]
   req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
   output$cox_plot <- renderPlot({
     withProgress(value = 1, message = "Generating plot ...",{
       # # the gene(s)/GS(s) as the title
       # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
-      if(x == "scatter"){x <- 1}
-      rv[["title"]] <- rv[[paste0("title_",x)]]
 
       # no of cases in each group
       rv[["lels"]] <- rv[[paste0("lels_",x)]]
