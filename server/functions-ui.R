@@ -249,8 +249,8 @@ plot_run_ui <- function(n){
     non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
     syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
+    cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
     check_inputs <- function(){
-      cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
       if(is.null(input[[cat_id]]) & is.null(input[[db_id]])){
         return(rv[[cat_id]] == "g" & rv[[db_id]] != "snv")
       }else if(is.null(input[[cat_id]])){

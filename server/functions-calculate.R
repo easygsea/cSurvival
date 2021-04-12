@@ -1,6 +1,6 @@
 # determine if plot_type is for a survival curve
 if_surv <- function(plot_type=rv$plot_type){
-  plot_type == "all" | suppressWarnings(!is.na(as.numeric(plot_type))) | plot_type == "gender" 
+  plot_type == "all" | suppressWarnings(!is.na(as.numeric(plot_type))) | plot_type == "gender"
 }
 
 # extract gene expression/mutation data

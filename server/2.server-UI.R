@@ -425,7 +425,7 @@ output$ui_stats <- renderUI({
     h3(stats_title),
     if(if_surv()){
       conditionalPanel(
-        'input.plot_type == "all" & input.cox_km == "km"',
+        'input.plot_type == "all" | input.plot_type == "gender" & input.cox_km == "km"',
         selectizeInput(
           "km_mul",
           NULL,
