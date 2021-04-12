@@ -220,6 +220,7 @@ observeEvent(input$confirm,{
           # perform survival analysis
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2)
           rv[["title_gender"]] <- paste0(rv[["title_1"]]," vs Gender")
+          rv[["title_scatter"]] <- rv[["title_1"]]
         }else{
           rv[["df_gender"]] <- unique(rv$df_survival[["gender"]])
         }

@@ -391,6 +391,8 @@ plot_surv <-
     
     if(two_rows=="all"){
       fig <- fig + guides(col = guide_legend(nrow=rv$variable_nr,byrow=TRUE))
+    }else if(two_rows=="gender"){
+      fig <- fig + guides(col = guide_legend(nrow=2,byrow=TRUE))
     }
     return(fig)
   }
