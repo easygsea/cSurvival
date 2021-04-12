@@ -291,7 +291,16 @@ output$plot_gear <- renderUI({
     fluidRow(
       column(
         12,
-        materialSwitch(
+        selectizeInput(
+          "scatter_gender",
+          HTML(paste0("Select gender group:",add_help("scatter_gender_q")))
+          ,choices = rv[["genders"]]
+          ,selected = rv$scatter_gender
+          ,multiple = T
+        )
+        ,bsTooltip("scatter_gender_q",HTML(paste0("Select gender group(s) to visualize"))
+                   ,placement = "top")
+        ,materialSwitch(
           inputId = "scatter_log_x",
           label = HTML(paste0("<b>Log2 transform survival days?</b>",add_help("scatter_log_x_q"))),
           value = rv$scatter_log_x, inline = F, width = "100%",
@@ -345,6 +354,7 @@ observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})
 observeEvent(input$risk_table,{rv$risk_table <- input$risk_table})
 observeEvent(input$cum_table,{rv$cum_table <- input$cum_table})
 
+observeEvent(input$scatter_gender,{rv$scatter_gender <- input$scatter_gender})
 observeEvent(input$scatter_log_x,{rv$scatter_log_x <- input$scatter_log_x})
 observeEvent(input$scatter_log_y,{rv$scatter_log_y <- input$scatter_log_y})
 observeEvent(input$scatter_lm,{rv$scatter_lm <- input$scatter_lm})
@@ -543,7 +553,16 @@ observeEvent(input$km_mul,{
 # ----------- 4[A]. expression-survival days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
   withProgress(value = 1,message = "Updating plot ...",{
-    df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
+    # retrieve survival data
+    if(typeof(rv[["df_gender"]]) == "list"){
+      req(length(rv$scatter_gender) > 0)
+      df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,survival_days,level.y) %>%
+        dplyr::filter(level.y %in% rv$scatter_gender) %>%
+        dplyr::select(-level.y)
+    }else{
+      df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
+    }
+    
     df <- rv[["exprs_1"]]
     
     df_o <- df <- df_survival %>% inner_join(df, by="patient_id")

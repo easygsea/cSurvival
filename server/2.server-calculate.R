@@ -202,6 +202,9 @@ observeEvent(input$confirm,{
         # generate interaction df
         df_combined <- df_list[[1]] %>% inner_join(dplyr::select(rv$df_survival, patient_id, gender), by = "patient_id")
         
+        # gender types
+        rv$scatter_gender <- rv[["genders"]] <- df_combined %>% dplyr::select(gender) %>% unique(.) %>% unlist(.) %>% unname(.)
+
         df_combined <- dplyr::rename(df_combined, level.x = level, level.y = gender)
         df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",c("x","y"))),1,paste0,collapse="_")
         
@@ -216,7 +219,6 @@ observeEvent(input$confirm,{
           # level tallies
           rv[["lels_gender"]] <- lapply(lels, function(x) table(df_combined$level == x)["TRUE"] %>% unname(.))
           names(rv[["lels_gender"]]) <- lels
-          
           # perform survival analysis
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2)
           rv[["title_gender"]] <- paste0(rv[["title_1"]]," vs Gender")
