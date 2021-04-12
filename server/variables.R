@@ -8,6 +8,9 @@ data_types <- c("Expression"="rna",
                 "miRNA"="mir",
                 "Methylation"="met")
 
+data_types_gs <- c("Gene set"="lib",
+                   "Gene set (manual)"="manual")
+
 # ------- algorithms for somatic variant calling, e.g. mutect -----------
 snv_algorithms <- list(
   "MuTect" = "mutect"

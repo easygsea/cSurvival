@@ -30,11 +30,11 @@ init_rv <- function(x){
   # feedback on manual gene input
   rv[[paste0("gs_mg_",x)]] <- ""
   # lower bound for quantile loop
-  rv[[paste0("lower_",x)]] <- .25
+  rv[[paste0("lower_",x)]] <- .15
   # upper bound for quantile loop
-  rv[[paste0("upper_",x)]] <- .75
+  rv[[paste0("upper_",x)]] <- .85
   # step size
-  rv[[paste0("step_",x)]] <- .05
+  rv[[paste0("step_",x)]] <- .01
   # parameters for SNV mutation analysis
   rv[[paste0("snv_method_",x)]] <- "mutect"
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
@@ -155,11 +155,13 @@ addlinebreaks <- function(x, max=50, lbtype="<br>"){
 
 # call the data type
 call_datatype <- function(x){
-  names(data_types)[match(input[[paste0("db_",x)]], data_types)]
+  ddd <- c(data_types,data_types_gs)
+  names(ddd)[match(input[[paste0("db_",x)]], ddd)]
 }
 
 call_datatype_from_rv <- function(x){
-  names(data_types)[match(x, data_types)]
+  ddd <- c(data_types,data_types_gs)
+  names(ddd)[match(x, ddd)]
 }
 
 # return all GSs when a db is selected
