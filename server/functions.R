@@ -138,6 +138,16 @@ ifelse_rv <- function(id){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# break vectors if too long
+breakvector <- function(x, max=60){
+  if(length(x)>max){
+    c(x[1:max],"...")
+  }else{
+    x
+  }
+}
+
+# add line breaks into a string
 addlinebreaks <- function(x, max=50, lbtype="<br>"){
   x = gsub(paste0('(.{1,',max,'})(\\s|$)'), paste0('\\1',lbtype), x)
   return(x)

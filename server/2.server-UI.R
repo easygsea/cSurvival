@@ -110,7 +110,7 @@ output$ui_results <- renderUI({
           ,placement = "top")
         )
       }
-      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter"){
+      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "snv_stats"){
         column(
           12, align="center",
           uiOutput("ui_error")
@@ -639,7 +639,9 @@ output$snv_stats_plot <- renderPlotly({
   dat <- dat %>% dplyr::arrange(Category,Frequency)
   # patient cases that have each mutation
   Cases <- lapply(dat$Mutation, function(x){
-    names(muts)[muts == x] %>% paste0(., collapse = ", ") %>% addlinebreaks(.)
+    names(muts)[muts == x] %>% 
+      breakvector(.) %>%
+      paste0(., collapse = ", ") %>% addlinebreaks(.)
   })
   
   # set Mutation data as factor for ordering in ggplotly
