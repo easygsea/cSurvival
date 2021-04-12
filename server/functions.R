@@ -41,6 +41,7 @@ init_rv <- function(x){
   # rv[[paste0("synonymous_",x)]] <- variant_types_syn
   rv[[paste0("iter_",x)]] <- "iter"
   rv[[paste0("clow_",x)]] <- 50
+  rv[[paste0("cnv_par_",x)]] <- "auto"
 }
 
 # update these into rv when selections change

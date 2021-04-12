@@ -64,5 +64,6 @@ dyn_list <- function(x){
     # ,syn_id <- paste0("synonymous_",x)
     ,iter_id <- paste0("iter_",x)
     ,clow_id <- paste0("clow_",x)
+    ,cnv_id <- paste0("cnv_par_",x)
   )
 }

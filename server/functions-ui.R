@@ -249,6 +249,8 @@ plot_run_ui <- function(n){
     non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
     syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
+    cnv_id <- paste0("cnv_par_",x); cnv_id_q <- paste0(cnv_id,"_q")
+    
     cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
     check_inputs <- function(){
       if(is.null(input[[cat_id]]) & is.null(input[[db_id]])){
@@ -270,7 +272,7 @@ plot_run_ui <- function(n){
         h4(paste0("Advanced run parameters for Analysis #",x), align = "center"),
         h4(paste0("(",datatype,")")),
         tags$hr(style="border-color: #c2bfb5;"),
-        if(check_inputs()){
+        if(check_inputs() & rv[[db_id]] != "cnv"){
           div(
             radioGroupButtons(
               inputId = iter_id,
@@ -337,6 +339,30 @@ plot_run_ui <- function(n){
             ,bsTooltip(clow_id_q,HTML("Cases &le; the cutoff will be classified as low, while those &gt; the cutoff will be classified as high")
                        ,placement = "right")
           )
+        }else if(rv[[cat_id]] == "g" & rv[[db_id]] == "cnv"){
+          if(rv$tcga){
+            div(
+              radioGroupButtons(
+                inputId = cnv_id,
+                label = HTML(paste0("Select group to analyze:"),add_help(cnv_id_q)),
+                choiceNames = c("Automatic", "Copy number gain", "Copy number loss"),
+                choiceValues = c("auto","gain","loss"),
+                selected = rv[[cnv_id]],
+                size = "sm",
+                checkIcon = list(
+                  yes = icon("check-square"),
+                  no = icon("square-o")
+                ),
+                # status = "primary",
+                direction = "horizontal"
+              )
+              ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain or loss results in more significant survival difference"
+                                              ,"<br><b>Copy number gain</b>: To compare cases with copy number gain with the rest of the population"
+                                              ,"<br><b>Copy number loss</b>: To compare cases with copy number loss with the rest of the population"
+              ))
+                         ,placement = "top")
+            )
+          }
         }else{
           
           div(
