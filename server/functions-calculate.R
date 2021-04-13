@@ -245,12 +245,13 @@ get_info_most_significant_cnv <- function(data, mode){
 
   # loop between loss and gain, if auto
   if(mode == "auto"){
-    cats <- c(-1,1)
+    if(rv$tcga){cats <- c(-1,1)}else{cats <- c(1,3)}
     names(cats) <- c("Loss","Gain")
   }else if(mode == "gain"){
-    cats <- 1
+    if(rv$tcga){cats <- 1}else{cats <- 3}
     names(cats) <- "Gain"
   }else{
+    if(rv$tcga){cats <- -1}else{cats <- 1}
     names(cats) <- "Loss"
   }
     
@@ -259,7 +260,12 @@ get_info_most_significant_cnv <- function(data, mode){
   
   for(cat in seq_along(cats)){
     i <- as.numeric(cats[[cat]])
-    if(i > 0){
+    if(rv$tcga){
+      threshold <- 0
+    }else{
+      threshold <- 2
+    }
+    if(i > threshold){
       lells <- ifelse(exp >= i, "Gain", "Other")
     }else{
       lells <- ifelse(exp <= i, "Loss", "Other")

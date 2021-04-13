@@ -158,17 +158,16 @@ observeEvent(input$confirm,{
           # ---------- 3D. survival analysis on CNVs ---------
           }else if(extract_mode == "cnv"){
             cnv_mode <- ifelse_rv(paste0("cnv_par_",x))
-            if(rv$tcga){
-              results <- get_info_most_significant_cnv(data,cnv_mode)
-
-              # extract most significant df
-              df <- results[["df"]]
-              rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
-              if(rv[["cutoff_all"]] == ""){
-                rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
-              }else{
-                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
-              }
+            
+            results <- get_info_most_significant_cnv(data,cnv_mode)
+            
+            # extract most significant df
+            df <- results[["df"]]
+            rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
+            if(rv[["cutoff_all"]] == ""){
+              rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
+            }else{
+              rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
             }
             
           }
@@ -192,7 +191,7 @@ observeEvent(input$confirm,{
         }
       }
       
-      # ------------- 3D. perform n=2 interaction Surv ---------
+      # ------------- 3E. perform n=2 interaction Surv ---------
       if(rv$variable_n > 1){
         # generate interaction df
         df_combined <- Reduce(
@@ -215,7 +214,7 @@ observeEvent(input$confirm,{
         # saveRDS(rv[["cox_all"]], "cox_all")
       }
       
-      # ------------- 3E. perform n=1 gender interaction Surv ---------
+      # ------------- 3F. perform n=1 gender interaction Surv ---------
       if(rv$variable_n == 1){
         # generate interaction df
         df_combined <- df_list[[1]] %>% inner_join(dplyr::select(rv$df_survival, patient_id, gender), by = "patient_id")

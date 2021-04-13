@@ -340,29 +340,27 @@ plot_run_ui <- function(n){
                        ,placement = "right")
           )
         }else if(rv[[cat_id]] == "g" & rv[[db_id]] == "cnv"){
-          if(rv$tcga){
-            div(
-              radioGroupButtons(
-                inputId = cnv_id,
-                label = HTML(paste0("Select group to analyze:"),add_help(cnv_id_q)),
-                choiceNames = c("Automatic", "Copy number gain", "Copy number loss"),
-                choiceValues = c("auto","gain","loss"),
-                selected = rv[[cnv_id]],
-                size = "sm",
-                checkIcon = list(
-                  yes = icon("check-square"),
-                  no = icon("square-o")
-                ),
-                # status = "primary",
-                direction = "horizontal"
-              )
-              ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain or loss results in more significant survival difference"
-                                              ,"<br><b>Copy number gain</b>: To compare cases with copy number gain with the rest of the population"
-                                              ,"<br><b>Copy number loss</b>: To compare cases with copy number loss with the rest of the population"
-              ))
-                         ,placement = "top")
+          div(
+            radioGroupButtons(
+              inputId = cnv_id,
+              label = HTML(paste0("Select group to analyze:"),add_help(cnv_id_q)),
+              choiceNames = c("Automatic", "Copy number gain", "Copy number loss"),
+              choiceValues = c("auto","gain","loss"),
+              selected = rv[[cnv_id]],
+              size = "sm",
+              checkIcon = list(
+                yes = icon("check-square"),
+                no = icon("square-o")
+              ),
+              # status = "primary",
+              direction = "horizontal"
             )
-          }
+            ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain or loss results in more significant survival difference"
+                                            ,"<br><b>Copy number gain</b>: To compare cases with copy number gain with the rest of the population"
+                                            ,"<br><b>Copy number loss</b>: To compare cases with copy number loss with the rest of the population"
+            ))
+            ,placement = "top")
+          )
         }else{
           
           div(
