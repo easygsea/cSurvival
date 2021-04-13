@@ -217,6 +217,7 @@ plot_ui <- function(n){
         ,radioTooltip(id = db_id, choice = "cnv", title = HTML("Copy Number Variation (CNV)"))
         ,radioTooltip(id = db_id, choice = "mir", title = HTML("microRNA expression level"))
         ,radioTooltip(id = db_id, choice = "met", title = HTML("DNA methylation level"))
+        ,radioTooltip(id = db_id, choice = "rrpa", title = HTML("Reverse-phase protein array (RPPA)"))
       )
       
     )

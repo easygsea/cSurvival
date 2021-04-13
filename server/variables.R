@@ -6,7 +6,8 @@ data_types <- c("Expression"="rna",
                 "Mutation"="snv",
                 "CNV"="cnv",
                 "miRNA"="mir",
-                "Methylation"="met")
+                "Methylation"="met"
+                ,"RRPA"="rrpa")
 
 data_types_gs <- c("Gene set"="lib",
                    "Gene set (manual)"="manual")
