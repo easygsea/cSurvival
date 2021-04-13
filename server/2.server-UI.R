@@ -598,6 +598,7 @@ output$scatter_plot <- renderPlotly({
     df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
     if(ncol(df) == 3){
       colnames(df) <- c("patient_id","survival_days","exp")
+      exprs <- df$exp
       rv[["gs_no"]] = T; exp_type = "FPKM"
       if(rv$scatter_log_y){
         df_y <- log2(df$exp+1)
@@ -608,7 +609,7 @@ output$scatter_plot <- renderPlotly({
       }
     }else{
       rv[["gs_no"]] = F; exp_type = "mean of Z scores"
-      df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
+      exprs <- df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
       if(rv$scatter_log_y){
         z_min <- min(df_y)
         df_y <- log2(df_y - z_min + 1)
@@ -643,7 +644,7 @@ output$scatter_plot <- renderPlotly({
                          ,text=paste0(
                            "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
                            "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                           "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
+                           "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
                          )
                     )) +
         geom_point(aes(color=genders)) + #, shape=genders
@@ -664,7 +665,7 @@ output$scatter_plot <- renderPlotly({
                          ,text=paste0(
                            "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
                            "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                           "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
+                           "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
                          )
                     )) +
         geom_point(color=col)
