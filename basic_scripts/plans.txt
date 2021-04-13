@@ -8,6 +8,7 @@ Establish df collections for
 2. [df_cnv.csv df_cnv_scale.csv] Copy number variation (CNV), may need ID conversion
 3. [df_mir.csv df_mir_scale.csv] microRNA (miRNA)
 4. [df_met.csv df_met_scale.csv] Methylation
+5. [df_rrpa.csv df_rrpa_scale.csv] reverse-phase protein array (RPPA)
 
 1的数据处理出来应像
 [df_snv_type_mutect.csv]
