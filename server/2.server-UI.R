@@ -302,9 +302,9 @@ output$plot_gear <- renderUI({
         )
         ,bsTooltip("scatter_gender_q",HTML(paste0("Select gender group(s) to visualize"))
                    ,placement = "top")
-        ,conditionalPanel(
-          "input.scatter_gender.length > 1",
-          materialSwitch(
+        # ,conditionalPanel(
+        #   "input.scatter_gender.length > 1",
+          ,materialSwitch(
             inputId = "scatter_gender_y",
             label = HTML(paste0("<b>Color data points by gender?</b>",add_help("scatter_gender_y_q"))),
             value = rv$scatter_gender_y, inline = F, width = "100%",
@@ -313,7 +313,7 @@ output$plot_gear <- renderUI({
           ,bsTooltip("scatter_gender_y_q",HTML(paste0(
             "If TRUE, color scatter points by gender"
           )),placement = "top")
-        )
+        # )
         ,materialSwitch(
           inputId = "scatter_log_x",
           label = HTML(paste0("<b>Log2 transform survival days?</b>",add_help("scatter_log_x_q"))),
@@ -649,6 +649,16 @@ output$scatter_plot <- renderPlotly({
         geom_point(aes(color=genders)) + #, shape=genders
         scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
     }else{
+      if(!rv$scatter_gender_y){
+        col <- "#939597"
+      }else{
+        g_val <- as.numeric(genders) %>% unique(.)
+        if(g_val == 1){
+          col <- "#00BFC4"
+        }else{
+          col <- "#F8766D"
+        }
+      }
       fig <- ggplot(df
                     ,aes(x=df_x, y=df_y
                          ,text=paste0(
@@ -657,7 +667,7 @@ output$scatter_plot <- renderPlotly({
                            "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
                          )
                     )) +
-        geom_point(color="#939597")
+        geom_point(color=col)
     }
     fig <- fig + 
       xlab(xlab) +
