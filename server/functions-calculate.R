@@ -84,17 +84,15 @@ extract_gene_data <- function(x, type){
   # system(paste0("cut -d',' -f1,",col_to_keep," ",infile," > ",ofile))
   # data <- fread(ofile,sep=",",header=T)
   
-  # save original mutation data, if applicable
-  if(x == 1){
-    if(type == "rna"){
-      # save original expression data
-      rv[[paste0("exprs_",x)]] <- data
-    }else if(type == "snv"){
-      muts <- data[,2] %>% unlist(.)
-      names(muts) <- data$patient_id
-      muts <- muts[!is.na(muts)]
-      rv[[paste0("mutations_",x)]] <- muts
-    }
+  # save original expression or mutation data, if applicable
+  if(type == "rna"){
+    # save original expression data
+    rv[[paste0("exprs_",x)]] <- data
+  }else if(type == "snv"){
+    muts <- data[,2] %>% unlist(.)
+    names(muts) <- data$patient_id
+    muts <- muts[!is.na(muts)]
+    rv[[paste0("mutations_",x)]] <- muts
   }
   if(type == "lib" | type == "manual"){
     # save original FPKM data

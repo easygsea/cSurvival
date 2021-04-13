@@ -124,7 +124,7 @@ output$ui_results <- renderUI({
             h3(rv[["title"]]),
             if(surv_yn){
               plotOutput("cox_plot",height = h_plot)
-            }else if(rv$plot_type == "scatter"){
+            }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
               plotlyOutput("scatter_plot", height = "585px")
             }else if(rv$plot_type == "snv_stats"){
               plotlyOutput("snv_stats_plot", height = "585px")
@@ -289,7 +289,7 @@ output$plot_gear <- renderUI({
         )
       )
     )
-  }else if(rv$plot_type == "scatter"){
+  }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
     fluidRow(
       column(
         12,
@@ -316,19 +316,19 @@ output$plot_gear <- renderUI({
         # )
         ,materialSwitch(
           inputId = "scatter_log_x",
-          label = HTML(paste0("<b>Log2 transform survival days?</b>",add_help("scatter_log_x_q"))),
+          label = HTML(paste0("<b>Log2 transform x-axis values?</b>",add_help("scatter_log_x_q"))),
           value = rv$scatter_log_x, inline = F, width = "100%",
           status = "danger"
         )
-        ,bsTooltip("scatter_log_x_q",HTML(paste0("If TRUE, survival days (x-axis) are log2 transformed"))
+        ,bsTooltip("scatter_log_x_q",HTML(paste0("If TRUE, values along the x-axis are log2 transformed"))
                    ,placement = "top")
         ,materialSwitch(
           inputId = "scatter_log_y",
-          label = HTML(paste0("<b>Log2 transform gene expression values?</b>",add_help("scatter_log_y_q"))),
+          label = HTML(paste0("<b>Log2 transform y-axis values?</b>",add_help("scatter_log_y_q"))),
           value = rv$scatter_log_y, inline = F, width = "100%",
           status = "danger"
         )
-        ,bsTooltip("scatter_log_y_q",HTML(paste0("If TRUE, gene expression values (FPKM, y-axis) are log2 transformed"))
+        ,bsTooltip("scatter_log_y_q",HTML(paste0("If TRUE, values along the y-axis are log2 transformed"))
                    ,placement = "top")
         ,materialSwitch(
           inputId = "scatter_lm",
@@ -434,7 +434,7 @@ output$ui_stats <- renderUI({
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                    ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
     stats_title <- paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])
-  }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+  }else if(rv$plot_type == "scatter"){
     req(!is.null(rv[["res_scatter"]]))
     stats_title <- "Correlation statistics"
     res <- rv[["res_scatter"]]
@@ -443,6 +443,8 @@ output$ui_stats <- renderUI({
     p <- format(as.numeric(res$p.value), scientific = T, digits = 3)
     p_title <- "P-value"
     p_w <- 6
+  }else if(rv$plot_type == "scatter2"){
+    
   }
   
   column(
@@ -466,7 +468,7 @@ output$ui_stats <- renderUI({
           ,selected = rv[["km_mul"]]
         )
       )
-    }else if(rv$plot_type == "scatter"){
+    }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
       selectizeInput(
         "cor_method",
         NULL,
@@ -491,7 +493,7 @@ output$ui_stats <- renderUI({
             )
             ,bsTooltip("hr_q",HTML(hr_q),placement = "bottom")
           )
-        }else if(rv$plot_type == "scatter"){
+        }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
           column(
             6,
             descriptionBlock(
@@ -537,7 +539,7 @@ output$ui_stats <- renderUI({
             12,
             renderPrint({print(res[["stats"]])})
           )
-        }else if(rv$plot_type == "scatter"){
+        }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter"){
           column(
             12,
             renderPrint({print(res)})
@@ -581,105 +583,144 @@ observeEvent(input$km_mul,{
 # ----------- 4[A]. expression-survival days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
   withProgress(value = 1,message = "Updating plot ...",{
-    # retrieve survival data
-    if(typeof(rv[["df_gender"]]) == "list"){
-      req(length(rv$scatter_gender) > 0)
-      df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,survival_days,level.y) %>%
-        dplyr::filter(level.y %in% rv$scatter_gender) 
-      genders <- df_survival$`level.y`
-      df_survival <- df_survival %>%
-        dplyr::select(-level.y)
-    }else{
-      df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
-    }
-    
-    df <- rv[["exprs_1"]]
-    
-    df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
-    if(ncol(df) == 3){
-      colnames(df) <- c("patient_id","survival_days","exp")
-      exprs <- df$exp
-      rv[["gs_no"]] = T; exp_type = "FPKM"
-      if(rv$scatter_log_y){
-        df_y <- log2(df$exp+1)
-        ylab <- "Log2 (FPKM + 1)"
+    if(rv$plot_type == "scatter"){
+      # retrieve survival data
+      if(typeof(rv[["df_gender"]]) == "list"){
+        req(length(rv$scatter_gender) > 0)
+        df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,survival_days,level.y) %>%
+          dplyr::filter(level.y %in% rv$scatter_gender) 
+        genders <- df_survival$`level.y`
+        df_survival <- df_survival %>%
+          dplyr::select(-level.y)
       }else{
-        df_y <- df$exp
-        ylab <- "Gene expression value (FPKM)"
+        df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
       }
-    }else{
-      rv[["gs_no"]] = F; exp_type = "mean of Z scores"
-      exprs <- df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
-      if(rv$scatter_log_y){
-        z_min <- min(df_y)
-        df_y <- log2(df_y - z_min + 1)
-        ylab <- "Log2 (Z score - min(Z scores) + 1)"
-      }else{
-        ylab <- "Average of gene expression Z scores"
-      }
-    }
-    
-    if(rv$scatter_log_x){
-      df_x <- log2(df$survival_days+1)
-      xlab <- "Log2 (survival days + 1)"
-    }else{
-      df_x <- df$survival_days
-      xlab <- "Survival days"
-    }
-    
-    # calculate correlation
-    rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
-    
-    # convert into ranks in necessary
-    if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
-      df_x <- rank(df_x,ties.method = "first")
-      df_y <- rank(df_y,ties.method = "first")
-      xlab <- "Ranks in survival days"; ylab <- "Ranks in FPKM expression"
-    }
+      
+      df <- rv[["exprs_1"]]
 
-    # draw the figure
-    if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
-      fig <- ggplot(df
-                    ,aes(x=df_x, y=df_y
-                         ,text=paste0(
-                           "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                           "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                           "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
-                         )
-                    )) +
-        geom_point(aes(color=genders)) + #, shape=genders
-        scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
-    }else{
-      if(!rv$scatter_gender_y){
-        col <- "#939597"
-      }else{
-        g_val <- as.numeric(genders) %>% unique(.)
-        if(g_val == 1){
-          col <- "#00BFC4"
+      df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
+      if(ncol(df) == 3){
+        colnames(df) <- c("patient_id","survival_days","exp")
+        exprs <- df$exp
+        rv[["gs_no"]] = T; exp_type = "FPKM"
+        if(rv$scatter_log_y){
+          df_y <- log2(df$exp+1)
+          ylab <- "Log2 (FPKM + 1)"
         }else{
-          col <- "#F8766D"
+          df_y <- df$exp
+          ylab <- "Gene expression value (FPKM)"
+        }
+      }else{
+        rv[["gs_no"]] = F; exp_type = "mean of Z scores"
+        exprs <- df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
+        if(rv$scatter_log_y){
+          z_min <- min(df_y)
+          df_y <- log2(df_y - z_min + 1)
+          ylab <- "Log2 (Z score - min(Z scores) + 1)"
+        }else{
+          ylab <- "Average of gene expression Z scores"
         }
       }
-      fig <- ggplot(df
-                    ,aes(x=df_x, y=df_y
-                         ,text=paste0(
-                           "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                           "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                           "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
-                         )
-                    )) +
-        geom_point(color=col)
+      
+      if(rv$scatter_log_x){
+        df_x <- log2(df$survival_days+1)
+        xlab <- "Log2 (survival days + 1)"
+      }else{
+        df_x <- df$survival_days
+        xlab <- "Survival days"
+      }
+      
+      # calculate correlation
+      rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
+      
+      # convert into ranks in necessary
+      if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
+        df_x <- rank(df_x,ties.method = "first")
+        df_y <- rank(df_y,ties.method = "first")
+        xlab <- "Ranks in survival days"; ylab <- "Ranks in FPKM expression"
+      }
+      
+      # draw the figure
+      if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
+        fig <- ggplot(df
+                      ,aes(x=df_x, y=df_y
+                           ,text=paste0(
+                             "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                             "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                             "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
+                           )
+                      )) +
+          geom_point(aes(color=genders)) + #, shape=genders
+          scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
+      }else{
+        if(!rv$scatter_gender_y){
+          col <- "#939597"
+        }else{
+          g_val <- as.numeric(genders) %>% unique(.)
+          if(g_val == 1){
+            col <- "#00BFC4"
+          }else{
+            col <- "#F8766D"
+          }
+        }
+        fig <- ggplot(df
+                      ,aes(x=df_x, y=df_y
+                           ,text=paste0(
+                             "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                             "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                             "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
+                           )
+                      )) +
+          geom_point(color=col)
+      }
+      fig <- fig + 
+        xlab(xlab) +
+        ylab(ylab)
+      
+      # draw a regression line
+      if(rv$scatter_lm){
+        fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
+      }
+      
+      rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
+    }else if(rv$plot_type == "scatter2"){
+      df_o <- NULL; exprs <- NULL
+      # retrieve expression data
+      for(x in 1:rv$variable_n){
+        df <- rv[[paste0("exprs_",x)]]
+        
+        # # calculate mean Z-scores if a GS
+        # if(ncol(df) == 3){
+        #   colnames(df) <- c("patient_id","exp")
+        #   exprs <- df$exp
+        #   exp_type = "FPKM"
+        #   if(rv$scatter_log_y){
+        #     df_y <- log2(df$exp+1)
+        #     ylab <- "Log2 (FPKM + 1)"
+        #   }else{
+        #     df_y <- df$exp
+        #     ylab <- "Gene expression value (FPKM)"
+        #   }
+        # }else{
+        #   rv[["gs_no"]] = F; exp_type = "mean of Z scores"
+        #   exprs <- df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
+        #   if(rv$scatter_log_y){
+        #     z_min <- min(df_y)
+        #     df_y <- log2(df_y - z_min + 1)
+        #     ylab <- "Log2 (Z score - min(Z scores) + 1)"
+        #   }else{
+        #     ylab <- "Average of gene expression Z scores"
+        #   }
+        # }
+        # df_o <- df1 <- df1 %>% inner_join(df2, by="patient_id")
+        # colnames(df_o) <- c("patient_id","exp_x","exp_y")
+        
+      }
+
+      
+      
     }
-    fig <- fig + 
-      xlab(xlab) +
-      ylab(ylab)
     
-    # draw a regression line
-    if(rv$scatter_lm){
-      fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
-    }
-    
-    rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
   })
 })
 
