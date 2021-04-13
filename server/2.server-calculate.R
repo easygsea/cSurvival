@@ -90,7 +90,7 @@ observeEvent(input$confirm,{
           }
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)
-
+          
           # check if manually input genes exist in database
           if(extract_mode == "manual"){
             n_col <- ncol(data) - 1
@@ -106,7 +106,7 @@ observeEvent(input$confirm,{
           req(rv[[paste0("title_",x)]] != "")
 
           # ---------- 3B. perform Surv if expression-like data --------
-          if(input[[db_id]] != "snv" | input[[cat_id]] == "gs"){
+          if(extract_mode != "snv" & extract_mode != "cnv"){
             iter_id <- paste0("iter_",x)
             yn <- ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
             if(yn){
@@ -133,7 +133,7 @@ observeEvent(input$confirm,{
             }
             
           # ---------- 3C. survival analysis on SNVs ---------
-          }else if(input[[db_id]] == "snv"){
+          }else if(extract_mode == "snv"){
             # non-synonymous
             non_id <- paste0("nonsynonymous_",x)
             nons <- ifelse_rv(non_id)
@@ -154,6 +154,23 @@ observeEvent(input$confirm,{
             # create df for survival analysis
             df <- get_df_snv(data, nons)
             rv[[paste0("cutoff_",x)]] <- ""
+            
+          # ---------- 3D. survival analysis on CNVs ---------
+          }else if(extract_mode == "cnv"){
+            cnv_mode <- ifelse_rv(paste0("cnv_par_",x))
+            if(rv$tcga){
+              results <- get_info_most_significant_cnv(data,cnv_mode)
+
+              # extract most significant df
+              df <- results[["df"]]
+              rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
+              if(rv[["cutoff_all"]] == ""){
+                rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
+              }else{
+                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
+              }
+            }
+            
           }
           
           # save df
@@ -171,6 +188,7 @@ observeEvent(input$confirm,{
           
           # save data type to rv
           rv[[paste0("data_type_",x)]] <- extract_mode
+          
         }
       }
       

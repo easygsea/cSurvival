@@ -403,7 +403,7 @@ observeEvent(manual_lst(),{
   })
 },ignoreInit = T)
 
-# ---------- 1[G]. upate loaded genes ---------
+# ---------- 1[G]. update loaded genes ---------
 ## update gene selection UI
 genes_lst <- reactive({
   lapply(1:rv$variable_n, function(x){

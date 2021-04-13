@@ -11,17 +11,19 @@ output$ui_results <- renderUI({
     )
     
     dtype1 <- rv[["data_type_1"]]
-    dtype1_name <- call_datatype_from_rv(dtype1)
-    dtype1_scatter <- as.list("scatter")
-    names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
-    
-    if(dtype1 == "snv"){
-      l_plot <- list("Mutation statistics"="snv_stats")
-    }else{
-      l_plot <- dtype1_scatter
+    if(dtype1 != "cnv"){
+      dtype1_name <- call_datatype_from_rv(dtype1)
+      dtype1_scatter <- as.list("scatter")
+      names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
+      
+      if(dtype1 == "snv"){
+        l_plot <- list("Mutation statistics"="snv_stats")
+      }else{
+        l_plot <- dtype1_scatter
+      }
+      
+      types <- c(types, l_plot)
     }
-    
-    types <- c(types, l_plot)
   }else{
     indi <- as.list(1:x)
     names(indi) <- paste0("Survival plot #",1:x)
@@ -498,29 +500,37 @@ output$ui_stats <- renderUI({
     )
     ,boxPad(
       color = "gray",
-      if(if_surv()){
-        div(
-          uiOutput("ui_cutoff")
-          ,tagList(
-            lapply(names(rv[["lels"]]), function(x){
-              no <- rv[["lels"]][[x]]
-              column(
-                col_w,
-                descriptionBlock(
-                  header = no,
-                  text = x
-                  ,rightBorder = F
+      fluidRow(
+        if(if_surv()){
+          column(12,
+            uiOutput("ui_cutoff")
+            ,tagList(
+              lapply(names(rv[["lels"]]), function(x){
+                no <- rv[["lels"]][[x]]
+                column(
+                  col_w,
+                  descriptionBlock(
+                    header = no,
+                    text = x
+                    ,rightBorder = F
+                  )
                 )
-              )
-            })
+              })
+            )
           )
-        )
-      }
-      ,if(if_surv()){
-        renderPrint({print(res[["stats"]])})
-      }else if(rv$plot_type == "scatter"){
-        renderPrint({print(res)})
-      }
+        }
+        ,if(if_surv()){
+          column(
+            12,
+            renderPrint({print(res[["stats"]])})
+          )
+        }else if(rv$plot_type == "scatter"){
+          column(
+            12,
+            renderPrint({print(res)})
+          )
+        }
+      )
     )
   )
 })
@@ -529,9 +539,14 @@ output$ui_stats <- renderUI({
 output$ui_cutoff <- renderUI({
   cutoff <- rv[[paste0("cutoff_",rv$plot_type)]]
   req(cutoff != "")
+  if(rv[["data_type_1"]] == "cnv"){
+    txt <- "Copy number group: "
+  }else{
+    txt <- "Cutoff percentile: "
+  }
   column(
     12, align="center",
-    HTML(paste0("Cutoff percentile: ",cutoff))
+    HTML(paste0(txt,cutoff))
   )
 })
 

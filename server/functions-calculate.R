@@ -5,10 +5,13 @@ if_surv <- function(plot_type=rv$plot_type){
 
 # extract gene expression/mutation data
 extract_gene_data <- function(x, type){
+  g_ui_id <- paste0("g_",x)
+  
   df_file <- list(
     "rna" = "df_gene.csv"
     ,"lib" = "df_gene_scale.csv"
     ,"manual" = "df_gene_scale.csv"
+    ,"cnv" = "df_cnv.csv"
   )
   # all genes in selected project
   a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
@@ -28,7 +31,6 @@ extract_gene_data <- function(x, type){
     a_range <- 2:(length(all_genes)+1)
     
     # selected gene
-    g_ui_id <- paste0("g_",x)
     genes <- input[[g_ui_id]]
     # extract ENSG info
     genes <- strsplit(genes,"\\|")[[1]]
@@ -36,7 +38,6 @@ extract_gene_data <- function(x, type){
   }else if(type == "snv"){
     all_genes <- rv[[paste0("genes",x)]]
     # selected gene
-    g_ui_id <- paste0("g_",x)
     genes <- input[[g_ui_id]]
     
     # detect mutation method
@@ -64,6 +65,9 @@ extract_gene_data <- function(x, type){
   }else if(type == "manual"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
+  }else if(type == "cnv"){
+    all_genes <- rv[[paste0("genes",x)]]
+    genes <- input[[g_ui_id]]
   }
   
   # infile
@@ -227,7 +231,65 @@ get_df_snv <- function(data, nons){
   df <- df_o %>% inner_join(data, by = "patient_id")
 }
 
-# combine and generate interaction df
+# generate df if CNV copy number data
+get_info_most_significant_cnv <- function(data, mode){
+  # initialize the most significant p value and model
+  least_p_value <- 1
+  quantile_most_significant <- NULL
+  
+  # extract patients' IDs and expression values
+  patient_ids <- data$patient_id
+
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(patient_ids)
+
+  # loop between loss and gain, if auto
+  if(mode == "auto"){
+    cats <- c(-1,1)
+    names(cats) <- c("Loss","Gain")
+  }else if(mode == "gain"){
+    cats <- 1
+    names(cats) <- "Gain"
+  }else{
+    names(cats) <- "Loss"
+  }
+    
+  # copy numer data
+  exp <-data[,2] %>% unlist(.) %>% unname(.)
+  
+  for(cat in seq_along(cats)){
+    i <- as.numeric(cats[[cat]])
+    if(i > 0){
+      lells <- ifelse(exp >= i, "Gain", "Other")
+    }else{
+      lells <- ifelse(exp <= i, "Loss", "Other")
+    }
+    lels <- unique(lells) %>% sort(.,decreasing = T)
+    df <- df_o
+    df$level <- factor(lells, levels = lels)
+
+    # # test if there is significant difference between high and low level genes
+    # if(rv$cox_km == "cox"){
+    surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+    p_diff <- coef(summary(surv_diff))[,5]
+    # }else if(rv$cox_km == "km"){
+    #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+    #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+    # }
+    
+    if(p_diff <= least_p_value){
+      least_p_value <- p_diff
+      df_most_significant <- df
+      cutoff_most_significant <- names(cats[cat])
+    }
+  }
+  
+  results <- list(
+    df = df_most_significant,
+    cutoff = cutoff_most_significant
+  )
+  return(results)
+}
 
 ## Perform survival analysis
 cal_surv_rna <- 

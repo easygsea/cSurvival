@@ -209,6 +209,8 @@ retrieve_genes <- function(x){
     fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }else if(input[[db_id]] == "snv"){
     fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+  }else if(input[[db_id]] == "cnv"){
+    fread(paste0(rv$indir,"df_cnv.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }
 }
 
