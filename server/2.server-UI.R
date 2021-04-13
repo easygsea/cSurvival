@@ -302,6 +302,18 @@ output$plot_gear <- renderUI({
         )
         ,bsTooltip("scatter_gender_q",HTML(paste0("Select gender group(s) to visualize"))
                    ,placement = "top")
+        ,conditionalPanel(
+          "input.scatter_gender.length > 1",
+          materialSwitch(
+            inputId = "scatter_gender_y",
+            label = HTML(paste0("<b>Color data points by gender?</b>",add_help("scatter_gender_y_q"))),
+            value = rv$scatter_gender_y, inline = F, width = "100%",
+            status = "danger"
+          )
+          ,bsTooltip("scatter_gender_y_q",HTML(paste0(
+            "If TRUE, color scatter points by gender"
+          )),placement = "top")
+        )
         ,materialSwitch(
           inputId = "scatter_log_x",
           label = HTML(paste0("<b>Log2 transform survival days?</b>",add_help("scatter_log_x_q"))),
@@ -357,6 +369,7 @@ observeEvent(input$risk_table,{rv$risk_table <- input$risk_table})
 observeEvent(input$cum_table,{rv$cum_table <- input$cum_table})
 
 observeEvent(input$scatter_gender,{rv$scatter_gender <- input$scatter_gender})
+observeEvent(input$scatter_gender_y,{rv$scatter_gender_y <- input$scatter_gender_y})
 observeEvent(input$scatter_log_x,{rv$scatter_log_x <- input$scatter_log_x})
 observeEvent(input$scatter_log_y,{rv$scatter_log_y <- input$scatter_log_y})
 observeEvent(input$scatter_lm,{rv$scatter_lm <- input$scatter_lm})
@@ -572,7 +585,9 @@ output$scatter_plot <- renderPlotly({
     if(typeof(rv[["df_gender"]]) == "list"){
       req(length(rv$scatter_gender) > 0)
       df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,survival_days,level.y) %>%
-        dplyr::filter(level.y %in% rv$scatter_gender) %>%
+        dplyr::filter(level.y %in% rv$scatter_gender) 
+      genders <- df_survival$`level.y`
+      df_survival <- df_survival %>%
         dplyr::select(-level.y)
     }else{
       df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
@@ -622,15 +637,29 @@ output$scatter_plot <- renderPlotly({
     }
 
     # draw the figure
-    fig <- ggplot(df
-                  ,aes(x=df_x, y=df_y
-                       ,text=paste0(
-                         "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                         "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                         "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
-                       )
-                  )) +
-      geom_point(color="#939597") + 
+    if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
+      fig <- ggplot(df
+                    ,aes(x=df_x, y=df_y
+                         ,text=paste0(
+                           "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                           "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                           "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
+                         )
+                    )) +
+        geom_point(aes(color=genders)) + #, shape=genders
+        scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
+    }else{
+      fig <- ggplot(df
+                    ,aes(x=df_x, y=df_y
+                         ,text=paste0(
+                           "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                           "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                           "Expression (",exp_type,"): <b>",signif(df_y,digits=3),"</b>"
+                         )
+                    )) +
+        geom_point(color="#939597")
+    }
+    fig <- fig + 
       xlab(xlab) +
       ylab(ylab)
     
