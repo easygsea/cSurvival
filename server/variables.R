@@ -6,7 +6,11 @@ data_types <- c("Expression"="rna",
                 "Mutation"="snv",
                 "CNV"="cnv",
                 "miRNA"="mir",
-                "Methylation"="met")
+                "Methylation"="met"
+                ,"RRPA"="rrpa")
+
+data_types_gs <- c("Gene set"="lib",
+                   "Gene set (manual)"="manual")
 
 # ------- algorithms for somatic variant calling, e.g. mutect -----------
 snv_algorithms <- list(
@@ -51,14 +55,16 @@ dyn_list <- function(x){
     ,gs_gene_genes_id <- paste0("gs_lgg_",x) # verbtxt
     # manual gene input
     ,gs_manual_id <- paste0("gs_m_",x)
+    ,gs_manual_btn <- paste0("add_btn_",x)
     ,gs_genes_id <- paste0("gs_mg_",x)
     ,lower_id <- paste0("lower_",x)
     ,higher_id <- paste0("upper_",x)
     ,step_id <- paste0("step_",x)
     ,snv_id <- paste0("snv_method_",x)
     ,non_id <- paste0("nonsynonymous_",x)
-    ,syn_id <- paste0("synonymous_",x)
+    # ,syn_id <- paste0("synonymous_",x)
     ,iter_id <- paste0("iter_",x)
     ,clow_id <- paste0("clow_",x)
+    ,cnv_id <- paste0("cnv_par_",x)
   )
 }

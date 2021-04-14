@@ -53,6 +53,7 @@ plot_ui <- function(n){
     gs_gene_genes_id <- paste0("gs_lgg_",x) # verbatimTextOutput on input genes to filter GS
     # manual gene input
     gs_manual_id <- paste0("gs_m_",x); gs_manual_id_q <- paste0(gs_manual_id,"_q")
+    gs_manual_btn_id <- paste0("add_btn_",x)
     gs_genes_id <- paste0("gs_mg_",x)
 
     # the UI
@@ -168,8 +169,7 @@ plot_ui <- function(n){
                     conditionalPanel(
                       condition = sprintf("input.%s != ''", gs_lib_id),
                       span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
-                      # ,uiOutput(paste0(gs_lib_genes_id,"_tag"))
-                  )
+                    )
               )
               ,column(
                   4,
@@ -186,17 +186,18 @@ plot_ui <- function(n){
             textAreaInput(
               gs_manual_id,
               HTML(paste0(x,".3. Enter your genes:"),add_help(gs_manual_id_q))
-              ,value = ""
+              ,value = rv[[gs_manual_id]]
               ,placeholder = "Type to enter..."
             )
-            ,bsButton(paste0("add_btn_",x),tags$strong("Submit"),style = "warning")
+            ,span(verbatimTextOutput(gs_genes_id), style = paste0(rv$verbTxtStyle1))
+            ,bsButton(gs_manual_btn_id,tags$strong("Submit"),style = "warning")
           )
         )
         
         # tooltip for data category
-        ,bsTooltip(cat_id_q, HTML("<b>Gene</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene correlates with poorer/better prognosis.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer prognosis, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
+        ,bsTooltip(cat_id_q, HTML("<b>Gene</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene correlates with poorer/better survival.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
                    ,placement = "right")
-        ,bsTooltip(db_id_q, HTML("To study if cancer prognosis is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
+        ,bsTooltip(db_id_q, HTML("To study if cancer survival is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
                    ,placement = "right")
         ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID. If a gene is not found, it means its expression/mutation is barely detected in the selected cancer project.")
                    ,placement = "right")
@@ -209,13 +210,14 @@ plot_ui <- function(n){
         ,bsTooltip(gs_gene_id_q, HTML(paste0("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by \"&\" (and) or \"|\" (or). | is evaluated before &. Example: MYC&TP53|BCL2&BRCA1|BRCA2 is evaluated as MYC&(TP53|BCL2)&(BRCA1|BRCA2), which means MYC and (TP53 or BCL2) and (BRCA1 or BRCA2)."
                                              ," A maximum of 10 genes are supported."))
                    ,placement = "top")
-        ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited.")
+        ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited")
                    ,placement = "right")
         ,radioTooltip(id = db_id, choice = "rna", title = HTML("Gene expression level quantified by RNA-seq"))
         ,radioTooltip(id = db_id, choice = "snv", title = HTML("Simple Nucleotide Variation (SNV)"))
         ,radioTooltip(id = db_id, choice = "cnv", title = HTML("Copy Number Variation (CNV)"))
         ,radioTooltip(id = db_id, choice = "mir", title = HTML("microRNA expression level"))
         ,radioTooltip(id = db_id, choice = "met", title = HTML("DNA methylation level"))
+        ,radioTooltip(id = db_id, choice = "rrpa", title = HTML("Reverse-phase protein array (RPPA)"))
       )
       
     )
@@ -248,8 +250,10 @@ plot_run_ui <- function(n){
     non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
     syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
+    cnv_id <- paste0("cnv_par_",x); cnv_id_q <- paste0(cnv_id,"_q")
+    
+    cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
     check_inputs <- function(){
-      cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
       if(is.null(input[[cat_id]]) & is.null(input[[db_id]])){
         return(rv[[cat_id]] == "g" & rv[[db_id]] != "snv")
       }else if(is.null(input[[cat_id]])){
@@ -269,7 +273,7 @@ plot_run_ui <- function(n){
         h4(paste0("Advanced run parameters for Analysis #",x), align = "center"),
         h4(paste0("(",datatype,")")),
         tags$hr(style="border-color: #c2bfb5;"),
-        if(check_inputs()){
+        if(check_inputs() & rv[[db_id]] != "cnv"){
           div(
             radioGroupButtons(
               inputId = iter_id,
@@ -336,10 +340,32 @@ plot_run_ui <- function(n){
             ,bsTooltip(clow_id_q,HTML("Cases &le; the cutoff will be classified as low, while those &gt; the cutoff will be classified as high")
                        ,placement = "right")
           )
+        }else if(rv[[cat_id]] == "g" & rv[[db_id]] == "cnv"){
+          div(
+            radioGroupButtons(
+              inputId = cnv_id,
+              label = HTML(paste0("Select group to analyze:"),add_help(cnv_id_q)),
+              choiceNames = c("Automatic", "Copy number gain", "Copy number loss"),
+              choiceValues = c("auto","gain","loss"),
+              selected = rv[[cnv_id]],
+              size = "sm",
+              checkIcon = list(
+                yes = icon("check-square"),
+                no = icon("square-o")
+              ),
+              # status = "primary",
+              direction = "horizontal"
+            )
+            ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain or loss results in more significant survival difference"
+                                            ,"<br><b>Copy number gain</b>: To compare cases with copy number gain with the rest of the population"
+                                            ,"<br><b>Copy number loss</b>: To compare cases with copy number loss with the rest of the population"
+            ))
+            ,placement = "top")
+          )
         }else{
           
           div(
-            if(grepl("^TCGA",input$project)){
+            if(rv$tcga){
               # mutation caller options
               selectizeInput(
                 snv_id
@@ -367,16 +393,16 @@ plot_run_ui <- function(n){
             ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
                        ,placement = "top")
             
-            # silent variants classifications
-            ,selectizeInput(
-              syn_id
-              ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
-              ,choices = variant_types
-              ,selected = rv[[syn_id]]
-              ,multiple = T
-            )
-            ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
-                       ,placement = "top")
+            # # silent variants classifications
+            # ,selectizeInput(
+            #   syn_id
+            #   ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
+            #   ,choices = variant_types
+            #   ,selected = rv[[syn_id]]
+            #   ,multiple = T
+            # )
+            # ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+            #            ,placement = "top")
             
             ,if(x == 1 & rv$variable_n > 1){
               if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){
