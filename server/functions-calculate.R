@@ -111,7 +111,8 @@ extract_gene_data <- function(x, type){
 original_surv_df <- function(patient_ids){
   df_o <- rv$df_survival
   df_o %>% dplyr::filter(patient_id %in% patient_ids)
-  df_o[match(patient_ids,df_o$patient_id),] %>% dplyr::select(-gender)
+  df_o[match(patient_ids,df_o$patient_id),] %>% 
+    dplyr::select(-gender)
 }
 
 # generate survival df
@@ -126,6 +127,8 @@ generate_surv_df <- function(df, patient_ids, exp, q){
   df$level <- gene_quantiles
   lels <- unique(df$level) %>% sort(.,decreasing = T)
   df$level <- factor(df$level, levels = lels)
+  
+  df <- df %>% dplyr::filter(!is.na(patient_id))
   return(df)
 }
 
