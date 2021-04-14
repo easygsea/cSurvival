@@ -96,7 +96,7 @@ plot_ui <- function(n){
             ,selected=rv[[g_ui_id]]
             ,width = "100%"
             ,options = list(
-              placeholder = 'On top left, select a project to load genes ...'
+              placeholder = 'On top left, select a project(s) and confirm the selection to load genes ...'
               ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
             )
           )

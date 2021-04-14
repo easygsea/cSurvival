@@ -1,22 +1,14 @@
 #======================================================================#
 ####  STEP 0. Freeze project once selected, update gene selection UI   ####
 #======================================================================#
-observeEvent(input$project,{
-  # update genes placeholder
-  if(input$project == ""){
-    lapply(1:rv$variable_n, function(x){
-      g_ui_id <- paste0("g_",x)
-      updateSelectizeInput(
-        session,
-        g_ui_id
-        ,choices=c()
-        ,options = list(
-          placeholder = 'On top left, select a project to load genes ...'
-        )
-      )
-    })
-  }
+# output option to see if a project(s) is (are) selected or not
+output$projectStatus <- reactive({
+  rv$projectStatus == "selected"
+})
+outputOptions(output, "projectStatus", suspendWhenHidden = FALSE)
 
+# extract genes when project selection is confirmed
+observeEvent(input$confirm_project,{
   req(input$project != "")
   
   withProgress(value = 1, message = "Retrieving data from project .... ",{
@@ -27,6 +19,7 @@ observeEvent(input$project,{
     update_genes_ui(opt="nil")
   })
   
+  rv$projectStatus <- "selected"
   shinyjs::disable("project")
 })
 
@@ -34,12 +27,26 @@ observeEvent(input$project,{
 observeEvent(input$reset_project,{
   rv$project <- ""
   shinyjs::enable("project")
+  rv$projectStatus <- "none"
   
   updateSelectizeInput(
     session,
     "project",
     selected = ""
   )
+  
+  # update genes placeholder
+  lapply(1:rv$variable_n, function(x){
+    g_ui_id <- paste0("g_",x)
+    updateSelectizeInput(
+      session,
+      g_ui_id
+      ,choices=c()
+      ,options = list(
+        placeholder = 'On top left, select a project(s) and confirm the selection to load genes ...'
+      )
+    )
+  })
 })
 
 ## update gene selection UI

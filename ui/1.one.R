@@ -1,7 +1,7 @@
 bodyOne <- tabItem(tabName = "one",
     fluidRow(
         box(
-            width = 12, status = "danger", 
+            width = 12, status = "danger",
             column(
               12,
               fluidRow(
@@ -10,22 +10,32 @@ bodyOne <- tabItem(tabName = "one",
                   selectizeInput(
                     "project",
                     h4(strong("Cancer type by project"))
-                    ,choices = projects[grepl("TCGA|TARGET",names(projects))]
+                    ,choices = projects[grepl("TCGA|TARGET|DepMap",names(projects))]
                     ,width = "100%"
+                    ,multiple = T
                     ,options = list(
                       `live-search` = TRUE,
                       placeholder = "Type to search ..."
-                      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',"TCGA-BRCA"))
+                      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',""))
                     )
                   )
                 )
                 ,column(
                   2,
                   conditionalPanel(
-                    'input.project != ""',
+                    'input.project != "" & !output.projectStatus',
+                    actionBttn(
+                      "confirm_project",
+                      "Confirm selection"
+                      ,block = T,style = "simple",color = "warning",size="sm"
+                    )
+                    ,tags$style(type='text/css', "#confirm_project { margin-top: 43.5px;}"),
+                  )
+                  ,conditionalPanel(
+                    'output.projectStatus',
                     actionButton(
                       "reset_project",
-                      "Reset project"
+                      "Reset selection"
                       ,width = "100%"
                     )
                     ,tags$style(type='text/css', "#reset_project { margin-top: 43.5px;}"),
@@ -42,7 +52,7 @@ bodyOne <- tabItem(tabName = "one",
                   # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
                 )
               )
-              
+
               ,fluidRow(
                 uiOutput("ui_parameters")
               )
@@ -54,10 +64,10 @@ bodyOne <- tabItem(tabName = "one",
                 )
               )
             )
-            
+
         )
     )
-    
+
     ,fluidRow(
       uiOutput("ui_results")
     )
