@@ -14,7 +14,7 @@ observeEvent(input$confirm_project,{
   if(project_length_check){
     shinyalert(paste0("We support pan-cancer analysis with up to ",rv$max_project_n," projects."
                       , " You have selected ",length(input$project),"."
-                      , " Please delete less related projects. Thank you."))
+                      , " Please delete unrelated projects. Thank you."))
   }
   req(!project_length_check)
   
@@ -26,8 +26,8 @@ observeEvent(input$confirm_project,{
   
   study_length_check <- length(study) > 1
   if(study_length_check){
-    shinyalert(paste0("You have selected studies from ",paste0(study, collapse = ", "),"."
-                      ,"Please select studies from the same program."))
+    shinyalert(paste0("You have selected projects from: ",paste0(study, collapse = ", "),"."
+                      ," Please select projects from the same program."))
   }
   req(!study_length_check)
   
