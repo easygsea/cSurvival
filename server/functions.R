@@ -204,14 +204,31 @@ retrieve_genes <- function(x){
   method <- ifelse(is.null(input[[paste0("snv_method_",x)]]),"mutect",input[[paste0("snv_method_",x)]])
 
   if(is.null(input[[db_id]])){
-    fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(input[[db_id]] == "rna"){
-    fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(input[[db_id]] == "snv"){
-    fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
   }else if(input[[db_id]] == "cnv"){
-    fread(paste0(rv$indir,"df_cnv.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_cnv.csv")
+  }else if(input[[db_id]] == "mir"){
+    infiles <- paste0(rv$indir,"df_mir_scale.csv")
   }
+  
+  l <- lapply(infiles, function(x){
+    info <- fread(x,sep=",",header=T,nrows = 0)
+    return(info)
+  })
+  
+  # df_gene <- rbindlist(l, fill = T, use.names = T)
+  df_gene <- Reduce(function(df_1,df_2){
+    common_genes <- intersect(colnames(df_1), colnames(df_2))
+    df_1 <- select(df_1, all_of(common_genes))
+    df_2 <- select(df_2, all_of(common_genes))
+    rbindlist(list(df_1, df_2))
+  }, l)
+  
+  names(df_gene) %>% .[-1]
 }
 
 # update genes in the UI accordingly

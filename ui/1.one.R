@@ -9,14 +9,14 @@ bodyOne <- tabItem(tabName = "one",
                   8,
                   selectizeInput(
                     "project",
-                    h4(strong("Cancer type by project"))
+                    h4(strong("Select project(s) to analyze"))
                     ,choices = projects[grepl("TCGA|TARGET|DepMap",names(projects))]
                     ,width = "100%"
                     ,multiple = T
                     ,options = list(
                       `live-search` = TRUE,
                       placeholder = "Type to search ..."
-                      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',""))
+                      ,onInitialize = I(sprintf('function() { this.setValue(%s); }',"['TCGA-LUAD','TCGA-LUSC']"))
                     )
                   )
                 )
