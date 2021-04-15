@@ -183,7 +183,8 @@ output$ui_results <- renderUI({
 })
 
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
-observeEvent(input$plot_type,{
+observeEvent(list(input$plot_type,rv[["title_1"]]),{
+  req(!is.null(input$plot_type))
   x <- rv$plot_type <- input$plot_type
   # # the gene(s)/GS(s) as the title
   # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
