@@ -37,6 +37,8 @@ observeEvent(input$confirm_project,{
   withProgress(value = 1, message = "Retrieving data from project .... ",{
     rv$project <- input$project
     if(study == "TCGA"){rv$tcga <- T}else{rv$tcga <- F}
+    if(study == "TARGET"){rv$target <- T}else{rv$target <- F}
+    if(study == "DepMap"){rv$depmap <- T}else{rv$depmap <- F}
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     infiles <- paste0(rv$indir,"df_survival.csv")
     l <- lapply(infiles, function(x){

@@ -6,6 +6,7 @@ server <- function(input, output, session) {
   waiter_hide() # will hide *on_load waiter
     
   source("server/rv.R", local = TRUE)
+  source("server/reactives.R", local = TRUE)
   source("server/variables.R", local = TRUE)
   source("server/functions.R", local = TRUE)
   source("server/functions-ui.R", local = TRUE)

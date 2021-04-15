@@ -81,7 +81,7 @@ plot_ui <- function(n){
           radioGroupButtons(
             inputId = db_id,
             label = HTML(paste0(x,".2. Select type of molecular data:",add_help(db_id_q))),
-            choices = data_types,
+            choices = data_types(),
             status = "danger",
             selected = rv[[db_id]],
             checkIcon = list(

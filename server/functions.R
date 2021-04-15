@@ -156,12 +156,12 @@ addlinebreaks <- function(x, max=50, lbtype="<br>"){
 
 # call the data type
 call_datatype <- function(x){
-  ddd <- c(data_types,data_types_gs)
+  ddd <- c(data_types(),data_types_gs)
   names(ddd)[match(input[[paste0("db_",x)]], ddd)]
 }
 
 call_datatype_from_rv <- function(x){
-  ddd <- c(data_types,data_types_gs)
+  ddd <- c(data_types(),data_types_gs)
   names(ddd)[match(x, ddd)]
 }
 
