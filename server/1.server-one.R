@@ -73,7 +73,7 @@ observeEvent(input$reset_project,{
       g_ui_id
       ,choices=c()
       ,options = list(
-        placeholder = 'On top left, select a project(s) and confirm the selection to load genes ...'
+        placeholder = g_placeholder
       )
     )
   })
