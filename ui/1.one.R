@@ -15,7 +15,7 @@ bodyOne <- tabItem(tabName = "one",
                     ,options = list(
                       `live-search` = TRUE,
                       placeholder = "Type to search ..."
-                      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',"TCGA-BRCA"))
+                      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',"TCGA-LUAD"))
                     )
                   )
                 )

@@ -30,17 +30,18 @@ init_rv <- function(x){
   # feedback on manual gene input
   rv[[paste0("gs_mg_",x)]] <- ""
   # lower bound for quantile loop
-  rv[[paste0("lower_",x)]] <- .25
+  rv[[paste0("lower_",x)]] <- .15
   # upper bound for quantile loop
-  rv[[paste0("upper_",x)]] <- .75
+  rv[[paste0("upper_",x)]] <- .85
   # step size
-  rv[[paste0("step_",x)]] <- .05
+  rv[[paste0("step_",x)]] <- .01
   # parameters for SNV mutation analysis
   rv[[paste0("snv_method_",x)]] <- "mutect"
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
   # rv[[paste0("synonymous_",x)]] <- variant_types_syn
   rv[[paste0("iter_",x)]] <- "iter"
   rv[[paste0("clow_",x)]] <- 50
+  rv[[paste0("cnv_par_",x)]] <- "auto"
 }
 
 # update these into rv when selections change
@@ -138,9 +139,30 @@ ifelse_rv <- function(id){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# break vectors if too long
+breakvector <- function(x, max=60){
+  if(length(x)>max){
+    c(x[1:max],"...")
+  }else{
+    x
+  }
+}
+
+# add line breaks into a string
+addlinebreaks <- function(x, max=50, lbtype="<br>"){
+  x = gsub(paste0('(.{1,',max,'})(\\s|$)'), paste0('\\1',lbtype), x)
+  return(x)
+}
+
 # call the data type
 call_datatype <- function(x){
-  names(data_types)[match(input[[paste0("db_",x)]], data_types)]
+  ddd <- c(data_types,data_types_gs)
+  names(ddd)[match(input[[paste0("db_",x)]], ddd)]
+}
+
+call_datatype_from_rv <- function(x){
+  ddd <- c(data_types,data_types_gs)
+  names(ddd)[match(x, ddd)]
 }
 
 # return all GSs when a db is selected
@@ -187,6 +209,8 @@ retrieve_genes <- function(x){
     fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }else if(input[[db_id]] == "snv"){
     fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+  }else if(input[[db_id]] == "cnv"){
+    fread(paste0(rv$indir,"df_cnv.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
   }
 }
 

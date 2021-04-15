@@ -157,3 +157,39 @@ ggsurvplot(cox_exp_fit,data=df_exp_combined,
            # tables.theme = theme_cleantable(),  # Clean theme for tables
            # tables.y.text = FALSE               # Hide tables y axis text
 )
+
+# -------- 3.2. scatter plot on continuous variable -----------
+df_x <- log10(df_exp1$survival_days+1)
+df_y <- df_exp1$exp
+fig <- ggplot(df_exp1
+              ,aes(x=df_x, y=df_y
+                   ,text=paste0(
+                     "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                     "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                     "Expression (FPKM): <b>",signif(.data[["exp"]],digits=3),"</b>"
+                   )
+              )) +
+  geom_point(color="#939597") + 
+  geom_smooth(method=lm,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y)) +
+  xlab("Log10-transformed suvival days") +
+  ylab("Z-score transformed expression values")
+
+ggplotly(fig,tooltip = "text")
+
+res <- cor.test(df_x, df_y, 
+                method = "pearson")
+
+# -------- 3.2b scatter on GS -------
+df <- readRDS("basic_scripts/surv_test/df_lib")
+# hist(as.numeric(unlist((df[,3]))[c(-1,-2)]))
+
+# convert to a longer table
+df <- df %>% pivot_longer(!c(patient_id,survival_days), names_to="gene", values_to="exp")
+df$gene <- as.factor(df$gene)
+ggplot(df,aes(x=survival_days, y=exp, color=gene)) +
+  geom_point() + 
+  # geom_smooth(method=lm,fill="#F5DF4D") +
+  xlab("Log10-transformed suvival days") +
+  ylab("Z-score transformed expression values")
+
+ggplotly(fig,tooltip = "text")

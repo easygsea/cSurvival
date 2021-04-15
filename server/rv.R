@@ -9,7 +9,11 @@ rv <- reactiveValues(
   ,plot_type="all"
   
   ,cox_km = "cox"
+  ,km_mul = "hommel" # multiple correction method
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"
   ,risk_table = T,cum_table=T
+  
+  ,scatter_log_x=T,scatter_log_y=T,scatter_lm=T,lm_method="lm",cor_method="kendall"
+  ,scatter_gender_y=F # whether to color the scatter plot by gender
 )

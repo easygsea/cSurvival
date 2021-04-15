@@ -15,9 +15,9 @@ projects <- projects_cats %>% lapply(., function(x){
 names(projects) <- projects_cats
 
 # ------ available GMT gene sets -----
-gmt_dir <- paste0(dirname(getwd()),"/eVITTA/easyGSEA/www/gmts/hsa/")
+gmt_dir <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/hsa/")
 # collection in a df
-gmt_collection_df <- read_csv(paste0(dirname(getwd()),"/eVITTA/easyGSEA/www/gmts/gmts_list.csv"),col_names = F) %>% dplyr::filter(X1 == "hsa")
+gmt_collection_df <- read_csv(paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/gmts_list.csv"),col_names = F) %>% dplyr::filter(X1 == "hsa")
 # available databases
 gmt_dbs <- str_split(gmt_collection_df$X3,";") %>% lapply(function(x) gsub("_"," ",gsub("?[.]gmt$","",x)))
 db_names <- gsub("_"," ",gsub("^\\d+_?","",gmt_collection_df$X2))

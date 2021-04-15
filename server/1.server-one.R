@@ -24,7 +24,7 @@ observeEvent(input$project,{
     if(grepl("^TCGA",project)){rv$tcga <- T}else{rv$tcga <- F}
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     rv$df_survival <- fread(paste0(rv$indir,"df_survival.csv"),sep=",",header=T) %>%
-      dplyr::select(patient_id,survival_days,censoring_status)
+      dplyr::select(patient_id,survival_days,censoring_status,gender)
     update_genes_ui(opt="nil")
   })
   
@@ -42,18 +42,6 @@ observeEvent(input$reset_project,{
     selected = ""
   )
 })
-
-## update gene selection UI
-genes_lst <- reactive({
-  lapply(1:rv$variable_n, function(x){
-   input[[paste0("db_",x)]]
-  })
-})
-
-observeEvent(genes_lst(),{
-  req(rv$project != "")
-  update_genes_ui(opt="nil")
-},ignoreInit = T)
 
 #======================================================================#
 ####                          STEP 1. parameters                   ####
@@ -83,14 +71,28 @@ observeEvent(input$variable_n,{
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
   }
   
-  if(input$variable_n==1){
+  if(rv$variable_n_reached==0){
     load()
   }else{
     withProgress(value = 1, message = "Loading parameters ...",{
       load()
+      lapply(1:rv$variable_n, function(x){
+        rv[[paste0("genes",x)]] <- retrieve_genes(x)
+        g_ui_id <- paste0("g_",x)
+        updateSelectizeInput(
+          session,
+          g_ui_id,
+          choices = rv[[paste0("genes",x)]]
+          ,selected = rv[[g_ui_id]]
+          ,server = TRUE
+          ,options = list(
+            placeholder = 'Type to search ...'
+          )
+        )
+      })
     })
   }
-  
+  rv$variable_n_reached <- rv$variable_n_reached + 1
 })
 
 # main panels for user inputs
@@ -359,8 +361,8 @@ observeEvent(manual_lst(),{
             
             if(length(genelist) == 1 & genelist==""){
               shinyalert(e_msg)
-            }else if(length(genelist)>1000){
-              shinyalert("We currently support analysis of up to 1000 genes. Please revise your input. Thank you.")
+            }else if(length(genelist)>100){
+              shinyalert("We currently support analysis of up to 100 genes. Please revise your input. Thank you.")
             }else{
               genelist <- genelist[genelist!=""]
               rv[[gs_manual_id]] <- genelist
@@ -384,7 +386,7 @@ manual_lst <- reactive({
 })
 
 observeEvent(manual_lst(),{
-  array <- 1:rv$variable_n #check_array(lst)
+  array <- 1:rv$variable_n
   namespaces <- paste0("snv_method_",array)
   req(req_diff_rv(namespaces))
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
@@ -398,6 +400,38 @@ observeEvent(manual_lst(),{
         update_genes_ui()
       }
     })
+  })
+},ignoreInit = T)
+
+# ---------- 1[G]. update loaded genes ---------
+## update gene selection UI
+genes_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    input[[paste0("db_",x)]]
+  })
+})
+
+observeEvent(genes_lst(),{
+  req(rv$project != "")
+  array <- 1:rv$variable_n
+  namespaces <- paste0("db_",array)
+  req(req_diff_rv(namespaces))
+  lapply(array, function(x){
+    db_id <- paste0("db_",x)
+    if(rv[[db_id]] != input[[db_id]]){
+      rv[[db_id]] <- input[[db_id]]
+      rv[[paste0("genes",x)]] <- retrieve_genes(x)
+      updateSelectizeInput(
+        session,
+        paste0("g_",x),
+        choices = rv[[paste0("genes",x)]]
+        ,selected = ""
+        ,server = TRUE
+        ,options = list(
+          placeholder = 'Type to search ...'
+        )
+      )
+    }
   })
 },ignoreInit = T)
 
