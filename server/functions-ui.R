@@ -273,7 +273,7 @@ plot_run_ui <- function(n){
         h4(paste0("Advanced run parameters for Analysis #",x), align = "center"),
         h4(paste0("(",datatype,")")),
         tags$hr(style="border-color: #c2bfb5;"),
-        if(check_inputs() & rv[[db_id]] != "cnv"){
+        if(check_inputs() & ifelse_rv(db_id) != "cnv"){
           div(
             radioGroupButtons(
               inputId = iter_id,
@@ -340,13 +340,13 @@ plot_run_ui <- function(n){
             ,bsTooltip(clow_id_q,HTML("Cases &le; the cutoff will be classified as low, while those &gt; the cutoff will be classified as high")
                        ,placement = "right")
           )
-        }else if(rv[[cat_id]] == "g" & rv[[db_id]] == "cnv"){
+        }else if(input[[cat_id]] == "g" & input[[db_id]] == "cnv"){
           div(
             radioGroupButtons(
               inputId = cnv_id,
               label = HTML(paste0("Select group to analyze:"),add_help(cnv_id_q)),
-              choiceNames = c("Automatic", "Copy number gain", "Copy number loss"),
-              choiceValues = c("auto","gain","loss"),
+              choiceNames = c("Automatic", "Copy number gain", "Copy number loss","Copy number gain and loss"),
+              choiceValues = c("auto","gain","loss","both"),
               selected = rv[[cnv_id]],
               size = "sm",
               checkIcon = list(
@@ -356,9 +356,10 @@ plot_run_ui <- function(n){
               # status = "primary",
               direction = "horizontal"
             )
-            ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain or loss results in more significant survival difference"
+            ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain and/or loss results in more significant survival difference"
                                             ,"<br><b>Copy number gain</b>: To compare cases with copy number gain with the rest of the population"
                                             ,"<br><b>Copy number loss</b>: To compare cases with copy number loss with the rest of the population"
+                                            ,"<br><b>Copy number gain and loss</b>: To compare cases with copy number gain and loss, respectively, with the rest of the population"
             ))
             ,placement = "top")
           )

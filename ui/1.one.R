@@ -21,7 +21,7 @@ bodyOne <- tabItem(tabName = "one",
                   )
                   ,bsTooltip("project_q",HTML(paste0(
                     "Select a project(s) from DepMap, TARGET or TCGA. Multiple selections (maximum 5) are allowed for pan-cancer analysis."
-                    ," Click button below to confirm your selection and to proceed."
+                    ," Click button below to confirm your selection and proceed."
                   )),placement = "right")
                 )
                 ,column(
@@ -34,8 +34,8 @@ bodyOne <- tabItem(tabName = "one",
                   )
                   # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
                   ,bsTooltip("variable_n_q",HTML(paste0(
-                    "1 to analyze a single gene or gene set."
-                    ," 2 to analyze interactions between genes and/or gene sets."
+                    "1 to analyze a single gene, locus, or gene set."
+                    ," 2 to analyze interactions between genes, loci and/or gene sets."
                   )),placement = "right")
                 )
                 ,column(

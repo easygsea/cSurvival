@@ -245,50 +245,69 @@ get_info_most_significant_cnv <- function(data, mode){
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)
 
-  # loop between loss and gain, if auto
-  if(mode == "auto"){
-    if(rv$tcga){cats <- c(-1,1)}else{cats <- c(1,3)}
-    names(cats) <- c("Loss","Gain")
-  }else if(mode == "gain"){
-    if(rv$tcga){cats <- 1}else{cats <- 3}
-    names(cats) <- "Gain"
-  }else{
-    if(rv$tcga){cats <- -1}else{cats <- 1}
-    names(cats) <- "Loss"
-  }
-    
   # copy numer data
   exp <-data[,2] %>% unlist(.) %>% unname(.)
   
-  for(cat in seq_along(cats)){
-    i <- as.numeric(cats[[cat]])
-    if(rv$tcga){
-      threshold <- 0
-    }else{
-      threshold <- 2
+  # threshold for different programs
+  if(rv$tcga){
+    threshold <- 0
+  }else{
+    threshold <- 2
+  }
+
+  if(mode != "both"){
+    # loop between loss and gain, if not both
+    if(mode == "auto"){
+      if(rv$tcga){cats <- c(-1,1)}else{cats <- c(1,3)}
+      names(cats) <- c("Loss","Gain")
+    }else if(mode == "gain"){
+      if(rv$tcga){cats <- 1}else{cats <- 3}
+      names(cats) <- "Gain"
+    }else if(mode == "loss"){
+      if(rv$tcga){cats <- -1}else{cats <- 1}
+      names(cats) <- "Loss"
     }
-    if(i > threshold){
-      lells <- ifelse(exp >= i, "Gain", "Other")
-    }else{
-      lells <- ifelse(exp <= i, "Loss", "Other")
+    
+    
+    for(cat in seq_along(cats)){
+      i <- as.numeric(cats[[cat]])
+      if(i > threshold){
+        lells <- ifelse(exp >= i, "Gain", "Other")
+      }else{
+        lells <- ifelse(exp <= i, "Loss", "Other")
+      }
+      lels <- unique(lells) %>% sort(.,decreasing = T)
+      df <- df_o
+      df$level <- factor(lells, levels = lels)
+      
+      # # test if there is significant difference between high and low level genes
+      # if(rv$cox_km == "cox"){
+      surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      p_diff <- coef(summary(surv_diff))[,5] #summary(surv_diff)$logtest[3]
+      # }else if(rv$cox_km == "km"){
+      #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+      #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+      # }
+      if(p_diff <= least_p_value){
+        least_p_value <- p_diff
+        df_most_significant <- df
+        cutoff_most_significant <- names(cats[cat])
+      }
     }
+  }
+  
+  # additional analysis if to look at both gain and loss
+  if(mode == "auto" | mode == "both"){
+    lells <- ifelse(exp > threshold, "Gain", ifelse(exp < threshold, "Loss", "Other"))
     lels <- unique(lells) %>% sort(.,decreasing = T)
     df <- df_o
     df$level <- factor(lells, levels = lels)
-
-    # # test if there is significant difference between high and low level genes
-    # if(rv$cox_km == "cox"){
     surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-    p_diff <- coef(summary(surv_diff))[,5]
-    # }else if(rv$cox_km == "km"){
-    #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-    #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
-    # }
-    
+    p_diff <- min(coef(summary(surv_diff))[,5]) #summary(surv_diff)$logtest[3]
     if(p_diff <= least_p_value){
       least_p_value <- p_diff
       df_most_significant <- df
-      cutoff_most_significant <- names(cats[cat])
+      cutoff_most_significant <- "Gain & Loss"
     }
   }
   
