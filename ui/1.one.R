@@ -9,7 +9,7 @@ bodyOne <- tabItem(tabName = "one",
                   8,
                   selectizeInput(
                     "project",
-                    h4(strong("Select project(s) to analyze"))
+                    HTML(paste0("<h4><b>Select project(s) to analyze</b>",add_help("project_q"),"</h4>"))
                     ,choices = projects[grepl("TCGA|TARGET|DepMap",names(projects))]
                     ,width = "100%"
                     ,multiple = T
@@ -19,6 +19,10 @@ bodyOne <- tabItem(tabName = "one",
                       ,onInitialize = I(sprintf('function() { this.setValue(%s); }',"['TCGA-LUAD','TCGA-LUSC']"))
                     )
                   )
+                  ,bsTooltip("project_q",HTML(paste0(
+                    "Select a project(s) from DepMap, TARGET or TCGA. Multiple selections (maximum 5) are allowed for pan-cancer analysis."
+                    ," Click <b>Confirm selection</b> to confirm your selection and to proceed."
+                  )),placement = "right")
                 )
                 ,column(
                   2,
@@ -45,11 +49,15 @@ bodyOne <- tabItem(tabName = "one",
                   2,#align="right",
                   numericInput(
                     "variable_n",
-                    h4(strong("No. of analysis")),
+                    HTML(paste0("<h4><b>No. of analysis</b>",add_help("variable_n_q"),"</h4>")),
                     value = 1,
                     min = 1, max = 2, step = 1
                   )
                   # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
+                  ,bsTooltip("variable_n_q",HTML(paste0(
+                    "1 to analyze a single gene or gene set."
+                    ," 2 to analyze interactions between genes and/or gene sets."
+                  )),placement = "right")
                 )
               )
 
