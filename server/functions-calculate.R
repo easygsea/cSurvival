@@ -14,8 +14,8 @@ extract_gene_data <- function(x, type){
     ,"cnv" = "df_cnv.csv"
     ,"mir" = "df_mir.csv"
   )
-  # all genes in selected project
-  a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
+  # # all genes in selected project
+  # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
   
   if(type == "rna"){
     # original file that stores raw FPKM values
