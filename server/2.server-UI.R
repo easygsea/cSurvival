@@ -732,7 +732,9 @@ observeEvent(input$cor_method,{rv$cor_method <- input$cor_method})
 # ----------- 4[B]. SNV statistics bar plot ---------------
 output$snv_stats_plot <- renderPlotly({
   # calculated statistics
-  muts <- rv[["mutations_1"]]
+  muts <- rv[["mutations_1"]] %>% sapply(., function(x){
+    strsplit(x, "\\|")[[1]]
+  }) %>% unlist(.)
   stats <- table(muts)
 
   dat <- data.frame(
@@ -764,7 +766,10 @@ output$snv_stats_plot <- renderPlotly({
   dat$Mutation <- factor(dat$Mutation, levels = dat$Mutation)
   
   fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category, Cases=Cases)) + 
-    geom_bar(stat="identity")
+    geom_bar(stat="identity") +
+    xlab("") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
   rv[["snv_stats_fig"]] <- ggplotly(fig, tooltip = c("Mutation","Frequency","Category","Cases"))
 })
 
