@@ -139,6 +139,16 @@ ifelse_rv <- function(id){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# rbind a list of dfs by common columns only
+rbind_common <- function(df_list){
+  Reduce(function(df_1,df_2){
+    common_genes <- intersect(colnames(df_1), colnames(df_2))
+    df_1 <- select(df_1, all_of(common_genes))
+    df_2 <- select(df_2, all_of(common_genes))
+    rbindlist(list(df_1, df_2))
+  }, df_list)
+}
+
 # break vectors if too long
 breakvector <- function(x, max=60){
   if(length(x)>max){
@@ -221,14 +231,20 @@ retrieve_genes <- function(x){
   })
   
   # df_gene <- rbindlist(l, fill = T, use.names = T)
-  df_gene <- Reduce(function(df_1,df_2){
-    common_genes <- intersect(colnames(df_1), colnames(df_2))
-    df_1 <- select(df_1, all_of(common_genes))
-    df_2 <- select(df_2, all_of(common_genes))
-    rbindlist(list(df_1, df_2))
-  }, l)
+  df_gene <- rbind_common(l)
   
-  names(df_gene) %>% .[-1]
+  # the genes
+  genes <- names(df_gene) %>% .[-1]
+  
+  # save into rv$snv_genes
+  if(input[[db_id]] == "snv"){
+    rv[[paste0("snv_genes_",x)]] <- lapply(l, function(x){
+      names(x) %>% .[-1]
+    })
+  }
+  
+  # return the genes
+  return(genes)
 }
 
 # update genes in the UI accordingly

@@ -1,6 +1,6 @@
 observeEvent(input$confirm,{
-  if(input$project == ""){
-    shinyalert("Please select a project to begin your analysis")
+  if(rv$projectStatus == "none"){
+    shinyalert("Please select a project(s) to begin your analysis")
   }else{
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL

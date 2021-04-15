@@ -9,8 +9,6 @@ outputOptions(output, "projectStatus", suspendWhenHidden = FALSE)
 
 # extract genes when project selection is confirmed
 observeEvent(input$confirm_project,{
-  req(input$project != "")
-  
   # check if exceed maximum no of projects
   project_length_check <- length(input$project) > rv$max_project_n
   if(project_length_check){

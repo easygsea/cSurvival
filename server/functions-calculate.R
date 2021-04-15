@@ -12,42 +12,38 @@ extract_gene_data <- function(x, type){
     ,"lib" = "df_gene_scale.csv"
     ,"manual" = "df_gene_scale.csv"
     ,"cnv" = "df_cnv.csv"
+    ,"mir" = "df_mir.csv"
   )
   # all genes in selected project
   a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
   
   if(type == "rna"){
     # original file that stores raw FPKM values
-    all_file <- paste0(rv$indir,"df_gene.csv")
-    # read in all genes
-    all_genes <- fread(all_file,sep=",",header=T,nrows=0) %>% names(.)
-    # all_genes <- sapply(all_genes, function(x){
-    #   x <- strsplit(x,"\\|")[[1]]
-    #   if(length(x) == 1){x}else{x[-1]}
-    # }) %>% unname(.)
-    all_genes <- all_genes[-1]
-    
-    # change a_range
-    a_range <- 2:(length(all_genes)+1)
+    all_file <- paste0(rv$indir,"df_gene.csv")[[1]]
+    # # read in all genes
+    # all_genes <- fread(all_file,sep=",",header=T,nrows=0) %>% names(.)
+    # # all_genes <- sapply(all_genes, function(x){
+    # #   x <- strsplit(x,"\\|")[[1]]
+    # #   if(length(x) == 1){x}else{x[-1]}
+    # # }) %>% unname(.)
+    # all_genes <- all_genes[-1]
+    # 
+    # # change a_range
+    # a_range <- 2:(length(all_genes)+1)
     
     # selected gene
     genes <- input[[g_ui_id]]
     # extract ENSG info
     genes <- strsplit(genes,"\\|")[[1]]
-    if(length(genes) == 1){genes <- genes}else{genes <- genes[-1]}
+    if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
   }else if(type == "snv"){
-    all_genes <- rv[[paste0("genes",x)]]
     # selected gene
     genes <- input[[g_ui_id]]
     
     # detect mutation method
     if(rv$tcga){
       snv_id <- paste0("snv_method_",x)
-      if(is.null(input[[snv_id]])){
-        method <- rv[[snv_id]]
-      }else{
-        method <- input[[snv_id]]
-      }
+      method <- ifelse_rv(snv_id)
       df_file <- c(
         df_file
         ,"snv" = paste0("df_snv_class_",method,".csv")
@@ -62,21 +58,26 @@ extract_gene_data <- function(x, type){
   }else if(type == "lib"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
+    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
   }else if(type == "manual"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
-  }else if(type == "cnv"){
-    all_genes <- rv[[paste0("genes",x)]]
+    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+  }else if(type == "cnv" | type == "mir"){
+    # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]
   }
   
   # infile
-  infile <- paste0(rv$indir,df_file[[type]])
+  infiles <- paste0(rv$indir,df_file[[type]])
   
   # # method 1 fread drop columns
-  col_to_drop <- a_range[!all_genes %in% genes]
-  data <- fread(infile,sep=",",header=T,drop = col_to_drop)
-  
+  # col_to_drop <- a_range[!all_genes %in% genes]
+  l <- lapply(infiles,function(y){
+    fread(y,sep=",",header=T,select = c("patient_id", genes))
+  })
+  data <- rbindlist(l, use.names = T)
+
   # # # method 2 fread essential columns
   # ofile <- paste0(rv$indir,"tmp.csv")
   # unlink(ofile)
