@@ -3,8 +3,8 @@ input_mode_names <- c(
   "Expression (FPKM)" = "rna"
   ,"Mutation" = "snv"
   ,"Copy number" = "cnv"
-  ,"microRNA expression (FPKM)" = "mir"
-  ,"Methylation GIST" = "met"
+  ,"Expression (RPM)" = "mir"
+  ,"Methylation beta-value" = "met"
 )
 
 # ------- survival analysis methods ---------

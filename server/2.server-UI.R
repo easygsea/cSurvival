@@ -598,18 +598,21 @@ output$scatter_plot <- renderPlotly({
       }
       
       df <- rv[["exprs_1"]]
+      
+      # the unit, e.g. expression (fpkm)
+      exp_unit <- input_mode_name("1")
 
       df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
       if(ncol(df) == 3){
         colnames(df) <- c("patient_id","survival_days","exp")
         exprs <- df$exp
-        rv[["gs_no"]] = T; exp_type = "FPKM"
+        rv[["gs_no"]] = T; exp_type = exp_unit
         if(rv$scatter_log_y){
           df_y <- log2(df$exp+1)
-          ylab <- "Log2 (FPKM + 1)"
+          ylab <- paste0("Log2 (",exp_unit," + 1)")
         }else{
           df_y <- df$exp
-          ylab <- "Gene expression value (FPKM)"
+          ylab <- exp_unit
         }
       }else{
         rv[["gs_no"]] = F; exp_type = "mean of Z scores"
@@ -638,7 +641,7 @@ output$scatter_plot <- renderPlotly({
       if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
         df_x <- rank(df_x,ties.method = "first")
         df_y <- rank(df_y,ties.method = "first")
-        xlab <- "Ranks in survival days"; ylab <- "Ranks in FPKM expression"
+        xlab <- "Ranks in survival days"; ylab <- paste0("Ranks in ",exp_unit)
       }
       
       # draw the figure
@@ -648,7 +651,7 @@ output$scatter_plot <- renderPlotly({
                            ,text=paste0(
                              "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
                              "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                             "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
+                             exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +
           geom_point(aes(color=genders)) + #, shape=genders
@@ -669,7 +672,7 @@ output$scatter_plot <- renderPlotly({
                            ,text=paste0(
                              "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
                              "Survival days: <b>",.data[["survival_days"]],"</b>\n",
-                             "Expression (",exp_type,"): <b>",signif(exprs,digits=3),"</b>"
+                             exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +
           geom_point(color=col)

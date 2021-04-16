@@ -172,7 +172,8 @@ input_mode <- function(x){
   ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
 }
 
-input_mode_name <- function(inmode){
+input_mode_name <- function(x){
+  inmode <- input_mode(x)
   names(input_mode_names)[input_mode_names == inmode]
 }
 
