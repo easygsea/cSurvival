@@ -199,7 +199,9 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(db_id_q, HTML("To study if cancer survival is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
                    ,placement = "right")
-        ,bsTooltip(g_ui_id_q, HTML("Search and select. If a gene or locus is not found, try its alias names. If still not found, it means its expression/mutation is barely detected in the selected cancer project.")
+        ,bsTooltip(g_ui_id_q, HTML(paste0("Search and select. If a gene or locus is not found, try its alias names."
+                                          ," If still not found, it means its expression/alteration is barely detected in the selected cancer project."
+                                          ,"Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects."))
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")

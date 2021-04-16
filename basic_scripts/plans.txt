@@ -3,13 +3,41 @@ Establish collections of df_gene and df_survival
 2. Establish df for each cancer
 3. Create a csv denoting collections
 
-Establish df collections for
+Establish df collections for TCGA and TARGET
 1. [df_snv_type_mutect.csv df_snv_class_mutect.csv df_snv_type_varscan.csv df_snv_class_varscan.csv df_snv_type_somaticsniper.csv df_snv_class_somaticsniper.csv df_snv_type_muse.csv df_snv_class_muse.csv] Mutation (somatic nucleotide variation, SNV) 共八个文件
 2. [df_cnv.csv df_cnv_scale.csv] Copy number variation (CNV), may need ID conversion
 3. [df_mir.csv df_mir_scale.csv] microRNA (miRNA)
 4. [df_met.csv df_met_scale.csv] Methylation
 5. [df_rrpa.csv df_rrpa_scale.csv] reverse-phase protein array (RPPA)
 
+Establish df collections for DepMap (refer to depmap_organization.ppt)
+1. [ccle.csv] general description of available cancer cell lines:
+https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#36_Cancer_cell_lines
+
+2. [df_gene.csv df_gene_scale.csv] RNA-seq gene expression data
+https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#35_CCLE_RNAseq_gene_expression_data
+
+3. [df_snv_class.csv] somatic mutation variations
+https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#37_Mutation_calls
+
+4. [df_cnv.csv df_cnv_scale.csv] copy number variations
+https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#33_WES_copy_number_data
+
+5. [df_rppa.csv df_rppa_scale.csv] Reverse Phase Protein Array data
+https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#34_CCLE_Reverse_Phase_Protein_Array_data
+
+6. [df_proteomic.csv df_proteomic_scale.csv] Proteomic data
+https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#39_Proteomic
+
+Establish survival dfs for each DepMap subcategory
+
+7. [df_survival.csv] x3 under corresponding folders:
+CRISPR-Cas9: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#32_CRISPR-Cas9_knockout_data
+Drug_sensitivity: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#38_Drug_Sensitivity
+RNAi: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#31_RNA_inference_knockout_data
+
+-------------------------------------
+Other notes:
 1的数据处理出来应像
 [df_snv_type_mutect.csv]
 "patient","PTCHD2|57540|ENSG****",...
