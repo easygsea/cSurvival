@@ -79,7 +79,7 @@ observeEvent(input$confirm,{
           # clear RVs
           rv[[paste0("title_",x)]] <- ""
           # mode of extracting gene expression/mutation data in extract_gene_data
-          extract_mode <- ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
+          extract_mode <- input_mode(x)
           
           # title for the survival plot
           rv[[paste0("title_",x)]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
@@ -193,6 +193,9 @@ observeEvent(input$confirm,{
       
       # ------------- 3E. perform n=2 interaction Surv ---------
       if(rv$variable_n > 1){
+        # reset plot_type
+        rv$plot_type <- "all"
+        
         # generate interaction df
         df_combined <- Reduce(
           function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
@@ -216,6 +219,9 @@ observeEvent(input$confirm,{
       
       # ------------- 3F. perform n=1 gender interaction Surv ---------
       if(rv$variable_n == 1){
+        # reset plot_type
+        rv$plot_type <- 1
+        
         # generate interaction df
         df_combined <- df_list[[1]] %>% inner_join(dplyr::select(rv$df_survival, patient_id, gender), by = "patient_id")
         

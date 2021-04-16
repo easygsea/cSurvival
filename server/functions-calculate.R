@@ -283,7 +283,7 @@ get_info_most_significant_cnv <- function(data, mode){
       # # test if there is significant difference between high and low level genes
       # if(rv$cox_km == "cox"){
       surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-      p_diff <- coef(summary(surv_diff))[,5] #summary(surv_diff)$logtest[3]
+      p_diff <- summary(surv_diff)$logtest[3] #coef(summary(surv_diff))[,5]
       # }else if(rv$cox_km == "km"){
       #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
       #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
@@ -303,7 +303,7 @@ get_info_most_significant_cnv <- function(data, mode){
     df <- df_o
     df$level <- factor(lells, levels = lels)
     surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-    p_diff <- min(coef(summary(surv_diff))[,5]) #summary(surv_diff)$logtest[3]
+    p_diff <- summary(surv_diff)$logtest[3] #min(coef(summary(surv_diff))[,5]) 
     if(p_diff <= least_p_value){
       least_p_value <- p_diff
       df_most_significant <- df

@@ -114,6 +114,7 @@ observeEvent(input$variable_n,{
         lapply(1:rv$variable_n, function(x){
           rv[[paste0("genes",x)]] <- retrieve_genes(x)
           g_ui_id <- paste0("g_",x)
+          
           updateSelectizeInput(
             session,
             g_ui_id,

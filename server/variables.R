@@ -1,3 +1,12 @@
+# ------- names for input modes ----------
+input_mode_names <- c(
+  "Expression (FPKM)" = "rna"
+  ,"Mutation" = "snv"
+  ,"Copy number" = "cnv"
+  ,"microRNA expression (FPKM)" = "mir"
+  ,"Methylation GIST" = "met"
+)
+
 # ------- survival analysis methods ---------
 surv_methods <- c("Cox proportional-hazards (PH) model"="cox", "Kaplan-Meier (KM) log rank"="km")
 

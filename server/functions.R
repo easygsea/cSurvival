@@ -164,6 +164,18 @@ addlinebreaks <- function(x, max=50, lbtype="<br>"){
   return(x)
 }
 
+# check input data type/mode
+input_mode <- function(x){
+  cat_id <- paste0("cat_",x)
+  db_id <- paste0("db_",x)
+  gs_mode_id <- paste0("gs_mode_",x)
+  ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
+}
+
+input_mode_name <- function(inmode){
+  names(input_mode_names)[input_mode_names == inmode]
+}
+
 # call the data type
 call_datatype <- function(x){
   ddd <- c(data_types(),data_types_gs)
@@ -237,12 +249,14 @@ retrieve_genes <- function(x){
   genes <- names(df_gene) %>% .[-1]
   
   # save into rv$snv_genes
-  if(input[[db_id]] == "snv"){
-    rv[[paste0("snv_genes_",x)]] <- lapply(l, function(x){
-      names(x) %>% .[-1]
-    })
+  if(!is.null(input[[db_id]])){
+    if(input[[db_id]] == "snv"){
+      rv[[paste0("snv_genes_",x)]] <- lapply(l, function(x){
+        names(x) %>% .[-1]
+      })
+    }
   }
-  
+
   # return the genes
   return(genes)
 }

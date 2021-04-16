@@ -6,13 +6,13 @@ data_types <- reactive({
       "CNV"="cnv",
       "miRNA"="mir",
       "Methylation"="met"
-      ,"RRPA"="rrpa")
+      )
   }else if(rv$target){
     c("Expression"="rna", 
       "Mutation"="snv",
       "CNV"="cnv",
-      "miRNA"="mir",
-      "RRPA"="rrpa")
+      "miRNA"="mir"
+    )
   }else if(rv$depmap){
     c("Expression"="rna", 
       "Mutation"="snv",
