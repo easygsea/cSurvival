@@ -55,6 +55,7 @@ observeEvent(input$confirm,{
     
     #------ 2. begin analysis ------
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
+      rv$try_error <- 0
       rv$variable_nr <- rv$variable_n
       if(rv$variable_nr == 1){
         rv$plot_type <- "1"

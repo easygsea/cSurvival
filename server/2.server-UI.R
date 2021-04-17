@@ -1,5 +1,6 @@
 # ------------ Plots area ------------
 output$ui_results <- renderUI({
+  req(rv$try_error < 1)
   req(!is.null(rv[["cox_1"]]))
   x <- rv$variable_nr
   rv[["dtypes"]] <- ""
@@ -39,7 +40,9 @@ output$ui_results <- renderUI({
     # check if both SNV, a single SNV; then decide plot type and add to pre-set plot options
     if(unique(dtypes) == "snv"){
       l_plot <- list("Mutation statistics"="snv_stats")
-    }else if("snv" %in% dtypes){
+    }else if(unique(dtypes) == "cnv"){
+      
+    }else if(any(c("snv","cnv") %in% dtypes)){
       l_plot <- list("Violin plot"="violin")
     }else{
       l_plot <- as.list("scatter2")

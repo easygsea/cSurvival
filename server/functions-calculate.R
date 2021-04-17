@@ -333,17 +333,21 @@ cal_surv_rna <-
     km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
     
     # # 2. Cox # #
-    # create new df to seperate effects in Cox regression
-    lels <- levels(df$level)
     if(n == 1){
-      new_df <- with(df,data.frame(level = lels))
-      
       # run Cox regression
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
       # summary statistics
       cox.stats <- summary(cox_fit)
     }else if(n == 2){
-      km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method)
+      km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+      if(inherits(km2, "try-error")) {
+        rv$try_error <- rv$try_error + 1
+        shinyalert(paste0("The selected two genes/loci have exactly the same data."
+                          ," If CNV, you might have selected genes from the same cytoband."
+                          ," Please contrast genes from different cytobands."))
+      }
+      req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
+      
       km.stats <- list(km.stats,km2)
 
       # run Cox regression
@@ -365,6 +369,8 @@ cal_surv_rna <-
     lels_x <- levels(df$`level.x`)
     lels_y <- levels(df$`level.y`)
     # lels <- apply(expand.grid(lels_x,lels_y),1,paste0,collapse="_")
+    # create new df to seperate effects in Cox regression
+    lels <- levels(df$level)
     new_df <- with(df,data.frame(level = lels))
     cox.fit <- survfit(cox_fit,newdata=new_df)
 
