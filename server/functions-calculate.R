@@ -86,7 +86,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
   
   # save original expression or mutation data, if applicable
-  if(type == "rna"){
+  if(type == "rna" | type == "mir"){
     # save original expression data
     rv[[paste0("exprs_",x)]] <- data
   }else if(type == "snv"){
