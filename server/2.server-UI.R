@@ -115,7 +115,7 @@ output$ui_results <- renderUI({
           ,placement = "top")
         )
       }
-      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "snv_stats"){
+      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats"){
         column(
           12, align="center",
           uiOutput("ui_error")
@@ -293,7 +293,7 @@ output$plot_gear <- renderUI({
         )
       )
     )
-  }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+  }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2" & !is.null(rv$scatter_gender)){
     fluidRow(
       column(
         12,
@@ -438,7 +438,7 @@ output$ui_stats <- renderUI({
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                    ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
     stats_title <- paste0("Statistics by ",names(surv_methods)[surv_methods == rv$cox_km])
-  }else if(rv$plot_type == "scatter"){
+  }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
     req(!is.null(rv[["res_scatter"]]))
     stats_title <- "Correlation statistics"
     res <- rv[["res_scatter"]]
@@ -447,8 +447,6 @@ output$ui_stats <- renderUI({
     p <- format(as.numeric(res$p.value), scientific = T, digits = 3)
     p_title <- "P-value"
     p_w <- 6
-  }else if(rv$plot_type == "scatter2"){
-    
   }
   
   column(
@@ -543,7 +541,7 @@ output$ui_stats <- renderUI({
             12,
             renderPrint({print(res[["stats"]])})
           )
-        }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter"){
+        }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
           column(
             12,
             renderPrint({print(res)})
@@ -691,41 +689,92 @@ output$scatter_plot <- renderPlotly({
       
       rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
     }else if(rv$plot_type == "scatter2"){
-      df_o <- NULL; exprs <- NULL
-      # retrieve expression data
-      for(x in 1:rv$variable_n){
-        df <- rv[[paste0("exprs_",x)]]
-        
-        # # calculate mean Z-scores if a GS
-        # if(ncol(df) == 3){
-        #   colnames(df) <- c("patient_id","exp")
-        #   exprs <- df$exp
-        #   exp_type = "FPKM"
-        #   if(rv$scatter_log_y){
-        #     df_y <- log2(df$exp+1)
-        #     ylab <- "Log2 (FPKM + 1)"
-        #   }else{
-        #     df_y <- df$exp
-        #     ylab <- "Gene expression value (FPKM)"
-        #   }
-        # }else{
-        #   rv[["gs_no"]] = F; exp_type = "mean of Z scores"
-        #   exprs <- df_y <- rowMeans(df[,c(-1,-2)]) %>% unlist(.) %>% unname(.)
-        #   if(rv$scatter_log_y){
-        #     z_min <- min(df_y)
-        #     df_y <- log2(df_y - z_min + 1)
-        #     ylab <- "Log2 (Z score - min(Z scores) + 1)"
-        #   }else{
-        #     ylab <- "Average of gene expression Z scores"
-        #   }
-        # }
-        # df_o <- df1 <- df1 %>% inner_join(df2, by="patient_id")
-        # colnames(df_o) <- c("patient_id","exp_x","exp_y")
-        
+      df <- rv[["exprs_1"]] %>% inner_join(rv[["exprs_2"]], by="patient_id") %>%
+        inner_join(dplyr::select(rv$df_survival, patient_id, gender), by="patient_id")
+      colnames(df) <- c("patient_id","expa","expb","gender")
+      genders <- df$gender
+      if(is.null(rv$scatter_gender)){
+        rv$scatter_gender <- rv[["genders"]] <- unique(genders)
       }
-
+      df <- df %>% dplyr::filter(gender %in% rv$scatter_gender)
+      # the unit, e.g. expression (fpkm)
+      exp_unita <- input_mode_name("1")
+      exp_unitb <- input_mode_name("2")
       
+      # log y, if prompted
+      if(rv$scatter_log_y){
+        df_y <- log2(df$expb+1)
+        ylab <- paste0("Log2 (",exp_unitb," + 1)")
+      }else{
+        df_y <- df$expb
+        ylab <- exp_unitb
+      }
       
+      # log x, if prompted
+      if(rv$scatter_log_x){
+        df_x <- log2(df$expa+1)
+        xlab <- paste0("Log2 (",exp_unita," + 1)")
+      }else{
+        df_x <- df$expa
+        xlab <- exp_unita
+      }
+      
+      # calculate correlation
+      rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
+      
+      # convert into ranks in necessary
+      if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
+        df_x <- rank(df_x,ties.method = "first")
+        df_y <- rank(df_y,ties.method = "first")
+        xlab <- paste0("Ranks in ",exp_unita); ylab <- paste0("Ranks in ",exp_unitb)
+      }
+      xlab <- paste0(rv[["title_1"]],": ",xlab)
+      ylab <- paste0(rv[["title_2"]],": ",ylab)
+      
+      # figure hovers
+      txt <- function(.data){paste0(
+        "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+        exp_unita,": <b>",signif(.data[["expa"]],digits=3),"</b>\n",
+        exp_unitb,": <b>",signif(.data[["expb"]],digits=3),"</b>"
+      )}
+      
+      # draw the figure
+      if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
+        fig <- ggplot(df
+                      ,aes(x=df_x, y=df_y
+                           ,text=txt(.data)
+                      )) +
+          geom_point(aes(color=genders)) + #, shape=genders
+          scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
+      }else{
+        if(!rv$scatter_gender_y){
+          col <- "#939597"
+        }else{
+          g_val <- as.numeric(genders) %>% unique(.)
+          if(g_val == 1){
+            col <- "#00BFC4"
+          }else{
+            col <- "#F8766D"
+          }
+        }
+        fig <- ggplot(df
+                      ,aes(x=df_x, y=df_y
+                           ,text=txt(.data)
+                      )) +
+          geom_point(color=col)
+      }
+      
+      # rename x- and y- axis
+      fig <- fig + 
+        xlab(xlab) +
+        ylab(ylab)
+      
+      # draw a regression line
+      if(rv$scatter_lm){
+        fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
+      }
+      
+      rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
     }
     
   })

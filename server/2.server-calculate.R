@@ -57,10 +57,11 @@ observeEvent(input$confirm,{
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
       rv$try_error <- 0
       rv$variable_nr <- rv$variable_n
+      rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
-        rv$plot_type <- "1"
+        rv$plot_type <- "1"; if(rv$cor_method=="pearson"){rv$cor_method <- "kendall"}
       }else{
-        rv$plot_type <- "all"
+        rv$plot_type <- "all"; if(rv$cor_method!="pearson"){rv$cor_method <- "pearson"}
       }
       df_list <- list()
       rv[["title_all"]] = ""
