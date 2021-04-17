@@ -347,8 +347,8 @@ plot_run_ui <- function(n){
             radioGroupButtons(
               inputId = cnv_id,
               label = HTML(paste0("Select group to analyze:"),add_help(cnv_id_q)),
-              choiceNames = c("Automatic", "Copy number gain", "Copy number loss","Copy number gain and loss"),
-              choiceValues = c("auto","gain","loss","both"),
+              choiceNames = c("Automatic", "Copy number gain", "Copy number loss"), #,"Copy number gain and loss"
+              choiceValues = c("auto","gain","loss"), #,"both"
               selected = rv[[cnv_id]],
               size = "sm",
               checkIcon = list(

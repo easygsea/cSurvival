@@ -255,7 +255,7 @@ get_info_most_significant_cnv <- function(data, mode){
     threshold <- 2
   }
 
-  if(mode != "both"){
+  # if(mode != "both"){
     # loop between loss and gain, if not both
     if(mode == "auto"){
       if(rv$tcga){cats <- c(-1,1)}else{cats <- c(1,3)}
@@ -294,22 +294,22 @@ get_info_most_significant_cnv <- function(data, mode){
         cutoff_most_significant <- names(cats[cat])
       }
     }
-  }
+  # }
   
-  # additional analysis if to look at both gain and loss
-  if(mode == "auto" | mode == "both"){
-    lells <- ifelse(exp > threshold, "Gain", ifelse(exp < threshold, "Loss", "Other"))
-    lels <- unique(lells) %>% sort(.,decreasing = T)
-    df <- df_o
-    df$level <- factor(lells, levels = lels)
-    surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-    p_diff <- summary(surv_diff)$logtest[3] #min(coef(summary(surv_diff))[,5]) 
-    if(p_diff <= least_p_value){
-      least_p_value <- p_diff
-      df_most_significant <- df
-      cutoff_most_significant <- "Gain & Loss"
-    }
-  }
+  # # additional analysis if to look at both gain and loss
+  # if(mode == "auto" | mode == "both"){
+  #   lells <- ifelse(exp > threshold, "Gain", ifelse(exp < threshold, "Loss", "Other"))
+  #   lels <- unique(lells) %>% sort(.,decreasing = T)
+  #   df <- df_o
+  #   df$level <- factor(lells, levels = lels)
+  #   surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+  #   p_diff <- summary(surv_diff)$logtest[3] #min(coef(summary(surv_diff))[,5]) 
+  #   if(p_diff <= least_p_value){
+  #     least_p_value <- p_diff
+  #     df_most_significant <- df
+  #     cutoff_most_significant <- "Gain & Loss"
+  #   }
+  # }
   
   results <- list(
     df = df_most_significant,

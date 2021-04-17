@@ -778,6 +778,7 @@ output$snv_stats_plot <- renderPlotly({
 
 #------------- 5. Error UI -------------
 output$ui_error <- renderUI({
+  req(!is.null(input$plot_type))
   if(input$plot_type == "gender"){
     div(
       br(),
