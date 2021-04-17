@@ -72,19 +72,23 @@ req_lst <- function(lst){
 
 # req rv not equal to input value
 req_diff_rv <- function(namespaces){
-  !all(
-    sapply(namespaces, function(x){
-      rv[[x]] == input[[x]]
-    })
+  suppressWarnings(
+    !all(
+      sapply(namespaces, function(x){
+        rv[[x]] == input[[x]]
+      })
+    )
   )
 }
 
 # req rv larger than or equal to input value, applies to btn
 req_diff_rv_btn <- function(namespaces){
-  !all(
-    sapply(namespaces, function(x){
-      rv[[x]] >= input[[x]][1]
-    })
+  suppressWarnings(
+    !all(
+      sapply(namespaces, function(x){
+        rv[[x]] >= input[[x]][1]
+      })
+    )
   )
 }
 
