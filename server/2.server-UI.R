@@ -188,27 +188,30 @@ output$ui_results <- renderUI({
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
 observeEvent(list(input$plot_type,rv[["title_1"]]),{
   req(!is.null(input$plot_type))
+  req(rv$surv_plotted == "plotted")
   x <- rv$plot_type <- input$plot_type
   # # the gene(s)/GS(s) as the title
   # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
+})
+
+output$cox_plot <- renderPlot({
+  x <- rv$plot_type
   req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
-  output$cox_plot <- renderPlot({
-    withProgress(value = 1, message = "Generating plot ...",{
-      # no of cases in each group
-      rv[["lels"]] <- rv[[paste0("lels_",x)]]
-      
-      # the cutoff percentile
-      rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
-      
-      
-      # extract statistics
-      res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-      
-      # generate survival curve
-      plot_surv(res,two_rows=x)
-    })
+  withProgress(value = 1, message = "Generating plot ...",{
+    # no of cases in each group
+    rv[["lels"]] <- rv[[paste0("lels_",x)]]
+    
+    # the cutoff percentile
+    rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
+    
+    
+    # extract statistics
+    res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
+    rv$surv_plotted <- "plotted"
+    # generate survival curve
+    plot_surv(res,two_rows=x)
   })
 })
 

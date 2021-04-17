@@ -55,7 +55,7 @@ observeEvent(input$confirm,{
     
     #------ 2. begin analysis ------
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
-      rv$try_error <- 0
+      rv$try_error <- 0; rv$surv_plotted <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
