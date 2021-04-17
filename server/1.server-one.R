@@ -9,15 +9,6 @@ outputOptions(output, "projectStatus", suspendWhenHidden = FALSE)
 
 # extract genes when project selection is confirmed
 observeEvent(input$confirm_project,{
-  # check if exceed maximum no of projects
-  project_length_check <- length(input$project) > rv$max_project_n
-  if(project_length_check){
-    shinyalert(paste0("We support pan-cancer analysis with up to ",rv$max_project_n," projects."
-                      , " You have selected ",length(input$project),"."
-                      , " Please delete unrelated projects. Thank you."))
-  }
-  req(!project_length_check)
-  
   # check if selected projects are from different studies
   project <- input$project
   study <- sapply(project, function(x){
@@ -30,6 +21,17 @@ observeEvent(input$confirm_project,{
                       ," Please select projects from the same program."))
   }
   req(!study_length_check)
+  
+  # check if exceed maximum no of projects
+  project_length_check <- length(input$project) > rv$max_project_n
+  if(study == "TARGET"){rv$max_project_n <- 4}else{rv$max_project_n <- 3}
+  if(project_length_check){
+    shinyalert(paste0("We support pan-cancer analysis with up to ",rv$max_project_n," projects in ",study,"."
+                      , " You have selected ",length(input$project),"."
+                      , " Please delete unrelated projects. Thank you."))
+  }
+  req(!project_length_check)
+
   
   # retrieve data
   withProgress(value = 1, message = "Retrieving data from project .... ",{
