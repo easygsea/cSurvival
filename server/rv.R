@@ -1,5 +1,5 @@
 rv <- reactiveValues(
-  projectStatus="none", project="", max_project_n=5, try_error=0
+  projectStatus="none", project="", max_project_n=3, try_error=0
   ,tcga=T,target=T,depmap=F
   
   ,variable_n_reached=0
