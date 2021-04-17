@@ -193,9 +193,6 @@ observeEvent(input$confirm,{
       
       # ------------- 3E. perform n=2 interaction Surv ---------
       if(rv$variable_n > 1){
-        # reset plot_type
-        rv$plot_type <- "all"
-        
         # generate interaction df
         df_combined <- Reduce(
           function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
@@ -219,9 +216,6 @@ observeEvent(input$confirm,{
       
       # ------------- 3F. perform n=1 gender interaction Surv ---------
       if(rv$variable_n == 1){
-        # reset plot_type
-        rv$plot_type <- 1
-        
         # generate interaction df
         df_combined <- df_list[[1]] %>% inner_join(dplyr::select(rv$df_survival, patient_id, gender), by = "patient_id")
         
