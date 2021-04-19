@@ -67,3 +67,7 @@ project_data/TCGA-LUSC/df_snv_type_mutect.csv
 project_data/TCGA-LUSC/df_snv_type_somaticsniper.csv
 project_data/TCGA-LUSC/df_snv_type_varscan.csv
 project_data/TCGA-LUSC/df_survival.csv
+basic_scripts/eVITTA_test/df_design_all.rds
+basic_scripts/eVITTA_test/df_design_gender.rds
+basic_scripts/eVITTA_test/df_gene_all.rds
+basic_scripts/eVITTA_test/df_gene_gender.rds

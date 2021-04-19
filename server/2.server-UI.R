@@ -196,6 +196,21 @@ observeEvent(list(input$plot_type,rv[["title_1"]]),{
   # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
+  
+  # # perform differential expression analysis
+  # if(x == "gsea" & rv$gsea_done==""){
+  #   withProgress(value = 1, message = "Performing differential expression analysis. This might take a while. Please wait a minute. Thank you.",{
+  #     df_gene <- de_dfgene()
+  #     saveRDS(df_gene,"df_gene_all.rds")
+  #     if(rv$variable_nr == 1){
+  #       df_design <- rv[["df_gender"]]
+  #     }else{
+  #       df_design <- rv[["df_all"]]
+  #     }
+  #     saveRDS(df_design,"df_design_all.rds")
+  #     rv$gsea_done <- "yes"
+  #   })
+  # }
 })
 
 output$cox_plot <- renderPlot({

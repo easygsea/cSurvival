@@ -3,6 +3,10 @@ if_surv <- function(plot_type=rv$plot_type){
   plot_type == "all" | suppressWarnings(!is.na(as.numeric(plot_type))) | plot_type == "gender"
 }
 
+#==============================================#
+####        Survival analysis functions     ####
+#==============================================#
+
 # extract gene expression/mutation data
 extract_gene_data <- function(x, type){
   g_ui_id <- paste0("g_",x)
@@ -491,3 +495,38 @@ plot_surv <-
     }
     return(fig)
   }
+
+#==============================================#
+####            eVITTA functions            ####
+#==============================================#
+# the gene expression table
+de_dfgene <- function(){
+  # patients
+  patients <- rv[["df_gender"]][["patient_id"]]
+  
+  # read in data
+  infiles <- paste0(rv$indir,"df_gene.csv")
+  
+  l <- lapply(infiles, function(x){
+    info <- fread(x,sep=",",header=T)
+    return(info)
+  })
+  
+  # whole gene expression table
+  df_gene <- rbind_common(l) %>% dplyr::filter(patient_id %in% patients)
+  
+  # remaining patient ids
+  patients <- df_gene$patient_id
+  # the genes
+  genes <- colnames(df_gene)[-1]
+  
+  # transpose
+  df_gene <- transpose(df_gene) %>% .[-1,] %>%
+    dplyr::mutate_all(as.numeric) %>%
+    as.matrix(.)
+  # reassign patient ids
+  colnames(df_gene) <- patients
+  rownames(df_gene) <- genes
+  
+  return(df_gene)
+}
