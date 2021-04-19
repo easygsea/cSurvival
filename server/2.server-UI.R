@@ -23,7 +23,6 @@ output$ui_results <- renderUI({
         l_plot <- dtype1_scatter
       }
       
-      types <- c(types, l_plot)
     }
   }else{
     indi <- as.list(1:x)
@@ -39,7 +38,7 @@ output$ui_results <- renderUI({
 
     # check if both SNV, a single SNV; then decide plot type and add to pre-set plot options
     if(unique(dtypes) == "snv"){
-      l_plot <- list("Mutation statistics"="snv_stats")
+      # l_plot <- list("Mutation statistics"="snv_stats")
     }else if(unique(dtypes) == "cnv"){
       
     }else if(any(c("snv","cnv") %in% dtypes)){
@@ -48,12 +47,13 @@ output$ui_results <- renderUI({
       l_plot <- as.list("scatter2")
       names(l_plot) <- paste0(paste0(dtypes_names,collapse = "-")," scatter")
     }
-    types <- c(types, l_plot)
-    
     # save to rv
     names(dtypes) <- dtypes_names
     rv[["dtypes"]] <- dtypes
   }
+  
+  # assemble all types of plots
+  types <- c(types, l_plot, "Differential expression & enrichment analysis"="gsea")
   
   if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
     h_plot <- "725px"
@@ -65,7 +65,7 @@ output$ui_results <- renderUI({
   surv_yn <- if_surv()
   
   # width for the plot area
-  if(rv$plot_type != "snv_stats"){
+  if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
     area_w <- 7
   }else{
     area_w <- 12
@@ -115,7 +115,7 @@ output$ui_results <- renderUI({
           ,placement = "top")
         )
       }
-      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats"){
+      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
         column(
           12, align="center",
           uiOutput("ui_error")
@@ -131,6 +131,8 @@ output$ui_results <- renderUI({
               plotlyOutput("scatter_plot", height = "585px")
             }else if(rv$plot_type == "snv_stats"){
               plotlyOutput("snv_stats_plot", height = "585px")
+            }else if(rv$plot_type == "gsea"){
+              uiOutput("ui_gsea")
             }
             ,div(
               align = "left",
@@ -138,7 +140,7 @@ output$ui_results <- renderUI({
               div(
                 id = "gear_btn",
                 style="display: inline-block;vertical-align:top;",
-                if(rv$plot_type != "snv_stats"){
+                if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
                   dropdown(
                     uiOutput("plot_gear"),
                     circle = TRUE, status = "danger", style = "material-circle",
@@ -160,7 +162,7 @@ output$ui_results <- renderUI({
             )
           )
           ,conditionalPanel(
-            'input.plot_type != "snv_stats"',
+            'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
             column(
               5, align="left",
               uiOutput("ui_stats")
@@ -409,7 +411,7 @@ output$download_plot <- downloadHandler(
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
-  req(rv$plot_type != "snv_stats")
+  req(rv$plot_type != "snv_stats" & rv$plot_type != "gsea")
   if(if_surv()){
     req(!is.null(rv[["res"]]))
     
