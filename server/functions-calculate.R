@@ -521,12 +521,40 @@ de_dfgene <- function(){
   genes <- colnames(df_gene)[-1]
   
   # transpose
-  df_gene <- transpose(df_gene) %>% .[-1,] %>%
-    dplyr::mutate_all(as.numeric) %>%
-    as.matrix(.)
+  df_gene <- transpose(df_gene) %>% .[-1,] %>% as.data.frame()
   # reassign patient ids
   colnames(df_gene) <- patients
   rownames(df_gene) <- genes
+  
+  # id conversion
+  # create individual tables using org.Hs
+  egENS <- toTable(org.Hs.egENSEMBL)
+  egSYMBOL <- toTable(org.Hs.egSYMBOL)
+  
+  # bind the tables
+  id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
+  
+  # extract the gene ids from df_gene and find their names from id conversion table
+  gene_ids <- as_tibble_col(rownames(df_gene), column_name = "ensembl_id")
+  gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
+  
+  # convert gene ids
+  df_gene <- df_gene %>% dplyr::mutate(ensembl_id=rownames(df_gene)) %>%
+    left_join(gene_ids_table, by = "ensembl_id")
+  
+  # remove unnecessary columns
+  df_gene <- df_gene %>%
+    dplyr::distinct(symbol,.keep_all = TRUE) %>%
+    dplyr::filter(!is.na(symbol))
+  
+  genes <- df_gene$symbol
+  rownames(df_gene) <- genes
+  
+  # convert to numeric matrix
+  df_gene <- df_gene %>%
+    dplyr::select(-c(ensembl_id, gene_id, symbol)) %>%
+    dplyr::mutate_all(as.numeric) %>%
+    as.matrix(.)
   
   return(df_gene)
 }

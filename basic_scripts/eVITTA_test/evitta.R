@@ -22,7 +22,6 @@ egSYMBOL <- toTable(org.Hs.egSYMBOL)
 
 # bind the tables
 id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
-head(id_table)
 
 # extract the gene ids from df_gene and find their names from id conversion table
 gene_ids <- as_tibble_col(rownames(df_gene_gender), column_name = "ensembl_id")
