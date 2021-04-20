@@ -1,6 +1,6 @@
 observeEvent(input$confirm,{
-  if(input$project == ""){
-    shinyalert("Please select a project to begin your analysis")
+  if(rv$projectStatus == "none"){
+    shinyalert("Please select a project(s) to begin your analysis")
   }else{
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
@@ -55,11 +55,13 @@ observeEvent(input$confirm,{
     
     #------ 2. begin analysis ------
     withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
+      rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
+      rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
-        rv$plot_type <- "1"
+        rv$plot_type <- "1"; if(rv$cor_method=="pearson"){rv$cor_method <- "kendall"}
       }else{
-        rv$plot_type <- "all"
+        rv$plot_type <- "all"; if(rv$cor_method!="pearson"){rv$cor_method <- "pearson"}
       }
       df_list <- list()
       rv[["title_all"]] = ""
@@ -79,7 +81,7 @@ observeEvent(input$confirm,{
           # clear RVs
           rv[[paste0("title_",x)]] <- ""
           # mode of extracting gene expression/mutation data in extract_gene_data
-          extract_mode <- ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
+          extract_mode <- input_mode(x)
           
           # title for the survival plot
           rv[[paste0("title_",x)]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])

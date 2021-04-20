@@ -72,19 +72,23 @@ req_lst <- function(lst){
 
 # req rv not equal to input value
 req_diff_rv <- function(namespaces){
-  !all(
-    sapply(namespaces, function(x){
-      rv[[x]] == input[[x]]
-    })
+  suppressWarnings(
+    !all(
+      sapply(namespaces, function(x){
+        rv[[x]] == input[[x]]
+      })
+    )
   )
 }
 
 # req rv larger than or equal to input value, applies to btn
 req_diff_rv_btn <- function(namespaces){
-  !all(
-    sapply(namespaces, function(x){
-      rv[[x]] >= input[[x]][1]
-    })
+  suppressWarnings(
+    !all(
+      sapply(namespaces, function(x){
+        rv[[x]] >= input[[x]][1]
+      })
+    )
   )
 }
 
@@ -139,6 +143,16 @@ ifelse_rv <- function(id){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# rbind a list of dfs by common columns only
+rbind_common <- function(df_list){
+  Reduce(function(df_1,df_2){
+    common_genes <- intersect(colnames(df_1), colnames(df_2))
+    df_1 <- select(df_1, all_of(common_genes))
+    df_2 <- select(df_2, all_of(common_genes))
+    rbindlist(list(df_1, df_2))
+  }, df_list)
+}
+
 # break vectors if too long
 breakvector <- function(x, max=60){
   if(length(x)>max){
@@ -154,14 +168,27 @@ addlinebreaks <- function(x, max=50, lbtype="<br>"){
   return(x)
 }
 
+# check input data type/mode
+input_mode <- function(x){
+  cat_id <- paste0("cat_",x)
+  db_id <- paste0("db_",x)
+  gs_mode_id <- paste0("gs_mode_",x)
+  ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
+}
+
+input_mode_name <- function(x){
+  inmode <- input_mode(x)
+  names(input_mode_names)[input_mode_names == inmode]
+}
+
 # call the data type
 call_datatype <- function(x){
-  ddd <- c(data_types,data_types_gs)
+  ddd <- c(data_types(),data_types_gs)
   names(ddd)[match(input[[paste0("db_",x)]], ddd)]
 }
 
 call_datatype_from_rv <- function(x){
-  ddd <- c(data_types,data_types_gs)
+  ddd <- c(data_types(),data_types_gs)
   names(ddd)[match(x, ddd)]
 }
 
@@ -204,14 +231,39 @@ retrieve_genes <- function(x){
   method <- ifelse(is.null(input[[paste0("snv_method_",x)]]),"mutect",input[[paste0("snv_method_",x)]])
 
   if(is.null(input[[db_id]])){
-    fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(input[[db_id]] == "rna"){
-    fread(paste0(rv$indir,"df_gene_scale.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(input[[db_id]] == "snv"){
-    fread(paste0(rv$indir,"df_snv_class_",method,".csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
   }else if(input[[db_id]] == "cnv"){
-    fread(paste0(rv$indir,"df_cnv.csv"),sep=",",header=T,nrows = 0) %>% names(.) %>% .[-1]
+    infiles <- paste0(rv$indir,"df_cnv.csv")
+  }else if(input[[db_id]] == "mir"){
+    infiles <- paste0(rv$indir,"df_mir_scale.csv")
   }
+  
+  l <- lapply(infiles, function(x){
+    info <- fread(x,sep=",",header=T,nrows = 0)
+    return(info)
+  })
+  
+  # df_gene <- rbindlist(l, fill = T, use.names = T)
+  df_gene <- rbind_common(l)
+  
+  # the genes
+  genes <- names(df_gene) %>% .[-1]
+  
+  # save into rv$snv_genes
+  if(!is.null(input[[db_id]])){
+    if(input[[db_id]] == "snv"){
+      rv[[paste0("snv_genes_",x)]] <- lapply(l, function(x){
+        names(x) %>% .[-1]
+      })
+    }
+  }
+
+  # return the genes
+  return(genes)
 }
 
 # update genes in the UI accordingly

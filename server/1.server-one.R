@@ -1,33 +1,55 @@
 #======================================================================#
 ####  STEP 0. Freeze project once selected, update gene selection UI   ####
 #======================================================================#
-observeEvent(input$project,{
-  # update genes placeholder
-  if(input$project == ""){
-    lapply(1:rv$variable_n, function(x){
-      g_ui_id <- paste0("g_",x)
-      updateSelectizeInput(
-        session,
-        g_ui_id
-        ,choices=c()
-        ,options = list(
-          placeholder = 'On top left, select a project to load genes ...'
-        )
-      )
-    })
-  }
+# output option to see if a project(s) is (are) selected or not
+output$projectStatus <- reactive({
+  rv$projectStatus == "selected"
+})
+outputOptions(output, "projectStatus", suspendWhenHidden = FALSE)
 
-  req(input$project != "")
+# extract genes when project selection is confirmed
+observeEvent(input$confirm_project,{
+  # check if selected projects are from different studies
+  project <- input$project
+  study <- sapply(project, function(x){
+    strsplit(x, "-")[[1]][1]
+  }) %>% unique(.)
   
+  study_length_check <- length(study) > 1
+  if(study_length_check){
+    shinyalert(paste0("You have selected projects from: ",paste0(study, collapse = ", "),"."
+                      ," Please select projects from the same program."))
+  }
+  req(!study_length_check)
+  
+  # check if exceed maximum no of projects
+  project_length_check <- length(input$project) > rv$max_project_n
+  if(study == "TARGET"){rv$max_project_n <- 4}else{rv$max_project_n <- 3}
+  if(project_length_check){
+    shinyalert(paste0("We support pan-cancer analysis with up to ",rv$max_project_n," projects in ",study,"."
+                      , " You have selected ",length(input$project),"."
+                      , " Please delete unrelated projects. Thank you."))
+  }
+  req(!project_length_check)
+
+  
+  # retrieve data
   withProgress(value = 1, message = "Retrieving data from project .... ",{
-    project <- rv$project <- input$project
-    if(grepl("^TCGA",project)){rv$tcga <- T}else{rv$tcga <- F}
+    rv$project <- input$project
+    if(study == "TCGA"){rv$tcga <- T}else{rv$tcga <- F}
+    if(study == "TARGET"){rv$target <- T}else{rv$target <- F}
+    if(study == "DepMap"){rv$depmap <- T}else{rv$depmap <- F}
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
-    rv$df_survival <- fread(paste0(rv$indir,"df_survival.csv"),sep=",",header=T) %>%
-      dplyr::select(patient_id,survival_days,censoring_status,gender)
+    infiles <- paste0(rv$indir,"df_survival.csv")
+    l <- lapply(infiles, function(x){
+      fread(x,sep=",",header=T) %>%
+        dplyr::select(patient_id,survival_days,censoring_status,gender)
+    })
+    rv$df_survival <- rbindlist(l,use.names = T)
     update_genes_ui(opt="nil")
   })
   
+  rv$projectStatus <- "selected"
   shinyjs::disable("project")
 })
 
@@ -35,12 +57,26 @@ observeEvent(input$project,{
 observeEvent(input$reset_project,{
   rv$project <- ""
   shinyjs::enable("project")
+  rv$projectStatus <- "none"
   
   updateSelectizeInput(
     session,
     "project",
     selected = ""
   )
+  
+  # update genes placeholder
+  lapply(1:rv$variable_n, function(x){
+    g_ui_id <- paste0("g_",x)
+    updateSelectizeInput(
+      session,
+      g_ui_id
+      ,choices=c()
+      ,options = list(
+        placeholder = g_placeholder
+      )
+    )
+  })
 })
 
 #======================================================================#
@@ -76,20 +112,23 @@ observeEvent(input$variable_n,{
   }else{
     withProgress(value = 1, message = "Loading parameters ...",{
       load()
-      lapply(1:rv$variable_n, function(x){
-        rv[[paste0("genes",x)]] <- retrieve_genes(x)
-        g_ui_id <- paste0("g_",x)
-        updateSelectizeInput(
-          session,
-          g_ui_id,
-          choices = rv[[paste0("genes",x)]]
-          ,selected = rv[[g_ui_id]]
-          ,server = TRUE
-          ,options = list(
-            placeholder = 'Type to search ...'
+      if(rv$project != ""){
+        lapply(1:rv$variable_n, function(x){
+          rv[[paste0("genes",x)]] <- retrieve_genes(x)
+          g_ui_id <- paste0("g_",x)
+          
+          updateSelectizeInput(
+            session,
+            g_ui_id,
+            choices = rv[[paste0("genes",x)]]
+            ,selected = rv[[g_ui_id]]
+            ,server = TRUE
+            ,options = list(
+              placeholder = 'Type to search ...'
+            )
           )
-        )
-      })
+        })
+      }
     })
   }
   rv$variable_n_reached <- rv$variable_n_reached + 1

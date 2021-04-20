@@ -66,7 +66,7 @@ plot_ui <- function(n){
         prettyRadioButtons(
           cat_id,
           label = HTML(paste0(x,".1. Select data category:",add_help(cat_id_q))),
-          choices = c("Gene" = "g", "Gene set (GS)" = "gs")
+          choices = c("Gene or locus" = "g", "Gene set (GS)" = "gs")
           ,selected = rv[[cat_id]]
           ,status = "danger"
           ,icon = icon("check")
@@ -81,7 +81,7 @@ plot_ui <- function(n){
           radioGroupButtons(
             inputId = db_id,
             label = HTML(paste0(x,".2. Select type of molecular data:",add_help(db_id_q))),
-            choices = data_types,
+            choices = data_types(),
             status = "danger",
             selected = rv[[db_id]],
             checkIcon = list(
@@ -97,7 +97,7 @@ plot_ui <- function(n){
             ,selected=rv[[g_ui_id]]
             ,width = "100%"
             ,options = list(
-              placeholder = 'On top left, select a project to load genes ...'
+              placeholder = g_placeholder
               ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
             )
           )
@@ -195,11 +195,13 @@ plot_ui <- function(n){
         )
         
         # tooltip for data category
-        ,bsTooltip(cat_id_q, HTML("<b>Gene</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene correlates with poorer/better survival.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
+        ,bsTooltip(cat_id_q, HTML("<b>Gene or locus</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene or locus correlates with poorer/better survival.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
                    ,placement = "right")
         ,bsTooltip(db_id_q, HTML("To study if cancer survival is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
                    ,placement = "right")
-        ,bsTooltip(g_ui_id_q, HTML("Search and select. We currently support analysis with Entrez ID, HUGO symbol, or Ensembl gene ID. If a gene is not found, it means its expression/mutation is barely detected in the selected cancer project.")
+        ,bsTooltip(g_ui_id_q, HTML(paste0("Search and select. If a gene or locus is not found, try its alias names."
+                                          ," If still not found, it means its expression/alteration is barely detected in the selected cancer project."
+                                          ,"Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects."))
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")
@@ -273,7 +275,7 @@ plot_run_ui <- function(n){
         h4(paste0("Advanced run parameters for Analysis #",x), align = "center"),
         h4(paste0("(",datatype,")")),
         tags$hr(style="border-color: #c2bfb5;"),
-        if(check_inputs() & rv[[db_id]] != "cnv"){
+        if(check_inputs() & ifelse_rv(db_id) != "cnv"){
           div(
             radioGroupButtons(
               inputId = iter_id,
@@ -340,13 +342,13 @@ plot_run_ui <- function(n){
             ,bsTooltip(clow_id_q,HTML("Cases &le; the cutoff will be classified as low, while those &gt; the cutoff will be classified as high")
                        ,placement = "right")
           )
-        }else if(rv[[cat_id]] == "g" & rv[[db_id]] == "cnv"){
+        }else if(input[[cat_id]] == "g" & input[[db_id]] == "cnv"){
           div(
             radioGroupButtons(
               inputId = cnv_id,
               label = HTML(paste0("Select group to analyze:"),add_help(cnv_id_q)),
-              choiceNames = c("Automatic", "Copy number gain", "Copy number loss"),
-              choiceValues = c("auto","gain","loss"),
+              choiceNames = c("Automatic", "Copy number gain", "Copy number loss"), #,"Copy number gain and loss"
+              choiceValues = c("auto","gain","loss"), #,"both"
               selected = rv[[cnv_id]],
               size = "sm",
               checkIcon = list(
@@ -356,9 +358,10 @@ plot_run_ui <- function(n){
               # status = "primary",
               direction = "horizontal"
             )
-            ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain or loss results in more significant survival difference"
+            ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain and/or loss results in more significant survival difference"
                                             ,"<br><b>Copy number gain</b>: To compare cases with copy number gain with the rest of the population"
                                             ,"<br><b>Copy number loss</b>: To compare cases with copy number loss with the rest of the population"
+                                            ,"<br><b>Copy number gain and loss</b>: To compare cases with copy number gain and loss, respectively, with the rest of the population"
             ))
             ,placement = "top")
           )

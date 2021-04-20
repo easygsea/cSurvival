@@ -3,6 +3,10 @@ if_surv <- function(plot_type=rv$plot_type){
   plot_type == "all" | suppressWarnings(!is.na(as.numeric(plot_type))) | plot_type == "gender"
 }
 
+#==============================================#
+####        Survival analysis functions     ####
+#==============================================#
+
 # extract gene expression/mutation data
 extract_gene_data <- function(x, type){
   g_ui_id <- paste0("g_",x)
@@ -12,42 +16,38 @@ extract_gene_data <- function(x, type){
     ,"lib" = "df_gene_scale.csv"
     ,"manual" = "df_gene_scale.csv"
     ,"cnv" = "df_cnv.csv"
+    ,"mir" = "df_mir.csv"
   )
-  # all genes in selected project
-  a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
+  # # all genes in selected project
+  # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
   
   if(type == "rna"){
     # original file that stores raw FPKM values
-    all_file <- paste0(rv$indir,"df_gene.csv")
-    # read in all genes
-    all_genes <- fread(all_file,sep=",",header=T,nrows=0) %>% names(.)
-    # all_genes <- sapply(all_genes, function(x){
-    #   x <- strsplit(x,"\\|")[[1]]
-    #   if(length(x) == 1){x}else{x[-1]}
-    # }) %>% unname(.)
-    all_genes <- all_genes[-1]
-    
-    # change a_range
-    a_range <- 2:(length(all_genes)+1)
+    all_file <- paste0(rv$indir,"df_gene.csv")[[1]]
+    # # read in all genes
+    # all_genes <- fread(all_file,sep=",",header=T,nrows=0) %>% names(.)
+    # # all_genes <- sapply(all_genes, function(x){
+    # #   x <- strsplit(x,"\\|")[[1]]
+    # #   if(length(x) == 1){x}else{x[-1]}
+    # # }) %>% unname(.)
+    # all_genes <- all_genes[-1]
+    # 
+    # # change a_range
+    # a_range <- 2:(length(all_genes)+1)
     
     # selected gene
     genes <- input[[g_ui_id]]
     # extract ENSG info
     genes <- strsplit(genes,"\\|")[[1]]
-    if(length(genes) == 1){genes <- genes}else{genes <- genes[-1]}
+    if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
   }else if(type == "snv"){
-    all_genes <- rv[[paste0("genes",x)]]
     # selected gene
     genes <- input[[g_ui_id]]
     
     # detect mutation method
     if(rv$tcga){
       snv_id <- paste0("snv_method_",x)
-      if(is.null(input[[snv_id]])){
-        method <- rv[[snv_id]]
-      }else{
-        method <- input[[snv_id]]
-      }
+      method <- ifelse_rv(snv_id)
       df_file <- c(
         df_file
         ,"snv" = paste0("df_snv_class_",method,".csv")
@@ -62,21 +62,26 @@ extract_gene_data <- function(x, type){
   }else if(type == "lib"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
+    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
   }else if(type == "manual"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
-  }else if(type == "cnv"){
-    all_genes <- rv[[paste0("genes",x)]]
+    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+  }else if(type == "cnv" | type == "mir"){
+    # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]
   }
   
   # infile
-  infile <- paste0(rv$indir,df_file[[type]])
+  infiles <- paste0(rv$indir,df_file[[type]])
   
   # # method 1 fread drop columns
-  col_to_drop <- a_range[!all_genes %in% genes]
-  data <- fread(infile,sep=",",header=T,drop = col_to_drop)
-  
+  # col_to_drop <- a_range[!all_genes %in% genes]
+  l <- lapply(infiles,function(y){
+    fread(y,sep=",",header=T,select = c("patient_id", genes))
+  })
+  data <- rbindlist(l, use.names = T)
+
   # # # method 2 fread essential columns
   # ofile <- paste0(rv$indir,"tmp.csv")
   # unlink(ofile)
@@ -85,7 +90,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
   
   # save original expression or mutation data, if applicable
-  if(type == "rna"){
+  if(type == "rna" | type == "mir"){
     # save original expression data
     rv[[paste0("exprs_",x)]] <- data
   }else if(type == "snv"){
@@ -244,52 +249,71 @@ get_info_most_significant_cnv <- function(data, mode){
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)
 
-  # loop between loss and gain, if auto
-  if(mode == "auto"){
-    if(rv$tcga){cats <- c(-1,1)}else{cats <- c(1,3)}
-    names(cats) <- c("Loss","Gain")
-  }else if(mode == "gain"){
-    if(rv$tcga){cats <- 1}else{cats <- 3}
-    names(cats) <- "Gain"
-  }else{
-    if(rv$tcga){cats <- -1}else{cats <- 1}
-    names(cats) <- "Loss"
-  }
-    
   # copy numer data
   exp <-data[,2] %>% unlist(.) %>% unname(.)
   
-  for(cat in seq_along(cats)){
-    i <- as.numeric(cats[[cat]])
-    if(rv$tcga){
-      threshold <- 0
-    }else{
-      threshold <- 2
-    }
-    if(i > threshold){
-      lells <- ifelse(exp >= i, "Gain", "Other")
-    }else{
-      lells <- ifelse(exp <= i, "Loss", "Other")
-    }
-    lels <- unique(lells) %>% sort(.,decreasing = T)
-    df <- df_o
-    df$level <- factor(lells, levels = lels)
-
-    # # test if there is significant difference between high and low level genes
-    # if(rv$cox_km == "cox"){
-    surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
-    p_diff <- coef(summary(surv_diff))[,5]
-    # }else if(rv$cox_km == "km"){
-    #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-    #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
-    # }
-    
-    if(p_diff <= least_p_value){
-      least_p_value <- p_diff
-      df_most_significant <- df
-      cutoff_most_significant <- names(cats[cat])
-    }
+  # threshold for different programs
+  if(rv$tcga){
+    threshold <- 0
+  }else{
+    threshold <- 2
   }
+
+  # if(mode != "both"){
+    # loop between loss and gain, if not both
+    if(mode == "auto"){
+      if(rv$tcga){cats <- c(-1,1)}else{cats <- c(1,3)}
+      names(cats) <- c("Loss","Gain")
+    }else if(mode == "gain"){
+      if(rv$tcga){cats <- 1}else{cats <- 3}
+      names(cats) <- "Gain"
+    }else if(mode == "loss"){
+      if(rv$tcga){cats <- -1}else{cats <- 1}
+      names(cats) <- "Loss"
+    }
+    
+    
+    for(cat in seq_along(cats)){
+      i <- as.numeric(cats[[cat]])
+      if(i > threshold){
+        lells <- ifelse(exp >= i, "Gain", "Other")
+      }else{
+        lells <- ifelse(exp <= i, "Loss", "Other")
+      }
+      lels <- unique(lells) %>% sort(.,decreasing = T)
+      df <- df_o
+      df$level <- factor(lells, levels = lels)
+      
+      # # test if there is significant difference between high and low level genes
+      # if(rv$cox_km == "cox"){
+      surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      p_diff <- summary(surv_diff)$logtest[3] #coef(summary(surv_diff))[,5]
+      # }else if(rv$cox_km == "km"){
+      #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+      #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+      # }
+      if(p_diff <= least_p_value){
+        least_p_value <- p_diff
+        df_most_significant <- df
+        cutoff_most_significant <- names(cats[cat])
+      }
+    }
+  # }
+  
+  # # additional analysis if to look at both gain and loss
+  # if(mode == "auto" | mode == "both"){
+  #   lells <- ifelse(exp > threshold, "Gain", ifelse(exp < threshold, "Loss", "Other"))
+  #   lels <- unique(lells) %>% sort(.,decreasing = T)
+  #   df <- df_o
+  #   df$level <- factor(lells, levels = lels)
+  #   surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+  #   p_diff <- summary(surv_diff)$logtest[3] #min(coef(summary(surv_diff))[,5]) 
+  #   if(p_diff <= least_p_value){
+  #     least_p_value <- p_diff
+  #     df_most_significant <- df
+  #     cutoff_most_significant <- "Gain & Loss"
+  #   }
+  # }
   
   results <- list(
     df = df_most_significant,
@@ -313,17 +337,21 @@ cal_surv_rna <-
     km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
     
     # # 2. Cox # #
-    # create new df to seperate effects in Cox regression
-    lels <- levels(df$level)
     if(n == 1){
-      new_df <- with(df,data.frame(level = lels))
-      
       # run Cox regression
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
       # summary statistics
       cox.stats <- summary(cox_fit)
     }else if(n == 2){
-      km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method)
+      km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+      if(inherits(km2, "try-error")) {
+        rv$try_error <- rv$try_error + 1
+        shinyalert(paste0("The selected two genes/loci have exactly the same data."
+                          ," If CNV, you might have selected genes from the same cytoband."
+                          ," Please contrast genes from different cytobands."))
+      }
+      req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
+      
       km.stats <- list(km.stats,km2)
 
       # run Cox regression
@@ -345,6 +373,8 @@ cal_surv_rna <-
     lels_x <- levels(df$`level.x`)
     lels_y <- levels(df$`level.y`)
     # lels <- apply(expand.grid(lels_x,lels_y),1,paste0,collapse="_")
+    # create new df to seperate effects in Cox regression
+    lels <- levels(df$level)
     new_df <- with(df,data.frame(level = lels))
     cox.fit <- survfit(cox_fit,newdata=new_df)
 
@@ -465,3 +495,38 @@ plot_surv <-
     }
     return(fig)
   }
+
+#==============================================#
+####            eVITTA functions            ####
+#==============================================#
+# the gene expression table
+de_dfgene <- function(){
+  # patients
+  patients <- rv[["df_gender"]][["patient_id"]]
+  
+  # read in data
+  infiles <- paste0(rv$indir,"df_gene.csv")
+  
+  l <- lapply(infiles, function(x){
+    info <- fread(x,sep=",",header=T)
+    return(info)
+  })
+  
+  # whole gene expression table
+  df_gene <- rbind_common(l) %>% dplyr::filter(patient_id %in% patients)
+  
+  # remaining patient ids
+  patients <- df_gene$patient_id
+  # the genes
+  genes <- colnames(df_gene)[-1]
+  
+  # transpose
+  df_gene <- transpose(df_gene) %>% .[-1,] %>%
+    dplyr::mutate_all(as.numeric) %>%
+    as.matrix(.)
+  # reassign patient ids
+  colnames(df_gene) <- patients
+  rownames(df_gene) <- genes
+  
+  return(df_gene)
+}

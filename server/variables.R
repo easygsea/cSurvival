@@ -1,16 +1,21 @@
+# ------- names for input modes ----------
+input_mode_names <- c(
+  "Expression (FPKM)" = "rna"
+  ,"Mutation" = "snv"
+  ,"Copy number" = "cnv"
+  ,"Expression (RPM)" = "mir"
+  ,"Methylation beta-value" = "met"
+)
+
 # ------- survival analysis methods ---------
 surv_methods <- c("Cox proportional-hazards (PH) model"="cox", "Kaplan-Meier (KM) log rank"="km")
 
-# ------- TCGA data types, e.g expression, snv ---------
-data_types <- c("Expression"="rna", 
-                "Mutation"="snv",
-                "CNV"="cnv",
-                "miRNA"="mir",
-                "Methylation"="met"
-                ,"RRPA"="rrpa")
-
+# ------- gene set data types, library or manual -------
 data_types_gs <- c("Gene set"="lib",
                    "Gene set (manual)"="manual")
+
+# ------- placeholder for gene search field ----------
+g_placeholder <- "On top left, select a project(s) and click the confirmation button to load genes ..."
 
 # ------- algorithms for somatic variant calling, e.g. mutect -----------
 snv_algorithms <- list(
