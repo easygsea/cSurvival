@@ -147,8 +147,8 @@ ifelse_rv <- function(id){
 rbind_common <- function(df_list){
   Reduce(function(df_1,df_2){
     common_genes <- intersect(colnames(df_1), colnames(df_2))
-    df_1 <- select(df_1, all_of(common_genes))
-    df_2 <- select(df_2, all_of(common_genes))
+    df_1 <- dplyr::select(df_1, all_of(common_genes))
+    df_2 <- dplyr::select(df_2, all_of(common_genes))
     rbindlist(list(df_1, df_2))
   }, df_list)
 }
