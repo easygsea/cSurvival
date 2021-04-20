@@ -20,6 +20,30 @@ filter <- dplyr::filter
 df_gdc_projects <- getGDCprojects() %>%
   filter(grepl("TCGA", id))
 
+# df_mir, df_met, df_cnv after scaling , only want the first line,
+# check if a column is all NAs, check if without NA, length(unique()) ==1; if yes, drop the column
+
+# the path to output your data frames
+df_met_path = paste0(project_name, "/", "df_met.csv")
+df_met_scale_path = paste0(project_name, "/", "df_met_scale.csv")
+
+# the function to output the valid names in df_cnv, df_mir and df_met
+# input: df_path, the path of the df where the data comes from
+# input: df_scale_path, the path of the the file you would like to output
+write_scale_df <- function(df_path, df_scale_path){
+  output <- c()
+  df <- fread(df_path) %>% select(-patient_id)
+  for(i in seq_along(df)){
+    if(!all(is.na(df[[i]]))){
+      if(length(na.omit(unique(df[[i]]))) > 1){
+        output[length(output)+1] <- colnames(df)[i]
+      }
+    }
+  }
+  write(paste(output, collapse = ","), file = df_scale_path, append = F)
+}
+
+
 # generate the methylation data for tcga projects----------------------
 # the function to get all the gene names in the format of "cg00013618|IGLVI-70|PRAMENP"
 # input: a df tthat from met data
@@ -135,7 +159,7 @@ for(name in names(cases_info)){
 # scale df_met to df_met_scale
 scale_a_df(df_met_path, df_met_scale_path)
 
-
+unlink(x = paste0(project_name, "/", "met_data"), recursive = T)
 
 
 
@@ -1138,4 +1162,29 @@ df_8 <- Reduce(function(...){
 (dt1 <- data.table(A = letters[1:10], X = 1:10, key = "A"))
 (dt2 <- data.table(A = letters[5:14], Y = 1:10, key = "A"))
 merge(dt1, dt2)
-
+# check the amount of NA
+NA_vector <- c()
+all_NA_count <- 0
+all_NA_zero_count <- 0
+count = 0
+na_max <- c()
+for(i in seq_along(df)){
+  if(anyNA(df[[i]])){
+    NA_vector[i] <- TRUE
+    count = count + 1
+    if(all(is.na(df[[i]]))){
+      all_NA_count = all_NA_count +1
+    }else if(all(df[[i]] == 0)){
+     print("all_zero")
+    } else {
+     na_max[i] <- sum(is.na(df[[i]]))
+   }
+    if(all(is.na(df[[i]])||(df[[i]] == 0))){
+      all_NA_zero_count = all_NA_zero_count +1
+    }
+   
+  }
+  else{
+    NA_vector[i] <- FALSE
+  }
+}
