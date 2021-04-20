@@ -71,3 +71,6 @@ basic_scripts/eVITTA_test/df_design_all.rds
 basic_scripts/eVITTA_test/df_design_gender.rds
 basic_scripts/eVITTA_test/df_gene_all.rds
 basic_scripts/eVITTA_test/df_gene_gender.rds
+basic_scripts/TCGA-BRCA
+basic_scripts/TCGA-CHOL
+basic_scripts/TCGA-UCEC
