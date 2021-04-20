@@ -4,8 +4,8 @@ basic_scripts/TCGA-LGG
 basic_scripts/TCGA-COAD
 
 basic_scripts/tcga_projects.csv
-basic_scripts/TCGA-LUAD
-basic_scripts/TARGET-AML
+basic_scripts/TCGA-*
+basic_scripts/TARGET-*
 .DS_Store
 basic_scripts/.Rhistory
 .DS_Store
@@ -74,3 +74,6 @@ basic_scripts/eVITTA_test/df_gene_gender.rds
 basic_scripts/eVITTA_test/coefs.rds
 basic_scripts/eVITTA_test/degs.rds
 basic_scripts/eVITTA_test/degss.rds
+basic_scripts/TCGA-BRCA
+basic_scripts/TCGA-CHOL
+basic_scripts/TCGA-UCEC
