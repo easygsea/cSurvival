@@ -1,4 +1,4 @@
-Establish collections of df_gene and df_survival
+ Establish collections of df_gene and df_survival
 1. Separate scripts for data extraction only
 2. Establish df for each cancer
 3. Create a csv denoting collections
@@ -50,6 +50,6 @@ Other notes:
 ......
 
 nSurvival
-1. CNV: 生成df
+1. CNV: 生成df: duplicates will be calculate as median(complete)
 2. SNV: patient ID missing problem; if duplicates, keep both if different, delimited by |; change patient to patient_id
-3. df_patient: extract gender
+3. df_patient: extract gender (completed)

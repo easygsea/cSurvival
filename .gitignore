@@ -4,8 +4,8 @@ basic_scripts/TCGA-LGG
 basic_scripts/TCGA-COAD
 
 basic_scripts/tcga_projects.csv
-basic_scripts/TCGA-LUAD
-basic_scripts/TARGET-AML
+basic_scripts/TCGA-*
+basic_scripts/TARGET-*
 .DS_Store
 basic_scripts/.Rhistory
 .DS_Store
