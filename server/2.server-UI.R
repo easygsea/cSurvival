@@ -199,59 +199,57 @@ observeEvent(list(input$plot_type,rv[["title_1"]]),{
   
   # --------------- perform differential expression analysis ---------
   if(x == "gsea" & rv$gsea_done==""){
-    withProgress(value = 1, message = "Performing differential expression analysis. This might take a while. Please wait a minute. Thank you.",{
-      # a) gene expression matrix
-      df_gene <- de_dfgene()
-  #    saveRDS(df_gene,"df_gene_all.rds")
-      # b) design matrix
-      if(rv$variable_nr == 1){
-        df_design <- rv[["df_gender"]]
-      }else{
-        df_design <- rv[["df_all"]]
-      }
-  #    saveRDS(df_design,"df_design_all.rds")
-      # # run DE analysis
-      # 1) create dgelist
-      y <- DGEList(counts=df_gene)
-      
-      # 2) filter low expressing genes
-      min_n <- min(table(df_design$level))
-      keep <- rowSums(y$counts>1) >= min_n
-      y <- y[keep,,keep.lib.sizes=TRUE]
-      
-      # 3) voom directly on counts, if data are very noisy, as would be used for microarray
-      v <- voom(y, design, plot=F, normalize.method="quantile")
-      
-      # 4) DEG analysis
-      fit <- lmFit(v, design)
-      fit <- eBayes(fit,trend=TRUE, robust=TRUE)
-      
-      # results
-      results <- decideTests(fit)
-      summary(results)
-      
-      # available coefficients
-      coefs <- colnames(design)[-1]
-      
-      # name the coefficients
-      lels1 <- levels(df_design_gender$level.x) %>% rev()
-      lels2 <- levels(df_design_gender$level.y) %>% rev()
-      names(coefs) <- c(
-        paste0(lels1, collapse = " vs. "),
-        paste0(lels2, collapse = " vs. "),
-        paste0("(",paste0(lels2, collapse = " vs. "),") vs. (",paste0(lels1, collapse = " vs. "),")")
-      )
-      
-      # export DEG table
-      degss = lapply(coefs, function(x){
-        topTable(fit, coef=x,sort.by="P",number=Inf)
-      })
-      names(degss) <- coefs
-      
-      # saveRDS(degss,"degss.rds")
-      # saveRDS(coefs,"coefs.rds")
-      rv$gsea_done <- "yes"
+    # a) gene expression matrix
+    df_gene <- de_dfgene()
+    #    saveRDS(df_gene,"df_gene_all.rds")
+    # b) design matrix
+    if(rv$variable_nr == 1){
+      df_design <- rv[["df_gender"]]
+    }else{
+      df_design <- rv[["df_all"]]
+    }
+    #    saveRDS(df_design,"df_design_all.rds")
+    # # run DE analysis
+    # 1) create dgelist
+    y <- DGEList(counts=df_gene)
+    
+    # 2) filter low expressing genes
+    min_n <- min(table(df_design$level))
+    keep <- rowSums(y$counts>1) >= min_n
+    y <- y[keep,,keep.lib.sizes=TRUE]
+    
+    # 3) voom directly on counts, if data are very noisy, as would be used for microarray
+    v <- voom(y, design, plot=F, normalize.method="quantile")
+    
+    # 4) DEG analysis
+    fit <- lmFit(v, design)
+    fit <- eBayes(fit,trend=TRUE, robust=TRUE)
+    
+    # results
+    results <- decideTests(fit)
+    summary(results)
+    
+    # available coefficients
+    coefs <- colnames(design)[-1]
+    
+    # name the coefficients
+    lels1 <- levels(df_design_gender$level.x) %>% rev()
+    lels2 <- levels(df_design_gender$level.y) %>% rev()
+    names(coefs) <- c(
+      paste0(lels1, collapse = " vs. "),
+      paste0(lels2, collapse = " vs. "),
+      paste0("(",paste0(lels2, collapse = " vs. "),") vs. (",paste0(lels1, collapse = " vs. "),")")
+    )
+    
+    # export DEG table
+    degss = lapply(coefs, function(x){
+      topTable(fit, coef=x,sort.by="P",number=Inf)
     })
+    names(degss) <- coefs
+    
+    # saveRDS(degss,"degss.rds")
+    # saveRDS(coefs,"coefs.rds")
+    rv$gsea_done <- "yes"
   }
 })
 

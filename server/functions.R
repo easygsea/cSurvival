@@ -140,6 +140,14 @@ ifelse_rv <- function(id){
 #   return(array)
 # }
 
+# waiting message for withProgress if too long
+wait_msg <- function(msg){
+  paste0(
+    msg,
+    " This might take a while. Please wait a minute. Thank you."
+  )
+}
+
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
