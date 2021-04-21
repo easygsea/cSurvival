@@ -53,7 +53,8 @@ output$ui_results <- renderUI({
   }
   
   # assemble all types of plots
-  types <- c(types, l_plot, "Differential expression & enrichment analysis"="gsea")
+  if(exists("l_plot")){types <- c(types, l_plot)}
+  types <- c(types, "Differential expression & enrichment analysis"="gsea")
   
   if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
     h_plot <- "725px"
