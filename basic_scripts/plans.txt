@@ -32,7 +32,12 @@ https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/do
 Establish survival dfs for each DepMap subcategory
 
 7. [df_survival.csv] x3 under corresponding folders:
+需要抓取三个数据：patient_id, gender, survival_days
 CRISPR-Cas9: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#32_CRISPR-Cas9_knockout_data
+survival_days对应的是dependency
+patient_id对应的是depmap_id
+gender对应的是sex
+
 Drug_sensitivity: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#38_Drug_Sensitivity
 RNAi: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#31_RNA_inference_knockout_data
 
