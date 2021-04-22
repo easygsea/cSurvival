@@ -12,7 +12,7 @@ shinyUI(
         
         title="cSurival",
 
-        dashboardHeader(title = div(id="ui_title",HTML("<b>mSurvival</b>: multivariate cancer survival database"))
+        dashboardHeader(title = div(id="ui_title",HTML("<b>cMechDB</b>: mechanistic cancer survival database"))
                         ,titleWidth = "100%"
         )
         # skin = "black",

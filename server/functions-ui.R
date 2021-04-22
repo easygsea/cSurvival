@@ -22,6 +22,14 @@ radioTooltip <- function(id, choice, title, placement = "top", trigger = "hover"
   htmltools::attachDependencies(bsTag, shinyBS:::shinyBSDep)
 }
 
+# a link icon, need to wrap in HTML
+# example: HTML(paste0("Visit eVITTA at ",link_icon("evitta_link","https://tau.cmmt.ubc.ca/eVITTA/")))
+link_icon <- function(id, link, title="Click to visit", icon="fas fa-external-link-alt", color="#00c0ef", style=""){
+  sprintf(
+    '<a href="%s" target="_blank"><i class="%s" id="%s" style = "color:%s"></i></a>'
+  ,link,icon,id,color)
+}
+
 #======================================================================#
 ####          function to generate dynamic 1 2, or more G/GS UIs     ####
 #======================================================================#

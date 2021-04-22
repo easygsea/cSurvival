@@ -8,6 +8,8 @@ css_addons <-
       
       #project_div label {display: table-cell; text-align: center; vertical-align: middle;}
       #project_div .form-group { display: table-row;}
+      
+      #evitta {font-size:120%;}
       "
     )))
   )

@@ -15,4 +15,5 @@ server <- function(input, output, session) {
   source("server/1.server-one.R", local = TRUE)
   source("server/2.server-calculate.R", local = TRUE)
   source("server/2.server-UI.R", local = TRUE)
+  source("server/3.server-eVITTA.R", local = TRUE)
 }

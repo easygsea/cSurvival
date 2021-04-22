@@ -135,32 +135,34 @@ output$ui_results <- renderUI({
             }else if(rv$plot_type == "gsea"){
               uiOutput("ui_gsea")
             }
-            ,div(
-              align = "left",
-              style = "position: absolute; right: 2.5em; top: 1.5em;",
+            ,if(rv$plot_type!="gsea"){
               div(
-                id = "gear_btn",
-                style="display: inline-block;vertical-align:top;",
-                if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
-                  dropdown(
-                    uiOutput("plot_gear"),
-                    circle = TRUE, status = "danger", style = "material-circle",
-                    size="sm", right = T,
-                    icon = icon("gear"), width = "300px",
-                    tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-                  )  
-                }
-              )
-              ,div(
-                id="download_btn",
-                style="display: inline-block;vertical-align:top;",
-                downloadBttn(
-                  size = "sm", color = "danger", style = "material-circle",
-                  outputId = "download_plot", label = NULL
+                align = "left",
+                style = "position: absolute; right: 2.5em; top: 1.5em;",
+                div(
+                  id = "gear_btn",
+                  style="display: inline-block;vertical-align:top;",
+                  if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
+                    dropdown(
+                      uiOutput("plot_gear"),
+                      circle = TRUE, status = "danger", style = "material-circle",
+                      size="sm", right = T,
+                      icon = icon("gear"), width = "300px",
+                      tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                    )  
+                  }
                 )
-                ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+                ,div(
+                  id="download_btn",
+                  style="display: inline-block;vertical-align:top;",
+                  downloadBttn(
+                    size = "sm", color = "danger", style = "material-circle",
+                    outputId = "download_plot", label = NULL
+                  )
+                  ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+                )
               )
-            )
+            }
           )
           ,conditionalPanel(
             'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
@@ -171,6 +173,27 @@ output$ui_results <- renderUI({
           )
         )
       }
+      ,conditionalPanel(
+        'input.plot_type == "gsea"',
+        wellPanel(
+          style = paste0("background:#e6f4fc;"),
+          HTML(paste0("<h3>Survival-coupled transcriptome analysis by <b>eVITTA</b> ",link_icon("evitta_link","https://tau.cmmt.ubc.ca/eVITTA/"),"</h3>")),
+          bsTooltip("evitta_link",HTML("Visit eVITTA webserver"),placement = "top"),
+          tags$hr(style="border-color: #939597;margin: 20px;"),
+          prettyRadioButtons(
+            inputId = "evitta",
+            label = NULL,
+            choiceNames = list(
+              HTML("Differential expression analysis by easyGEO")
+              ,HTML("Gene set enrichment analysis by easyGSEA")
+              ,"Intersection analysis and visualization by easyVizR"),
+            choiceValues = c("geo","gsea","vizr"),
+            selected = rv$evitta,
+            # status = "primary",
+            inline = T, bigger = T
+          )
+        )
+      )
     )
     ,absolutePanel(
       actionBttn(
@@ -197,75 +220,6 @@ observeEvent(list(input$plot_type,rv[["title_1"]]),{
   # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
-  
-  # --------------- perform differential expression analysis ---------
-  if(x == "gsea" & rv$gsea_done==""){
-    withProgress(value = 0.1, message = wait_msg("Compiling data for DE analysis..."),{
-      # a) gene expression matrix
-      df_gene <- de_dfgene()
-      
-      #    saveRDS(df_gene,"df_gene_all.rds")
-      incProgress(amount = 0.1, message = "Creating design matrix...")
-      # b) design matrix
-      if(rv$variable_nr == 1){
-        df_design <- rv[["df_gender"]]
-      }else{
-        df_design <- rv[["df_all"]]
-      }
-      # saveRDS(df_design,"df_design_all.rds")
-      # create the design model
-      design <- model.matrix(~level.x*level.y, df_design)
-      
-      # # run DE analysis
-      incProgress(amount = 0.1, message = "Filtering lowly expressed genes...")
-      
-      # 1) create dgelist
-      y <- DGEList(counts=df_gene)
-      
-      # 2) filter low expressing genes
-      min_n <- min(table(df_design$level))
-      keep <- rowSums(y$counts>1) >= min_n
-      y <- y[keep,,keep.lib.sizes=TRUE]
-      
-      incProgress(amount = 0.2, message = wait_msg("Performing DE analysis..."))
-      
-      # 3) voom directly on counts, if data are very noisy, as would be used for microarray
-      v <- voom(y, design, plot=F, normalize.method="quantile")
-      
-      # 4) DEG analysis
-      fit <- lmFit(v, design)
-      fit <- eBayes(fit,trend=TRUE, robust=TRUE)
-      
-      # results
-      results <- decideTests(fit)
-      print(summary(results))
-      
-      incProgress(amount = 0.1, message = "Exporting results...")
-      
-      # available coefficients
-      coefs <- colnames(design)[-1]
-      
-      # name the coefficients
-      lels1 <- levels(df_design$level.x) %>% rev()
-      lels2 <- levels(df_design$level.y) %>% rev()
-      names(coefs) <- c(
-        paste0(lels1, collapse = " vs. "),
-        paste0(lels2, collapse = " vs. "),
-        paste0("(",paste0(lels2, collapse = " vs. "),") vs. (",paste0(lels1, collapse = " vs. "),")")
-      )
-      
-      # export DEG table
-      degss = lapply(coefs, function(x){
-        topTable(fit, coef=x,sort.by="P",number=Inf)
-      })
-      names(degss) <- coefs
-      print(head(degss[[1]]))
-      # saveRDS(degss,"degss.rds")
-      # saveRDS(coefs,"coefs.rds")
-    })
-    
-    rv$gsea_done <- "yes"
-  }
 })
 
 output$cox_plot <- renderPlot({
