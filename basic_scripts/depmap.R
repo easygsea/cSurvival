@@ -7,3 +7,5 @@ query(eh, "depmap")
 
 ## retrieve metadata about cancer cell lines
 metadata <- depmap::depmap_metadata()
+
+print(metadata)
