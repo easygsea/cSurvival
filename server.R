@@ -16,4 +16,12 @@ server <- function(input, output, session) {
   source("server/2.server-calculate.R", local = TRUE)
   source("server/2.server-UI.R", local = TRUE)
   source("server/3.server-eVITTA.R", local = TRUE)
+  
+  # delete the cSurvival variables we have save for easygeo
+  onStop(fun = function(){
+    for(i in seq_along(isolate(rv$variables_for_geo))){
+      unlink(
+        paste0(gsub(pattern = "/cSurvival", replacement = "", getwd()), "/variables/", isolate(rv$variables_for_geo[[i]]), ".rds"))
+    }
+  })
 }
