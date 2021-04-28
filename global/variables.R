@@ -1,7 +1,7 @@
 bcols = c("#f0eee9","#e9ebf0") # colors for parameter wellpanels
 
 # ------ available projects -----
-projects <- read_csv(paste0(getwd(),"/project_data/project_name.csv")) %>% arrange(project_id)
+projects <- read_csv(paste0(getwd(),"/inc/project_data/project_name.csv")) %>% arrange(project_id)
 
 projects_abbr <- projects$project_id
 projects_full <- projects$name

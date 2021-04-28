@@ -39,7 +39,7 @@ observeEvent(input$confirm_project,{
     if(study == "TCGA"){rv$tcga <- T}else{rv$tcga <- F}
     if(study == "TARGET"){rv$target <- T}else{rv$target <- F}
     if(study == "DepMap"){rv$depmap <- T}else{rv$depmap <- F}
-    rv$indir <- paste0(getwd(),"/project_data/",project,"/")
+    rv$indir <- paste0(getwd(),"/inc/project_data/",project,"/")
     infiles <- paste0(rv$indir,"df_survival.csv")
     l <- lapply(infiles, function(x){
       fread(x,sep=",",header=T) %>%
