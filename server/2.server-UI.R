@@ -192,7 +192,9 @@ output$ui_results <- renderUI({
             # status = "primary",
             inline = T, bigger = T
           )
-        )
+        ),btn_save_for_geo(id = "btn_jump_to_geo", label = "Jump to easyGEO"),
+        br(),
+        htmlOutput("easygeo_iframe")
       )
     )
     ,absolutePanel(
@@ -209,6 +211,24 @@ output$ui_results <- renderUI({
       top = 4
     )
   )
+})
+
+# the button to control if the easygeo is embeded in our app
+observeEvent(input$btn_jump_to_geo, {
+  rv$easygeo_status <- TRUE
+})
+
+output$easygeo_iframe <- renderUI({
+  req(rv$easygeo_status == TRUE)
+  variables_for_geo <- rv$variables_for_geo
+  url_easygeo <- paste0('https://tau.cmmt.ubc.ca/eVITTA/easyGEO/',
+                "?survival=yes&degss=", variables_for_geo[['degss']], "&coefs=", variables_for_geo[['coefs']])
+  print(url_easygeo)
+  div(br(),
+      tags$iframe(src = url_easygeo
+                     , style="width:100%;",  frameborder="0"
+                     ,id="iframe"
+                     , height = "800px"))
 })
 
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------

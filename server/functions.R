@@ -294,3 +294,28 @@ update_genes_ui <- function(opt="hi"){
     )
   })
 }
+
+
+# the button ui that will save cSurvival's variables for easygeo
+btn_save_for_geo <- function(id, label){
+  bsButton(
+    inputId = id,
+    label = tags$b(label),
+    style = "primary"
+    #,onclick ="location.href='http://tau.cmmt.ubc.ca/eVITTA/';target='_blank'"
+    
+  )
+}
+
+# save cSurvival's variables to easyGEO 's variables folder for future read
+# input: the rv you would like to save
+# output: the random string we have generated
+save_csurvival_variable <- function(rv){
+  random_string <- ids::random_id(bytes = 8)
+  saveRDS(object = rv, 
+          file = paste0(gsub(pattern = "/cSurvival", replacement = "", getwd()), "/variables/", random_string, ".rds"))
+  print(random_string)
+  # url <- paste0('https://tau.cmmt.ubc.ca/eVITTA/easyGSEA/',"?data_head_o=", random_string)
+  # runjs(paste0("window.open('", url, "','_blank');"))
+  return(random_string)
+}
