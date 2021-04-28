@@ -19,9 +19,6 @@ server <- function(input, output, session) {
   
   # delete the cSurvival variables we have save for easygeo
   onStop(fun = function(){
-    for(i in seq_along(isolate(rv$variables_for_geo))){
-      unlink(
-        paste0(surv_dir, isolate(rv$variables_for_geo[[i]]), ".rds"))
-    }
+    clear_rds()
   })
 }

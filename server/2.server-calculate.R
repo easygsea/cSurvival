@@ -2,6 +2,9 @@ observeEvent(input$confirm,{
   if(rv$projectStatus == "none"){
     shinyalert("Please select a project(s) to begin your analysis")
   }else{
+    #------ 0. clear previous data --------
+    clear_rds()
+    
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
     for(x in 1:rv$variable_n){

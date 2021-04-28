@@ -16,7 +16,7 @@ bodyOne <- tabItem(tabName = "one",
                     ,options = list(
                       `live-search` = TRUE,
                       placeholder = "Type to search ..."
-                      ,onInitialize = I(sprintf('function() { this.setValue(%s); }',"['TCGA-LUAD','TCGA-LUSC']"))
+                      ,onInitialize = I(sprintf('function() { this.setValue(%s); }',"")) #['TCGA-LUAD','TCGA-LUSC']
                     )
                   )
                   ,bsTooltip("project_q",HTML(paste0(
