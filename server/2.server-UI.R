@@ -183,7 +183,7 @@ output$ui_results <- renderUI({
           HTML(paste0("<h4>eVITTA provides modules for differential expression analysis (<b>easyGEO</b>), "
                       ,"functional profiling (<b>easyGSEA</b>), "
                       ,"intersection analysis (<b>easyVizR</b>), and transcriptome pattern visualizations."
-                      ,"<br><br>Click button below to start differential expression by easyGEO.</h4>")),
+                      ,"<br><br>Click button below to start differential expression (DE) analysis by easyGEO.</h4>")),
           br(),
           btn_save_for_geo(id = "btn_jump_to_geo", label = "Start DE analysis and visualization by easyGEO")
           ,htmlOutput("easygeo_iframe")

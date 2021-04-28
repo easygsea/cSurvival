@@ -20,7 +20,10 @@ library(waiter)
 library(shinyalert)
 library(shinydisconnect)
 library(rintrojs)
+library(edgeR)
+library(limma)
 library(org.Hs.eg.db)
+library(ids)
 
 options(repos = BiocManager::repositories())
 
