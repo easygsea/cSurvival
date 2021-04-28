@@ -54,7 +54,7 @@ output$ui_results <- renderUI({
   
   # assemble all types of plots
   if(exists("l_plot")){types <- c(types, l_plot)}
-  types <- c(types, "Differential expression & enrichment analysis"="gsea")
+  types <- c(types, "Transcriptome analysis by eVITTA"="gsea")
   
   if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
     h_plot <- "725px"
@@ -180,21 +180,14 @@ output$ui_results <- renderUI({
           HTML(paste0("<h3>Survival-coupled transcriptome analysis by <b>eVITTA</b> ",link_icon("evitta_link","https://tau.cmmt.ubc.ca/eVITTA/"),"</h3>")),
           bsTooltip("evitta_link",HTML("Visit eVITTA webserver"),placement = "top"),
           tags$hr(style="border-color: #939597;margin: 20px;"),
-          prettyRadioButtons(
-            inputId = "evitta",
-            label = NULL,
-            choiceNames = list(
-              HTML("Differential expression analysis by easyGEO")
-              ,HTML("Gene set enrichment analysis by easyGSEA")
-              ,"Intersection analysis and visualization by easyVizR"),
-            choiceValues = c("geo","gsea","vizr"),
-            selected = rv$evitta,
-            # status = "primary",
-            inline = T, bigger = T
-          )
-        ),btn_save_for_geo(id = "btn_jump_to_geo", label = "Jump to easyGEO"),
-        br(),
-        htmlOutput("easygeo_iframe")
+          HTML(paste0("<h4>eVITTA provides modules for differential expression analysis (<b>easyGEO</b>), "
+                      ,"functional profiling (<b>easyGSEA</b>), "
+                      ,"intersection analysis (<b>easyVizR</b>), and transcriptome pattern visualizations."
+                      ,"<br><br>Click button below to start differential expression (DE) analysis by easyGEO.</h4>")),
+          br(),
+          btn_save_for_geo(id = "btn_jump_to_geo", label = "Start DE analysis and visualization by easyGEO")
+          ,htmlOutput("easygeo_iframe")
+        )
       )
     )
     ,absolutePanel(
@@ -213,22 +206,23 @@ output$ui_results <- renderUI({
   )
 })
 
-# the button to control if the easygeo is embeded in our app
-observeEvent(input$btn_jump_to_geo, {
-  rv$easygeo_status <- TRUE
-})
-
+# ------------ UI for easyGEO -------------
 output$easygeo_iframe <- renderUI({
-  req(rv$easygeo_status == TRUE)
+  req(rv$gsea_done == "yes")
   variables_for_geo <- rv$variables_for_geo
   url_easygeo <- paste0('https://tau.cmmt.ubc.ca/eVITTA/easyGEO/',
                 "?survival=yes&degss=", variables_for_geo[['degss']], "&coefs=", variables_for_geo[['coefs']])
   print(url_easygeo)
-  div(br(),
-      tags$iframe(src = url_easygeo
+  div(
+    tags$script(HTML(
+      "document.getElementById('easygeo_iframe').scrollIntoView();"
+    )),
+    br(),
+    tags$iframe(src = url_easygeo
                      , style="width:100%;",  frameborder="0"
                      ,id="iframe"
-                     , height = "800px"))
+                     , height = "800px")
+  )
 })
 
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------

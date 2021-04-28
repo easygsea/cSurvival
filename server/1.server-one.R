@@ -56,6 +56,8 @@ observeEvent(input$confirm_project,{
 ## reset project
 observeEvent(input$reset_project,{
   rv$project <- ""
+  rv[["cox_1"]] <- NULL
+  clear_rds()
   shinyjs::enable("project")
   rv$projectStatus <- "none"
   

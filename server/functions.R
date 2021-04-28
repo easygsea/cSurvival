@@ -312,8 +312,10 @@ btn_save_for_geo <- function(id, label){
 # output: the random string we have generated
 save_csurvival_variable <- function(rv){
   random_string <- ids::random_id(bytes = 8)
+  ofile <- paste0(surv_dir,random_string, ".rds")
   saveRDS(object = rv, 
-          file = paste0(gsub(pattern = "/cSurvival", replacement = "", getwd()), "/variables/", random_string, ".rds"))
+          file = ofile)
+  system(paste0("chmod -R a+rwX ",ofile))
   print(random_string)
   # url <- paste0('https://tau.cmmt.ubc.ca/eVITTA/easyGSEA/',"?data_head_o=", random_string)
   # runjs(paste0("window.open('", url, "','_blank');"))
