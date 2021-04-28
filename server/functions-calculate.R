@@ -528,7 +528,7 @@ de_dfgene <- function(){
   colnames(df_gene) <- patients
   rownames(df_gene) <- genes
   
-  incProgress(amount = 0.2, message = "Converting gene IDs...")
+  incProgress(amount = 0.2, message = wait_msg("Converting gene IDs..."))
   
   # id conversion
   # create individual tables using org.Hs
