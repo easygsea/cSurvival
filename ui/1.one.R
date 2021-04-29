@@ -1,3 +1,26 @@
+# the panel to confirm project(s) selection
+confirm_panel <- conditionalPanel(
+  'input.project != "" & !output.projectStatus',
+  actionBttn(
+    "confirm_project",
+    tags$b("Confirm selection!")
+    ,block = T,style = "simple",color = "warning",size="sm"
+  )
+  ,tags$style(type='text/css', "#confirm_project { margin-top: 43.5px; height: 33.5px;}"),
+)
+
+# the panel to reset project(s) selection
+reset_panel <- conditionalPanel(
+  'output.projectStatus',
+  actionButton(
+    "reset_project",
+    strong("Reset selection")
+    ,width = "100%"
+  )
+  ,tags$style(type='text/css', "#reset_project { margin-top: 43.5px;}"),
+)
+
+# assemble the UI
 bodyOne <- tabItem(tabName = "one",
     fluidRow(
         box(
@@ -6,7 +29,7 @@ bodyOne <- tabItem(tabName = "one",
               12,
               fluidRow(
                 column(
-                  10,
+                  8,
                   selectizeInput(
                     "project",
                     HTML(paste0("<h4><b>To start, select project(s) to analyze:</b>",add_help("project_q"),"</h4>"))
@@ -21,8 +44,14 @@ bodyOne <- tabItem(tabName = "one",
                   )
                   ,bsTooltip("project_q",HTML(paste0(
                     "Select a project(s) from DepMap, TARGET or TCGA. Multiple selections (maximum 5) are allowed for pan-cancer analysis."
-                    ," Click button below to confirm your selection and proceed."
+                    ," Click button to the right to confirm your selection and proceed."
                   )),placement = "right")
+                )
+                ,column(
+                  2,
+                  confirm_panel
+                  ,reset_panel
+                  # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
                 )
                 ,column(
                   2,#align="right",
@@ -37,27 +66,6 @@ bodyOne <- tabItem(tabName = "one",
                     "1 to analyze a single gene, locus, or gene set."
                     ," 2 to analyze interactions and relationships between genes, loci and/or gene sets."
                   )),placement = "right")
-                )
-                ,column(
-                  12,
-                  conditionalPanel(
-                    'input.project != "" & !output.projectStatus',
-                    actionBttn(
-                      "confirm_project",
-                      "Click to confirm project(s) selection to proceed!"
-                      ,block = T,style = "simple",color = "warning",size="md"
-                    )
-                    # ,tags$style(type='text/css', "#confirm_project { margin-top: 43.5px;}"),
-                  )
-                  ,conditionalPanel(
-                    'output.projectStatus',
-                    actionButton(
-                      "reset_project",
-                      strong("Click to reset project(s) selection")
-                      ,width = "100%"
-                    )
-                    # ,tags$style(type='text/css', "#reset_project { margin-top: 43.5px;}"),
-                  )
                 )
               )
             ,br()

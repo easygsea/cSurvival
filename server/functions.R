@@ -243,7 +243,11 @@ retrieve_genes <- function(x){
   }else if(input[[db_id]] == "rna"){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(input[[db_id]] == "snv"){
-    infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
+    if(rv$tcga){
+      infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
+    }else{
+      infiles <- paste0(rv$indir,"df_snv_class",".csv")
+    }
   }else if(input[[db_id]] == "cnv"){
     infiles <- paste0(rv$indir,"df_cnv.csv")
   }else if(input[[db_id]] == "mir"){

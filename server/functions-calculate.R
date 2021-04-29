@@ -142,10 +142,9 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
   
-  # initialize the most significant p value and model
+  # initialize the most significant p value
   least_p_value <- 1
-  quantile_most_significant <- NULL
-  
+
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
   if(mode == "g"){
@@ -172,11 +171,12 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
     #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
     #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     # }
-      
-    if(p_diff <= least_p_value){
-      least_p_value <- p_diff
-      df_most_significant <- df
-      cutoff_most_significant <- names(quantiles[i])
+    if(!is.na(p_diff)){
+      if(p_diff <= least_p_value){
+        least_p_value <- p_diff
+        df_most_significant <- df
+        cutoff_most_significant <- names(quantiles[i])
+      }
     }
   }
 
@@ -239,10 +239,9 @@ get_df_snv <- function(data, nons){
 
 # generate df if CNV copy number data
 get_info_most_significant_cnv <- function(data, mode){
-  # initialize the most significant p value and model
+  # initialize the most significant p value
   least_p_value <- 1
-  quantile_most_significant <- NULL
-  
+
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
 
