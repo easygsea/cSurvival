@@ -45,7 +45,8 @@ observeEvent(input$confirm_project,{
       fread(x,sep=",",header=T) %>%
         dplyr::select(patient_id,survival_days,censoring_status,gender)
     })
-    rv$df_survival <- rbindlist(l,use.names = T)
+    rv$df_survival <- rbindlist(l,use.names = T) %>%
+      dplyr::distinct(patient_id, .keep_all = T)
     update_genes_ui(opt="nil")
   })
   
