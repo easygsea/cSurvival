@@ -551,7 +551,6 @@ de_dfgene <- function(){
     dplyr::filter(!is.na(symbol))
   
   genes <- df_gene$symbol
-  rownames(df_gene) <- genes
   
   # convert to numeric matrix
   df_gene <- df_gene %>%
@@ -559,5 +558,7 @@ de_dfgene <- function(){
     dplyr::mutate_all(as.numeric) %>%
     as.matrix(.)
 
+  rownames(df_gene) <- genes
+  
   return(df_gene)
 }
