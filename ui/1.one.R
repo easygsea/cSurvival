@@ -29,7 +29,7 @@ bodyOne <- tabItem(tabName = "one",
               12,
               fluidRow(
                 column(
-                  7,
+                  8,
                   selectizeInput(
                     "project",
                     HTML(paste0("<h4><b>To start, select project(s) to analyze:</b>",add_help("project_q"),"</h4>"))
@@ -48,7 +48,7 @@ bodyOne <- tabItem(tabName = "one",
                   )),placement = "right")
                 )
                 ,column(
-                  3,
+                  2,
                   confirm_panel
                   ,reset_panel
                   # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
