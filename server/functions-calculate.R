@@ -413,7 +413,7 @@ plot_surv <-
     df <- res[[mode]][["df"]]
     fit <- res[[mode]][["fit"]]
     lels <- res[[mode]][["lels"]]
-    
+    req(!is.null(fit))
     # median survival lines
     if(is.null(rv$median)){
       surv.median.line="none"
