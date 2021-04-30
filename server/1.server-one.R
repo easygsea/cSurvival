@@ -31,7 +31,6 @@ observeEvent(input$confirm_project,{
                       , " Please delete unrelated projects. Thank you."))
   }
   req(!project_length_check)
-
   
   # retrieve data
   withProgress(value = 1, message = "Retrieving data from project .... ",{
@@ -45,7 +44,9 @@ observeEvent(input$confirm_project,{
       fread(x,sep=",",header=T) %>%
         dplyr::select(patient_id,survival_days,censoring_status,gender)
     })
-    rv$df_survival <- rbindlist(l,use.names = T)
+    rv$df_survival <- rbindlist(l,use.names = T) %>%
+      dplyr::distinct(patient_id, .keep_all = T)
+    rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
     update_genes_ui(opt="nil")
   })
   

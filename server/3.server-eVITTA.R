@@ -2,23 +2,21 @@ observeEvent(input$btn_jump_to_geo,{
   rv$gsea_done <- ""
   # --------------- perform differential expression analysis ---------
   print("hihihi")
-  print(getwd())
   withProgress(value = 0.1, message = wait_msg("Compiling data for DE analysis..."),{
     # a) gene expression matrix
     df_gene <- de_dfgene()
     
-    #    saveRDS(df_gene,"df_gene_all.rds")
-    incProgress(amount = 0.1, message = "Creating design matrix...")
-    # b) design matrix
+    # # run DE analysis
+    incProgress(amount = 0.1, message = "Filtering samples according to study design...")
+    # # design matrix
     if(rv$variable_nr == 1){
       df_design <- rv[["df_gender"]]
     }else{
       df_design <- rv[["df_all"]]
     }
-    # saveRDS(df_design,"df_design_all.rds")
-    # create the design model
-    design <- model.matrix(~level.x*level.y, df_design)
     
+    df_gene <- df_gene[ , (colnames(df_gene) %in% df_design$patient_id)]
+
     # # run DE analysis
     incProgress(amount = 0.1, message = "Filtering lowly expressed genes...")
     
@@ -26,23 +24,31 @@ observeEvent(input$btn_jump_to_geo,{
     y <- DGEList(counts=df_gene)
     
     # 2) filter low expressing genes
+    # filter according to design matrix
     min_n <- min(table(df_design$level))
     keep <- rowSums(y$counts>1) >= min_n
     y <- y[keep,,keep.lib.sizes=TRUE]
     
+    incProgress(amount = 0.1, message = "Creating design matrix...")
+
+    # filter df_design according to count table
+    df_design <- df_design %>% dplyr::filter(patient_id %in% colnames(y$counts))
+
+    # create the design model
+    design <- model.matrix(~level.x*level.y, df_design)
+    
     incProgress(amount = 0.2, message = wait_msg("Performing DE analysis..."))
     
-    # 3) voom directly on counts, if data are very noisy, as would be used for microarray
+    # 4) voom directly on counts, if data are very noisy, as would be used for microarray
     v <- voom(y, design, plot=F, normalize.method="quantile")
     
-    # 4) DEG analysis
+    # 5) DEG analysis
     fit <- lmFit(v, design)
     fit <- eBayes(fit,trend=TRUE, robust=TRUE)
     
     # results
     results <- decideTests(fit)
-    print(summary(results))
-    
+
     incProgress(amount = 0.1, message = "Exporting results...")
     
     # available coefficients
@@ -62,13 +68,13 @@ observeEvent(input$btn_jump_to_geo,{
       topTable(fit, coef=x,sort.by="P",number=Inf)
     })
     names(degss) <- coefs
-    print(head(degss[[1]]))
+    
     # saveRDS(degss,"degss.rds")
     # saveRDS(coefs,"coefs.rds")
     # save the variables for easyGEO
     rv$variables_for_geo[['degss']] <- save_csurvival_variable(degss)
     rv$variables_for_geo[['coefs']] <- save_csurvival_variable(coefs)
-    print(rv$variables_for_geo)
+    # print(rv$variables_for_geo)
   })
   
   rv$gsea_done <- "yes"
