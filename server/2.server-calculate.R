@@ -256,10 +256,5 @@ observeEvent(input$confirm,{
         }
       }
     })
-    
-    # -------- check if successful -------
-    if(typeof(df_list[[1]]) == "list"){
-      rv$surv_plotted <- "plotted"
-    }
   }
 })

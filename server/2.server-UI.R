@@ -249,7 +249,7 @@ output$cox_plot <- renderPlot({
     
     # extract statistics
     res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-    
+    rv$surv_plotted <- "plotted"
     # generate survival curve
     plot_surv(res,two_rows=x)
   })
