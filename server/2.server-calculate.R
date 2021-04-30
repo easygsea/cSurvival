@@ -2,6 +2,9 @@ observeEvent(input$confirm,{
   if(rv$projectStatus == "none"){
     shinyalert("Please select a project(s) to begin your analysis")
   }else{
+    #------ 0. clear previous data --------
+    clear_rds()
+    
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
     for(x in 1:rv$variable_n){
@@ -54,7 +57,7 @@ observeEvent(input$confirm,{
     req(is.null(error_g) & is.null(error_lib) & is.null(error_manual) & is.null(error_gs))
     
     #------ 2. begin analysis ------
-    withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
+    withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
@@ -117,7 +120,14 @@ observeEvent(input$confirm,{
               max <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
               step <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
               
+              enough_error <- 0
               results <- get_info_most_significant_rna(data, min, max, step, mode=input[[cat_id]])
+              if(is.null(results)){
+                enough_error <- 1
+                shinyalert("The selected project does not have enough data for the selected gene, locus, or gene set.")
+              }
+              
+              req(enough_error == 0)
               
               # extract most significant df
               df <- results[["df"]]

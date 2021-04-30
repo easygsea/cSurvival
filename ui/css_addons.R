@@ -10,6 +10,9 @@ css_addons <-
       #project_div .form-group { display: table-row;}
       
       #evitta {font-size:120%;}
+      
+      #confirm_project {display: inline-block;}
+      #reset_project {display: inline-block;}
       "
     )))
   )

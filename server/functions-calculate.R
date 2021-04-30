@@ -142,10 +142,9 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
   
-  # initialize the most significant p value and model
-  least_p_value <- 1
-  quantile_most_significant <- NULL
-  
+  # initialize the most significant p value and df
+  least_p_value <- 1; df_most_significant <- NULL
+
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
   if(mode == "g"){
@@ -172,19 +171,25 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
     #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
     #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     # }
-      
-    if(p_diff <= least_p_value){
-      least_p_value <- p_diff
-      df_most_significant <- df
-      cutoff_most_significant <- names(quantiles[i])
+    if(!is.na(p_diff)){
+      if(p_diff <= least_p_value){
+        least_p_value <- p_diff
+        df_most_significant <- df
+        cutoff_most_significant <- names(quantiles[i])
+      }
     }
   }
-
-  results <- list(
-    df = df_most_significant,
-    cutoff = cutoff_most_significant
-  )
-  return(results)
+  
+  # proceed only if enough data
+  if(is.null(df_most_significant)){
+    return(NULL)
+  }else{
+    results <- list(
+      df = df_most_significant,
+      cutoff = cutoff_most_significant
+    )
+    return(results)
+  }
 }
 
 # generate df if user-defined cutoffs
@@ -239,10 +244,9 @@ get_df_snv <- function(data, nons){
 
 # generate df if CNV copy number data
 get_info_most_significant_cnv <- function(data, mode){
-  # initialize the most significant p value and model
+  # initialize the most significant p value
   least_p_value <- 1
-  quantile_most_significant <- NULL
-  
+
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
 
@@ -414,7 +418,7 @@ plot_surv <-
     df <- res[[mode]][["df"]]
     fit <- res[[mode]][["fit"]]
     lels <- res[[mode]][["lels"]]
-    
+    req(!is.null(fit))
     # median survival lines
     if(is.null(rv$median)){
       surv.median.line="none"
@@ -528,7 +532,7 @@ de_dfgene <- function(){
   colnames(df_gene) <- patients
   rownames(df_gene) <- genes
   
-  incProgress(amount = 0.2, message = "Converting gene IDs...")
+  incProgress(amount = 0.2, message = wait_msg("Converting gene IDs..."))
   
   # id conversion
   # create individual tables using org.Hs
@@ -552,7 +556,6 @@ de_dfgene <- function(){
     dplyr::filter(!is.na(symbol))
   
   genes <- df_gene$symbol
-  rownames(df_gene) <- genes
   
   # convert to numeric matrix
   df_gene <- df_gene %>%
@@ -560,5 +563,7 @@ de_dfgene <- function(){
     dplyr::mutate_all(as.numeric) %>%
     as.matrix(.)
 
+  rownames(df_gene) <- genes
+  
   return(df_gene)
 }

@@ -1,3 +1,5 @@
+surv_dir <- paste0(dirname(dirname(getwd())), "/variables/")
+
 # ------- names for input modes ----------
 input_mode_names <- c(
   "Expression (FPKM)" = "rna"

@@ -243,7 +243,11 @@ retrieve_genes <- function(x){
   }else if(input[[db_id]] == "rna"){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(input[[db_id]] == "snv"){
-    infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
+    if(rv$tcga){
+      infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
+    }else{
+      infiles <- paste0(rv$indir,"df_snv_class",".csv")
+    }
   }else if(input[[db_id]] == "cnv"){
     infiles <- paste0(rv$indir,"df_cnv.csv")
   }else if(input[[db_id]] == "mir"){
@@ -293,4 +297,31 @@ update_genes_ui <- function(opt="hi"){
       )
     )
   })
+}
+
+
+# the button ui that will save cSurvival's variables for easygeo
+btn_save_for_geo <- function(id, label){
+  bsButton(
+    inputId = id,
+    label = tags$b(label),
+    style = "primary"
+    #,onclick ="location.href='http://tau.cmmt.ubc.ca/eVITTA/';target='_blank'"
+    
+  )
+}
+
+# save cSurvival's variables to easyGEO 's variables folder for future read
+# input: the rv you would like to save
+# output: the random string we have generated
+save_csurvival_variable <- function(rv){
+  random_string <- ids::random_id(bytes = 8)
+  ofile <- paste0(surv_dir,random_string, ".rds")
+  saveRDS(object = rv, 
+          file = ofile)
+  system(paste0("chmod -R a+rwX ",ofile))
+  print(random_string)
+  # url <- paste0('https://tau.cmmt.ubc.ca/eVITTA/easyGSEA/',"?data_head_o=", random_string)
+  # runjs(paste0("window.open('", url, "','_blank');"))
+  return(random_string)
 }
