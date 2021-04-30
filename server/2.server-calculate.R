@@ -57,7 +57,7 @@ observeEvent(input$confirm,{
     req(is.null(error_g) & is.null(error_lib) & is.null(error_manual) & is.null(error_gs))
     
     #------ 2. begin analysis ------
-    withProgress(value = 1, message = "Performing analysis. Please wait a minute ...",{
+    withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
@@ -249,5 +249,10 @@ observeEvent(input$confirm,{
         }
       }
     })
+    
+    # -------- check if successful -------
+    if(typeof(df_list[[1]]) == "list"){
+      rv$surv_plotted <- "plotted"
+    }
   }
 })
