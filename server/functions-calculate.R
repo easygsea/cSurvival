@@ -142,8 +142,8 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
   
-  # initialize the most significant p value
-  least_p_value <- 1
+  # initialize the most significant p value and df
+  least_p_value <- 1; df_most_significant <- NULL
 
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
@@ -179,12 +179,17 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       }
     }
   }
-
-  results <- list(
-    df = df_most_significant,
-    cutoff = cutoff_most_significant
-  )
-  return(results)
+  
+  # proceed only if enough data
+  if(is.null(df_most_significant)){
+    return(NULL)
+  }else{
+    results <- list(
+      df = df_most_significant,
+      cutoff = cutoff_most_significant
+    )
+    return(results)
+  }
 }
 
 # generate df if user-defined cutoffs

@@ -120,7 +120,14 @@ observeEvent(input$confirm,{
               max <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
               step <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
               
+              enough_error <- 0
               results <- get_info_most_significant_rna(data, min, max, step, mode=input[[cat_id]])
+              if(is.null(results)){
+                enough_error <- 1
+                shinyalert("The selected project does not have enough data for the selected gene, locus, or gene set.")
+              }
+              
+              req(enough_error == 0)
               
               # extract most significant df
               df <- results[["df"]]
