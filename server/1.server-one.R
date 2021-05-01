@@ -52,6 +52,25 @@ observeEvent(input$confirm_project,{
   
   rv$projectStatus <- "selected"
   shinyjs::disable("project")
+  
+  # create the modal that display the target project information
+  if(study == "TARGET"){
+    target_project_texts <- ""
+    for(j in seq_along(project)){
+      target_project_texts <- paste0(target_project_texts, project[j], " contains ", paste(names(name_project_choices(rv$parameters_target_projects[[j]])), collapse = ", "), " data. ")
+    }
+    print(target_project_texts)
+    # the modal that displayed the information of target projects' data
+    showModal(modalDialog(
+      title = h2("About our database"),
+      div(
+        style="font-size:200%",
+        paste0(target_project_texts, "Therefore, you have ", paste(names(rv$overlapped_parameter), collapse = ", "), " options. ")
+      ),
+      size = "l", easyClose = T, footer = modalButton("OK")
+      
+    ))
+  }
 })
 
 ## reset project
@@ -201,7 +220,7 @@ observeEvent(lib_input_lst(),{
       if(!is.null(gs) & gs != ""){
         genes <- rv[[paste0("gmts",x)]][[gs]]
         rv[[paste0("gs_genes_",x)]] <- genes
-
+        
         output[[gs_lib_genes_id]] <- renderText({
           paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
         })
@@ -256,7 +275,7 @@ observeEvent(lg_input_btn_lst(),{
           no_genes <- sapply(genes, function(x){
             str_split(x,"\\|") %>% .[[1]]
           }) %>% unlist(.) %>% length(.)
-
+          
           if(genes == ""){
             shinyalert("Please enter valid gene(s).")
           }
@@ -331,7 +350,7 @@ observeEvent(lg_input_btn_lst(),{
               # })
             }
           }
-      }
+        }
       }
     })
   })

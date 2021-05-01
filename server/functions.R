@@ -325,3 +325,15 @@ save_csurvival_variable <- function(rv){
   # runjs(paste0("window.open('", url, "','_blank');"))
   return(random_string)
 }
+
+
+# name a vector based on the value to form the choices of "Select type of molecular data:"
+name_project_choices <- function(overlapped_parameter){
+  if(!is.null(overlapped_parameter)){
+    names(overlapped_parameter)[which(overlapped_parameter=="rna")] <- "Expression"
+    names(overlapped_parameter)[which(overlapped_parameter=="snv")] <- "Mutation"
+    names(overlapped_parameter)[which(overlapped_parameter=="cnv")] <- "CNV"
+    names(overlapped_parameter)[which(overlapped_parameter=="mir")] <- "miRNA"
+  }
+  overlapped_parameter
+}

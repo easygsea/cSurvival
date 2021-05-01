@@ -75,3 +75,6 @@ dyn_list <- function(x){
     ,cnv_id <- paste0("cnv_par_",x)
   )
 }
+# the data that tell what Target projects data have
+TARGET_existing_data <- fread("project_data/TARGET_existing_data.csv") %>%
+  mutate(existing_data = str_split(existing_data, pattern = ","))
