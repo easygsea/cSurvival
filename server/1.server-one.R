@@ -38,6 +38,7 @@ observeEvent(input$confirm_project,{
     if(study == "TCGA"){rv$tcga <- T}else{rv$tcga <- F}
     if(study == "TARGET"){rv$target <- T}else{rv$target <- F}
     if(study == "DepMap"){rv$depmap <- T}else{rv$depmap <- F}
+
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     infiles <- paste0(rv$indir,"df_survival.csv")
     l <- lapply(infiles, function(x){
@@ -54,22 +55,24 @@ observeEvent(input$confirm_project,{
   shinyjs::disable("project")
   
   # create the modal that display the target project information
-  if(study == "TARGET"){
+  if(rv$target){
     target_project_texts <- ""
-    for(j in seq_along(project)){
-      target_project_texts <- paste0(target_project_texts, project[j], " contains ", paste(names(name_project_choices(rv$parameters_target_projects[[j]])), collapse = ", "), " data. ")
+    if(length(project) > 1 & length(rv$overlapped_parameter) < 4){
+      for(j in seq_along(project)){
+        target_project_texts <- paste0(target_project_texts, project[j], ": ", paste0(names(name_project_choices(rv$parameters_target_projects[[j]])), collapse = ", "), ".<br><br>")
+      }
+      # the modal that displayed the information of target projects' data
+      showModal(modalDialog(
+        title = h2("Available datasets"),
+        div(
+          style="font-size:120%",
+          HTML(paste0(target_project_texts
+                      , "<b>Common datasets for pan-cancer analysis:</b> ", paste(names(rv$overlapped_parameter), collapse = ", "), "."
+          ))
+        ),
+        size = "l", easyClose = T, footer = modalButton("OK")
+      ))
     }
-    print(target_project_texts)
-    # the modal that displayed the information of target projects' data
-    showModal(modalDialog(
-      title = h2("About our database"),
-      div(
-        style="font-size:200%",
-        paste0(target_project_texts, "Therefore, you have ", paste(names(rv$overlapped_parameter), collapse = ", "), " options. ")
-      ),
-      size = "l", easyClose = T, footer = modalButton("OK")
-      
-    ))
   }
 })
 
