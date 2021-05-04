@@ -15,6 +15,24 @@ library(TCGAutils) # aliquot UUID to patient barcode conversion
 
 setwd("~/ShinyApps/project_data")
 
+#-------small functions--------------
+return_good_data <- function(df){
+  genes <- colnames(df)
+  genes_keep <- sapply(genes, function(x){
+    data <- df[[x]]
+    yn <- table(data[!is.na(data)])
+    if(length(yn) > 1 & min(yn)>10){
+      return(genes[x])
+    }else{
+      return(NULL)
+    }
+  })
+  genes_keep <- genes_keep[!sapply(genes_keep, is.null)]
+  if(length(genes_keep)==0){return(NULL)}else{
+    return(paste0("patient_id,",paste0(genes_keep,collapse = ",")))
+  }
+}
+
 #-------get all the project names--------------------
 df_gdc_projects <- getGDCprojects()
 # write them into a .csv
@@ -1100,18 +1118,21 @@ for(j in seq_along(project_id)){
   df_cnv_scale_path = paste0(project_name, "/", "df_cnv_scale.csv")
   # read df_cnv into a df
   df_cnv <- try(fread(df_cnv_path))
-  # scale the df
-  df_cnv_scale <- try(
-    apply(df_cnv[,-1], 2, scale) %>%
-      as_tibble() %>%
-      mutate(patient_id = df_cnv$patient_id) %>%
-      select(patient_id, everything())
-  )
-  if(!inherits(df_cnv_scale, "try-error")){
+  # # scale the df
+  # df_cnv_scale <- try(
+  #   apply(df_cnv[,-1], 2, scale) %>%
+  #     as_tibble() %>%
+  #     mutate(patient_id = df_cnv$patient_id) %>%
+  #     select(patient_id, everything())
+  # )
+  if(!inherits(df_cnv, "try-error")){
+    df_cnv_scale <- return_good_data(df_cnv)
     unlink(df_cnv_scale_path, recursive = T)
+    if(!is.null(df_cnv_scale)){
+      # output the df to directory
+      fwrite(df_cnv_scale, file = df_cnv_scale_path)
+    }
   } else {next}
-  # output the df to directory
-  fwrite(df_cnv_scale, file = df_cnv_scale_path)
   
   # # delete unneccessary folder
   # unlink(paste0(project_name, "/", "cnv_data"), recursive = T)

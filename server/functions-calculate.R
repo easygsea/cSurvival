@@ -296,10 +296,12 @@ get_info_most_significant_cnv <- function(data, mode){
       #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
       #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
       # }
-      if(p_diff <= least_p_value){
-        least_p_value <- p_diff
-        df_most_significant <- df
-        cutoff_most_significant <- names(cats[cat])
+      if(!is.na(p_diff)){
+        if(p_diff <= least_p_value){
+          least_p_value <- p_diff
+          df_most_significant <- df
+          cutoff_most_significant <- names(cats[cat])
+        }
       }
     }
   # }
