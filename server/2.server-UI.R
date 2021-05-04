@@ -228,14 +228,16 @@ output$easygeo_iframe <- renderUI({
 })
 
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
-observeEvent(list(input$plot_type,rv[["title_1"]],rv[["title_all"]]),{
+observeEvent(input$plot_type,{
   req(!is.null(input$plot_type))
   req(rv$surv_plotted == "plotted")
   x <- rv$plot_type <- input$plot_type
-  # # the gene(s)/GS(s) as the title
-  # rv[["title"]] <- ifelse(isolate(input[[paste0("cat_",x)]]=="g"),isolate(input[[paste0("g_",x)]]),isolate(input[[paste0("gs_l_",x)]]))
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
+})
+
+observeEvent(list(rv[["title_1"]],rv[["title_all"]]),{
+  rv[["title"]] <- rv[[paste0("title_",rv$plot_type)]]
 })
 
 output$cox_plot <- renderPlot({
