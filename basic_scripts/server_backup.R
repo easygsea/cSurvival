@@ -1145,7 +1145,65 @@ generate_mir_data(project_ids = project_id, abbreviate_position = 16L)
 #-------- delete unnecessary files-------------------
 unlink("MANIFEST.txt")
 
+# generate a data frame that contains all the  data name of TARGET projects
+write("project_name,existing_data", file = "TARGET_existing_data.csv")
+for(project_name in df_target_projects$project_id){
+  existing_data <- c()
+  if(length(list.files(path = project_name, pattern = "df_gene_scale")) > 0){
+    existing_data[length(existing_data)+1] <- "rna"
+  }
+  if(length(list.files(path = project_name, pattern = "df_snv")) > 0){
+    existing_data[length(existing_data)+1] <- "snv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_cnv_scale")) > 0){
+    existing_data[length(existing_data)+1] <- "cnv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_mir_scale")) > 0){
+    existing_data[length(existing_data)+1] <- "mir"
+  }
+  write(paste0("\"", project_name, "\",\"", paste(existing_data, collapse = ","), "\"") , file = "TARGET_existing_data.csv", append = T)
+}
 
+# generate a data frame that contains all the missing data name of TARGET projects
+write("project_name,missing_data", file = "TARGET_missing_data.csv")
+for(project_name in df_target_projects$project_id){
+  missing_data <- c()
+  if(length(list.files(path = project_name, pattern = "df_gene_scale")) == 0){
+    missing_data[length(missing_data)+1] <- "rna"
+  }
+  if(length(list.files(path = project_name, pattern = "df_snv")) == 0){
+    missing_data[length(missing_data)+1] <- "snv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_cnv_scale")) == 0){
+    missing_data[length(missing_data)+1] <- "cnv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_mir_scale")) == 0){
+    missing_data[length(missing_data)+1] <- "mir"
+  }
+  write(paste0("\"", project_name, "\",\"", paste(missing_data, collapse = ","), "\"") , file = "TARGET_missing_data.csv", append = T)
+}
+
+# generate a data frame that contains all the missing data names of TCGA projects
+write("project_name,missing_data", file = "TCGA_missing_data.csv")
+for(project_name in df_tcga_projects$project_id){
+  missing_data <- c()
+  if(length(list.files(path = project_name, pattern = "df_gene")) == 0){
+    missing_data[length(missing_data)+1] <- "rna"
+  }
+  if(length(list.files(path = project_name, pattern = "df_snv")) == 0){
+    missing_data[length(missing_data)+1] <- "snv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_cnv")) == 0){
+    missing_data[length(missing_data)+1] <- "cnv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_mir")) == 0){
+    missing_data[length(missing_data)+1] <- "mir"
+  }
+  if(length(list.files(path = project_name, pattern = "df_met")) == 0){
+    missing_data[length(missing_data)+1] <- "mir"
+  }
+  write(paste0("\"", project_name, "\",\"", paste(missing_data, collapse = ","), "\"") , file = "TCGA_missing_data.csv", append = T)
+}
 
 
 #--------- test_code-------------------------------#
