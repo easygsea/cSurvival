@@ -1,6 +1,6 @@
-#======================================================================#
+#=========================================================================#
 ####  STEP 0. Freeze project once selected, update gene selection UI   ####
-#======================================================================#
+#=========================================================================#
 # output option to see if a project(s) is (are) selected or not
 output$projectStatus <- reactive({
   rv$projectStatus == "selected"
@@ -467,7 +467,7 @@ observeEvent(manual_lst(),{
   })
 },ignoreInit = T)
 
-# ---------- 1[G]. update loaded genes ---------
+# ---------- [1G] update loaded genes ---------
 ## update gene selection UI
 genes_lst <- reactive({
   lapply(1:rv$variable_n, function(x){

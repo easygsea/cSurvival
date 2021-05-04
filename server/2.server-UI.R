@@ -5,6 +5,8 @@ output$ui_results <- renderUI({
   x <- rv$variable_nr
   rv[["dtypes"]] <- ""
   
+  if(is.null(rv[["title"]])){rv[["title"]] <- rv[[paste0("title_",rv$plot_type)]]}
+  
   if(x == 1){
     types <- list(
       "Survival plot #1" = 1
@@ -212,7 +214,7 @@ output$easygeo_iframe <- renderUI({
   variables_for_geo <- rv$variables_for_geo
   url_easygeo <- paste0('https://tau.cmmt.ubc.ca/eVITTA/easyGEO/',
                 "?survival=yes&degss=", variables_for_geo[['degss']], "&coefs=", variables_for_geo[['coefs']])
-  print(url_easygeo)
+  # print(url_easygeo)
   div(
     tags$script(HTML(
       "document.getElementById('easygeo_iframe').scrollIntoView();"
@@ -226,7 +228,7 @@ output$easygeo_iframe <- renderUI({
 })
 
 # --------- 1. display the survival curve / scatter plot / mutation statistics ---------
-observeEvent(list(input$plot_type,rv[["title_1"]]),{
+observeEvent(list(input$plot_type,rv[["title_1"]],rv[["title_all"]]),{
   req(!is.null(input$plot_type))
   req(rv$surv_plotted == "plotted")
   x <- rv$plot_type <- input$plot_type
