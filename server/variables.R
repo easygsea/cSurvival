@@ -37,6 +37,8 @@ input_mode_names <- c(
   ,"Copy number" = "cnv"
   ,"Expression (RPM)" = "mir"
   ,"Methylation beta-value" = "met"
+  ,"Mean Z-score" = "lib"
+  ,"Mean Z-score" = "manual"
 )
 
 # ------- survival analysis methods ---------

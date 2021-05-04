@@ -98,15 +98,16 @@ extract_gene_data <- function(x, type){
     names(muts) <- data$patient_id
     muts <- muts[!is.na(muts)]
     rv[[paste0("mutations_",x)]] <- muts
-  }
-  if(type == "lib" | type == "manual"){
-    # save original FPKM data
-    if(x == 1){rv[[paste0("exprs_",x)]] <- data}
-    
+  }else if(type == "lib" | type == "manual"){
     # z score transform expression values
     n_col <- ncol(data)
     exp_scale <- apply(data[,2:n_col], 2, scale)
     data <- cbind(data[,1,drop=F],exp_scale)
+    
+    # save mean scaled FPKM data
+    rv[[paste0("exprs_",x)]] <- data %>%
+      mutate(Mean=rowMeans(dplyr::select(., !patient_id))) %>%
+      dplyr::select(patient_id, Mean)
   }
   
   return(data)
