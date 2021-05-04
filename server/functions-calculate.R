@@ -508,7 +508,11 @@ plot_surv <-
 # the gene expression table
 de_dfgene <- function(){
   # patients
-  patients <- rv[["df_gender"]][["patient_id"]]
+  if(rv$variable_nr == 1){
+    patients <- rv[["df_gender"]][["patient_id"]]
+  }else{
+    patients <- rv[["df_all"]][["patient_id"]]
+  }
   
   # read in data
   infiles <- paste0(rv$indir,"df_gene.csv")
