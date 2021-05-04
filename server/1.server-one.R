@@ -48,6 +48,15 @@ observeEvent(input$confirm_project,{
     rv$df_survival <- rbindlist(l,use.names = T) %>%
       dplyr::distinct(patient_id, .keep_all = T)
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+    if(!is.null(rv$overlapped_parameter)){
+      lapply(1:rv$variable_n, function(x){
+        db_id <- paste0("db_",x)
+        if(!rv[[db_id]] %in% rv$overlapped_parameter){
+          rv[[db_id]] <- "rna"
+        }
+      })
+      rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+    }
     update_genes_ui(opt="nil")
   })
   

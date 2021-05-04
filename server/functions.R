@@ -237,20 +237,21 @@ update_gs_by_db <- function(x, mode="nil"){
 retrieve_genes <- function(x){
   db_id <- paste0("db_",x)
   method <- ifelse(is.null(input[[paste0("snv_method_",x)]]),"mutect",input[[paste0("snv_method_",x)]])
-
-  if(is.null(input[[db_id]])){
+  
+  dbt <- rv[[db_id]]
+  if(is.null(dbt)){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
-  }else if(input[[db_id]] == "rna"){
+  }else if(dbt == "rna"){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
-  }else if(input[[db_id]] == "snv"){
+  }else if(dbt == "snv"){
     if(rv$tcga){
       infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
     }else{
       infiles <- paste0(rv$indir,"df_snv_class",".csv")
     }
-  }else if(input[[db_id]] == "cnv"){
+  }else if(dbt == "cnv"){
     infiles <- paste0(rv$indir,"df_cnv.csv")
-  }else if(input[[db_id]] == "mir"){
+  }else if(dbt == "mir"){
     infiles <- paste0(rv$indir,"df_mir_scale.csv")
   }
   
