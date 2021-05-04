@@ -33,7 +33,7 @@ observeEvent(input$confirm_project,{
   req(!project_length_check)
   
   # retrieve data
-  withProgress(value = 1, message = "Retrieving data from project .... ",{
+  withProgress(value = 1, message = "Retrieving data from project(s) .... ",{
     rv$project <- input$project
     if(study == "TCGA"){rv$tcga <- T}else{rv$tcga <- F}
     if(study == "TARGET"){rv$target <- T}else{rv$target <- F}
@@ -72,11 +72,11 @@ observeEvent(input$confirm_project,{
       }
       # the modal that displayed the information of target projects' data
       showModal(modalDialog(
-        title = h2("Available datasets"),
+        title = h2("Available data"),
         div(
           style="font-size:120%",
           HTML(paste0(target_project_texts
-                      , "<b>Common datasets for pan-cancer analysis:</b> ", paste(names(rv$overlapped_parameter), collapse = ", "), "."
+                      , "<b>Common dataset(s) for pan-cancer analysis:</b> ", paste(names(rv$overlapped_parameter), collapse = ", "), "."
           ))
         ),
         size = "l", easyClose = T, footer = modalButton("OK")
