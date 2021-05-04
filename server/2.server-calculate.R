@@ -4,6 +4,7 @@ observeEvent(input$confirm,{
   }else{
     #------ 0. clear previous data --------
     clear_rds()
+    rv$show_ui <- ""
     
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
@@ -256,5 +257,8 @@ observeEvent(input$confirm,{
         }
       }
     })
+    
+    # 
+    rv$show_ui <- "yes"
   }
 })

@@ -177,6 +177,7 @@ observeEvent(gmt_input_lst(),{
   array <- 1:rv$variable_n #check_array(lst)
   namespaces <- paste0("gs_db_",array)
   req(req_diff_rv(namespaces))
+  rv$show_ui <- ""
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
     lapply(array, function(x) {
       gs_db_id <- paste0("gs_db_",x)

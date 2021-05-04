@@ -76,9 +76,11 @@ output$ui_results <- renderUI({
 
   box(
     width = 12, status = "danger",
-    tags$script(HTML(
-      "document.getElementById('ui_results').scrollIntoView();"
-    )),
+    if(rv$show_ui == "yes"){
+      tags$script(HTML(
+        "document.getElementById('ui_results').scrollIntoView();"
+      ))
+    },
     column(
       12,align="center",
       radioGroupButtons(
