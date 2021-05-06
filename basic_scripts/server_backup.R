@@ -938,7 +938,7 @@ for(j in seq_along(project_id)){
     # read the .xlsx file
     df_xlsx <- try(
       read_xlsx(filename_xlsx) %>%
-        select(patient_id = `TARGET USI`,gender = Gender, censoring_status = `Vital Status`, survival_days = `Overall Survival Time in Days`) %>%
+        dplyr::select(patient_id = `TARGET USI`,gender = Gender, censoring_status = `Vital Status`, survival_days = `Overall Survival Time in Days`) %>%
         filter(!is.na(censoring_status)) %>%
         mutate(censoring_status = ifelse(censoring_status=="Alive", 0 , 1))
     )
