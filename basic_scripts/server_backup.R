@@ -122,7 +122,7 @@ for(w in seq_along(project_id)){
       filter(diagnosis_days == 0) %>%
       mutate(survival_days = as.numeric(ifelse(is.na(death_days), followup_days, death_days))) %>%
       filter(!is.na(survival_days)) %>%
-      filter(survival_days > 0)
+      filter(survival_days >= 0)
   )
   if(!inherits(df_survival, "try-error")){
     unlink(df_survival_path, recursive = T)
@@ -943,7 +943,7 @@ for(j in seq_along(project_id)){
         dplyr::select(patient_id = `TARGET USI`,gender = Gender, censoring_status = `Vital Status`, survival_days = `Overall Survival Time in Days`) %>%
         filter(!is.na(censoring_status)) %>%
         mutate(censoring_status = ifelse(censoring_status=="Alive", 0 , 1)) %>%
-        filter(survival_days > 0)
+        filter(survival_days >= 0)
     )
     if(inherits(df_xlsx, "try-error")){next}
     # store them in the list

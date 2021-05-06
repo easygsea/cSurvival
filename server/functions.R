@@ -30,9 +30,9 @@ init_rv <- function(x){
   # feedback on manual gene input
   rv[[paste0("gs_mg_",x)]] <- ""
   # lower bound for quantile loop
-  rv[[paste0("lower_",x)]] <- .15
+  rv[[paste0("lower_",x)]] <- .2
   # upper bound for quantile loop
-  rv[[paste0("upper_",x)]] <- .85
+  rv[[paste0("upper_",x)]] <- .8
   # step size
   rv[[paste0("step_",x)]] <- .01
   # parameters for SNV mutation analysis
