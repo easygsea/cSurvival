@@ -98,15 +98,16 @@ extract_gene_data <- function(x, type){
     names(muts) <- data$patient_id
     muts <- muts[!is.na(muts)]
     rv[[paste0("mutations_",x)]] <- muts
-  }
-  if(type == "lib" | type == "manual"){
-    # save original FPKM data
-    if(x == 1){rv[[paste0("exprs_",x)]] <- data}
-    
+  }else if(type == "lib" | type == "manual"){
     # z score transform expression values
     n_col <- ncol(data)
     exp_scale <- apply(data[,2:n_col], 2, scale)
     data <- cbind(data[,1,drop=F],exp_scale)
+    
+    # save mean scaled FPKM data
+    rv[[paste0("exprs_",x)]] <- data %>%
+      mutate(Mean=rowMeans(dplyr::select(., !patient_id))) %>%
+      dplyr::select(patient_id, Mean)
   }
   
   return(data)
@@ -296,10 +297,12 @@ get_info_most_significant_cnv <- function(data, mode){
       #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
       #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
       # }
-      if(p_diff <= least_p_value){
-        least_p_value <- p_diff
-        df_most_significant <- df
-        cutoff_most_significant <- names(cats[cat])
+      if(!is.na(p_diff)){
+        if(p_diff <= least_p_value){
+          least_p_value <- p_diff
+          df_most_significant <- df
+          cutoff_most_significant <- names(cats[cat])
+        }
       }
     }
   # }
@@ -506,7 +509,11 @@ plot_surv <-
 # the gene expression table
 de_dfgene <- function(){
   # patients
-  patients <- rv[["df_gender"]][["patient_id"]]
+  if(rv$variable_nr == 1){
+    patients <- rv[["df_gender"]][["patient_id"]]
+  }else{
+    patients <- rv[["df_all"]][["patient_id"]]
+  }
   
   # read in data
   infiles <- paste0(rv$indir,"df_gene.csv")

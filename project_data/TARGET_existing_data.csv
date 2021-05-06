@@ -1,0 +1,10 @@
+project_name, existing_data
+"TARGET-ALL-P1","rna"
+"TARGET-ALL-P3","rna,snv,mir"
+"TARGET-CCSK","rna,cnv"
+"TARGET-NBL","rna,snv"
+"TARGET-AML","rna,snv,cnv,mir"
+"TARGET-ALL-P2","rna,cnv,mir"
+"TARGET-RT","rna,mir"
+"TARGET-OS","rna,cnv"
+"TARGET-WT","rna,snv,mir"

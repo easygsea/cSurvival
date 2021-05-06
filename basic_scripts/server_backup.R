@@ -15,6 +15,29 @@ library(TCGAutils) # aliquot UUID to patient barcode conversion
 
 setwd("~/ShinyApps/project_data")
 
+#-------small functions--------------
+return_good_data <- function(df){
+  genes <- colnames(df)
+  genes_keep <- sapply(genes, function(x){
+    data <- df[[x]]
+    yn <- table(data[!is.na(data)])
+    if(length(yn) == 1){
+      return(NULL)
+    }else if((length(yn) == 2 & min(yn)>10) | (length(yn) > 2 & sort(yn)[[2]]>10)){
+      return(x)
+    }else{
+      return(NULL)
+    }
+  })
+  genes_keep <- genes_keep[!sapply(genes_keep, is.null)]
+  genes_keep <- names(genes_keep)
+  if(length(genes_keep)==0){return(NULL)}else{
+    df <- data.frame(matrix(0, ncol = length(genes_keep)+1, nrow = 0))
+    colnames(df) <- c("patient_id,",genes_keep)
+    return(df)
+  }
+}
+
 #-------get all the project names--------------------
 df_gdc_projects <- getGDCprojects()
 # write them into a .csv
@@ -443,18 +466,21 @@ for(w in seq_along(project_id)){
   df_cnv_scale_path = paste0(project_name, "/", "df_cnv_scale.csv")
   # read df_cnv into a df
   df_cnv <- try(fread(df_cnv_path))
-  # scale the df
-  df_cnv_scale <- try(
-    apply(df_cnv[,-1], 2, scale) %>%
-      as_tibble() %>%
-      mutate(patient_id = df_cnv$patient_id) %>%
-      select(patient_id, everything())
-  )
-  if(!inherits(df_cnv_scale, "try-error")){
+  # # scale the df
+  # df_cnv_scale <- try(
+  #   apply(df_cnv[,-1], 2, scale) %>%
+  #     as_tibble() %>%
+  #     mutate(patient_id = df_cnv$patient_id) %>%
+  #     select(patient_id, everything())
+  # )
+  if(!inherits(df_cnv, "try-error")){
+    df_cnv_scale <- return_good_data(df_cnv)
     unlink(df_cnv_scale_path, recursive = T)
+    if(!is.null(df_cnv_scale)){
+      # output the df to directory
+      fwrite(df_cnv_scale, file = df_cnv_scale_path)
+    }
   } else {next}
-  # output the df to directory
-  fwrite(df_cnv_scale, file = df_cnv_scale_path)
   
   # # delete the cnv data folder
   # unlink(paste0(project_name, "/", "cnv_data"), recursive = T)
@@ -912,7 +938,7 @@ for(j in seq_along(project_id)){
     # read the .xlsx file
     df_xlsx <- try(
       read_xlsx(filename_xlsx) %>%
-        select(patient_id = `TARGET USI`,gender = Gender, censoring_status = `Vital Status`, survival_days = `Overall Survival Time in Days`) %>%
+        dplyr::select(patient_id = `TARGET USI`,gender = Gender, censoring_status = `Vital Status`, survival_days = `Overall Survival Time in Days`) %>%
         filter(!is.na(censoring_status)) %>%
         mutate(censoring_status = ifelse(censoring_status=="Alive", 0 , 1))
     )
@@ -1100,18 +1126,21 @@ for(j in seq_along(project_id)){
   df_cnv_scale_path = paste0(project_name, "/", "df_cnv_scale.csv")
   # read df_cnv into a df
   df_cnv <- try(fread(df_cnv_path))
-  # scale the df
-  df_cnv_scale <- try(
-    apply(df_cnv[,-1], 2, scale) %>%
-      as_tibble() %>%
-      mutate(patient_id = df_cnv$patient_id) %>%
-      select(patient_id, everything())
-  )
-  if(!inherits(df_cnv_scale, "try-error")){
+  # # scale the df
+  # df_cnv_scale <- try(
+  #   apply(df_cnv[,-1], 2, scale) %>%
+  #     as_tibble() %>%
+  #     mutate(patient_id = df_cnv$patient_id) %>%
+  #     select(patient_id, everything())
+  # )
+  if(!inherits(df_cnv, "try-error")){
+    df_cnv_scale <- return_good_data(df_cnv)
     unlink(df_cnv_scale_path, recursive = T)
+    if(!is.null(df_cnv_scale)){
+      # output the df to directory
+      fwrite(df_cnv_scale, file = df_cnv_scale_path)
+    }
   } else {next}
-  # output the df to directory
-  fwrite(df_cnv_scale, file = df_cnv_scale_path)
   
   # # delete unneccessary folder
   # unlink(paste0(project_name, "/", "cnv_data"), recursive = T)
@@ -1124,7 +1153,65 @@ generate_mir_data(project_ids = project_id, abbreviate_position = 16L)
 #-------- delete unnecessary files-------------------
 unlink("MANIFEST.txt")
 
+# generate a data frame that contains all the  data name of TARGET projects
+write("project_name,existing_data", file = "TARGET_existing_data.csv")
+for(project_name in df_target_projects$project_id){
+  existing_data <- c()
+  if(length(list.files(path = project_name, pattern = "df_gene_scale")) > 0){
+    existing_data[length(existing_data)+1] <- "rna"
+  }
+  if(length(list.files(path = project_name, pattern = "df_snv")) > 0){
+    existing_data[length(existing_data)+1] <- "snv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_cnv_scale")) > 0){
+    existing_data[length(existing_data)+1] <- "cnv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_mir_scale")) > 0){
+    existing_data[length(existing_data)+1] <- "mir"
+  }
+  write(paste0("\"", project_name, "\",\"", paste(existing_data, collapse = ","), "\"") , file = "TARGET_existing_data.csv", append = T)
+}
 
+# generate a data frame that contains all the missing data name of TARGET projects
+write("project_name,missing_data", file = "TARGET_missing_data.csv")
+for(project_name in df_target_projects$project_id){
+  missing_data <- c()
+  if(length(list.files(path = project_name, pattern = "df_gene_scale")) == 0){
+    missing_data[length(missing_data)+1] <- "rna"
+  }
+  if(length(list.files(path = project_name, pattern = "df_snv")) == 0){
+    missing_data[length(missing_data)+1] <- "snv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_cnv_scale")) == 0){
+    missing_data[length(missing_data)+1] <- "cnv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_mir_scale")) == 0){
+    missing_data[length(missing_data)+1] <- "mir"
+  }
+  write(paste0("\"", project_name, "\",\"", paste(missing_data, collapse = ","), "\"") , file = "TARGET_missing_data.csv", append = T)
+}
+
+# generate a data frame that contains all the missing data names of TCGA projects
+write("project_name,missing_data", file = "TCGA_missing_data.csv")
+for(project_name in df_tcga_projects$project_id){
+  missing_data <- c()
+  if(length(list.files(path = project_name, pattern = "df_gene")) == 0){
+    missing_data[length(missing_data)+1] <- "rna"
+  }
+  if(length(list.files(path = project_name, pattern = "df_snv")) == 0){
+    missing_data[length(missing_data)+1] <- "snv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_cnv")) == 0){
+    missing_data[length(missing_data)+1] <- "cnv"
+  }
+  if(length(list.files(path = project_name, pattern = "df_mir")) == 0){
+    missing_data[length(missing_data)+1] <- "mir"
+  }
+  if(length(list.files(path = project_name, pattern = "df_met")) == 0){
+    missing_data[length(missing_data)+1] <- "mir"
+  }
+  write(paste0("\"", project_name, "\",\"", paste(missing_data, collapse = ","), "\"") , file = "TCGA_missing_data.csv", append = T)
+}
 
 
 #--------- test_code-------------------------------#

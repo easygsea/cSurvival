@@ -22,24 +22,34 @@ https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/do
 
 4. [df_cnv.csv df_cnv_scale.csv] copy number variations
 https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#33_WES_copy_number_data
+提取log_copy_number
 
 5. [df_rppa.csv df_rppa_scale.csv] Reverse Phase Protein Array data
 https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#34_CCLE_Reverse_Phase_Protein_Array_data
+提取expression
 
 6. [df_proteomic.csv df_proteomic_scale.csv] Proteomic data
 https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#39_Proteomic
+提取protein_expression
 
 Establish survival dfs for each DepMap subcategory
 
 7. [df_survival.csv] x3 under corresponding folders:
 需要抓取三个数据：patient_id, gender, survival_days
 CRISPR-Cas9: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#32_CRISPR-Cas9_knockout_data
+以gene_name来分类，建立文件夹；另外，键一张csv的所有gene_name的list。
 survival_days对应的是dependency
 patient_id对应的是depmap_id
 gender对应的是sex
 
+dependency需要dropna
+
 Drug_sensitivity: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#38_Drug_Sensitivity
+以compound来分类，建立文件夹；另外，键一张csv的所有compound的list。
+
+
 RNAi: https://bioconductor.org/packages/devel/data/experiment/vignettes/depmap/inst/doc/depmap.html#31_RNA_inference_knockout_data
+以gene_name来分类，建立文件夹；另外，键一张csv的所有gene_name的list。
 
 -------------------------------------
 Other notes:

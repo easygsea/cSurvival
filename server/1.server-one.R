@@ -1,6 +1,6 @@
-#======================================================================#
+#=========================================================================#
 ####  STEP 0. Freeze project once selected, update gene selection UI   ####
-#======================================================================#
+#=========================================================================#
 # output option to see if a project(s) is (are) selected or not
 output$projectStatus <- reactive({
   rv$projectStatus == "selected"
@@ -33,11 +33,12 @@ observeEvent(input$confirm_project,{
   req(!project_length_check)
   
   # retrieve data
-  withProgress(value = 1, message = "Retrieving data from project .... ",{
+  withProgress(value = 1, message = "Retrieving data from project(s) .... ",{
     rv$project <- input$project
     if(study == "TCGA"){rv$tcga <- T}else{rv$tcga <- F}
     if(study == "TARGET"){rv$target <- T}else{rv$target <- F}
     if(study == "DepMap"){rv$depmap <- T}else{rv$depmap <- F}
+
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     infiles <- paste0(rv$indir,"df_survival.csv")
     l <- lapply(infiles, function(x){
@@ -47,11 +48,41 @@ observeEvent(input$confirm_project,{
     rv$df_survival <- rbindlist(l,use.names = T) %>%
       dplyr::distinct(patient_id, .keep_all = T)
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+    if(!is.null(rv$overlapped_parameter)){
+      lapply(1:rv$variable_n, function(x){
+        db_id <- paste0("db_",x)
+        if(!rv[[db_id]] %in% rv$overlapped_parameter){
+          rv[[db_id]] <- "rna"
+        }
+      })
+      rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+    }
     update_genes_ui(opt="nil")
   })
   
   rv$projectStatus <- "selected"
   shinyjs::disable("project")
+  
+  # create the modal that display the target project information
+  if(rv$target){
+    target_project_texts <- ""
+    if(length(project) > 1 & length(rv$overlapped_parameter) < 4){
+      for(j in seq_along(project)){
+        target_project_texts <- paste0(target_project_texts, project[j], ": ", paste0(names(name_project_choices(rv$parameters_target_projects[[j]])), collapse = ", "), ".<br><br>")
+      }
+      # the modal that displayed the information of target projects' data
+      showModal(modalDialog(
+        title = h2("Available data"),
+        div(
+          style="font-size:120%",
+          HTML(paste0(target_project_texts
+                      , "<b>Common dataset(s) for pan-cancer analysis:</b> ", paste(names(rv$overlapped_parameter), collapse = ", "), "."
+          ))
+        ),
+        size = "l", easyClose = T, footer = modalButton("OK")
+      ))
+    }
+  }
 })
 
 ## reset project
@@ -155,6 +186,7 @@ observeEvent(gmt_input_lst(),{
   array <- 1:rv$variable_n #check_array(lst)
   namespaces <- paste0("gs_db_",array)
   req(req_diff_rv(namespaces))
+  rv$show_ui <- ""
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
     lapply(array, function(x) {
       gs_db_id <- paste0("gs_db_",x)
@@ -201,7 +233,7 @@ observeEvent(lib_input_lst(),{
       if(!is.null(gs) & gs != ""){
         genes <- rv[[paste0("gmts",x)]][[gs]]
         rv[[paste0("gs_genes_",x)]] <- genes
-
+        
         output[[gs_lib_genes_id]] <- renderText({
           paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
         })
@@ -256,7 +288,7 @@ observeEvent(lg_input_btn_lst(),{
           no_genes <- sapply(genes, function(x){
             str_split(x,"\\|") %>% .[[1]]
           }) %>% unlist(.) %>% length(.)
-
+          
           if(genes == ""){
             shinyalert("Please enter valid gene(s).")
           }
@@ -331,7 +363,7 @@ observeEvent(lg_input_btn_lst(),{
               # })
             }
           }
-      }
+        }
       }
     })
   })
@@ -445,7 +477,7 @@ observeEvent(manual_lst(),{
   })
 },ignoreInit = T)
 
-# ---------- 1[G]. update loaded genes ---------
+# ---------- [1G] update loaded genes ---------
 ## update gene selection UI
 genes_lst <- reactive({
   lapply(1:rv$variable_n, function(x){
