@@ -5,6 +5,21 @@ library('HelpersMG')
 library("org.Hs.eg.db")
 library(data.table)
 library(stringr)
+library(tidyverse)
+library(RCurl) # to download the specific folder
+library(tools) # to check the file name extensions
+library(R.utils) # unzip the .gz files
+library(survival) # to do the survival analysis
+library(survminer) # to plot the survival analysis nicer
+library(data.table)
+library(TCGAbiolinks)
+library(microbenchmark) # test the time spent on a command
+library(fgsea) # use the function gmtpathways
+library("org.Hs.eg.db") # generate the id conversion table
+library(maftools)
+library(TCGAutils)
+
+
 
 wget("https://ndownloader.figshare.com/files/26261527", '/Applications/Codes/cSurvival/project_data/DepMap/mutation.csv')
 ## create ExperimentHub query object
@@ -60,7 +75,7 @@ scale_a_df <- function(df_mir_path, df_mir_scale_path){
       apply(df_mir[,-1], 2, scale) %>%
          as_tibble() %>%
          mutate(patient_id = df_mir$patient_id) %>%
-         select(patient_id, everything())
+         dplyr::select(patient_id, everything())
    )
    if(!inherits(df_mir_scale, "try-error")){
       unlink(df_mir_scale_path, recursive = T)
@@ -101,7 +116,7 @@ TPM <- NULL
 
 #START OF Computer Specific because I lost my environment during my session
 write.csv(df_gene_total,'df_gene.csv')
-df_gene_total <- read.csv("/Applications/Codes/cSurvival/project_data/DepMap/df_gene.csv")
+df_gene_total <- read.csv("/Applications/Codes/cSurvival/basic_scripts/df_gene.csv")
 df_gene_total <- df_gene_total[ , -which(names(df_gene_total) %in% c("X"))]
 change_name_list = colnames(df_gene_total)
 #Split the column names
@@ -116,6 +131,17 @@ colnames(df_gene_total) <- generate_full_name_table(df_gene_total)
 
 
 write.csv(df_gene_total,'df_gene.csv',row.names = FALSE)
+
+
+#write scale df
+df_gene_path <- "/Applications/Codes/cSurvival/project_data/DepMap/df_gene.csv"
+df_gene_scale_path <- "/Applications/Codes/cSurvival/project_data/DepMap/df_gene_scale.csv"
+
+scale_a_df(df_gene_path,df_gene_scale_path)
+
+rm(df_gene_path)
+rm(df_gene_scale_path)
+
 #TEST WORKS
 #test <- read.csv('df_gene.csv')
 #END OF Computer Specific
@@ -141,7 +167,7 @@ colnames(df_snv_class) <- c('patient_id',change_name_list)
 df_snv_class$patient_id <- patients
 #Initialize the same empty type df
 df_snv_type <- df_snv_class
-patients<-NULL
+rm(patients)
 
 for(index in 1: nrow(df_mutations)){
    print(index)
@@ -182,11 +208,77 @@ colnames(df_snv_type) <- generate_full_name_table(df_snv_type)
 write.csv(df_snv_class,'df_snv_class.csv',row.names = FALSE)
 write.csv(df_snv_type,'df_snv_type.csv',row.names = FALSE)
 
-df_snv_class <- NULL
-df_snv_type <- NULL
-df_mutations <- NULL
+rm(df_snv_class)
+rm(df_snv_type)
+rm(df_mutations)
+
+
+#START OF DF_CNV----
+raw_data <- eh[["EH2262"]]#depmap::depmap_copyNumber()
+
+raw_data <- raw_data[, c("depmap_id", "gene_name", "log_copy_number")]
+raw_data <- data.frame(raw_data)
+
+patients <- unique(raw_data$depmap_id)
+change_name_list <- unique(raw_data$gene_name)
+change_name_list <- str_sort(change_name_list, numeric = TRUE)
+
+#The df we are going to write as csv
+df_cnv <- data.frame(matrix(NA, nrow = length(patients), ncol = 1+length(change_name_list)))
+
+colnames(df_cnv) <- c('patient_id',change_name_list)
+df_cnv$patient_id <- patients
+#Initialize the same empty type df
+rm(patients)
+
+
+#do first 5 million because last time I ran the server blacked out
+for(index in 1: 5000000){
+   print(index)
+   temp_gene <- raw_data[index,"gene_name"]
+   temp_patient <- raw_data[index,"depmap_id"]
+   temp_num <- raw_data[index,"log_copy_number"]
+   row_number <- which(df_cnv$patient_id %in% temp_patient)
+   df_cnv[row_number,temp_gene] <- temp_num
+}
+
+#5 million to 10 million   
+for(index in 5000001: 10000000){
+   print(index)
+   temp_gene <- raw_data[index,"gene_name"]
+   temp_patient <- raw_data[index,"depmap_id"]
+   temp_num <- raw_data[index,"log_copy_number"]
+   row_number <- which(df_cnv$patient_id %in% temp_patient)
+   df_cnv[row_number,temp_gene] <- temp_num
+}
 
 
 
+rm(raw_data)
+rm(temp_gene)
+rm(temp_num)
+rm(temp_patient)
 
 
+
+# aftersplit <- split(TPM,unique(TPM$depmap_id))
+
+#for(index in 1:length(aftersplit)){
+# for(index in 1:length(aftersplit)){
+#    temp <- data.frame(aftersplit[index])
+#    colnames(temp) <- c("depmap_id", "gene",'expression')
+#    print(index)
+#    name_list <- colnames(temp)
+#    new_col_name <- c('depmap_id',temp$gene)
+#    
+#    if(index == 1){
+#       df_gene_total <- reshape(temp, idvar = name_list[1], timevar = name_list[2], direction = "wide")
+#       colnames(df_gene_total) <- new_col_name
+#    }
+#    else{
+#       df_gene <- reshape(temp, idvar = name_list[1], timevar = name_list[2], direction = "wide")
+#       colnames(df_gene) <- new_col_name
+#       df_gene_total <- rbind(df_gene_total,df_gene)
+#    }
+# }
+# TPM <- NULL
