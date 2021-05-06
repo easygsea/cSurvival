@@ -17,24 +17,3 @@ label_with_help_bttn <- function(label_text, bttn_id, bttn_status="info", bttn_s
     tags$style(type = "text/css", paste0("#",bttn_id,"{display: inline-block;width: 17px;height: 17px;padding: 0;border-radius: 50%;vertical-align: text-top;margin-left: 3px;font-size: 10px;padding-top: 1px;",bttn_style,"}")),
     bsButton(bttn_id, label = "", icon = icon("question"), style = bttn_status, size = "extra-small"))
 }
-
-# # add a gear button
-add_gear <- function(
-  id, left="6.9em", top="-4em", title="Click for advanced run parameters", up = F, width = "80%"
-  , placement="top"
-  ){
-  div(
-    style=sprintf("position: relative; align: center; left: %s; top: %s;",left, top),
-    dropdownButton(
-      circle = TRUE, status = "info",
-      size = "xs",
-      icon = icon("gear"),# class = "opt"),
-      up = up, width = width,
-      tooltip = tooltipOptions(title = title, placement = placement),
-      
-      fluidRow(
-        uiOutput(id)
-      )
-    )
-  )
-}

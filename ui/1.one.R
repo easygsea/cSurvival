@@ -77,7 +77,6 @@ bodyOne <- tabItem(tabName = "one",
                 column(
                   12, align="center"
                   ,uiOutput("ui_parameters_confirm")
-                  ,add_gear("par_gear")
                 )
               )
             )

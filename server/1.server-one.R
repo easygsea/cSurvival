@@ -547,7 +547,8 @@ observeEvent(input$toall_m,{
 output$ui_parameters_confirm <- renderUI({
   column(
     12,align="center",
-    bsButton(
+    add_gear("par_gear")
+    ,bsButton(
       "confirm",
       strong("Confirm and analyze!")
       # ,block = T

@@ -30,6 +30,27 @@ link_icon <- function(id, link, title="Click to visit", icon="fas fa-external-li
   ,link,icon,id,color)
 }
 
+# # add a gear button
+add_gear <- function(
+  id, left="6.9em", top="1em", title="Click for advanced run parameters", up = F, width = "80%"
+  , placement="top"
+){
+  div(
+    style=sprintf("position: relative; align: center; left: %s; top: %s;",left, top),
+    dropdownButton(
+      circle = TRUE, status = "info",
+      size = "xs",
+      icon = icon("gear"),# class = "opt"),
+      up = up, width = width,
+      tooltip = tooltipOptions(title = title, placement = placement),
+      
+      fluidRow(
+        uiOutput(id)
+      )
+    )
+  )
+}
+
 #======================================================================#
 ####          function to generate dynamic 1 2, or more G/GS UIs     ####
 #======================================================================#
