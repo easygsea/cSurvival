@@ -14,6 +14,7 @@ library(readxl) # read the .xlsx files
 library(TCGAutils) # aliquot UUID to patient barcode conversion
 
 setwd("~/ShinyApps/project_data")
+select <- dplyr::select
 
 #-------small functions--------------
 return_good_data <- function(df){
@@ -116,11 +117,12 @@ for(w in seq_along(project_id)){
   # create the df_survival
   df_survival <- try(
     read_tsv(filename_patient, skip = 1, na = c("", "NA", "[Not Available]", "[Not Applicable]", "[Discrepancy]")) %>%
-      select(patient_id = `bcr_patient_barcode`,gender, death_days = `days_to_death`, followup_days = `days_to_last_followup`, diagnosis_days = `days_to_initial_pathologic_diagnosis`) %>%
+      select(patient_id = `bcr_patient_barcode`,gender, `person_neoplasm_cancer_status`, `new_tumor_event_after_initial_treatment`, death_days = `days_to_death`, followup_days = `days_to_last_followup`, diagnosis_days = `days_to_initial_pathologic_diagnosis`) %>%
       mutate(censoring_status = ifelse(is.na(death_days), 0, 1)) %>% # The status indicator, normally 0=alive, 1=dead.
       filter(diagnosis_days == 0) %>%
       mutate(survival_days = as.numeric(ifelse(is.na(death_days), followup_days, death_days))) %>%
-      filter(!is.na(survival_days))
+      filter(!is.na(survival_days)) %>%
+      filter(survival_days > 0)
   )
   if(!inherits(df_survival, "try-error")){
     unlink(df_survival_path, recursive = T)
@@ -940,7 +942,8 @@ for(j in seq_along(project_id)){
       read_xlsx(filename_xlsx) %>%
         dplyr::select(patient_id = `TARGET USI`,gender = Gender, censoring_status = `Vital Status`, survival_days = `Overall Survival Time in Days`) %>%
         filter(!is.na(censoring_status)) %>%
-        mutate(censoring_status = ifelse(censoring_status=="Alive", 0 , 1))
+        mutate(censoring_status = ifelse(censoring_status=="Alive", 0 , 1)) %>%
+        filter(survival_days > 0)
     )
     if(inherits(df_xlsx, "try-error")){next}
     # store them in the list
