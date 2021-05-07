@@ -577,10 +577,10 @@ output$tcga_pars <- renderUI({
       ,"."
     )), placement = "top")
     ,radioTooltip(id = "tcga_stype", choice = "os", title = HTML("Analyze all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
-    ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Focus on cases in disease (with tumor) status since intitial pathological diagnosis to last known disease status"))
-    ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("Focus on cases in disease free (tumor free) status since initial pathological diagnosis to last known disease status"))
-    ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) since intitial pathological diagnosis to last known disease status"))
-    ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("Focus on cases in progression free (no new tumor event) status since intitial pathological diagnosis to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Focus on cases in disease (with tumor) status to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("Focus on cases in disease free (tumor free) status sto last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("Focus on cases in progression free (no new tumor event) status to last known disease status"))
   )
 })
 
