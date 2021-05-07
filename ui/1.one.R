@@ -69,18 +69,23 @@ bodyOne <- tabItem(tabName = "one",
                 )
               )
             ,br()
-
-              ,fluidRow(
-                uiOutput("ui_parameters")
-              )
-              ,fluidRow(
-                column(
-                  12, align="center"
-                  ,uiOutput("ui_parameters_confirm")
-                )
-              )
+            
+            # TCGA only disease-free survival and progression-free survival
+            ,fluidRow(
+              uiOutput("tcga_pars")
             )
-
+            
+            # control widgets for individual analysis
+            ,fluidRow(
+              uiOutput("ui_parameters")
+            )
+            
+            # the confirm button
+            ,fluidRow(
+              uiOutput("ui_parameters_confirm")
+            )
+            ,br()
+          )
         )
     )
 

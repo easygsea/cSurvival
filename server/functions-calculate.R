@@ -117,8 +117,13 @@ extract_gene_data <- function(x, type){
 original_surv_df <- function(patient_ids){
   df_o <- rv$df_survival
   df_o %>% dplyr::filter(patient_id %in% patient_ids)
-  df_o[match(patient_ids,df_o$patient_id),] %>% 
-    dplyr::select(-gender)
+  if(rv$tcga){
+    df_o[match(patient_ids,df_o$patient_id),] %>% 
+      dplyr::select(-gender,-person_neoplasm_cancer_status,-new_tumor_event_after_initial_treatment)
+  }else{
+    df_o[match(patient_ids,df_o$patient_id),] %>% 
+      dplyr::select(-gender)
+  }
 }
 
 # generate survival df

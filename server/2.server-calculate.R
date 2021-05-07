@@ -59,6 +59,26 @@ observeEvent(input$confirm,{
     
     #------ 2. begin analysis ------
     withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
+      # update survival df
+      # filter OS, DFS, or PFS
+      rv$df_survival <- rv$df_survival_o
+      if(rv$tcga){
+        tcga_error <- 0
+        if(rv$tcga_stype == "dss"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(person_neoplasm_cancer_status == "WITH TUMOR")
+        }else if(rv$tcga_stype == "dfs"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(person_neoplasm_cancer_status == "TUMOR FREE")
+        }else if(rv$tcga_stype == "pss"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(new_tumor_event_after_initial_treatment == "YES")
+        }else if(rv$tcga_stype == "pfs"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(new_tumor_event_after_initial_treatment == "NO")
+        } 
+        if(nrow(rv$df_survival) == 0){
+          shinyalert(paste0("No cases found under category ",vector_names(rv$tcga_stype,tcga_stypes)))
+          tcga_error <- 1
+        }
+        req(tcga_error == 0)
+      }
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
@@ -166,6 +186,12 @@ observeEvent(input$confirm,{
             
             # create df for survival analysis
             df <- get_df_snv(data, nons)
+            error_snv <- 0
+            if(length(unique(df$level)) < 2){
+              shinyalert("Not enough data found for the selected endpoint")
+              error_snv <- 1
+            }
+            req(error_snv == 0)
             rv[[paste0("cutoff_",x)]] <- ""
             
           # ---------- 3D. survival analysis on CNVs ---------

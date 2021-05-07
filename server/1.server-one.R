@@ -41,11 +41,18 @@ observeEvent(input$confirm_project,{
 
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     infiles <- paste0(rv$indir,"df_survival.csv")
-    l <- lapply(infiles, function(x){
-      fread(x,sep=",",header=T) %>%
-        dplyr::select(patient_id,survival_days,censoring_status,gender)
-    })
-    rv$df_survival <- rbindlist(l,use.names = T) %>%
+    if(rv$tcga){
+      l <- lapply(infiles, function(x){
+        fread(x,sep=",",header=T) %>%
+          dplyr::select(patient_id,person_neoplasm_cancer_status,new_tumor_event_after_initial_treatment,survival_days,censoring_status,gender)
+      })
+    }else{
+      l <- lapply(infiles, function(x){
+        fread(x,sep=",",header=T) %>%
+          dplyr::select(patient_id,survival_days,censoring_status,gender)
+      })
+    }
+    rv$df_survival_o <- rbindlist(l,use.names = T) %>%
       dplyr::distinct(patient_id, .keep_all = T)
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
     if(!is.null(rv$overlapped_parameter)){
@@ -542,13 +549,50 @@ observeEvent(input$toall_m,{
   })
 })
 
-# ----- 1.3. confirm to start analysis -------
+# ----- 1.3. TCGA DFS and PFS -------
+output$tcga_pars <- renderUI({
+  req(rv$tcga)
+  
+  column(
+    12, align="center",
+    radioGroupButtons(
+      inputId = "tcga_stype",
+      label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
+      choices = tcga_stypes,
+      selected = rv$tcga_stype,
+      size = "sm",
+      checkIcon = list(
+        yes = icon("check-square"),
+        no = icon("square-o")
+      ),
+      # status = "primary",
+      direction = "horizontal"
+    )
+    ,bsTooltip("tcga_stype_q",HTML(paste0(
+      "To last known disease status, <b>OS</b> assesses all cases"
+      ,"; <b>DSS</b> assesses cases with detectable tumor"
+      ,"; <b>DFS</b> assesses cases without detectable tumors"
+      ,"; <b>PSS</b> assesses cases with tumor recurrence"
+      ,"; <b>PFD</b> assesses cases without tumor recurrence"
+      ,"."
+    )), placement = "top")
+    ,radioTooltip(id = "tcga_stype", choice = "os", title = HTML("Analyze all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
+    ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Focus on cases in disease (with tumor) status since intitial pathological diagnosis to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("Focus on cases in disease free (tumor free) status since initial pathological diagnosis to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) since intitial pathological diagnosis to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("Focus on cases in progression free (no new tumor event) status since intitial pathological diagnosis to last known disease status"))
+  )
+})
+
+observeEvent(input$tcga_stype,{rv$tcga_stype <- input$tcga_stype})
+
+# ----- 1.4. confirm to start analysis -------
 # the confirm button
 output$ui_parameters_confirm <- renderUI({
   column(
     12,align="center",
-    add_gear("par_gear")
-    ,bsButton(
+    add_gear("par_gear"),
+    bsButton(
       "confirm",
       strong("Confirm and analyze!")
       # ,block = T

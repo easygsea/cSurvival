@@ -110,3 +110,12 @@ dyn_list <- function(x){
 # the data that tell what Target projects data have
 TARGET_existing_data <- fread("project_data/TARGET_existing_data.csv") %>%
   mutate(existing_data = str_split(existing_data, pattern = ","))
+
+# -------- TCGA survival endpoints ----------
+tcga_stypes <- c(
+  "Overall survival (OS)" = "os"
+  ,"Disease-specific survival (DSS)" = "dss"
+  ,"Disease-free survival (DFS)" = "dfs"
+  ,"Progression-specific survival (PSS)" = "pss"
+  ,"Progression-free survival (PFS)" = "pfs"
+)
