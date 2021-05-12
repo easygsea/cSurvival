@@ -268,27 +268,28 @@ output$plot_gear <- renderUI({
       column(
         12,
         # median thresholds
-        checkboxGroupButtons(
-          inputId = "median",
-          label = HTML(paste0("Draw line(s) at median survival?",add_help("median_q"))),
-          choices = c("Horizontal"="h",
-                      "Vertical"="v"
+        radioGroupButtons(
+          inputId = "ymd",
+          label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
+          choices = c("Days"="d",
+                      "Months"="m",
+                      "Years"="y"
           ),
-          selected = rv$median,
-          size="s",
+          selected = rv$ymd,
+          size = "sm",
           checkIcon = list(
-            no = tags$i(class = "fa fa-times",
-                        style = "color: crimson"),
-            yes = tags$i(class = "fa fa-check",
-                         style = "color: green"))
+            yes = icon("check-square"),
+            no = icon("square-o")
+          ),
+          direction = "horizontal"
         )
-        ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
+        ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis"
         ))
         ,placement = "top")
         # confidence intervals
         ,materialSwitch(
           inputId = "confi",
-          label = HTML(paste0("<b>Plot confidence intervals?</b>",add_help("confi_q"))),
+          label = HTML(paste0("<b>Plot confidence intervals?</b> ",add_help("confi_q"))),
           value = rv$confi, inline = F, width = "100%",
           status = "danger"
         )
@@ -301,7 +302,7 @@ output$plot_gear <- renderUI({
           12,
           radioGroupButtons(
             inputId = "confi_opt",
-            label = HTML(paste0("Confidence interval style:"),add_help(paste0("confi_opt_q"))),
+            label = HTML(paste0("Confidence interval style: "),add_help(paste0("confi_opt_q"))),
             choiceNames = c("Ribbon", "Step"),
             choiceValues = c("ribbon","step"),
             selected = rv$confi_opt,
@@ -314,6 +315,24 @@ output$plot_gear <- renderUI({
           )
           ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
                                                ," <b>Step</b> plots boundaries."
+          ))
+          ,placement = "top"),
+          # median thresholds
+          checkboxGroupButtons(
+            inputId = "median",
+            label = HTML(paste0("Draw line(s) at median survival? ",add_help("median_q"))),
+            choices = c("Horizontal"="h",
+                        "Vertical"="v"
+            ),
+            selected = rv$median,
+            size="s",
+            checkIcon = list(
+              no = tags$i(class = "fa fa-times",
+                          style = "color: crimson"),
+              yes = tags$i(class = "fa fa-check",
+                           style = "color: green"))
+          )
+          ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
           ))
           ,placement = "top")
         )
@@ -415,6 +434,7 @@ output$plot_gear <- renderUI({
 })
 
 observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
+observeEvent(input$ymd,{rv$ymd <- input$ymd})
 observeEvent(input$median,{rv$median <- input$median},ignoreNULL = F)
 observeEvent(input$confi,{rv$confi <- input$confi})
 observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})

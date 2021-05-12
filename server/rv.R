@@ -18,6 +18,7 @@ rv <- reactiveValues(
   
   ,cox_km = "cox"
   ,km_mul = "hommel" # multiple correction method
+  ,ymd="y" # default plot survival in months; "d" for days; "m" for months; "y" for years
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"
   ,risk_table = T,cum_table=T

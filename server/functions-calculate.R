@@ -436,10 +436,19 @@ plot_surv <-
       surv.median.line=rv$median
     }
     
+    # x-axis time intervals
+    if(rv$ymd == "d"){
+      xscale <- 1; xlab <- "Days"; breaktime <- NULL
+    }else if(rv$ymd == "m"){
+      xscale <- "d_m"; xlab <- "Months"; breaktime <- 608.75 # 30.4375 * 20 = 365.25
+    }else if(rv$ymd == "y"){
+      xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25
+    }
+    
     if(mode == "km"){
       fig <- ggsurvplot(fit, data=df, 
                         title = title,
-                        xlab = "Days",
+                        xlab = xlab,
                         ylab = "Survival probability",
                         conf.int=conf.int, conf.int.style=conf.int.style,
                         surv.median.line = surv.median.line,            # Add median survival lines
@@ -463,6 +472,8 @@ plot_surv <-
                         tables.height = 0.15,               # Specify tables height
                         tables.theme = theme_cleantable(),  # Clean theme for tables
                         tables.y.text = FALSE               # Hide tables y axis text
+                        ,xscale = xscale
+                        ,break.time.by = breaktime
       )
       
       # adjust KM table size
@@ -479,7 +490,7 @@ plot_surv <-
     }else if(mode == "cox"){
       fig <- ggsurvplot(fit,data=df,
                         title = title,
-                        xlab = "Days",
+                        xlab = xlab,
                         ylab = "Survival probability",
                         conf.int=conf.int, conf.int.style=conf.int.style,
                         surv.median.line = surv.median.line,            # Add median survival lines
@@ -497,6 +508,8 @@ plot_surv <-
                           font.legend = c(base_size, "plain", "black")
                         ),
                         palette = palette                    # Use JCO journal color palette
+                        ,xscale = xscale
+                        ,break.time.by = breaktime
       )
     }
     
