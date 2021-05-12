@@ -64,15 +64,19 @@ observeEvent(input$confirm,{
       rv$df_survival <- rv$df_survival_o
       if(rv$tcga){
         tcga_error <- 0
-        if(rv$tcga_stype == "dss"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(person_neoplasm_cancer_status == "WITH TUMOR")
+        if(rv$tcga_stype == "os"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = OS.time)
+        }else if(rv$tcga_stype == "dss"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = DSS.time)
         }else if(rv$tcga_stype == "dfs"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(person_neoplasm_cancer_status == "TUMOR FREE")
-        }else if(rv$tcga_stype == "pss"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(new_tumor_event_after_initial_treatment == "YES")
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = DFI.time)
+        # }else if(rv$tcga_stype == "pss"){
+        #   rv$df_survival <- rv$df_survival_o %>% dplyr::filter(new_tumor_event_after_initial_treatment == "YES")
         }else if(rv$tcga_stype == "pfs"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::filter(new_tumor_event_after_initial_treatment == "NO")
-        } 
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = PFI.time)
+        }
+        rv$df_survival <- rv$df_survival %>% dplyr::filter(survival_days != "#N/A") %>%
+          dplyr::select(patient_id,survival_days,censoring_status,gender)
         if(nrow(rv$df_survival) == 0){
           shinyalert(paste0("No cases found under category ",vector_names(rv$tcga_stype,tcga_stypes)))
           tcga_error <- 1

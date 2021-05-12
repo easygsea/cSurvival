@@ -40,13 +40,14 @@ observeEvent(input$confirm_project,{
     if(study == "DepMap"){rv$depmap <- T}else{rv$depmap <- F}
 
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
-    infiles <- paste0(rv$indir,"df_survival.csv")
     if(rv$tcga){
+      infiles <- paste0(rv$indir,"df_survival_o.csv")
       l <- lapply(infiles, function(x){
-        fread(x,sep=",",header=T) %>%
-          dplyr::select(patient_id,person_neoplasm_cancer_status,new_tumor_event_after_initial_treatment,survival_days,censoring_status,gender)
+        fread(x,sep=",",header=T) #%>%
+          # dplyr::select(patient_id,person_neoplasm_cancer_status,new_tumor_event_after_initial_treatment,survival_days,censoring_status,gender)
       })
     }else{
+      infiles <- paste0(rv$indir,"df_survival.csv")
       l <- lapply(infiles, function(x){
         fread(x,sep=",",header=T) %>%
           dplyr::select(patient_id,survival_days,censoring_status,gender)
@@ -569,18 +570,19 @@ output$tcga_pars <- renderUI({
       direction = "horizontal"
     )
     ,bsTooltip("tcga_stype_q",HTML(paste0(
-      "To last known disease status, <b>OS</b> assesses all cases"
-      ,"; <b>DSS</b> assesses cases with detectable tumor"
-      ,"; <b>DFS</b> assesses cases without detectable tumors"
-      ,"; <b>PSS</b> assesses cases with tumor recurrence"
-      ,"; <b>PFD</b> assesses cases without tumor recurrence"
-      ,"."
+      "Curated clinical and survival outcome data by Liu et al., <i>Cell</i>, 2018."
+      # ," To last known disease status, <b>OS</b> assesses all cases"
+      # ,"; <b>PFI</b> assesses cases without tumor recurrence"
+      # ,"; <b>DFI</b> assesses cases without detectable tumors"
+      # ,"; <b>PSS</b> assesses cases with tumor recurrence"
+      # ,"; <b>DSS</b> assesses cases with histological evidence of cancer"
+      # ,"."
     )), placement = "top")
-    ,radioTooltip(id = "tcga_stype", choice = "os", title = HTML("Analyze all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
-    ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Focus on cases in disease (with tumor) status to last known disease status"))
-    ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("Focus on cases in disease free (tumor free) status sto last known disease status"))
-    ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
-    ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("Focus on cases in progression free (no new tumor event) status to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "os", title = HTML("Assesses all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
+    ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Assesses cases with histological evidence of cancer"))
+    ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("The length of time after primary treatment for a cancer ends that the patient survives without any signs or symptoms of that cancer"))
+    # ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("The length of time during and after the treatment of cancer, that a patient lives with the disease but it does not get worse"))
   )
 })
 
