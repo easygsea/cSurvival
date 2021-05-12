@@ -574,45 +574,111 @@ observeEvent(input$toall_m,{
   })
 })
 
-# ----- 1.3. TCGA DFS and PFS -------
+# ----- 1.3. TCGA OS, DFI, PFI, DSS -------
 output$tcga_pars <- renderUI({
   req(rv$tcga)
   
-  div(
-    column(
-      12, align="center",
-      radioGroupButtons(
-        inputId = "tcga_stype",
-        label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
-        choices = tcga_stypes,
-        selected = rv$tcga_stype,
-        size = "sm",
-        checkIcon = list(
-          yes = icon("check-square"),
-          no = icon("square-o")
-        ),
-        # status = "primary",
-        direction = "horizontal"
-      )
-      ,bsTooltip("tcga_stype_q",HTML(paste0(
-        "Curated clinical and survival outcome data by Liu et al., <i>Cell</i>, 2018."
-        # ," To last known disease status, <b>OS</b> assesses all cases"
-        # ,"; <b>PFI</b> assesses cases without tumor recurrence"
-        # ,"; <b>DFI</b> assesses cases without detectable tumors"
-        # ,"; <b>PSS</b> assesses cases with tumor recurrence"
-        # ,"; <b>DSS</b> assesses cases with histological evidence of cancer"
-        # ,"."
-      )), placement = "top")
-      ,radioTooltip(id = "tcga_stype", choice = "OS", title = HTML("Assesses all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
-      ,radioTooltip(id = "tcga_stype", choice = "DSS", title = HTML("Assesses cases with histological evidence of cancer"))
-      ,radioTooltip(id = "tcga_stype", choice = "DFI", title = HTML("The length of time after primary treatment for a cancer ends that the patient survives without any signs or symptoms of that cancer"))
-      # ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
-      ,radioTooltip(id = "tcga_stype", choice = "PFI", title = HTML("The length of time during and after the treatment of cancer, that a patient lives with the disease but it does not get worse"))
+  # check if certain outcomes available for selected TCGA project
+  if(rv$project != ""){
+    code <- rv$tcga_code <- tcga_codes %>% dplyr::filter(type == rv$project) %>% dplyr::select(-type)
+    cords <- code %>% dplyr::select(-msg)
+    cords <- unlist(cords)
+    # if any NA, render a warning msg on UI
+    if(anyNA(cords)){rv$tcga_msg <- code$msg}else{rv$tcga_msg <- ""}
+    cords <- c(1:4)[!is.na(cords)]
+  }else{
+    cords <- c(1:4); rv$tcga_code <- ""; rv$tcga_msg <- ""
+  }
+  tcga_stypess <- tcga_stypes[cords]
+  if(!rv$tcga_stype %in% tcga_stypess){rv$tcga_stype <- tcga_stypess[1]}
+  
+  column(
+    12, align="center",
+    radioGroupButtons(
+      inputId = "tcga_stype",
+      label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
+      choices = tcga_stypess,
+      selected = rv$tcga_stype,
+      size = "sm",
+      checkIcon = list(
+        yes = icon("check-square"),
+        no = icon("square-o")
+      ),
+      # status = "primary",
+      direction = "horizontal"
     )
+    ,uiOutput("tcga_warning")
+    ,bsTooltip("tcga_stype_q",HTML(paste0(
+      "Curated clinical and survival outcome data by Liu et al., <i>Cell</i>, 2018."
+      # ," To last known disease status, <b>OS</b> assesses all cases"
+      # ,"; <b>PFI</b> assesses cases without tumor recurrence"
+      # ,"; <b>DFI</b> assesses cases without detectable tumors"
+      # ,"; <b>PSS</b> assesses cases with tumor recurrence"
+      # ,"; <b>DSS</b> assesses cases with histological evidence of cancer"
+      # ,"."
+    )), placement = "top")
+    ,radioTooltip(id = "tcga_stype", choice = "OS", title = HTML("Assesses all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
+    ,radioTooltip(id = "tcga_stype", choice = "DSS", title = HTML("Assesses cases with histological evidence of cancer"))
+    ,radioTooltip(id = "tcga_stype", choice = "DFI", title = HTML("The length of time after primary treatment for a cancer ends that the patient survives without any signs or symptoms of that cancer"))
+    # ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
+    ,radioTooltip(id = "tcga_stype", choice = "PFI", title = HTML("The length of time during and after the treatment of cancer, that a patient lives with the disease but it does not get worse"))
   )
 })
 
 observeEvent(input$tcga_stype,{rv$tcga_stype <- input$tcga_stype; rv$plot_stype <- vector_names(rv$tcga_stype, tcga_stypes)})
+
+# warning messages about recommendations by Liu 2018
+output$tcga_warning <- renderUI({
+  req(typeof(rv$tcga_code) == "list")
+  # recommendations by Liu, Cell, 2018
+  code <- code_color <- rv[["tcga_code"]][[rv$tcga_stype]]
+  
+  # split value if DSS
+  if(rv$tcga_stype == "DSS"){
+    dss_split <- strsplit(code, "\\|")[[1]]
+    dss_split_n <- length(dss_split)
+    if(dss_split_n > 1){
+      code_color <- dss_split[dss_split_n]
+    }
+  }
+  
+  # beginning wording
+  green <- 0
+  if(code == "yes"){
+    s_msg <- " is recommended"; green <- 1; s_icon <- icon("check")
+  }else if(code == "acc"){
+    s_msg <- " is accurate and recommended"; green <- 1; s_icon <- icon("check")
+  }else if(code == "app"){
+    s_msg <- " is approximate and recommended"; green <- 1; s_icon <- icon("check")
+  }else if(code == "app|caution"){
+    s_msg <- " is approximate and should be <b>used with caution</b>"; s_icon <- icon("exclamation")
+  }else if(code == "no"){
+    s_msg <- " is <b>not recommended</b>"; s_icon <- icon("times")
+  }else if(code == "caution"){
+    s_msg <- " should be <b>used with caution</b>"; s_icon <- icon("exclamation")
+  }
+  
+  # assemble msg
+  msg <- paste0(rv$plot_stype,s_msg," for ",rv$project)
+  if(green == 0){
+    msg <- paste0(msg,". Reason: ",rv[["tcga_code"]][["msg"]])
+  }else{
+    if(rv$tcga_msg != ""){
+      msg <- paste0(msg,". Note: ",rv$project," ",rv$tcga_msg)
+    }
+  }
+  
+  # render msg
+  div(
+    p(
+      style=sprintf("color:%s;", codes_color[[code_color]]),
+      HTML(paste0(s_icon,msg," ",link_icon("liu_link","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/",color="#363B48",icon="fas fa-book")))
+    )
+    ,bsTooltip("liu_link",HTML(paste0(
+      "Assessment by Liu et al, <i>Cell</i>, 2018. Click for full text at PubMed Central."
+    )),placement = "top")
+  )
+})
 
 # ----- 1.4. confirm to start analysis -------
 # the confirm button

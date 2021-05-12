@@ -108,7 +108,7 @@ dyn_list <- function(x){
   )
 }
 # the data that tell what Target projects data have
-TARGET_existing_data <- fread("project_data/TARGET_existing_data.csv") %>%
+TARGET_existing_data <- fread(paste0(getwd(),"/project_data/TARGET_existing_data.csv"), sep = ",") %>%
   mutate(existing_data = str_split(existing_data, pattern = ","))
 
 # -------- TCGA survival endpoints ----------
@@ -118,4 +118,15 @@ tcga_stypes <- c(
   ,"Disease-free interval (DFI)" = "DFI"
   # ,"Progression-specific survival (PSS)" = "pss"
   ,"Disease-specific survival (DSS)" = "DSS"
+)
+
+# -------- TCGA clinical codes ----------
+tcga_codes <- fread(paste0(getwd(),"/project_data/tcga_codes.tsv"), sep = "\t")
+
+codes_color <- list(
+  "yes" = "#339900" #99cc33
+  ,"no" = "#cc3300"
+  ,"caution" = "#f58c00" # ff9966
+  ,"app" = "#339900"
+  ,"acc" = "#339900"
 )

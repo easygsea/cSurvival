@@ -14,6 +14,8 @@ rv <- reactiveValues(
   ,tcga=T # check if TCGA project
   ,tcga_stype="OS" # if TCGA, type of survival analysis
   ,plot_stype="OS" # label to display
+  ,tcga_code="" # clinical data quality info for the selected TCGA project
+  ,tcga_msg="" # warning message if NA annotation for TCGA clinical outcome codes; "" means no NA
   ,censor_time="10" # default censor time 10 yrs
 
   ,plot_type="all"
