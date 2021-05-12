@@ -55,22 +55,7 @@ bodyOne <- tabItem(tabName = "one",
                 )
                 ,column(
                   2,
-                  selectizeInput(
-                    "censor_time",
-                    HTML(paste0("<h4><b>Censor cases at:</b> ",add_help("censor_time_q"),"</h4>")),
-                    choices = c(
-                      "15 years" = "15",
-                      "10 years" = "10",
-                      "5 years" = "5",
-                      "3 years" = "3",
-                      "None" = "none"
-                    )
-                    ,selected = "10"
-                    ,width = "100%"
-                  )
-                  ,bsTooltip("censor_time_q",HTML(paste0(
-                    "To study a specified time interval"
-                  )),placement = "top")
+                  uiOutput("ui_censortime")
                 )
                 ,column(
                   2,#align="right",

@@ -14,6 +14,7 @@ rv <- reactiveValues(
   ,tcga=T # check if TCGA project
   ,tcga_stype="OS" # if TCGA, type of survival analysis
   ,plot_stype="OS" # label to display
+  ,censor_time="10" # default censor time 10 yrs
 
   ,plot_type="all"
   
