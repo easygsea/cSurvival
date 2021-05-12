@@ -29,7 +29,7 @@ bodyOne <- tabItem(tabName = "one",
               12,
               fluidRow(
                 column(
-                  8,
+                  6,
                   selectizeInput(
                     "project",
                     HTML(paste0("<h4><b>To start, select project(s) to analyze:</b>",add_help("project_q"),"</h4>"))
@@ -52,6 +52,25 @@ bodyOne <- tabItem(tabName = "one",
                   confirm_panel
                   ,reset_panel
                   # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
+                )
+                ,column(
+                  2,
+                  selectizeInput(
+                    "censor_time",
+                    HTML(paste0("<h4><b>Censor cases at:</b> ",add_help("censor_time_q"),"</h4>")),
+                    choices = c(
+                      "15 years" = "15",
+                      "10 years" = "10",
+                      "5 years" = "5",
+                      "3 years" = "3",
+                      "None" = "none"
+                    )
+                    ,selected = "10"
+                    ,width = "100%"
+                  )
+                  ,bsTooltip("censor_time_q",HTML(paste0(
+                    "To study a specified time interval"
+                  )),placement = "top")
                 )
                 ,column(
                   2,#align="right",

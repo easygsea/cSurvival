@@ -83,6 +83,14 @@ observeEvent(input$confirm,{
         }
         req(tcga_error == 0)
       }
+      if(input$censor_time != "none"){
+        nnn <- as.numeric(input$censor_time) * 365.25
+        rv[["df_survival"]][["survival_days"]] <- ifelse(
+          rv[["df_survival"]][["survival_days"]] > nnn,
+          nnn,
+          rv[["df_survival"]][["survival_days"]]
+        )
+      }
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL

@@ -554,35 +554,37 @@ observeEvent(input$toall_m,{
 output$tcga_pars <- renderUI({
   req(rv$tcga)
   
-  column(
-    12, align="center",
-    radioGroupButtons(
-      inputId = "tcga_stype",
-      label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
-      choices = tcga_stypes,
-      selected = rv$tcga_stype,
-      size = "sm",
-      checkIcon = list(
-        yes = icon("check-square"),
-        no = icon("square-o")
-      ),
-      # status = "primary",
-      direction = "horizontal"
+  div(
+    column(
+      12, align="center",
+      radioGroupButtons(
+        inputId = "tcga_stype",
+        label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
+        choices = tcga_stypes,
+        selected = rv$tcga_stype,
+        size = "sm",
+        checkIcon = list(
+          yes = icon("check-square"),
+          no = icon("square-o")
+        ),
+        # status = "primary",
+        direction = "horizontal"
+      )
+      ,bsTooltip("tcga_stype_q",HTML(paste0(
+        "Curated clinical and survival outcome data by Liu et al., <i>Cell</i>, 2018."
+        # ," To last known disease status, <b>OS</b> assesses all cases"
+        # ,"; <b>PFI</b> assesses cases without tumor recurrence"
+        # ,"; <b>DFI</b> assesses cases without detectable tumors"
+        # ,"; <b>PSS</b> assesses cases with tumor recurrence"
+        # ,"; <b>DSS</b> assesses cases with histological evidence of cancer"
+        # ,"."
+      )), placement = "top")
+      ,radioTooltip(id = "tcga_stype", choice = "os", title = HTML("Assesses all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
+      ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Assesses cases with histological evidence of cancer"))
+      ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("The length of time after primary treatment for a cancer ends that the patient survives without any signs or symptoms of that cancer"))
+      # ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
+      ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("The length of time during and after the treatment of cancer, that a patient lives with the disease but it does not get worse"))
     )
-    ,bsTooltip("tcga_stype_q",HTML(paste0(
-      "Curated clinical and survival outcome data by Liu et al., <i>Cell</i>, 2018."
-      # ," To last known disease status, <b>OS</b> assesses all cases"
-      # ,"; <b>PFI</b> assesses cases without tumor recurrence"
-      # ,"; <b>DFI</b> assesses cases without detectable tumors"
-      # ,"; <b>PSS</b> assesses cases with tumor recurrence"
-      # ,"; <b>DSS</b> assesses cases with histological evidence of cancer"
-      # ,"."
-    )), placement = "top")
-    ,radioTooltip(id = "tcga_stype", choice = "os", title = HTML("Assesses all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
-    ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Assesses cases with histological evidence of cancer"))
-    ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("The length of time after primary treatment for a cancer ends that the patient survives without any signs or symptoms of that cancer"))
-    # ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
-    ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("The length of time during and after the treatment of cancer, that a patient lives with the disease but it does not get worse"))
   )
 })
 
