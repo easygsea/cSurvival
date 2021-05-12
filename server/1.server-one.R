@@ -35,9 +35,9 @@ observeEvent(input$confirm_project,{
   # retrieve data
   withProgress(value = 1, message = "Retrieving data from project(s) .... ",{
     rv$project <- input$project
-    if(study == "TCGA"){rv$tcga <- T}else{rv$tcga <- F}
-    if(study == "TARGET"){rv$target <- T}else{rv$target <- F}
-    if(study == "DepMap"){rv$depmap <- T}else{rv$depmap <- F}
+    if(study == "TCGA"){rv$tcga <- T; rv$plot_stype <- vector_names(rv$tcga_stype, tcga_stypes)}else{rv$tcga <- F}
+    if(study == "TARGET"){rv$target <- T; rv$plot_stype <- "Overall survival (OS)"}else{rv$target <- F}
+    if(study == "DepMap"){rv$depmap <- T; rv$plot_stype <- "Dependency"}else{rv$depmap <- F}
 
     rv$indir <- paste0(getwd(),"/project_data/",project,"/")
     if(rv$tcga){
@@ -579,16 +579,16 @@ output$tcga_pars <- renderUI({
         # ,"; <b>DSS</b> assesses cases with histological evidence of cancer"
         # ,"."
       )), placement = "top")
-      ,radioTooltip(id = "tcga_stype", choice = "os", title = HTML("Assesses all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
-      ,radioTooltip(id = "tcga_stype", choice = "dss", title = HTML("Assesses cases with histological evidence of cancer"))
-      ,radioTooltip(id = "tcga_stype", choice = "dfs", title = HTML("The length of time after primary treatment for a cancer ends that the patient survives without any signs or symptoms of that cancer"))
+      ,radioTooltip(id = "tcga_stype", choice = "OS", title = HTML("Assesses all cases: the duration from the time of initial pathological diagnosis till the time of death or loss of followup"))
+      ,radioTooltip(id = "tcga_stype", choice = "DSS", title = HTML("Assesses cases with histological evidence of cancer"))
+      ,radioTooltip(id = "tcga_stype", choice = "DFI", title = HTML("The length of time after primary treatment for a cancer ends that the patient survives without any signs or symptoms of that cancer"))
       # ,radioTooltip(id = "tcga_stype", choice = "pss", title = HTML("Focus on recurrence cases (with new tumor event) status to last known disease status"))
-      ,radioTooltip(id = "tcga_stype", choice = "pfs", title = HTML("The length of time during and after the treatment of cancer, that a patient lives with the disease but it does not get worse"))
+      ,radioTooltip(id = "tcga_stype", choice = "PFI", title = HTML("The length of time during and after the treatment of cancer, that a patient lives with the disease but it does not get worse"))
     )
   )
 })
 
-observeEvent(input$tcga_stype,{rv$tcga_stype <- input$tcga_stype})
+observeEvent(input$tcga_stype,{rv$tcga_stype <- input$tcga_stype; rv$plot_stype <- vector_names(rv$tcga_stype, tcga_stypes)})
 
 # ----- 1.4. confirm to start analysis -------
 # the confirm button

@@ -13,7 +13,6 @@ css_addons <-
       #confirm_project {display: inline-block;}
       #reset_project {display: inline-block;}
       
-      #censor_time {height: 50%;}
       "
     )))
   )

@@ -64,16 +64,16 @@ observeEvent(input$confirm,{
       rv$df_survival <- rv$df_survival_o
       if(rv$tcga){
         tcga_error <- 0
-        if(rv$tcga_stype == "os"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = OS.time)
-        }else if(rv$tcga_stype == "dss"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = DSS.time)
-        }else if(rv$tcga_stype == "dfs"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = DFI.time)
+        if(rv$tcga_stype == "OS"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = OS.time) %>% dplyr::mutate(censoring_status = as.numeric(OS))
+        }else if(rv$tcga_stype == "DSS"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = DSS.time) %>% dplyr::mutate(censoring_status = as.numeric(DSS))
+        }else if(rv$tcga_stype == "DFI"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = DFI.time) %>% dplyr::mutate(censoring_status = as.numeric(DFI))
         # }else if(rv$tcga_stype == "pss"){
         #   rv$df_survival <- rv$df_survival_o %>% dplyr::filter(new_tumor_event_after_initial_treatment == "YES")
-        }else if(rv$tcga_stype == "pfs"){
-          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = PFI.time)
+        }else if(rv$tcga_stype == "PFI"){
+          rv$df_survival <- rv$df_survival_o %>% dplyr::mutate(survival_days = PFI.time) %>% dplyr::mutate(censoring_status = as.numeric(PFI))
         }
         rv$df_survival <- rv$df_survival %>% dplyr::filter(survival_days != "#N/A") %>%
           dplyr::select(patient_id,survival_days,censoring_status,gender)

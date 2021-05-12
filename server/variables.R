@@ -113,9 +113,9 @@ TARGET_existing_data <- fread("project_data/TARGET_existing_data.csv") %>%
 
 # -------- TCGA survival endpoints ----------
 tcga_stypes <- c(
-  "Overall survival (OS)" = "os"
-  ,"Progression-free interval (PFI)" = "pfs"
-  ,"Disease-free interval (DFI)" = "dfs"
+  "Overall survival (OS)" = "OS"
+  ,"Progression-free interval (PFI)" = "PFI"
+  ,"Disease-free interval (DFI)" = "DFI"
   # ,"Progression-specific survival (PSS)" = "pss"
-  ,"Disease-specific survival (DSS)" = "dss"
+  ,"Disease-specific survival (DSS)" = "DSS"
 )

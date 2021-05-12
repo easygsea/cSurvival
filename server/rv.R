@@ -12,7 +12,8 @@ rv <- reactiveValues(
   ,verbTxtStyle2 = ""
   
   ,tcga=T # check if TCGA project
-  ,tcga_stype="os" # if TCGA, type of survival analysis
+  ,tcga_stype="OS" # if TCGA, type of survival analysis
+  ,plot_stype="OS" # label to display
 
   ,plot_type="all"
   
