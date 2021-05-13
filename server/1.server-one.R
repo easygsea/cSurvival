@@ -637,7 +637,7 @@ output$tcga_pars <- renderUI({
       y <- codes[[x]]
       c <- codes_color[[y]]
       i <- codes_icon[[y]]
-      return(paste0(names(tcga_stypess)[[x]],span(style=sprintf("color:%s;",c),i)))
+      return(paste0(names(tcga_stypes)[[x]],span(style=sprintf("color:%s;",c),i)))
     }) %>% unname(.)
   }else{
     tcga_stypess_names <- names(tcga_stypess)
