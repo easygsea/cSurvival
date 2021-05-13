@@ -85,6 +85,11 @@ observeEvent(input$confirm,{
       }
       if(input$censor_time != "none"){
         nnn <- as.numeric(input$censor_time) * 365.25
+        rv[["df_survival"]][["censoring_status"]] <- ifelse(
+          rv[["df_survival"]][["survival_days"]] > nnn,
+          0,
+          rv[["df_survival"]][["censoring_status"]]
+        )
         rv[["df_survival"]][["survival_days"]] <- ifelse(
           rv[["df_survival"]][["survival_days"]] > nnn,
           nnn,
@@ -102,6 +107,8 @@ observeEvent(input$confirm,{
       df_list <- list()
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""
+      rv$censor_time_p <- input$censor_time
+      
       #------ 3. Loop from 1 to rv$variable_n ------
       for(x in 1:rv$variable_n){
         # clear previous RVs
