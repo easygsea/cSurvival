@@ -84,12 +84,15 @@ observeEvent(input$confirm,{
         req(tcga_error == 0)
       }
       if(input$censor_time != "none"){
+        # calculate censoring time in days
         nnn <- as.numeric(input$censor_time) * 365.25
+        # if time record larger than censoring time, convert status to 0
         rv[["df_survival"]][["censoring_status"]] <- ifelse(
           rv[["df_survival"]][["survival_days"]] > nnn,
           0,
           rv[["df_survival"]][["censoring_status"]]
         )
+        # if time record larger than censoring time, convert to the time cap
         rv[["df_survival"]][["survival_days"]] <- ifelse(
           rv[["df_survival"]][["survival_days"]] > nnn,
           nnn,

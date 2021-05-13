@@ -127,6 +127,16 @@ codes_color <- list(
   "yes" = "#339900" #99cc33
   ,"no" = "#cc3300"
   ,"caution" = "#f58c00" # ff9966
+  ,"app|caution" = "#f58c00"
   ,"app" = "#339900"
   ,"acc" = "#339900"
+)
+
+codes_icon <- list(
+  "yes" = icon("check")
+  ,"no" = icon("times")
+  ,"caution" = icon("exclamation")
+  ,"app|caution" = icon("exclamation")
+  ,"app" = icon("check")
+  ,"acc" = icon("check")
 )

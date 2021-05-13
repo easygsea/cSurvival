@@ -9,8 +9,10 @@ output$ui_censortime <- renderUI({
       choices = c(
         "15 years" = "15",
         "10 years" = "10",
+        "8 years" = "8",
         "5 years" = "5",
         "3 years" = "3",
+        "2 years" = "2",
         "None" = "none"
       )
       ,selected = rv$censor_time
@@ -50,7 +52,7 @@ observeEvent(input$confirm_project,{
   project_length_check <- length(input$project) > rv$max_project_n
   if(study == "TARGET"){rv$max_project_n <- 4}else{rv$max_project_n <- 3}
   if(project_length_check){
-    shinyalert(paste0("We support pan-cancer analysis with up to ",rv$max_project_n," projects in ",study,"."
+    shinyalert(paste0("We support analysis with up to ",rv$max_project_n," projects in ",study,"."
                       , " You have selected ",length(input$project),"."
                       , " Please delete unrelated projects. Thank you."))
   }
@@ -108,7 +110,7 @@ observeEvent(input$confirm_project,{
         div(
           style="font-size:120%",
           HTML(paste0(target_project_texts
-                      , "<b>Common dataset(s) for pan-cancer analysis:</b> ", paste(names(rv$overlapped_parameter), collapse = ", "), "."
+                      , "<b>Common dataset(s) kept for analysis:</b> ", paste(names(rv$overlapped_parameter), collapse = ", "), "."
           ))
         ),
         size = "l", easyClose = T, footer = modalButton("OK")
@@ -582,7 +584,7 @@ output$tcga_pars <- renderUI({
   if(rv$project != ""){
     code <- rv$tcga_code <- tcga_codes %>% dplyr::filter(type == rv$project) %>% dplyr::select(-type)
     cords <- code %>% dplyr::select(-msg)
-    cords <- unlist(cords)
+    cords <- codes <- unlist(cords)
     # if any NA, render a warning msg on UI
     if(anyNA(cords)){rv$tcga_msg <- code$msg}else{rv$tcga_msg <- ""}
     cords <- c(1:4)[!is.na(cords)]
@@ -592,12 +594,26 @@ output$tcga_pars <- renderUI({
   tcga_stypess <- tcga_stypes[cords]
   if(!rv$tcga_stype %in% tcga_stypess){rv$tcga_stype <- tcga_stypess[1]}
   
+  # choice names
+  if(rv$project != ""){
+    tcga_stypess_names <- sapply(cords, function(x){
+      y <- codes[[x]]
+      c <- codes_color[[y]]
+      i <- codes_icon[[y]]
+      return(paste0(names(tcga_stypess)[[x]],span(style=sprintf("color:%s;",c),i)))
+    }) %>% unname(.)
+  }else{
+    tcga_stypess_names <- names(tcga_stypess)
+  }
+  
+  # render the UI
   column(
     12, align="center",
     radioGroupButtons(
       inputId = "tcga_stype",
       label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
-      choices = tcga_stypess,
+      choiceNames = tcga_stypess_names,
+      choiceValues = unname(tcga_stypess),
       selected = rv$tcga_stype,
       size = "sm",
       checkIcon = list(
@@ -631,31 +647,22 @@ observeEvent(input$tcga_stype,{rv$tcga_stype <- input$tcga_stype; rv$plot_stype 
 output$tcga_warning <- renderUI({
   req(typeof(rv$tcga_code) == "list")
   # recommendations by Liu, Cell, 2018
-  code <- code_color <- rv[["tcga_code"]][[rv$tcga_stype]]
-  
-  # split value if DSS
-  if(rv$tcga_stype == "DSS"){
-    dss_split <- strsplit(code, "\\|")[[1]]
-    dss_split_n <- length(dss_split)
-    if(dss_split_n > 1){
-      code_color <- dss_split[dss_split_n]
-    }
-  }
-  
+  code <- rv[["tcga_code"]][[rv$tcga_stype]]
+
   # beginning wording
   green <- 0
   if(code == "yes"){
-    s_msg <- " is recommended"; green <- 1; s_icon <- icon("check")
+    s_msg <- " is recommended"; green <- 1
   }else if(code == "acc"){
-    s_msg <- " is accurate and recommended"; green <- 1; s_icon <- icon("check")
+    s_msg <- " is accurate and recommended"; green <- 1
   }else if(code == "app"){
-    s_msg <- " is approximate and recommended"; green <- 1; s_icon <- icon("check")
+    s_msg <- " is approximate and recommended"; green <- 1
   }else if(code == "app|caution"){
-    s_msg <- " is approximate and should be <b>used with caution</b>"; s_icon <- icon("exclamation")
+    s_msg <- " is approximate and should be <b>used with caution</b>"
   }else if(code == "no"){
-    s_msg <- " is <b>not recommended</b>"; s_icon <- icon("times")
+    s_msg <- " is <b>not recommended</b>"
   }else if(code == "caution"){
-    s_msg <- " should be <b>used with caution</b>"; s_icon <- icon("exclamation")
+    s_msg <- " should be <b>used with caution</b>"
   }
   
   # assemble msg
@@ -671,8 +678,8 @@ output$tcga_warning <- renderUI({
   # render msg
   div(
     p(
-      style=sprintf("color:%s;", codes_color[[code_color]]),
-      HTML(paste0(s_icon,msg," ",link_icon("liu_link","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/",color="#363B48",icon="fas fa-book")))
+      style=sprintf("color:%s;", codes_color[[code]]),
+      HTML(paste0(codes_icon[[code]],msg," ",link_icon("liu_link","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/",color="#363B48",icon="fas fa-book")))
     )
     ,bsTooltip("liu_link",HTML(paste0(
       "Assessment by Liu et al, <i>Cell</i>, 2018. Click for full text at PubMed Central."

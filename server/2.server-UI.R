@@ -130,6 +130,7 @@ output$ui_results <- renderUI({
           column(
             area_w, align = "left",
             h3(rv[["title"]]),
+            p(style="color:gray;font-size:120%;",paste0(rv$project, collapse = ", ")),
             if(surv_yn){
               plotOutput("cox_plot",height = h_plot)
             }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){

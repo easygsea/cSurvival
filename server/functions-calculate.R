@@ -441,7 +441,7 @@ plot_surv <-
     }
     # add censor time if applicable
     if(rv$censor_time_p != "none"){
-      xlab <- paste0(xlab,"\n",sprintf("(censored at %s)",rv$censor_time_p))
+      xlab <- paste0(xlab,"\n",sprintf("(censored at %s years)",rv$censor_time_p))
     }
     if(mode == "km"){
       fig <- ggsurvplot(fit, data=df, 
