@@ -86,12 +86,12 @@ observeEvent(input$confirm_project,{
   req(!study_length_check)
   
   # check if exceed maximum no of projects
+  if(study == "TARGET"){rv$max_project_n <- 3}else{rv$max_project_n <- 1}
   project_length_check <- length(input$project) > rv$max_project_n
-  if(study == "TARGET"){rv$max_project_n <- 4}else{rv$max_project_n <- 3}
   if(project_length_check){
-    shinyalert(paste0("We support analysis with up to ",rv$max_project_n," projects in ",study,"."
+    shinyalert(paste0("We support analysis with up to ",rv$max_project_n," project(s) in ",study,"."
                       , " You have selected ",length(input$project),"."
-                      , " Please delete unrelated projects. Thank you."))
+                      , " Please delete unrelated project(s). Thank you."))
   }
   req(!project_length_check)
   
