@@ -531,13 +531,21 @@ manual_lst <- reactive({
 })
 
 observeEvent(manual_lst(),{
+  req(rv$project != "")
   array <- 1:rv$variable_n
   namespaces <- paste0("snv_method_",array)
   req(req_diff_rv(namespaces))
   withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
     lapply(array, function(x) {
       snv_id <- paste0("snv_method_",x)
-      if(rv[[snv_id]] != input[[snv_id]]){
+      snv_diff <- 0
+      if(length(rv[[snv_id]]) != length(input[[snv_id]])){
+        snv_diff <- 1
+      }else if(rv[[snv_id]] != input[[snv_id]]){
+        snv_diff <- 1
+      }
+      
+      if(snv_diff == 1){
         # update SNV calling method stored in RV
         rv[[snv_id]] <- input[[snv_id]]
         

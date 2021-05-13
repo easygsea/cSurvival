@@ -75,8 +75,10 @@ req_diff_rv <- function(namespaces){
   suppressWarnings(
     !all(
       sapply(namespaces, function(x){
-        rv[[x]] == input[[x]]
-      })
+        sapply(seq_along(rv[[x]]), function(i){
+          rv[[x]][i] == input[[x]][i]
+        })
+      }) %>% unlist(.)
     )
   )
 }
@@ -164,6 +166,30 @@ vector_names <- function(x, vector){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# paste without NA
+paste_na <- function(...,sep="\\|") {
+  L <- list(...)
+  L <- lapply(L,function(x) {x[is.na(x)] <- ""; x})
+  ret <-gsub(paste0("(^",sep,"|",sep,"$)"),"",
+             gsub(paste0(sep,sep),sep,
+                  do.call(paste,c(L,list(sep=sep)))))
+  is.na(ret) <- ret==""
+  ret
+}
+
+# find common mutations
+common_mut <- function(row, mode="int"){
+  muts <- sapply(row, function(x){
+    strsplit(x, "\\|")
+  })
+  if(mode == "int"){
+    muts <- Reduce(intersect, muts) %>% paste0(collapse = "\\|")
+  }else if(mode == "uni"){
+    muts <- Reduce(union, muts) %>% paste0(collapse = "\\|")
+  }
+  if(muts == "" | muts == "NA"){return(NA)}else{return(muts)}
+}
+
 # rbind a list of dfs by common columns only
 rbind_common <- function(df_list){
   Reduce(function(df_1,df_2){
@@ -249,8 +275,7 @@ update_gs_by_db <- function(x, mode="nil"){
 # retrieve genes from a project
 retrieve_genes <- function(x){
   db_id <- paste0("db_",x)
-  method <- ifelse(is.null(input[[paste0("snv_method_",x)]]),"mutect",input[[paste0("snv_method_",x)]])
-  
+  if(is.null(input[[paste0("snv_method_",x)]])){method <- "mutect"}else{method <- input[[paste0("snv_method_",x)]]}
   dbt <- rv[[db_id]]
   if(is.null(dbt)){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")

@@ -296,6 +296,15 @@ plot_run_ui <- function(n){
       }
     }
     datatype <- call_datatype(x)
+    
+    # preselected SNV callers
+    snv_pre_a <- ifelse(
+      length(rv[[snv_id]]) == 1,
+      paste0('"',rv[[snv_id]],'"'),
+      paste0("['",paste0(rv[[snv_id]],collapse = "','"),"']")
+    )
+    
+    # render the UI
     column(
       col_w,align="center",
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
@@ -401,28 +410,29 @@ plot_run_ui <- function(n){
               # mutation caller options
               selectizeInput(
                 snv_id
-                ,label = HTML(paste0("Somatic mutation caller:",add_help(snv_id_q)))
+                ,label = HTML(paste0("Select somatic mutation caller(s):",add_help(snv_id_q)))
                 ,choices = snv_algorithms
                 ,selected = rv[[snv_id]]
+                ,multiple = T
                 ,options = list(
                   # `live-search` = TRUE,
                   placeholder = 'Type to search ...'
-                  ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
+                  ,onInitialize = I(sprintf('function() { this.setValue(%s); }',snv_pre_a)))
               )
             }
             ,bsTooltip(snv_id_q
-                       ,HTML("The algorithm used for calling somatic nucleotide variations")
+                       ,HTML("Algorithm(s) used for calling somatic nucleotide variations. If multiple callers are selected, consensus results will be extracted for analysis.")
                        ,placement = "top")
             
             # non-silent variants classifications
             ,selectizeInput(
               non_id
-              ,label = HTML(paste0("Non-synomynous variants:",add_help(non_id_q)))
+              ,label = HTML(paste0("Select variants of interest:",add_help(non_id_q)))
               ,choices = variant_types
               ,selected = rv[[non_id]]
               ,multiple = T
             )
-            ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+            ,bsTooltip(non_id_q,HTML("By default, variants to be classified as High/Moderate variant consequences are selected. For more information about variant classification: http://uswest.ensembl.org/Help/Glossary?id=535")
                        ,placement = "top")
             
             # # silent variants classifications

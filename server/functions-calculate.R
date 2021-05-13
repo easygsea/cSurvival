@@ -48,10 +48,9 @@ extract_gene_data <- function(x, type){
     if(rv$tcga){
       snv_id <- paste0("snv_method_",x)
       method <- ifelse_rv(snv_id)
-      df_file <- c(
-        df_file
-        ,"snv" = paste0("df_snv_class_",method,".csv")
-      )
+      
+      df_file[["snv"]] = paste0("df_snv_class_",method,".csv")
+      
     }else{
       df_file <- c(
         df_file
@@ -80,7 +79,16 @@ extract_gene_data <- function(x, type){
   l <- lapply(infiles,function(y){
     fread(y,sep=",",header=T,select = c("patient_id", genes))
   })
-  data <- rbindlist(l, use.names = T)
+  if(type == "snv"){
+    data <- Reduce(
+      function(x, y) inner_join(x, dplyr::select(y, patient_id, genes), by = "patient_id"),
+      l
+    )
+    data[[genes]] <- apply(data[ ,2:ncol(data)] , 1 , common_mut)
+    data <- data %>% dplyr::select(patient_id, genes)
+  }else{
+    data <- rbindlist(l, use.names = T)
+  }
 
   # # # method 2 fread essential columns
   # ofile <- paste0(rv$indir,"tmp.csv")
