@@ -114,7 +114,15 @@ observeEvent(input$confirm,{
         error_censor <- 1
         ymd_name <- vector_names(input$censor_time_ymd,ymd_names)
         shinyalert(paste0("Please enter a longer censoring time. Minimum: ",rv$censor_time_min," ",ymd_name,"."
-                          ," Updated to default: ",rv$censor_time," ",ymd_name,"."))
+                          ," Updated to default/previous entry: ",rv$censor_time," ",ymd_name,"."))
+      }else if(input$censor_time > rv$censor_time_max){
+        error_censor <- 1
+        ymd_name <- vector_names(input$censor_time_ymd,ymd_names)
+        shinyalert(paste0("Please enter a shorter censoring time. Maximum: ",rv$censor_time_max," ",ymd_name,"."
+                          ," Updated to default/previous entry: ",rv$censor_time," ",ymd_name,"."))
+      }else{
+        rv$censor_time <- input$censor_time
+        rv[[paste0("censor_time_",input$censor_time_ymd)]] <- input$censor_time
       }
       updateNumericInput(
         session,"censor_time", NULL,
@@ -190,7 +198,11 @@ observeEvent(input$confirm,{
               results <- get_info_most_significant_rna(data, min, max, step, mode=input[[cat_id]])
               if(is.null(results)){
                 enough_error <- 1
-                shinyalert("The selected project does not have enough data for the selected gene, locus, or gene set.")
+                txt <- "The selected project does not have enough data for the selected gene/locus/gene set"
+                if(input$censor_time_ymd != "none"){
+                  txt <- paste0(txt,", at censoring time ",input$censor_time," ",vector_names(input$censor_time_ymd,ymd_names))
+                }
+                shinyalert(paste0(txt,"."))
               }
               
               req(enough_error == 0)
