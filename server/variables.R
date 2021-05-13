@@ -3,17 +3,18 @@ surv_dir <- paste0(dirname(dirname(getwd())), "/variables/")
 
 # ------ available GMT gene sets -----
 # gmt_dir <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/hsa/")
-# gmt_dir <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/hsa/"
-gmt_dir <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/hsa/" # tau path
+gmt_dir <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/hsa/"
+# gmt_dir <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/hsa/" # tau path
 # # collection in a df
 # in_gmt_lst <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/gmts_list.csv") # code test locally
-# in_gmt_lst <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/gmts_list.csv"
-in_gmt_lst <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/gmts_list.csv" # tau path
+in_gmt_lst <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/gmts_list.csv"
+# in_gmt_lst <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/gmts_list.csv" # tau path
 gmt_collection_df <- read_csv(in_gmt_lst,col_names = F) %>% dplyr::filter(X1 == "hsa")
 # available databases
 gmt_dbs <- str_split(gmt_collection_df$X3,";") %>% lapply(function(x) gsub("_"," ",gsub("?[.]gmt$","",x)))
 db_names <- gsub("_"," ",gsub("^\\d+_?","",gmt_collection_df$X2))
 names(gmt_dbs) <- db_names
+gmt_dbs[["Other"]] <- gmt_dbs[["Other"]][-4]
 # function to find the full path to a selected GMT
 retrieve_gmt_path <- function(db){
   db <- paste0(gsub(" ","_",db),".gmt")

@@ -127,6 +127,15 @@ ifelse_rv <- function(id){
   }
 }
 
+# pass value rv if input is.na
+ifelse_rv_na <- function(id){
+  if(is.na(input[[id]])){
+    rv[[id]]
+  }else{
+    input[[id]]
+  }
+}
+
 # # specific function to handle the bug when second panel is initiated but not responding to UI update
 # check_array <- function(lst){
 #   # lst_u <- lst %>% unlist() %>% unique()

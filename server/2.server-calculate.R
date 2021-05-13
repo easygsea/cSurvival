@@ -85,8 +85,9 @@ observeEvent(input$confirm,{
       }
       # re-calculate survival days if censored by time
       if(input$censor_time_ymd != "none"){
+        c_time <- ifelse_rv_na("censor_time")
         # calculate censoring time in days
-        nnn <- rv$censor_time * ymd_unit[[input$censor_time_ymd]]
+        nnn <- c_time * ymd_unit[[input$censor_time_ymd]]
         # if time record larger than censoring time, convert status to 0
         rv[["df_survival"]][["censoring_status"]] <- ifelse(
           rv[["df_survival"]][["survival_days"]] > nnn,
@@ -100,17 +101,28 @@ observeEvent(input$confirm,{
           rv[["df_survival"]][["survival_days"]]
         )
         # mark down as time censored
-        rv$censor_time_p <- sprintf(", censored at %s %s",rv$censor_time, tolower(vector_names(input$censor_time_ymd,ymd_names)))
+        rv$censor_time_p <- sprintf(", censored at %s %s",c_time, tolower(vector_names(input$censor_time_ymd,ymd_names)))
       }else{
         rv$censor_time_p <- ""
       }
-      # update censor time UI
+      # error on censor time UI
+      error_censor <- 0
       if(is.na(input$censor_time)){
-        updateNumericInput(
-          session,"censor_time", NULL,
-          value = rv$censor_time
-        )
+        error_censor <- 1
+        shinyalert("Please enter a valid censoring time.")
+      }else if(input$censor_time < rv$censor_time_min){
+        error_censor <- 1
+        ymd_name <- vector_names(input$censor_time_ymd,ymd_names)
+        shinyalert(paste0("Please enter a longer censoring time. Minimum: ",rv$censor_time_min," ",ymd_name,"."
+                          ," Updated to default: ",rv$censor_time," ",ymd_name,"."))
       }
+      updateNumericInput(
+        session,"censor_time", NULL,
+        value = rv$censor_time
+      )
+      req(error_censor == 0)
+      
+      # begin analysis after error checking
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL

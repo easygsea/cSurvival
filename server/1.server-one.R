@@ -48,18 +48,18 @@ observeEvent(input$censor_time_ymd,{
   rv$censor_time_step <- rv[[paste0("censor_time_step_",ymd)]]
 })
 
-# correct user's numeric time input
-observeEvent(input$censor_time,{
-  if(!is.na(input$censor_time)){
-    # take intervals
-    n <- floor(input$censor_time)
-    # cap at min and max
-    if(n < rv$censor_time_min){n <- rv$censor_time_min}
-    if(n > rv$censor_time_max){n <- rv$censor_time_max}
-    # update rv
-    rv$censor_time <- rv[[paste0("censor_time_",rv$censor_time_ymd)]] <- n
-  }
-})
+# # correct user's numeric time input
+# observeEvent(input$censor_time,{
+#   if(!is.na(input$censor_time)){
+#     # take intervals
+#     n <- floor(input$censor_time)
+#     # cap at min and max
+#     if(n < rv$censor_time_min){n <- rv$censor_time_min}
+#     if(n > rv$censor_time_max){n <- rv$censor_time_max}
+#     # update rv
+#     rv$censor_time <- rv[[paste0("censor_time_",rv$censor_time_ymd)]] <- n
+#   }
+# })
 
 #=========================================================================#
 ####  STEP 0. Freeze project once selected, update gene selection UI   ####
