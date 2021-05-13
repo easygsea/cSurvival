@@ -439,10 +439,7 @@ plot_surv <-
     }else if(rv$ymd == "y"){
       xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25
     }
-    # add censor time if applicable
-    if(rv$censor_time_p != "none"){
-      xlab <- paste0(xlab,"\n",sprintf("(censored at %s years)",rv$censor_time_p))
-    }
+    
     if(mode == "km"){
       fig <- ggsurvplot(fit, data=df, 
                         title = title,

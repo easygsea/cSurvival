@@ -140,3 +140,15 @@ codes_icon <- list(
   ,"app" = icon("check")
   ,"acc" = icon("check")
 )
+
+# ----- YMD time units -----
+ymd_names <- c(
+  "Days"="d",
+  "Months"="m",
+  "Years"="y"
+)
+ymd_unit <- c(
+  "y" = 365.25
+  ,"m" = 30.4375
+  ,"d" = 1
+)

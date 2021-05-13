@@ -1,29 +1,66 @@
 # ---- UI: censor time cutoff -----
 output$ui_censortime <- renderUI({
   req(rv$tcga | rv$target)
-  
+  if(rv$censor_time_ymd == "none"){t_w <- "0px";ymd_w <- "90%"}else{t_w <- "45%";ymd_w <- "50%"}
   div(
-    selectizeInput(
-      "censor_time",
-      HTML(paste0("<h4><b>Censor cases at:</b> ",add_help("censor_time_q"),"</h4>")),
-      choices = c(
-        "15 years" = "15",
-        "10 years" = "10",
-        "8 years" = "8",
-        "5 years" = "5",
-        "3 years" = "3",
-        "2 years" = "2",
-        "None" = "none"
+    HTML(paste0("<h4 style='margin-bottom: 15px;'><b>Censor cases at:</b> ",add_help("censor_time_q"),"</h4>")),
+    div(
+      style=sprintf("display: inline-block;vertical-align:top;width:%s",t_w),
+      uiOutput("ui_censor_time")
+    ),
+    div(
+      style=sprintf("display: inline-block;vertical-align:top;width:%s",ymd_w),
+      selectizeInput(
+        "censor_time_ymd", NULL,
+        choices = c(
+          "Years" = "y",
+          "Months" = "m",
+          "Days" = "d",
+          "None" = "none"
+        )
+        ,selected = rv$censor_time_ymd
       )
-      ,selected = rv$censor_time
-      ,width = "100%"
     )
     ,bsTooltip("censor_time_q",HTML(paste0(
-      "To study a specified time interval"
+      "To study a specified time interval. Choose <b>None</b> to study the whole time course"
     )),placement = "top")
   )
 })
-observeEvent(input$censor_time,{rv$censor_time <- input$censor_time})
+
+# the no of time units
+output$ui_censor_time <- renderUI({
+  req(input$censor_time_ymd != "none")
+  
+  numericInput(
+    "censor_time", NULL,
+    value = rv$censor_time
+    ,min = rv$censor_time_min,max = rv$censor_time_max,step = rv$censor_time_step
+  )
+})
+
+# switch time units
+observeEvent(input$censor_time_ymd,{
+  ymd <- rv$censor_time_ymd <- input$censor_time_ymd
+  req(ymd != "none")
+  rv$censor_time <- rv[[paste0("censor_time_",ymd)]]
+  rv$censor_time_min <- rv[[paste0("censor_time_min_",ymd)]]
+  rv$censor_time_max <- rv[[paste0("censor_time_max_",ymd)]]
+  rv$censor_time_step <- rv[[paste0("censor_time_step_",ymd)]]
+})
+
+# correct user's numeric time input
+observeEvent(input$censor_time,{
+  if(!is.na(input$censor_time)){
+    # take intervals
+    n <- floor(input$censor_time)
+    # cap at min and max
+    if(n < rv$censor_time_min){n <- rv$censor_time_min}
+    if(n > rv$censor_time_max){n <- rv$censor_time_max}
+    # update rv
+    rv$censor_time <- rv[[paste0("censor_time_",rv$censor_time_ymd)]] <- n
+  }
+})
+
 #=========================================================================#
 ####  STEP 0. Freeze project once selected, update gene selection UI   ####
 #=========================================================================#

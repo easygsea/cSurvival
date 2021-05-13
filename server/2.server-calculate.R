@@ -83,9 +83,10 @@ observeEvent(input$confirm,{
         }
         req(tcga_error == 0)
       }
-      if(input$censor_time != "none"){
+      # re-calculate survival days if censored by time
+      if(input$censor_time_ymd != "none"){
         # calculate censoring time in days
-        nnn <- as.numeric(input$censor_time) * 365.25
+        nnn <- rv$censor_time * ymd_unit[[input$censor_time_ymd]]
         # if time record larger than censoring time, convert status to 0
         rv[["df_survival"]][["censoring_status"]] <- ifelse(
           rv[["df_survival"]][["survival_days"]] > nnn,
@@ -97,6 +98,17 @@ observeEvent(input$confirm,{
           rv[["df_survival"]][["survival_days"]] > nnn,
           nnn,
           rv[["df_survival"]][["survival_days"]]
+        )
+        # mark down as time censored
+        rv$censor_time_p <- sprintf(", censored at %s %s",rv$censor_time, tolower(vector_names(input$censor_time_ymd,ymd_names)))
+      }else{
+        rv$censor_time_p <- ""
+      }
+      # update censor time UI
+      if(is.na(input$censor_time)){
+        updateNumericInput(
+          session,"censor_time", NULL,
+          value = rv$censor_time
         )
       }
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
@@ -110,7 +122,6 @@ observeEvent(input$confirm,{
       df_list <- list()
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""
-      rv$censor_time_p <- input$censor_time
       
       #------ 3. Loop from 1 to rv$variable_n ------
       for(x in 1:rv$variable_n){

@@ -130,7 +130,7 @@ output$ui_results <- renderUI({
           column(
             area_w, align = "left",
             h3(rv[["title"]]),
-            p(style="color:gray;font-size:120%;",paste0(rv$project, collapse = ", ")),
+            p(style="color:gray;font-size:135%;",paste0(rv$project, collapse = " ",rv$censor_time_p)),
             if(surv_yn){
               plotOutput("cox_plot",height = h_plot)
             }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
@@ -272,10 +272,7 @@ output$plot_gear <- renderUI({
         radioGroupButtons(
           inputId = "ymd",
           label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
-          choices = c("Days"="d",
-                      "Months"="m",
-                      "Years"="y"
-          ),
+          choices = ymd_names,
           selected = rv$ymd,
           size = "sm",
           checkIcon = list(

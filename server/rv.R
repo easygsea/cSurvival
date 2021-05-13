@@ -16,8 +16,13 @@ rv <- reactiveValues(
   ,plot_stype="OS" # label to display
   ,tcga_code="" # clinical data quality info for the selected TCGA project
   ,tcga_msg="" # warning message if NA annotation for TCGA clinical outcome codes; "" means no NA
-  ,censor_time="10" # default censor time 10 yrs
-
+  ,censor_time_ymd="y" # default censor time unit: years
+  ,censor_time=10 # default censor time 10 yrs
+  ,censor_time_min=1,censor_time_max=100,censor_time_step=1
+  ,censor_time_min_y=1,censor_time_max_y=100,censor_time_step_y=1,censor_time_y=10
+  ,censor_time_min_m=20,censor_time_max_m=2000,censor_time_step_m=20,censor_time_m=200
+  ,censor_time_min_d=1000,censor_time_max_d=30000,censor_time_step_d=1000,censor_time_d=3000
+  
   ,plot_type="all"
   
   ,cox_km = "cox"
