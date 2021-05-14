@@ -235,10 +235,15 @@ observeEvent(input$confirm,{
             # non-synonymous
             non_id <- paste0("nonsynonymous_",x)
             nons <- ifelse_rv(non_id)
+            if(is.null(input[[non_id]])){
+              updateSelectizeInput(session,non_id,selected = variant_types_non)
+            }
             # synonymous
             syn_id <- paste0("synonymous_",x)
             syns <- ifelse_rv(syn_id)
-
+            if(is.null(input[[syn_id]])){
+              updateSelectizeInput(session,syn_id,selected = variant_types_syn)
+            }
             # render an error if a mutation class is selected twice
             error <- 0
             if(any(nons %in% syns)){
@@ -253,7 +258,7 @@ observeEvent(input$confirm,{
             df <- get_df_snv(data, nons, syns)
             error_snv <- 0
             if(length(unique(df$level)) < 2){
-              shinyalert("Not enough data found for the selected endpoint")
+              shinyalert("Not enough data found for the selected endpoint and parameters")
               error_snv <- 1
             }
             req(error_snv == 0)
