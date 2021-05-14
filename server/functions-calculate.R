@@ -233,6 +233,8 @@ get_df_snv <- function(data, nons, syns){
       "Mutated" #"Nonsynonymous"
     }else if(any(tolower(x) %in% syns)){
       "Other" #"Synonymous"
+    }else{
+      NA
     }
   })
   mutations <- mm #[!is.na(mutations)]
@@ -243,6 +245,8 @@ get_df_snv <- function(data, nons, syns){
   col_names[length(col_names)] <- "level"
   colnames(data) <- col_names
   
+  # filter data
+  data <- data %>% dplyr::filter(!is.na(level))
   # reset levels
   lels <- unique(data$level) %>% sort(.,decreasing = T)
   data$level <- factor(data$level, levels = lels)

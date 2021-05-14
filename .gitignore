@@ -110,3 +110,8 @@ inc/project_data/TCGA-LUSC/df_snv_type_varscan.csv
 inc/project_data/TCGA-LUSC/df_survival.csv
 project_data/project_name.csv
 project_data/TCGA-LUAD/df_survival_o.csv
+cox_dm
+project_data/DepMap/ccle.csv
+project_data/DepMap/DepMap-CRISPR.csv
+project_data/DepMap/df_gene.csv
+project_data/DepMap/df_gene_scale.csv
