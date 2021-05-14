@@ -224,25 +224,29 @@ observeEvent(input$confirm,{
             
           # ---------- 3C. survival analysis on SNVs ---------
           }else if(extract_mode == "snv"){
+            snv_id <- paste0("snv_method_",x)
+            if(is.null(input[[snv_id]])){
+              updateSelectizeInput(session,snv_id,selected = "mutect")
+            }
             # non-synonymous
             non_id <- paste0("nonsynonymous_",x)
             nons <- ifelse_rv(non_id)
-            # # synonymous
-            # syn_id <- paste0("synonymous_",x)
-            # syns <- ifelse_rv(syn_id)
-            # 
-            # # render an error if a mutation class is selected twice
-            # error <- 0
-            # if(any(nons %in% syns)){
-            #   error <- error + 1
-            #   ol <- nons[nons %in% syns]
-            #   shinyalert(paste0("You have selected ",paste0(ol,collapse = ", ")," in both non- and synonymous mutations in Analysis #",x,". Please refine your selection."))
-            # }
-            # 
-            # req(error == 0)
+            # synonymous
+            syn_id <- paste0("synonymous_",x)
+            syns <- ifelse_rv(syn_id)
+
+            # render an error if a mutation class is selected twice
+            error <- 0
+            if(any(nons %in% syns)){
+              error <- error + 1
+              ol <- nons[nons %in% syns]
+              shinyalert(paste0("You have selected ",paste0(ol,collapse = ", ")," in both Mutated and Other in Analysis #",x,". Please refine your selection."))
+            }
+
+            req(error == 0)
             
             # create df for survival analysis
-            df <- get_df_snv(data, nons)
+            df <- get_df_snv(data, nons, syns)
             error_snv <- 0
             if(length(unique(df$level)) < 2){
               shinyalert("Not enough data found for the selected endpoint")

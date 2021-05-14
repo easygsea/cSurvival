@@ -85,7 +85,7 @@ extract_gene_data <- function(x, type){
       l
     )
     uni_mode <- ifelse_rv(paste0("snv_uni_",x))
-    data[[genes]] <- apply(data[ ,2:ncol(data)] , 1 , common_mut, mode=uni_mode)
+    data[[genes]] <- apply(data[ ,2:ncol(data)] , 1 , function(x) common_mut(x,mode=uni_mode))
     data <- data %>% dplyr::select(patient_id, genes)
   }else{
     data <- rbindlist(l, use.names = T)
@@ -218,23 +218,24 @@ get_df_by_cutoff <- function(data, cutoff){
 }
 
 # generate df if SNV mutation data
-get_df_snv <- function(data, nons){
+get_df_snv <- function(data, nons, syns){
   nons <- tolower(nons)
+  syns <- tolower(syns)
   # extract patients' IDs and mutation data
   patient_ids <- data$patient_id
   mutations <- data[,2] %>% unlist(.) %>% unname(.)
   # check if nonsyn
-  mm <- mutations[!is.na(mutations)]
+  mutations[is.na(mutations)] <- "WT" #"Synonymous"
+  mm <- mutations #[!is.na(mutations)]
   mm <- sapply(mm, function(x){
     x <- strsplit(x, "\\|")[[1]]
     if(any(tolower(x) %in% nons)){
-      "Nonsynonymous"
-    }else{
-      "Synonymous"
+      "Mutated" #"Nonsynonymous"
+    }else if(any(tolower(x) %in% syns)){
+      "Other" #"Synonymous"
     }
   })
-  mutations[!is.na(mutations)] <- mm
-  mutations[is.na(mutations)] <- "Synonymous"
+  mutations <- mm #[!is.na(mutations)]
   data[,2] <- mutations
   
   # rename columns

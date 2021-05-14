@@ -445,7 +445,7 @@ plot_run_ui <- function(n){
                   )
                 )
                 ,bsTooltip(snv_uni_id_q,HTML(paste0(
-                  "When multiple callers are selected, select <b>Intersect</b> to extract consensus results for analysis, or <b>Union</b> a positive hit by any algorithm."
+                  "When multiple callers are selected, select <b>Intersect</b> to extract consensus results for analysis, or <b>Union</b> to find a positive hit in any algorithm."
                 )),placement = "top")
               )
             }
@@ -453,24 +453,24 @@ plot_run_ui <- function(n){
             # non-silent variants classifications
             ,selectizeInput(
               non_id
-              ,label = HTML(paste0("Select variants of interest:",add_help(non_id_q)))
+              ,label = HTML(paste0("Select variants of interest (Mutated): ",add_help(non_id_q)))
               ,choices = variant_types
               ,selected = rv[[non_id]]
               ,multiple = T
             )
-            ,bsTooltip(non_id_q,HTML("By default, variants to be classified as High/Moderate variant consequences are selected. For more information about variant classification: http://uswest.ensembl.org/Help/Glossary?id=535")
+            ,bsTooltip(non_id_q,HTML("By default, variants to be classified as High/Moderate variant consequences are selected. Adjust to suit the purpose of your study. For more information about variant classification: http://uswest.ensembl.org/Help/Glossary?id=535")
                        ,placement = "top")
             
-            # # silent variants classifications
-            # ,selectizeInput(
-            #   syn_id
-            #   ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
-            #   ,choices = variant_types
-            #   ,selected = rv[[syn_id]]
-            #   ,multiple = T
-            # )
-            # ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
-            #            ,placement = "top")
+            # silent variants classifications
+            ,selectizeInput(
+              syn_id
+              ,label = HTML(paste0("Select control group (Other): ",add_help(syn_id_q)))
+              ,choices = variant_types
+              ,selected = rv[[syn_id]]
+              ,multiple = T
+            )
+            ,bsTooltip(syn_id_q,HTML("By default, wild-type (WT) and variants to be classified as Low/No variant consequences are selected. Adjust to suit the purpose of your study. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                       ,placement = "top")
             
             ,if(x == 1 & rv$variable_n > 1){
               if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){

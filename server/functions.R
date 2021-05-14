@@ -38,7 +38,7 @@ init_rv <- function(x){
   # parameters for SNV mutation analysis
   rv[[paste0("snv_method_",x)]] <- "mutect"
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
-  # rv[[paste0("synonymous_",x)]] <- variant_types_syn
+  rv[[paste0("synonymous_",x)]] <- variant_types_syn
   rv[[paste0("iter_",x)]] <- "iter"
   rv[[paste0("clow_",x)]] <- 50
   rv[[paste0("cnv_par_",x)]] <- "auto"
@@ -184,11 +184,16 @@ common_mut <- function(row, mode="int"){
     strsplit(x, "\\|")
   })
   if(mode == "int"){
-    muts <- Reduce(intersect, muts) %>% paste0(collapse = "\\|")
+    muts <- Reduce(intersect, muts) 
   }else if(mode == "uni"){
-    muts <- Reduce(union, muts) %>% paste0(collapse = "\\|")
+    muts <- Reduce(union, muts)
   }
-  if(muts == "" | muts == "NA"){return(NA)}else{return(muts)}
+  muts <- muts[!is.na(muts)]
+  if(identical(muts,character(0))){
+    return(NA)
+  }else{
+    return(paste0(muts,collapse = "\\|"))
+  }
 }
 
 # rbind a list of dfs by common columns only
@@ -276,7 +281,10 @@ update_gs_by_db <- function(x, mode="nil"){
 # retrieve genes from a project
 retrieve_genes <- function(x){
   db_id <- paste0("db_",x)
-  if(is.null(input[[paste0("snv_method_",x)]])){method <- "mutect"}else{method <- input[[paste0("snv_method_",x)]]}
+  snv_id <- paste0("snv_method_",x)
+  if(is.null(input[[snv_id]])){
+    method <- "mutect"
+  }else{method <- input[[snv_id]]}
   dbt <- rv[[db_id]]
   if(is.null(dbt)){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
