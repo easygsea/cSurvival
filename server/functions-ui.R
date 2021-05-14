@@ -278,6 +278,7 @@ plot_run_ui <- function(n){
     col <- extract_color(x)
     
     snv_id <- paste0("snv_method_",x); snv_id_q <- paste0(snv_id,"_q")
+    snv_uni_id <- paste0("snv_uni_",x); snv_uni_id_q <- paste0(snv_uni_id,"_q")
     non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
     syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
@@ -407,22 +408,47 @@ plot_run_ui <- function(n){
           
           div(
             if(rv$tcga){
-              # mutation caller options
-              selectizeInput(
-                snv_id
-                ,label = HTML(paste0("Select somatic mutation caller(s):",add_help(snv_id_q)))
-                ,choices = snv_algorithms
-                ,selected = rv[[snv_id]]
-                ,multiple = T
-                ,options = list(
-                  # `live-search` = TRUE,
-                  placeholder = 'Type to search ...'
-                  ,onInitialize = I(sprintf('function() { this.setValue(%s); }',snv_pre_a)))
+              div(
+                # mutation caller options
+                selectizeInput(
+                  snv_id
+                  ,label = HTML(paste0("Select somatic mutation caller(s):",add_help(snv_id_q)))
+                  ,choices = snv_algorithms
+                  ,selected = rv[[snv_id]]
+                  ,multiple = T
+                  ,options = list(
+                    # `live-search` = TRUE,
+                    placeholder = 'Type to search ...'
+                    ,onInitialize = I(sprintf('function() { this.setValue(%s); }',snv_pre_a)))
+                )
+                ,bsTooltip(snv_id_q
+                           ,HTML("Algorithm(s) used for calling somatic nucleotide variations. Multiple selections are allowed")
+                                 ,placement = "top")
+                # intersect or union
+                ,conditionalPanel(
+                  sprintf('input.%s.length > 1',snv_id),
+                  radioGroupButtons(
+                    inputId = snv_uni_id,
+                    label = HTML(paste0("Select method to handle results by different callers: ",add_help(snv_uni_id_q))),
+                    choices = c(
+                      "Intersect" = "int"
+                      ,"Union" = "uni"
+                    ),
+                    selected = rv[[snv_uni_id]],
+                    size = "sm",
+                    checkIcon = list(
+                      yes = icon("check-square"),
+                      no = icon("square-o")
+                    ),
+                    # status = "primary",
+                    direction = "horizontal"
+                  )
+                )
+                ,bsTooltip(snv_uni_id_q,HTML(paste0(
+                  "When multiple callers are selected, select <b>Intersect</b> to extract consensus results for analysis, or <b>Union</b> a positive hit by any algorithm."
+                )),placement = "top")
               )
             }
-            ,bsTooltip(snv_id_q
-                       ,HTML("Algorithm(s) used for calling somatic nucleotide variations. If multiple callers are selected, consensus results will be extracted for analysis.")
-                       ,placement = "top")
             
             # non-silent variants classifications
             ,selectizeInput(

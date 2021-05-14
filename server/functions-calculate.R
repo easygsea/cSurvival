@@ -84,7 +84,8 @@ extract_gene_data <- function(x, type){
       function(x, y) inner_join(x, dplyr::select(y, patient_id, genes), by = "patient_id"),
       l
     )
-    data[[genes]] <- apply(data[ ,2:ncol(data)] , 1 , common_mut)
+    uni_mode <- ifelse_rv(paste0("snv_uni_",x))
+    data[[genes]] <- apply(data[ ,2:ncol(data)] , 1 , common_mut, mode=uni_mode)
     data <- data %>% dplyr::select(patient_id, genes)
   }else{
     data <- rbindlist(l, use.names = T)

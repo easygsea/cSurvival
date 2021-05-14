@@ -42,6 +42,7 @@ init_rv <- function(x){
   rv[[paste0("iter_",x)]] <- "iter"
   rv[[paste0("clow_",x)]] <- 50
   rv[[paste0("cnv_par_",x)]] <- "auto"
+  rv[[paste0("snv_uni_",x)]] <- "int"
 }
 
 # update these into rv when selections change

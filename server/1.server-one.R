@@ -616,6 +616,7 @@ observeEvent(input$toall,{
 observeEvent(input$toall_m,{
   lapply(2:rv$variable_n, function(x){
     updateSelectInput(session, paste0("snv_method_",x), selected = input[["snv_method_1"]])
+    updateRadioGroupButtons(session, paste0("snv_uni_",x), selected = input[["snv_uni_1"]])
     updateSelectizeInput(session, paste0("nonsynonymous_",x), selected = input[["nonsynonymous_1"]])
     updateSelectizeInput(session, paste0("synonymous_",x), selected = input[["synonymous_1"]])
   })
