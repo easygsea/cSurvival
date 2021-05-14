@@ -17,3 +17,8 @@ label_with_help_bttn <- function(label_text, bttn_id, bttn_status="info", bttn_s
     tags$style(type = "text/css", paste0("#",bttn_id,"{display: inline-block;width: 17px;height: 17px;padding: 0;border-radius: 50%;vertical-align: text-top;margin-left: 3px;font-size: 10px;padding-top: 1px;",bttn_style,"}")),
     bsButton(bttn_id, label = "", icon = icon("question"), style = bttn_status, size = "extra-small"))
 }
+
+# sort a named list by its first-layer elements
+sort_list <- function(alist, na.last = TRUE, decreasing=FALSE){
+  alist[order(names(alist), decreasing=decreasing, na.last = na.last)]
+}

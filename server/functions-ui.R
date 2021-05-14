@@ -126,7 +126,7 @@ plot_ui <- function(n){
             ,selected=rv[[g_ui_id]]
             ,width = "100%"
             ,options = list(
-              placeholder = g_placeholder
+              placeholder = g_placeholder()
               ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
             )
           )
@@ -249,6 +249,7 @@ plot_ui <- function(n){
         ,radioTooltip(id = db_id, choice = "mir", title = HTML("microRNA expression level"))
         ,radioTooltip(id = db_id, choice = "met", title = HTML("DNA methylation level"))
         ,radioTooltip(id = db_id, choice = "rrpa", title = HTML("Reverse-phase protein array (RPPA)"))
+        ,radioTooltip(id = db_id, choice = "pro", title = HTML("Normalized protein expression data by mass spectrometry"))
       )
       
     )

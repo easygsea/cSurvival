@@ -23,7 +23,7 @@ output$ui_censortime <- renderUI({
     )
     ,bsTooltip("censor_time_q",HTML(paste0(
       "To study a specified time interval. Choose <b>None</b> to study the whole time course"
-    )),placement = "top")
+    )),placement = "right")
   )
 })
 
@@ -100,35 +100,51 @@ observeEvent(input$confirm_project,{
     rv$project <- input$project
     if(study == "TCGA"){rv$tcga <- T; rv$plot_stype <- vector_names(rv$tcga_stype, tcga_stypes)}else{rv$tcga <- F}
     if(study == "TARGET"){rv$target <- T; rv$plot_stype <- "Overall survival (OS)"}else{rv$target <- F}
-    if(study == "DepMap"){rv$depmap <- T; rv$plot_stype <- "Dependency"}else{rv$depmap <- F}
-
-    rv$indir <- paste0(getwd(),"/project_data/",project,"/")
-    if(rv$tcga){
-      infiles <- paste0(rv$indir,"df_survival_o.csv")
-      l <- lapply(infiles, function(x){
-        fread(x,sep=",",header=T) #%>%
+    if(study == "DepMap"){rv$depmap <- T; rv$plot_stype <- paste0(gsub("^DepMap-","",project)," dependency")}else{rv$depmap <- F}
+    
+    if(study != "DepMap"){
+      rv$indir <- paste0(getwd(),"/project_data/",project,"/")
+      if(rv$tcga){
+        infiles <- paste0(rv$indir,"df_survival_o.csv")
+        l <- lapply(infiles, function(x){
+          fread(x,sep=",",header=T) #%>%
           # dplyr::select(patient_id,person_neoplasm_cancer_status,new_tumor_event_after_initial_treatment,survival_days,censoring_status,gender)
-      })
+        })
+      }else if(rv$target){
+        infiles <- paste0(rv$indir,"df_survival.csv")
+        l <- lapply(infiles, function(x){
+          fread(x,sep=",",header=T) %>%
+            dplyr::select(patient_id,survival_days,censoring_status,gender)
+        })
+      }
+      rv$df_survival_o <- rbindlist(l,use.names = T) %>%
+        dplyr::distinct(patient_id, .keep_all = T)
+      rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+      if(!is.null(rv$overlapped_parameter)){
+        lapply(1:rv$variable_n, function(x){
+          db_id <- paste0("db_",x)
+          if(!rv[[db_id]] %in% rv$overlapped_parameter){
+            rv[[db_id]] <- "rna"
+          }
+        })
+        rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+      }
+      update_genes_ui(opt="nil")
     }else{
-      infiles <- paste0(rv$indir,"df_survival.csv")
-      l <- lapply(infiles, function(x){
-        fread(x,sep=",",header=T) %>%
-          dplyr::select(patient_id,survival_days,censoring_status,gender)
-      })
-    }
-    rv$df_survival_o <- rbindlist(l,use.names = T) %>%
-      dplyr::distinct(patient_id, .keep_all = T)
-    rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
-    if(!is.null(rv$overlapped_parameter)){
-      lapply(1:rv$variable_n, function(x){
-        db_id <- paste0("db_",x)
-        if(!rv[[db_id]] %in% rv$overlapped_parameter){
-          rv[[db_id]] <- "rna"
-        }
-      })
+      rv$indir <- paste0(getwd(),"/project_data/DepMap/")
+      rv$depmap_path <- paste0(rv$indir,project,".csv")
+      # the genes for initial selection
+      rv$depmap_genes <- fread(rv$depmap_path, sep = ",", nrows = 0)
+      rv$depmap_genes <- colnames(rv$depmap_genes)[-1]
+      # available cell lines
+      rv$depmap_ids <- fread(rv$depmap_path, sep = ",", select = "patient_id") %>% .[["patient_id"]]
+      rv$depmap_ccle <- df_ccle %>% dplyr::filter(patient_id %in% rv$depmap_ids)
+      rv$cell_lines <- rv$depmap_ccle$CCLE_Name
+      names(rv$cell_lines) <- rv$depmap_ccle$patient_id
+      # primary cancers
+      rv$ccle_cancers <- unique(rv$depmap_ccle$primary_disease)
       rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
     }
-    update_genes_ui(opt="nil")
   })
   
   rv$projectStatus <- "selected"
@@ -157,8 +173,22 @@ observeEvent(input$confirm_project,{
 })
 
 ## reset project
+clear_loaded_genes <- function(){
+  # update genes placeholder
+  lapply(1:rv$variable_n, function(x){
+    g_ui_id <- paste0("g_",x)
+    updateSelectizeInput(
+      session,
+      g_ui_id
+      ,choices=c()
+      ,options = list(
+        placeholder = g_placeholder()
+      )
+    )
+  })
+}
 observeEvent(input$reset_project,{
-  rv$project <- ""
+  rv$project <- ""; rv$tcga <- T; rv$depmap <- F; rv$target <- F; rv$ccleStatus1 <- "none"
   rv[["cox_1"]] <- NULL
   clear_rds()
   shinyjs::enable("project")
@@ -170,23 +200,29 @@ observeEvent(input$reset_project,{
     selected = ""
   )
   
-  # update genes placeholder
-  lapply(1:rv$variable_n, function(x){
-    g_ui_id <- paste0("g_",x)
-    updateSelectizeInput(
-      session,
-      g_ui_id
-      ,choices=c()
-      ,options = list(
-        placeholder = g_placeholder
-      )
-    )
-  })
+  clear_loaded_genes()
 })
 
 #======================================================================#
 ####                          STEP 1. parameters                   ####
 #======================================================================#
+retrieve_genes_total <- function(){
+  lapply(1:rv$variable_n, function(x){
+    rv[[paste0("genes",x)]] <- retrieve_genes(x)
+    g_ui_id <- paste0("g_",x)
+    
+    updateSelectizeInput(
+      session,
+      g_ui_id,
+      choices = rv[[paste0("genes",x)]]
+      ,selected = rv[[g_ui_id]]
+      ,server = TRUE
+      ,options = list(
+        placeholder = 'Type to search ...'
+      )
+    )
+  })
+}
 # ----- 1.1. detect and organize user inputs -------
 # capping maximum # of analysis at 2
 observeEvent(input$variable_n,{
@@ -217,22 +253,8 @@ observeEvent(input$variable_n,{
   }else{
     withProgress(value = 1, message = "Loading parameters ...",{
       load()
-      if(rv$project != ""){
-        lapply(1:rv$variable_n, function(x){
-          rv[[paste0("genes",x)]] <- retrieve_genes(x)
-          g_ui_id <- paste0("g_",x)
-          
-          updateSelectizeInput(
-            session,
-            g_ui_id,
-            choices = rv[[paste0("genes",x)]]
-            ,selected = rv[[g_ui_id]]
-            ,server = TRUE
-            ,options = list(
-              placeholder = 'Type to search ...'
-            )
-          )
-        })
+      if(grepl("TCGA|TARGET",rv[["project"]][1]) | (grepl("DepMap",rv[["project"]][1]) & rv$depmap_gene != "")){
+        retrieve_genes_total()
       }
     })
   }
@@ -733,7 +755,186 @@ output$tcga_warning <- renderUI({
   )
 })
 
-# ----- 1.4. confirm to start analysis -------
+# ----- 1.4a. DepMap UI ------
+output$depmap_pars <- renderUI({
+  req(rv$depmap)
+
+  div(
+    column(
+      3,
+      pickerInput(
+        "ccle_cancer_types",
+        HTML(paste0("i. Select cancer type(s) to study:",add_help("ccle_cancer_types_q"))),
+        choices = rv$ccle_cancers
+        ,selected = rv[["ccle_cancer_types"]]
+        ,options = list(
+          `actions-box` = TRUE,
+          size = 10,
+          style = "btn-default",
+          `selected-text-format` = "count > 2"
+          ,`live-search` = TRUE
+        ),
+        multiple = TRUE
+      )
+      ,bsTooltip("ccle_cancer_types_q",HTML(paste0(
+        "If DepMap, select a cancer type of interest. Multiple selections are allowed."
+      )),placement = "top")
+    )
+    ,uiOutput("ui_ccle_subtypes")
+  )
+})
+
+# cancer subtypes
+observeEvent(input$ccle_cancer_types,{rv$ccle_cancer_types <- input$ccle_cancer_types})
+output$ui_ccle_subtypes <- renderUI({
+  req(!is.null(input$ccle_cancer_types))
+  subtypes <- rv$depmap_ccle %>% dplyr::filter(primary_disease %in% rv$ccle_cancer_types) %>%
+    .[["Subtype"]] %>% unique()
+  div(
+    column(
+      3,
+      pickerInput(
+        "ccle_cancer_subtypes",
+        HTML(paste0("ii. (Optional) subtypes to study:",add_help("ccle_cancer_subtypes_q"))),
+        choices = subtypes
+        ,selected = subtypes
+        ,options = list(
+          `actions-box` = TRUE,
+          size = 10,
+          style = "btn-default",
+          `selected-text-format` = "count > 2"
+          ,`live-search` = TRUE
+        ),
+        multiple = TRUE
+      )
+      ,bsTooltip("ccle_cancer_subtypes_q",HTML(paste0(
+        "Select cancer subtypes. Default: all. Multiple selections are allowed."
+      )),placement = "top")
+    )
+    ,uiOutput("ui_cells")
+  )
+})
+
+# CCLE cell lines
+observeEvent(input$ccle_cancer_subtypes,{rv$ccle_cancer_subtypes <- input$ccle_cancer_subtypes})
+output$ui_cells <- renderUI({
+  req(!is.null(input$ccle_cancer_subtypes))
+  cells <- rv$depmap_ccle %>% dplyr::filter(primary_disease %in% rv$ccle_cancer_types) %>%
+    dplyr::filter(Subtype %in% rv$ccle_cancer_subtypes)
+  cells_names <- cells[["CCLE_Name"]]
+  cells <- cells[["patient_id"]]
+  names(cells) <- cells_names
+  
+  div(
+    column(
+      3,
+      pickerInput(
+        "ccle_cells",
+        HTML(paste0("iii. (Optional) cell lines:",add_help("ccle_cells_q"))),
+        choices = cells
+        ,selected = cells
+        ,options = list(
+          `actions-box` = TRUE,
+          size = 10,
+          style = "btn-default",
+          `selected-text-format` = "count > 1"
+          ,`live-search` = TRUE
+        ),
+        multiple = TRUE
+      )
+      ,bsTooltip("ccle_cells_q",HTML(paste0(
+        "Select cell lines to analyze. Click confirmation button to the right to load data."
+      )),placement = "top")
+    )
+    ,uiOutput("ui_ccle_gene")
+  )
+})
+
+# DepMap gene/drug selection
+output$ui_ccle_gene <- renderUI({
+  req(!is.null(input$ccle_cells))
+  div(
+    column(
+      3,
+      selectizeInput(
+        "depmap_gene",
+        HTML(paste0("iv. Select a ",agene(),":",add_help("depmap_gene_q"))),
+        choices = c()
+        ,width = "100%"
+        ,options = list(
+          `live-search` = TRUE,
+          placeholder = "Type to search ..."
+          ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+        )
+      )
+      ,bsTooltip("depmap_gene_q",HTML(paste0("To start, select ",depmap_gene_help())),placement = "top")
+    )
+    # ,conditionalPanel(
+    #   'input.depmap_gene != ""',
+    #   column(
+    #     2,
+    #     actionBttn(
+    #       "confirm_ccle",strong("Load data!")
+    #       ,block = T,style = "simple",color = "warning",size="sm"
+    #     )
+    #     ,tags$style(type='text/css', "#confirm_ccle { margin-top: 24.2px; height: 33.5px;}")
+    #   )
+    # )
+  )
+})
+
+# update available DepMap genes/drugs for selection
+observeEvent(input$ccle_cells,{
+  updateSelectizeInput(
+    session,"depmap_gene",choices = rv$depmap_genes, server = T, selected = ""
+  )
+})
+
+# ----- 1.4b. DepMap data processing ------
+observeEvent(input$depmap_gene,{
+  rv$depmap_gene <- input$depmap_gene
+  if(input$depmap_gene == ""){clear_loaded_genes()}
+  req(input$depmap_gene != "")
+  
+  withProgress(value = 1, message = "Loading data ...",{
+    # error if too few cell lines
+    error <- 0
+    if(length(input$ccle_cells) < 20){
+      shinyalert(paste0("Please select at least 20 cell lines to proceed."))
+      error <- 1
+    }
+    req(error == 0)
+    
+    # check if input gene has enough data
+    error <- 0
+    gene <- input$depmap_gene
+    df_gene_scale <- fread(rv$depmap_path, sep = ",", select = c("patient_id",gene)) %>%
+      dplyr::filter(patient_id %in% input$ccle_cells)
+    df_gene_scale[[gene]] <- (df_gene_scale[[gene]] - mean(df_gene_scale[[gene]])) / sd(df_gene_scale[[gene]])
+    df_gene_scale <- df_gene_scale %>% dplyr::filter(!is.na(gene))
+    genes_len <- nrow(df_gene_scale)
+    if(genes_len < 20){
+      shinyalert(paste0(gene," only has ",genes_len," data points in the selected cell lines."
+                        ," At least 20 are needed. Please select another ",agene()," or adjust cell line choices"))
+      error <- 1
+    }
+    req(error == 0)
+    
+    # retrieves molecular data
+    retrieve_genes_total()
+    
+    # update depmap RVs
+    df_survival_o <- left_join(df_gene_scale, rv$depmap_ccle, by="patient_id") %>%
+      dplyr::select(-c(CCLE_Name, primary_or_metastasis, primary_disease, Subtype))
+    colnames(df_survival_o) <- c("patient_id","dependency","gender")
+    df_survival_o[["dependency"]] <- ifelse(is.na(df_survival_o[["dependency"]]),NA,2^df_survival_o[["dependency"]])
+    rv$df_survival_o <- df_survival_o
+    rv$ccle_cells <- input$ccle_cells
+  })
+})
+
+
+# ----- 1.5. confirm to start analysis -------
 # the confirm button
 output$ui_parameters_confirm <- renderUI({
   column(

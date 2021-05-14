@@ -83,53 +83,57 @@ observeEvent(input$confirm,{
         }
         req(tcga_error == 0)
       }
-      # re-calculate survival days if censored by time
-      if(input$censor_time_ymd != "none"){
-        c_time <- ifelse_rv_na("censor_time")
-        # calculate censoring time in days
-        nnn <- c_time * ymd_unit[[input$censor_time_ymd]]
-        # if time record larger than censoring time, convert status to 0
-        rv[["df_survival"]][["censoring_status"]] <- ifelse(
-          rv[["df_survival"]][["survival_days"]] > nnn,
-          0,
-          rv[["df_survival"]][["censoring_status"]]
+      if(!rv$depmap){
+        # re-calculate survival days if censored by time
+        if(input$censor_time_ymd != "none"){
+          c_time <- ifelse_rv_na("censor_time")
+          # calculate censoring time in days
+          nnn <- c_time * ymd_unit[[input$censor_time_ymd]]
+          # if time record larger than censoring time, convert status to 0
+          rv[["df_survival"]][["censoring_status"]] <- ifelse(
+            rv[["df_survival"]][["survival_days"]] > nnn,
+            0,
+            rv[["df_survival"]][["censoring_status"]]
+          )
+          # if time record larger than censoring time, convert to the time cap
+          rv[["df_survival"]][["survival_days"]] <- ifelse(
+            rv[["df_survival"]][["survival_days"]] > nnn,
+            nnn,
+            rv[["df_survival"]][["survival_days"]]
+          )
+          # mark down as time censored
+          rv$censor_time_p <- sprintf(", %s-%s survival",c_time, gsub("s$","",tolower(vector_names(input$censor_time_ymd,ymd_names))))
+        }else{
+          rv$censor_time_p <- ""
+        }
+        # error on censor time UI
+        error_censor <- 0
+        if(is.na(input$censor_time)){
+          error_censor <- 1
+          shinyalert("Please enter a valid censoring time.")
+        }else if(input$censor_time < rv$censor_time_min){
+          error_censor <- 1
+          ymd_name <- vector_names(input$censor_time_ymd,ymd_names)
+          shinyalert(paste0("Please enter a longer censoring time. Minimum: ",rv$censor_time_min," ",ymd_name,"."
+                            ," Updated to default/previous entry: ",rv$censor_time," ",ymd_name,"."))
+        }else if(input$censor_time > rv$censor_time_max){
+          error_censor <- 1
+          ymd_name <- vector_names(input$censor_time_ymd,ymd_names)
+          shinyalert(paste0("Please enter a shorter censoring time. Maximum: ",rv$censor_time_max," ",ymd_name,"."
+                            ," Updated to default/previous entry: ",rv$censor_time," ",ymd_name,"."))
+        }else{
+          rv$censor_time <- input$censor_time
+          rv[[paste0("censor_time_",input$censor_time_ymd)]] <- input$censor_time
+        }
+        updateNumericInput(
+          session,"censor_time", NULL,
+          value = rv$censor_time
         )
-        # if time record larger than censoring time, convert to the time cap
-        rv[["df_survival"]][["survival_days"]] <- ifelse(
-          rv[["df_survival"]][["survival_days"]] > nnn,
-          nnn,
-          rv[["df_survival"]][["survival_days"]]
-        )
-        # mark down as time censored
-        rv$censor_time_p <- sprintf(", %s-%s survival",c_time, gsub("s$","",tolower(vector_names(input$censor_time_ymd,ymd_names))))
+        req(error_censor == 0)
       }else{
-        rv$censor_time_p <- ""
+        rv$censor_time_p <- sprintf(": %s",rv$depmap_gene)
       }
-      # error on censor time UI
-      error_censor <- 0
-      if(is.na(input$censor_time)){
-        error_censor <- 1
-        shinyalert("Please enter a valid censoring time.")
-      }else if(input$censor_time < rv$censor_time_min){
-        error_censor <- 1
-        ymd_name <- vector_names(input$censor_time_ymd,ymd_names)
-        shinyalert(paste0("Please enter a longer censoring time. Minimum: ",rv$censor_time_min," ",ymd_name,"."
-                          ," Updated to default/previous entry: ",rv$censor_time," ",ymd_name,"."))
-      }else if(input$censor_time > rv$censor_time_max){
-        error_censor <- 1
-        ymd_name <- vector_names(input$censor_time_ymd,ymd_names)
-        shinyalert(paste0("Please enter a shorter censoring time. Maximum: ",rv$censor_time_max," ",ymd_name,"."
-                          ," Updated to default/previous entry: ",rv$censor_time," ",ymd_name,"."))
-      }else{
-        rv$censor_time <- input$censor_time
-        rv[[paste0("censor_time_",input$censor_time_ymd)]] <- input$censor_time
-      }
-      updateNumericInput(
-        session,"censor_time", NULL,
-        value = rv$censor_time
-      )
-      req(error_censor == 0)
-      
+
       # begin analysis after error checking
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
@@ -284,6 +288,7 @@ observeEvent(input$confirm,{
           # perform survival analysis
           cox_id <- paste0("cox_",x)
           rv[[cox_id]] <- cal_surv_rna(df,1)
+          # saveRDS(rv[[cox_id]], "cox_dm")
           
           # save data type to rv
           rv[[paste0("data_type_",x)]] <- extract_mode
@@ -317,7 +322,8 @@ observeEvent(input$confirm,{
       # ------------- 3F. perform n=1 gender interaction Surv ---------
       if(rv$variable_n == 1){
         # generate interaction df
-        df_combined <- df_list[[1]] %>% inner_join(dplyr::select(rv$df_survival, patient_id, gender), by = "patient_id")
+        df_combined <- df_list[[1]] %>% inner_join(dplyr::select(rv$df_survival, patient_id, gender), by = "patient_id") %>%
+          dplyr::filter(gender != "Unknown")
         
         # gender types
         rv$scatter_gender <- rv[["genders"]] <- df_combined %>% dplyr::select(gender) %>% unique(.) %>% unlist(.) %>% unname(.)

@@ -51,9 +51,6 @@ surv_methods <- c("Cox proportional-hazards (PH) model"="cox", "Kaplan-Meier (KM
 data_types_gs <- c("Gene set"="lib",
                    "Gene set (manual)"="manual")
 
-# ------- placeholder for gene search field ----------
-g_placeholder <- "On top left, select a project(s) and click the confirmation button to load genes ..."
-
 # ------- algorithms for somatic variant calling, e.g. mutect -----------
 snv_algorithms <- list(
   "MuTect" = "mutect"

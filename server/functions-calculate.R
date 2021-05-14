@@ -37,9 +37,11 @@ extract_gene_data <- function(x, type){
     
     # selected gene
     genes <- input[[g_ui_id]]
-    # extract ENSG info
-    genes <- strsplit(genes,"\\|")[[1]]
-    if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
+    if(!rv$depmap){
+      # extract ENSG info
+      genes <- strsplit(genes,"\\|")[[1]]
+      if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
+    }
   }else if(type == "snv"){
     # selected gene
     genes <- input[[g_ui_id]]
@@ -148,6 +150,36 @@ generate_surv_df <- function(df, patient_ids, exp, q){
 }
 
 # generate survival df for analysis
+surv_cox <- function(df, mode=1){
+  if(rv$depmap){
+    if(mode == 1){
+      coxph(Surv(dependency) ~ level, data = df)
+    }else if(mode == 2){
+      coxph(Surv(dependency) ~ level.x * level.y, data = df)
+    }
+  }else{
+    if(mode == 1){
+      coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+    }else if(mode == 2){
+      coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+    }
+  }
+}
+surv_km <- function(df, mode=1){
+  if(rv$depmap){
+    if(mode == 1){
+      survfit(Surv(dependency) ~ level, data = df)
+    }else if(mode == 2){
+      survfit(Surv(dependency) ~ level.x * level.y, data = df)
+    }
+  }else{
+    if(mode == 1){
+      survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+    }else if(mode == 2){
+      survfit(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+    }
+  }
+}
 get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
@@ -168,14 +200,14 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
 
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s)
-
+  
   for(i in seq_along(quantiles)){
     q <- quantiles[i]
     df <- generate_surv_df(df_o, patient_ids, exp, q)
 
     # # test if there is significant difference between high and low level genes
     # if(rv$cox_km == "cox"){
-      surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      surv_diff <- surv_cox(df)
       p_diff <- coef(summary(surv_diff))[,5]
     # }else if(rv$cox_km == "km"){
     #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
@@ -301,7 +333,7 @@ get_info_most_significant_cnv <- function(data, mode){
       
       # # test if there is significant difference between high and low level genes
       # if(rv$cox_km == "cox"){
-      surv_diff <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      surv_diff <- surv_cox(df)
       p_diff <- summary(surv_diff)$logtest[3] #coef(summary(surv_diff))[,5]
       # }else if(rv$cox_km == "km"){
       #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
@@ -347,20 +379,28 @@ cal_surv_rna <-
   ){
     # # 1. KM # #
     # summary statistics
-    km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+    if(rv$depmap){
+      km.stats <- survdiff(Surv(dependency) ~ level, data = df)
+    }else{
+      km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+    }
     p.km <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
     
     # run KM
-    km.fit <- survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+    km.fit <- surv_km(df)
     
     # # 2. Cox # #
     if(n == 1){
       # run Cox regression
-      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      cox_fit <- surv_cox(df)
       # summary statistics
       cox.stats <- summary(cox_fit)
     }else if(n == 2){
-      km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+      if(rv$depmap){
+        km2 <- try(pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = p.adjust.method))
+      }else{
+        km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+      }
       if(inherits(km2, "try-error")) {
         rv$try_error <- rv$try_error + 1
         shinyalert(paste0("The selected two genes/loci have exactly the same data."
@@ -372,11 +412,11 @@ cal_surv_rna <-
       km.stats <- list(km.stats,km2)
 
       # run Cox regression
-      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+      cox_fit <- surv_cox(df, mode=2)
       # summary statistics
       cox.stats <- summary(cox_fit)
       # run Cox regression for visualization purpose
-      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+      cox_fit <- surv_cox(df)
     }
 
     hr.cox <- sapply(cox.stats$coefficients[,2], function(x){
@@ -441,14 +481,19 @@ plot_surv <-
       surv.median.line=rv$median
     }
     
-    # x-axis time intervals
-    if(rv$ymd == "d"){
-      xscale <- 1; xlab <- "Days"; breaktime <- NULL
-    }else if(rv$ymd == "m"){
-      xscale <- "d_m"; xlab <- "Months"; breaktime <- 608.75 # 30.4375 * 20 = 365.25
-    }else if(rv$ymd == "y"){
-      xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25
+    if(!rv$depmap){
+      # x-axis time intervals
+      if(rv$ymd == "d"){
+        xscale <- 1; xlab <- "Days"; breaktime <- NULL
+      }else if(rv$ymd == "m"){
+        xscale <- "d_m"; xlab <- "Months"; breaktime <- 608.75 # 30.4375 * 20 = 365.25
+      }else if(rv$ymd == "y"){
+        xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25
+      }
+    }else{
+      xscale <- 1; xlab <- "Log2-transformed dependency score"; breaktime <- NULL
     }
+    
     
     if(mode == "km"){
       fig <- ggsurvplot(fit, data=df, 

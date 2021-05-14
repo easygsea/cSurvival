@@ -13,3 +13,13 @@ projects_cats <- unique(projects_cat)
 projects <- projects_cats %>% lapply(., function(x){
   id <- x == projects_cat; prs <- projects_abbr[id]; return(prs) })
 names(projects) <- projects_cats
+
+projects[["DepMap"]][["DepMap-CRISPR: Chronos CRISPR Data"]] <- "DepMap-CRISPR"
+projects[["DepMap"]][["DepMap-Drug: Drug sensitivity"]] <- "DepMap-Drug"
+projects[["DepMap"]][["DepMap-RNAi: RNAi screening"]] <- "DepMap-RNAi"
+
+projects <- sort_list(projects)
+
+# ------- CCLE basic info --------
+df_ccle <- fread(paste0(getwd(),"/project_data/DepMap/ccle.csv"), select = c("patient_id","CCLE_Name","gender","primary_or_metastasis","primary_disease","Subtype"))
+

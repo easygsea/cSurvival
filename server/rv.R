@@ -5,6 +5,7 @@ rv <- reactiveValues(
   
   projectStatus="none", project="", max_project_n=3, try_error=0
   ,tcga=T,target=T,depmap=F
+  ,ccleStatus1="none",ccle_cancer_types="",ccle_cancer_subtypes="",depmap_gene=""
   
   ,variable_n_reached=0
   ,variable_n = 1

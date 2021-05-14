@@ -644,7 +644,11 @@ observeEvent(input$km_mul,{
   df <- rv[[paste0("df_",rv$plot_type)]]
   
   # update statistics
-  km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
+  if(rv$depmap){
+    km2 <- pairwise_survdiff(Surv(dependency, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
+  }else{
+    km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
+  }
   rv[["res"]][[rv$cox_km]][["stats"]][[2]] <- km2
   
 },ignoreInit = T)
@@ -656,13 +660,22 @@ output$scatter_plot <- renderPlotly({
       # retrieve survival data
       if(typeof(rv[["df_gender"]]) == "list"){
         req(length(rv$scatter_gender) > 0)
-        df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,survival_days,level.y) %>%
-          dplyr::filter(level.y %in% rv$scatter_gender) 
+        if(rv$depmap){
+          df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,dependency,level.y) %>%
+            dplyr::filter(level.y %in% rv$scatter_gender)
+        }else{
+          df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,survival_days,level.y) %>%
+            dplyr::filter(level.y %in% rv$scatter_gender)
+        }
         genders <- df_survival$`level.y`
         df_survival <- df_survival %>%
           dplyr::select(-level.y)
       }else{
-        df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
+        if(rv$depmap){
+          df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,dependency)
+        }else{
+          df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
+        }
       }
       
       df <- rv[["exprs_1"]]
@@ -694,12 +707,26 @@ output$scatter_plot <- renderPlotly({
         }
       }
       
+      if(rv$depmap){
+        ltitle <- "Dependency score"
+      }else{
+        ltitle <- "Survival days"
+      }
       if(rv$scatter_log_x){
-        df_x <- log2(df$survival_days+1)
-        xlab <- "Log2 (survival days + 1)"
+        if(rv$depmap){
+          df_x <- 2 ^ df$survival_days
+          xlab <- "2 ^ Dependency score"
+        }else{
+          df_x <- log2(df$survival_days+1)
+          xlab <- "Log2 (survival days + 1)"
+        }
       }else{
         df_x <- df$survival_days
-        xlab <- "Survival days"
+        if(rv$depmap){
+          xlab <- ltitle
+        }else{
+          xlab <- ltitle
+        }
       }
       
       # calculate correlation
@@ -709,7 +736,7 @@ output$scatter_plot <- renderPlotly({
       if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
         df_x <- rank(df_x,ties.method = "first")
         df_y <- rank(df_y,ties.method = "first")
-        xlab <- "Ranks in survival days"; ylab <- paste0("Ranks in ",exp_unit)
+        xlab <- paste0("Ranks in ",tolower(ltitle)); ylab <- paste0("Ranks in ",exp_unit)
       }
       
       # draw the figure
@@ -718,7 +745,7 @@ output$scatter_plot <- renderPlotly({
                       ,aes(x=df_x, y=df_y
                            ,text=paste0(
                              "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                             "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                             ltitle,": <b>",.data[["survival_days"]],"</b>\n",
                              exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +
@@ -739,7 +766,7 @@ output$scatter_plot <- renderPlotly({
                       ,aes(x=df_x, y=df_y
                            ,text=paste0(
                              "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                             "Survival days: <b>",.data[["survival_days"]],"</b>\n",
+                             ltitle,": <b>",.data[["survival_days"]],"</b>\n",
                              exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +

@@ -167,6 +167,10 @@ vector_names <- function(x, vector){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# function to remove all na per column
+not_all_na <- function(x) any(!is.na(x))
+# function to remove all na per column
+not_any_na <- function(x) all(!is.na(x))
 # paste without NA
 paste_na <- function(...,sep="\\|") {
   L <- list(...)

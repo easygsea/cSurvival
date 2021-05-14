@@ -74,9 +74,11 @@ bodyOne <- tabItem(tabName = "one",
               )
             ,br()
             
-            # TCGA only disease-free survival and progression-free survival
             ,fluidRow(
+              # TCGA only disease-free survival and progression-free survival
               uiOutput("tcga_pars")
+              # DepMap only cell line selection
+              ,uiOutput("depmap_pars")
             )
             
             # control widgets for individual analysis
