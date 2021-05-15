@@ -45,7 +45,7 @@ input_mode_names <- c(
 )
 
 # ------- survival analysis methods ---------
-surv_methods <- c("Cox proportional-hazards (PH) model"="cox", "Kaplan-Meier (KM) log rank"="km")
+surv_methods <- c("Kaplan-Meier (KM) log rank"="km","Cox proportional-hazards (PH) model"="cox")
 
 # ------- gene set data types, library or manual -------
 data_types_gs <- c("Gene set"="lib",
