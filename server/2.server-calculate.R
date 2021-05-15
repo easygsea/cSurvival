@@ -57,6 +57,12 @@ observeEvent(input$confirm,{
     
     req(is.null(error_g) & is.null(error_lib) & is.null(error_manual) & is.null(error_gs))
     
+    error_depmap <- 0
+    if(input$depmap_gene == ""){
+      shinyalert(paste0("Please select a ",agene()," in iv. Select a ",agene()," to load data."))
+      error_depmap <- 1
+    }
+    req(error_depmap == 0)
     #------ 2. begin analysis ------
     withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
       # update survival df

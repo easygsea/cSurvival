@@ -495,7 +495,7 @@ plot_surv <-
         xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25
       }
     }else{
-      xscale <- 1; xlab <- "Log2-transformed dependency score"; breaktime <- NULL
+      xscale <- 1; xlab <- "Exponential of dependency score"; breaktime <- NULL
     }
     
     
