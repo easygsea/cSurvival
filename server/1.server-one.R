@@ -134,10 +134,10 @@ observeEvent(input$confirm_project,{
       rv$indir <- paste0(getwd(),"/project_data/DepMap/")
       rv$depmap_path <- paste0(rv$indir,project,".csv")
       # the genes for initial selection
-      rv$depmap_genes <- fread(rv$depmap_path, sep = ",", nrows = 0)
+      rv$depmap_genes <- fread(rv$depmap_path, sep = ",", nrows = 0, quote="")
       rv$depmap_genes <- colnames(rv$depmap_genes)[-1]
       # available cell lines
-      rv$depmap_ids <- fread(rv$depmap_path, sep = ",", select = "patient_id") %>% .[["patient_id"]]
+      rv$depmap_ids <- fread(rv$depmap_path, sep = ",", select = "patient_id", quote="") %>% .[["patient_id"]]
       rv$depmap_ccle <- df_ccle %>% dplyr::filter(patient_id %in% rv$depmap_ids)
       rv$cell_lines <- rv$depmap_ccle$CCLE_Name
       names(rv$cell_lines) <- rv$depmap_ccle$patient_id
@@ -910,9 +910,15 @@ observeEvent(input$depmap_gene,{
     gene <- input$depmap_gene
     df_gene_scale <- fread(rv$depmap_path, sep = ",", select = c("patient_id",gene)) %>%
       dplyr::filter(patient_id %in% input$ccle_cells)
-    df_gene_scale[[gene]] <- (df_gene_scale[[gene]] - mean(df_gene_scale[[gene]])) / sd(df_gene_scale[[gene]])
-    df_gene_scale <- df_gene_scale %>% dplyr::filter(!is.na(gene))
-    genes_len <- nrow(df_gene_scale)
+    # df_gene_scale[[gene]] <- (df_gene_scale[[gene]] - mean(df_gene_scale[[gene]])) / sd(df_gene_scale[[gene]])
+    # df_gene_scale <- df_gene_scale[!is.na(df_gene_scale[[gene]]),]
+    # update depmap RVs
+    df_survival_o <- left_join(df_gene_scale, rv$depmap_ccle, by="patient_id") %>%
+      dplyr::select(-c(CCLE_Name, primary_or_metastasis, primary_disease, Subtype))
+    colnames(df_survival_o) <- c("patient_id","dependency","gender")
+    df_survival_o <- df_survival_o %>% dplyr::filter(!is.na(dependency))
+    df_survival_o[["dependency"]] <- 2^df_survival_o[["dependency"]]
+    genes_len <- nrow(df_survival_o)
     if(genes_len < 20){
       shinyalert(paste0(gene," only has ",genes_len," data points in the selected cell lines."
                         ," At least 20 are needed. Please select another ",agene()," or adjust cell line choices"))
@@ -922,12 +928,7 @@ observeEvent(input$depmap_gene,{
     
     # retrieves molecular data
     retrieve_genes_total()
-    
-    # update depmap RVs
-    df_survival_o <- left_join(df_gene_scale, rv$depmap_ccle, by="patient_id") %>%
-      dplyr::select(-c(CCLE_Name, primary_or_metastasis, primary_disease, Subtype))
-    colnames(df_survival_o) <- c("patient_id","dependency","gender")
-    df_survival_o[["dependency"]] <- ifelse(is.na(df_survival_o[["dependency"]]),NA,2^df_survival_o[["dependency"]])
+
     rv$df_survival_o <- df_survival_o
     rv$ccle_cells <- input$ccle_cells
   })
