@@ -26,7 +26,7 @@ rv <- reactiveValues(
   
   ,plot_type="all"
   
-  ,cox_km = "cox"
+  ,cox_km = "km"
   ,km_mul = "hommel" # multiple correction method
   ,ymd="y" # default plot survival in months; "d" for days; "m" for months; "y" for years
   ,median = NULL
