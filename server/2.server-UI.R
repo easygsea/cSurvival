@@ -519,25 +519,7 @@ output$ui_stats <- renderUI({
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     h3(stats_title),
-    if(if_surv()){
-      conditionalPanel(
-        '(input.plot_type == "all" | input.plot_type == "gender") & input.cox_km == "km"',
-        selectizeInput(
-          "km_mul",
-          NULL,
-          choices = list(
-            "Multiple comparisons test by Holm (1979)" = "holm"
-            ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
-            ,"Multiple comparisons test by Hommel (1988)" = "hommel"
-            ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
-            ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
-            ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
-            ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
-          )
-          ,selected = rv[["km_mul"]]
-        )
-      )
-    }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+    if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
       selectizeInput(
         "cor_method",
         NULL,
@@ -606,7 +588,36 @@ output$ui_stats <- renderUI({
         ,if(if_surv()){
           column(
             12,
-            renderPrint({print(res[["stats"]])})
+            conditionalPanel(
+              '(input.plot_type == "all" | input.plot_type == "gender") & input.cox_km == "km"',
+              selectizeInput(
+                "km_mul",
+                NULL,
+                choices = list(
+                  "Multiple comparisons test by Holm (1979)" = "holm"
+                  ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
+                  ,"Multiple comparisons test by Hommel (1988)" = "hommel"
+                  ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
+                  ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
+                  ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
+                  ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
+                )
+                ,selected = rv[["km_mul"]]
+              )
+              ,div(
+                align="center",
+                plotlyOutput("km_hm", height="180px", width = "99.5%")
+              )
+              ,br()
+            ), 
+            div(
+              align="left",
+              if(length(res[["stats"]]) == 2){
+                renderPrint({print(res[["stats"]][[1]]); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])})
+              }else{
+                renderPrint({print(res[["stats"]])})
+              }
+            )
           )
         }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
           column(
@@ -634,7 +645,7 @@ output$ui_cutoff <- renderUI({
   )
 })
 
-# ------------- 3. detailed statistics output -------
+# ------------- 3a. pairwise comparison statistics -------
 observeEvent(input$km_mul,{
   req(input$km_mul != "")
   req(input$km_mul != rv$km_mul)
@@ -645,9 +656,44 @@ observeEvent(input$km_mul,{
   
   # update statistics
   km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
-  rv[["res"]][[rv$cox_km]][["stats"]][[2]] <- km2
-  
+  rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
 },ignoreInit = T)
+
+# ----------- 3b. pairwise heatmap ----------
+output$km_hm <- renderPlotly({
+  pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
+  req(is.numeric(pvals))
+  counts <- -log10(pvals)
+  counts[is.na(counts)] <- 0
+  dat <- expand.grid(y = rownames(counts), x = colnames(counts))
+  dat$z <- unlist(as.data.frame(counts),recursive = T)
+  pvals <- unlist(as.data.frame(pvals), recursive = T) %>% format(., scientific = T, digits = 3)
+  req(length(dat$z)>0)
+  
+  fig <- plot_ly() %>%
+    add_trace(data = dat, x = ~x, y = ~y, z = ~z, type = "heatmap",
+              colorscale  = col_scale,zmax = 3,zmin=0,
+              colorbar = list(
+                title = list(text="-log10(P)", side = "right")
+                ,len = 1.2),
+              text = pvals,
+              hovertemplate = paste('<b>%{x}</b> vs <b>%{y}</b><br>',
+                                    'P-value: <b>%{text}</b>'
+              )
+    ) %>% layout(
+      # title = "Pariwise comparisons",
+      xaxis = list(title = paste0("Pariwise comparisons adjusted by ",rv$km_mul), showticklabels = T),
+      yaxis = list(title = "", showticklabels = T)
+      # ,margin = list(l=200)
+    ) %>%
+    add_annotations(x = dat$x, y = dat$y,
+                    text = as.character(pvals), 
+                    showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
+                    ,ax = 20, ay = -20
+    )
+  
+  fig
+})
 
 # ----------- 4[A]. expression-survival days scatter plot ---------------
 output$scatter_plot <- renderPlotly({

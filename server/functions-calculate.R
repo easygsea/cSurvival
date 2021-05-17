@@ -373,7 +373,7 @@ cal_surv_rna <-
       }
       req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
       
-      km.stats <- list(km.stats,km2)
+      km.stats <- list(km2,km.stats)
 
       # run Cox regression
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
