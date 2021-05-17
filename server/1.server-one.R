@@ -30,7 +30,7 @@ output$ui_censortime <- renderUI({
 # the no of time units
 output$ui_censor_time <- renderUI({
   req(input$censor_time_ymd != "none")
-  
+
   numericInput(
     "censor_time", NULL,
     value = rv$censor_time
@@ -77,14 +77,14 @@ observeEvent(input$confirm_project,{
   study <- sapply(project, function(x){
     strsplit(x, "-")[[1]][1]
   }) %>% unique(.)
-  
+
   study_length_check <- length(study) > 1
   if(study_length_check){
     shinyalert(paste0("You have selected projects from: ",paste0(study, collapse = ", "),"."
                       ," Please select projects from the same program."))
   }
   req(!study_length_check)
-  
+
   # check if exceed maximum no of projects
   if(study == "TARGET"){rv$max_project_n <- 3}else{rv$max_project_n <- 1}
   project_length_check <- length(input$project) > rv$max_project_n
@@ -94,14 +94,14 @@ observeEvent(input$confirm_project,{
                       , " Please delete unrelated project(s). Thank you."))
   }
   req(!project_length_check)
-  
+
   # retrieve data
   withProgress(value = 1, message = "Retrieving data from project(s) .... ",{
     rv$project <- input$project
     if(study == "TCGA"){rv$tcga <- T; rv$plot_stype <- vector_names(rv$tcga_stype, tcga_stypes)}else{rv$tcga <- F}
     if(study == "TARGET"){rv$target <- T; rv$plot_stype <- "Overall survival (OS)"}else{rv$target <- F}
     if(study == "DepMap"){rv$depmap <- T; rv$plot_stype <- paste0(gsub("^DepMap-","",project)," dependency")}else{rv$depmap <- F}
-    
+
     if(study != "DepMap"){
       rv$indir <- paste0(getwd(),"/project_data/",project,"/")
       if(rv$tcga){
@@ -146,10 +146,10 @@ observeEvent(input$confirm_project,{
       rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
     }
   })
-  
+
   rv$projectStatus <- "selected"
   shinyjs::disable("project")
-  
+
   # create the modal that display the target project information
   if(rv$target){
     target_project_texts <- ""
@@ -188,18 +188,18 @@ clear_loaded_genes <- function(){
   })
 }
 observeEvent(input$reset_project,{
-  rv$project <- ""; rv$tcga <- T; rv$depmap <- F; rv$target <- F; rv$ccleStatus1 <- "none"
+  rv$project <- ""; rv$tcga <- T; rv$depmap <- F; rv$target <- F
   rv[["cox_1"]] <- NULL
   clear_rds()
   shinyjs::enable("project")
   rv$projectStatus <- "none"
-  
+
   updateSelectizeInput(
     session,
     "project",
     selected = ""
   )
-  
+
   clear_loaded_genes()
 })
 
@@ -210,7 +210,7 @@ retrieve_genes_total <- function(){
   lapply(1:rv$variable_n, function(x){
     rv[[paste0("genes",x)]] <- retrieve_genes(x)
     g_ui_id <- paste0("g_",x)
-    
+
     updateSelectizeInput(
       session,
       g_ui_id,
@@ -233,9 +233,9 @@ observeEvent(input$variable_n,{
       shinyalert("We currently support interaction analysis up to two variables.")
       n <- 2
     }
-    
+
     rv$variable_n <- n
-    
+
     if(is.null(rv[[paste0("cat_",rv$variable_n)]])){
       init_rv(rv$variable_n)
     }
@@ -247,7 +247,7 @@ observeEvent(input$variable_n,{
     update_all()
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
   }
-  
+
   if(rv$variable_n_reached==0){
     load()
   }else{
@@ -286,7 +286,7 @@ observeEvent(gmt_input_lst(),{
       if(rv[[gs_db_id]] != input[[gs_db_id]]){
         # extract GS data
         update_gs_by_db(x)
-        
+
         # update searchInput
         gs_gene_id <- paste0("gs_lg_",x)
         updateSearchInput(
@@ -294,7 +294,7 @@ observeEvent(gmt_input_lst(),{
           gs_gene_id,
           value = ""
         )
-        
+
         # update verttext
         gs_gene_genes_id <- paste0("gs_lgg_",x)
         output[[gs_gene_genes_id]] <- NULL
@@ -319,21 +319,21 @@ observeEvent(lib_input_lst(),{
   lapply(array, function(x){
     gs_lib_id <- paste0("gs_l_",x)
     gs_lib_genes_id <- paste0("gs_lgs_",x)
-    
+
     if(!is.na(input[[gs_lib_id]])){
       gs <- rv[[gs_lib_id]] <- input[[gs_lib_id]]
-      
+
       if(!is.null(gs) & gs != ""){
         genes <- rv[[paste0("gmts",x)]][[gs]]
         rv[[paste0("gs_genes_",x)]] <- genes
-        
+
         output[[gs_lib_genes_id]] <- renderText({
           paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
         })
       }
-      
+
     }
-    
+
   })
 }, ignoreInit = T)
 
@@ -364,36 +364,36 @@ observeEvent(lg_input_btn_lst(),{
       # saveRDS(input[[lgg_btn_id]], file = paste0(getwd(),"/inc/btn0.rds"))
       if(rv[[lgg_btn_id]] < input[[lgg_btn_id]][1]){
         rv[[lgg_btn_id]] <- input[[lgg_btn_id]][1]
-        
+
         # the user-supplied GS-filtering genes
         lgg_id <- paste0("gs_lg_",x)
         lgg <- rv[[lgg_id]] <- input[[lgg_id]]
-        
+
         # check if input is empty
         if(lgg == ""){
           #   shinyalert("Please enter a valid gene.")
           update_gs_by_db(x)
         }else{
           # proceed only rv not equal to input
-          
+
           # check if valid entry
           genes <- toupper(lgg) %>% gsub(" ","",.) %>% str_split(.,"&") %>% .[[1]] %>% unique()
           no_genes <- sapply(genes, function(x){
             str_split(x,"\\|") %>% .[[1]]
           }) %>% unlist(.) %>% length(.)
-          
+
           if(genes == ""){
             shinyalert("Please enter valid gene(s).")
           }
-          
+
           if(no_genes > 10){
             shinyalert("We support evaluation up to 10 genes. Please delete less important genes wherever appropriate.")
           }
-          
+
           if(genes != "" & no_genes < 11){
             # retrive gmt data
             gmts <- rv[[paste0("gmts",x)]]
-            
+
             filtered_gmts <- lapply(seq_along(gmts), function(i) {
               gmt <- gmts[i]
               gs <- names(gmt)
@@ -410,28 +410,28 @@ observeEvent(lg_input_btn_lst(),{
                   count <- count + 1
                 }
               }
-              
+
               if(!(count < length(genes))){
                 return(gmt)
               }
             })
-            
+
             filtered_gmts[sapply(filtered_gmts, is.null)] <- NULL
             filtered_gmts <- unlist(filtered_gmts, recursive = F)
-            
+
             if(length(filtered_gmts) == 0){
               shinyalert(sprintf("Analysis #%s: Unable to detect the entered gene combination in the selected database. Try another database or another gene combination, or double check if your input follows the right format.",x))
             }
-            
+
             gmt_length <-  length(filtered_gmts)
             if(gmt_length > 0){
               rv[[paste0("gmts_tmp",x)]] <- filtered_gmts
               rv[[paste0("gs_lgg_",x)]] <- paste0("Filtered by: ", paste0(genes, collapse = " "))
-              
+
               gs_db_id <- paste0("gs_l_",x)
-              
+
               rv[[paste0("gs_placeholder",x)]] <- sprintf('(Filtered n=%s) Type to search ...',gmt_length)
-              
+
               # update gene set UI
               updateSelectizeInput(
                 session,
@@ -444,11 +444,11 @@ observeEvent(lg_input_btn_lst(),{
                   ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
                 )
               )
-              
+
               output[[paste0("gs_lgg_",x)]] <- renderText({
                 rv[[paste0("gs_lgg_",x)]]
               })
-              
+
               # output[[paste0("gs_lgg_",x,"_tag")]] <- renderUI({
               #   tags$head(tags$style(
               #     paste0("#gs_lgg_",x,"{",rv$verbTxtStyle1,"}")
@@ -502,17 +502,17 @@ observeEvent(manual_lst(),{
   withProgress(value = 1, message = "Processing input genes ...",{
     lapply(array, function(x){
       add_btn_id <- paste0("add_btn_",x)
-      
+
       if(rv[[add_btn_id]] < input[[add_btn_id]][1]){
         # update the Submit button value
         rv[[add_btn_id]] <- input[[add_btn_id]][1]
         # read in the gene list
         gs_manual_id <- paste0("gs_m_",x)
         gs_genes_id <- paste0("gs_mg_",x)
-        
-        
+
+
         e_msg <- paste0("Please input a valid gene list in Analysis #",x)
-        
+
         if(input[[gs_manual_id]] == ""){
           shinyalert(e_msg)
         }else{
@@ -525,7 +525,7 @@ observeEvent(manual_lst(),{
             genelist = unlist(strsplit(genelist,"\t"))
             genelist = unlist(strsplit(genelist," "))
             genelist = unique(genelist) %>% toupper(.)
-            
+
             if(length(genelist) == 1 & genelist==""){
               shinyalert(e_msg)
             }else if(length(genelist)>100){
@@ -566,11 +566,11 @@ observeEvent(manual_lst(),{
       }else if(rv[[snv_id]] != input[[snv_id]]){
         snv_diff <- 1
       }
-      
+
       if(snv_diff == 1){
         # update SNV calling method stored in RV
         rv[[snv_id]] <- input[[snv_id]]
-        
+
         # update loaded genes
         update_genes_ui()
       }
@@ -631,7 +631,7 @@ observeEvent(input$toall,{
     }else{
       updateSliderInput(session, paste0("clow_",x), value = input[["clow_1"]])
     }
-    
+
   })
 })
 
@@ -647,7 +647,7 @@ observeEvent(input$toall_m,{
 # ----- 1.3. TCGA OS, DFI, PFI, DSS -------
 output$tcga_pars <- renderUI({
   req(rv$tcga)
-  
+
   # check if certain outcomes available for selected TCGA project
   if(rv$project != ""){
     code <- rv$tcga_code <- tcga_codes %>% dplyr::filter(type == rv$project) %>% dplyr::select(-type)
@@ -661,7 +661,7 @@ output$tcga_pars <- renderUI({
   }
   tcga_stypess <- tcga_stypes[cords]
   if(!rv$tcga_stype %in% tcga_stypess){rv$tcga_stype <- tcga_stypess[1]}
-  
+
   # choice names
   if(rv$project != ""){
     tcga_stypess_names <- sapply(cords, function(x){
@@ -673,7 +673,7 @@ output$tcga_pars <- renderUI({
   }else{
     tcga_stypess_names <- names(tcga_stypess)
   }
-  
+
   # render the UI
   column(
     12, align="center",
@@ -732,7 +732,7 @@ output$tcga_warning <- renderUI({
   }else if(code == "caution"){
     s_msg <- " should be <b>used with caution</b>"
   }
-  
+
   # assemble msg
   msg <- paste0(rv$plot_stype,s_msg," for ",rv$project)
   if(green == 0){
@@ -742,7 +742,7 @@ output$tcga_warning <- renderUI({
       msg <- paste0(msg,". Note: ",rv$project," ",rv$tcga_msg)
     }
   }
-  
+
   # render msg
   div(
     p(
@@ -824,7 +824,7 @@ output$ui_cells <- renderUI({
   cells_names <- cells[["CCLE_Name"]]
   cells <- cells[["patient_id"]]
   names(cells) <- cells_names
-  
+
   div(
     column(
       3,
@@ -895,7 +895,7 @@ observeEvent(input$depmap_gene,{
   rv$depmap_gene <- input$depmap_gene
   if(input$depmap_gene == ""){clear_loaded_genes()}
   req(input$depmap_gene != "")
-  
+
   withProgress(value = 1, message = "Loading data ...",{
     # error if too few cell lines
     error <- 0
@@ -904,7 +904,7 @@ observeEvent(input$depmap_gene,{
       error <- 1
     }
     req(error == 0)
-    
+
     # check if input gene has enough data
     error <- 0
     gene <- input$depmap_gene
@@ -925,7 +925,7 @@ observeEvent(input$depmap_gene,{
       error <- 1
     }
     req(error == 0)
-    
+
     # retrieves molecular data
     retrieve_genes_total()
 
@@ -951,5 +951,3 @@ output$ui_parameters_confirm <- renderUI({
     )
   )
 })
-
-
