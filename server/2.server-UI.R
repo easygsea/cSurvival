@@ -656,7 +656,7 @@ observeEvent(input$km_mul,{
 
   # update statistics
   if(rv$depmap){
-    km2 <- pairwise_survdiff(Surv(dependency, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
+    km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
   }else{
     km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
   }
