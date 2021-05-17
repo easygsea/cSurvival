@@ -153,3 +153,13 @@ ymd_unit <- c(
   ,"m" = 30.4375
   ,"d" = 1
 )
+
+# ----- Miscellaneous ----
+# red colorscale
+col_scale <- list(c(0, "rgb(255, 255, 255)"), # 0 = white
+               list(0.200687, "rgb(254,224,144)"), # 0.25 = light yellow
+               list(0.333333, "rgb(253,174,97)"), # 0.1 = yellow
+               list(0.433677, "rgb(244,109,67)"), # 0.05 = orange
+               list(0.666667, "rgb(215,48,39)"), # 0.01 = red
+               list(1, "rgb(165,0,38)") # 0.001 = dark red
+)

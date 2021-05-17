@@ -4,27 +4,27 @@ output$ui_results <- renderUI({
   req(!is.null(rv[["cox_1"]]))
   x <- rv$variable_nr
   rv[["dtypes"]] <- ""
-  
+
   if(is.null(rv[["title"]])){rv[["title"]] <- rv[[paste0("title_",rv$plot_type)]]}
-  
+
   if(x == 1){
     types <- list(
       "Survival plot #1" = 1
       ,"Gender effect plot" = "gender"
     )
-    
+
     dtype1 <- rv[["data_type_1"]]
     if(dtype1 != "cnv"){
       dtype1_name <- call_datatype_from_rv(dtype1)
       dtype1_scatter <- as.list("scatter")
       names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
-      
+
       if(dtype1 == "snv"){
         l_plot <- list("Mutation statistics"="snv_stats")
       }else{
         l_plot <- dtype1_scatter
       }
-      
+
     }
   }else{
     indi <- as.list(1:x)
@@ -32,7 +32,7 @@ output$ui_results <- renderUI({
     types <- list(
       "Interaction Survival plot" = "all"
     ) %>% c(.,indi)
-    
+
     # check data types
     dtypes <- grep("^data_type_",{names(rv)},value=T)
     dtypes <- sapply(dtypes,function(x) rv[[x]])
@@ -42,7 +42,7 @@ output$ui_results <- renderUI({
     if(unique(dtypes) == "snv"){
       # l_plot <- list("Mutation statistics"="snv_stats")
     }else if(unique(dtypes) == "cnv"){
-      
+
     }else if(any(c("snv","cnv") %in% dtypes)){
       l_plot <- list("Violin plot"="violin")
     }else{
@@ -53,20 +53,20 @@ output$ui_results <- renderUI({
     names(dtypes) <- dtypes_names
     rv[["dtypes"]] <- dtypes
   }
-  
+
   # assemble all types of plots
   if(exists("l_plot")){types <- c(types, l_plot)}
   types <- c(types, "Transcriptome analysis by eVITTA"="gsea")
-  
+
   if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
     h_plot <- "725px"
   }else{
     h_plot <- "580px"
   }
-  
+
   # check if to generate survival curves
   surv_yn <- if_surv()
-  
+
   # width for the plot area
   if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
     area_w <- 7
@@ -154,7 +154,7 @@ output$ui_results <- renderUI({
                       size="sm", right = T,
                       icon = icon("gear"), width = "300px",
                       tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-                    )  
+                    )
                   }
                 )
                 ,div(
@@ -197,7 +197,7 @@ output$ui_results <- renderUI({
     )
     ,absolutePanel(
       actionBttn(
-        inputId = "up_button", label=NULL, 
+        inputId = "up_button", label=NULL,
         icon = icon("angle-double-up"), style="material-circle", color="default", size="md"
       ),
       tags$script(HTML(
@@ -249,11 +249,11 @@ output$cox_plot <- renderPlot({
   withProgress(value = 1, message = "Generating plot ...",{
     # no of cases in each group
     rv[["lels"]] <- rv[[paste0("lels_",x)]]
-    
+
     # the cutoff percentile
     rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
-    
-    
+
+
     # extract statistics
     res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
     rv$surv_plotted <- "plotted"
@@ -476,22 +476,22 @@ output$ui_stats <- renderUI({
   req(rv$plot_type != "snv_stats" & rv$plot_type != "gsea")
   if(if_surv()){
     req(!is.null(rv[["res"]]))
-    
+
     n_lels <- length(rv[["lels"]])
     col_w <- 12 / n_lels
     lel1 <- names(rv[["lels"]])[[n_lels]]
     lel2 <- names(rv[["lels"]])[[1]]
-    
+
     res <- rv[["res"]][[rv$cox_km]]
     hr <- res[["hr"]]
     p <- res[["p"]]
-    
+
     if(rv$cox_km == "cox"){
       p_w <- 6
     }else{
       p_w <- 12
     }
-    
+
     if(rv$cox_km == "cox" & rv$plot_type == "all"){
       hr_title <- "HR (hazard ratios)"
       p_title <- "P-values"
@@ -501,7 +501,7 @@ output$ui_stats <- renderUI({
       hr_title <- "HR (hazard ratio)"
       p_title <- "P-value"
     }
-    
+
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                    ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
     stats_title <- paste0(rv$plot_stype," analysis by ",names(surv_methods)[surv_methods == rv$cox_km])
@@ -515,29 +515,11 @@ output$ui_stats <- renderUI({
     p_title <- "P-value"
     p_w <- 6
   }
-  
+
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     h3(stats_title),
-    if(if_surv()){
-      conditionalPanel(
-        '(input.plot_type == "all" | input.plot_type == "gender") & input.cox_km == "km"',
-        selectizeInput(
-          "km_mul",
-          NULL,
-          choices = list(
-            "Multiple comparisons test by Holm (1979)" = "holm"
-            ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
-            ,"Multiple comparisons test by Hommel (1988)" = "hommel"
-            ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
-            ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
-            ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
-            ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
-          )
-          ,selected = rv[["km_mul"]]
-        )
-      )
-    }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+    if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
       selectizeInput(
         "cor_method",
         NULL,
@@ -606,7 +588,36 @@ output$ui_stats <- renderUI({
         ,if(if_surv()){
           column(
             12,
-            renderPrint({print(res[["stats"]])})
+            conditionalPanel(
+              '(input.plot_type == "all" | input.plot_type == "gender") & input.cox_km == "km"',
+              selectizeInput(
+                "km_mul",
+                NULL,
+                choices = list(
+                  "Multiple comparisons test by Holm (1979)" = "holm"
+                  ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
+                  ,"Multiple comparisons test by Hommel (1988)" = "hommel"
+                  ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
+                  ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
+                  ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
+                  ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
+                )
+                ,selected = rv[["km_mul"]]
+              )
+              ,div(
+                align="center",
+                plotlyOutput("km_hm", height="180px", width = "99.5%")
+              )
+              ,br()
+            ),
+            div(
+              align="left",
+              if(length(res[["stats"]]) == 2){
+                renderPrint({print(res[["stats"]][[1]]); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])})
+              }else{
+                renderPrint({print(res[["stats"]])})
+              }
+            )
           )
         }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
           column(
@@ -634,24 +645,59 @@ output$ui_cutoff <- renderUI({
   )
 })
 
-# ------------- 3. detailed statistics output -------
+# ------------- 3a. pairwise comparison statistics -------
 observeEvent(input$km_mul,{
   req(input$km_mul != "")
   req(input$km_mul != rv$km_mul)
   rv$km_mul <- input$km_mul
-  
+
   # retrieve df for survival analysis
   df <- rv[[paste0("df_",rv$plot_type)]]
-  
+
   # update statistics
   if(rv$depmap){
     km2 <- pairwise_survdiff(Surv(dependency, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
   }else{
     km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
   }
-  rv[["res"]][[rv$cox_km]][["stats"]][[2]] <- km2
-  
+  rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
 },ignoreInit = T)
+
+# ----------- 3b. pairwise heatmap ----------
+output$km_hm <- renderPlotly({
+  pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
+  req(is.numeric(pvals))
+  counts <- -log10(pvals)
+  counts[is.na(counts)] <- 0
+  dat <- expand.grid(y = rownames(counts), x = colnames(counts))
+  dat$z <- unlist(as.data.frame(counts),recursive = T)
+  pvals <- unlist(as.data.frame(pvals), recursive = T) %>% format(., scientific = T, digits = 3)
+  req(length(dat$z)>0)
+
+  fig <- plot_ly() %>%
+    add_trace(data = dat, x = ~x, y = ~y, z = ~z, type = "heatmap",
+              colorscale  = col_scale,zmax = 3,zmin=0,
+              colorbar = list(
+                title = list(text="-log10(P)", side = "right")
+                ,len = 1.2),
+              text = pvals,
+              hovertemplate = paste('<b>%{x}</b> vs <b>%{y}</b><br>',
+                                    'P-value: <b>%{text}</b>'
+              )
+    ) %>% layout(
+      # title = "Pariwise comparisons",
+      xaxis = list(title = paste0("Pariwise comparisons adjusted by ",rv$km_mul), showticklabels = T),
+      yaxis = list(title = "", showticklabels = T)
+      # ,margin = list(l=200)
+    ) %>%
+    add_annotations(x = dat$x, y = dat$y,
+                    text = as.character(pvals),
+                    showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
+                    ,ax = 20, ay = -20
+    )
+
+  fig
+})
 
 # ----------- 4[A]. expression-survival days scatter plot ---------------
 output$scatter_plot <- renderPlotly({
@@ -677,9 +723,9 @@ output$scatter_plot <- renderPlotly({
           df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
         }
       }
-      
+
       df <- rv[["exprs_1"]]
-      
+
       # the unit, e.g. expression (fpkm)
       exp_unit <- input_mode_name("1")
 
@@ -706,7 +752,7 @@ output$scatter_plot <- renderPlotly({
           ylab <- "Average of gene expression Z scores"
         }
       }
-      
+
       if(rv$depmap){
         ltitle <- "Dependency score"
       }else{
@@ -728,17 +774,17 @@ output$scatter_plot <- renderPlotly({
           xlab <- ltitle
         }
       }
-      
+
       # calculate correlation
       rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
-      
+
       # convert into ranks in necessary
       if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
         df_x <- rank(df_x,ties.method = "first")
         df_y <- rank(df_y,ties.method = "first")
         xlab <- paste0("Ranks in ",tolower(ltitle)); ylab <- paste0("Ranks in ",exp_unit)
       }
-      
+
       # draw the figure
       if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
         fig <- ggplot(df
@@ -772,15 +818,15 @@ output$scatter_plot <- renderPlotly({
                       )) +
           geom_point(color=col)
       }
-      fig <- fig + 
+      fig <- fig +
         xlab(xlab) +
         ylab(ylab)
-      
+
       # draw a regression line
       if(rv$scatter_lm){
         fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
       }
-      
+
       rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
     }else if(rv$plot_type == "scatter2"){
       df <- rv[["exprs_1"]] %>% inner_join(rv[["exprs_2"]], by="patient_id") %>%
@@ -794,7 +840,7 @@ output$scatter_plot <- renderPlotly({
       # the unit, e.g. expression (fpkm)
       exp_unita <- input_mode_name("1")
       exp_unitb <- input_mode_name("2")
-      
+
       # log y, if prompted
       if(rv$scatter_log_y){
         df_y <- log2(df$expb+1)
@@ -803,7 +849,7 @@ output$scatter_plot <- renderPlotly({
         df_y <- df$expb
         ylab <- exp_unitb
       }
-      
+
       # log x, if prompted
       if(rv$scatter_log_x){
         df_x <- log2(df$expa+1)
@@ -812,10 +858,10 @@ output$scatter_plot <- renderPlotly({
         df_x <- df$expa
         xlab <- exp_unita
       }
-      
+
       # calculate correlation
       rv[["res_scatter"]] <- cor.test(df_x, df_y, method = rv$cor_method)
-      
+
       # convert into ranks in necessary
       if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
         df_x <- rank(df_x,ties.method = "first")
@@ -824,14 +870,14 @@ output$scatter_plot <- renderPlotly({
       }
       xlab <- paste0(rv[["title_1"]],": ",xlab)
       ylab <- paste0(rv[["title_2"]],": ",ylab)
-      
+
       # figure hovers
       txt <- function(.data){paste0(
         "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
         exp_unita,": <b>",signif(.data[["expa"]],digits=3),"</b>\n",
         exp_unitb,": <b>",signif(.data[["expb"]],digits=3),"</b>"
       )}
-      
+
       # draw the figure
       if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
         fig <- ggplot(df
@@ -857,20 +903,20 @@ output$scatter_plot <- renderPlotly({
                       )) +
           geom_point(color=col)
       }
-      
+
       # rename x- and y- axis
-      fig <- fig + 
+      fig <- fig +
         xlab(xlab) +
         ylab(ylab)
-      
+
       # draw a regression line
       if(rv$scatter_lm){
         fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
       }
-      
+
       rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
     }
-    
+
   })
 })
 
@@ -890,7 +936,7 @@ output$snv_stats_plot <- renderPlotly({
     Mutation = names(stats),
     Frequency = as.numeric(stats)
   )
-  
+
   # non-synonymous
   non_id <- "nonsynonymous_1"
   nons <- ifelse_rv(non_id) %>% tolower(.)
@@ -906,19 +952,19 @@ output$snv_stats_plot <- renderPlotly({
   dat <- dat %>% dplyr::arrange(Category,Frequency)
   # patient cases that have each mutation
   Cases <- lapply(dat$Mutation, function(x){
-    names(muts)[muts == x] %>% 
+    names(muts)[muts == x] %>%
       breakvector(.) %>%
       paste0(., collapse = ", ") %>% addlinebreaks(.)
   })
-  
+
   # set Mutation data as factor for ordering in ggplotly
   dat$Mutation <- factor(dat$Mutation, levels = dat$Mutation)
-  
-  fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category, Cases=Cases)) + 
+
+  fig <- ggplot(data=dat,aes(x=Mutation, y=Frequency, fill=Category, Cases=Cases)) +
     geom_bar(stat="identity") +
     xlab("") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
+
   rv[["snv_stats_fig"]] <- ggplotly(fig, tooltip = c("Mutation","Frequency","Category","Cases"))
 })
 
