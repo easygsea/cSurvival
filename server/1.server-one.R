@@ -158,7 +158,7 @@ observeEvent(input$confirm_project,{
 
 ## reset project
 observeEvent(input$reset_project,{
-  rv$project <- ""
+  rv$project <- ""; rv$tcga <- T; rv$depmap <- F; rv$target <- F
   rv[["cox_1"]] <- NULL
   clear_rds()
   shinyjs::enable("project")
