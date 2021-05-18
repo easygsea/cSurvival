@@ -56,3 +56,12 @@ depmap_gene_help <- reactive({
     "a gene to study if its RNAi-mediated knockdown effects on cell survivals are dependent on certain genomic backgrounds."
   }
 })
+
+# -------- methods for survival analysis ----------
+surv_methods_r <- reactive({
+  if(rv$depmapr){
+    c(surv_methods, "Density plot"="dens")
+  }else{
+    surv_methods
+  }
+})

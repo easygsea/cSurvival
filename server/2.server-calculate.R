@@ -65,6 +65,7 @@ observeEvent(input$confirm,{
       }
       req(error_depmap == 0)
     }
+    rv$depmapr <- rv$depmap
     
     #------ 2. begin analysis ------
     withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
@@ -365,7 +366,8 @@ observeEvent(input$confirm,{
       }
     })
     
-    # 
+    # update parameters
     rv$show_ui <- "yes"
+    if(rv$cox_km == "dens"){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}
   }
 })

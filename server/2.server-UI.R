@@ -24,7 +24,6 @@ output$ui_results <- renderUI({
       }else{
         l_plot <- dtype1_scatter
       }
-
     }
   }else{
     indi <- as.list(1:x)
@@ -44,7 +43,7 @@ output$ui_results <- renderUI({
     }else if(unique(dtypes) == "cnv"){
 
     }else if(any(c("snv","cnv") %in% dtypes)){
-      l_plot <- list("Violin plot"="violin")
+      # l_plot <- list("Violin plot"="violin")
     }else{
       l_plot <- as.list("scatter2")
       names(l_plot) <- paste0(paste0(dtypes_names,collapse = "-")," scatter")
@@ -53,6 +52,7 @@ output$ui_results <- renderUI({
     names(dtypes) <- dtypes_names
     rv[["dtypes"]] <- dtypes
   }
+
 
   # assemble all types of plots
   if(exists("l_plot")){types <- c(types, l_plot)}
@@ -111,7 +111,7 @@ output$ui_results <- renderUI({
           radioGroupButtons(
             inputId = "cox_km",
             label = HTML(paste0("Select survival analysis method:"),add_help(paste0("cox_km_q"))),
-            choices = surv_methods,
+            choices = surv_methods_r(),
             selected = rv[["cox_km"]],
             status = "danger",
             # size = "sm",
@@ -140,7 +140,18 @@ output$ui_results <- renderUI({
             h3(rv[["title"]]),
             p(style="color:gray;font-size:135%;",paste0(paste0(rv$project, collapse = " & "),rv$censor_time_p)),
             if(surv_yn){
-              plotOutput("cox_plot",height = h_plot)
+              div(
+                conditionalPanel(
+                  'input.cox_km != "dens"',
+                  plotOutput("cox_plot",height = h_plot)
+                )
+                ,conditionalPanel(
+                  'input.cox_km == "dens"',
+                  if(typeof(rv[["res"]]) == "list"){
+                    plotlyOutput("dens_plot",height = "550px")
+                  }
+                )
+              )
             }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
               plotlyOutput("scatter_plot", height = "585px")
             }else if(rv$plot_type == "snv_stats"){
@@ -242,6 +253,7 @@ output$easygeo_iframe <- renderUI({
 observeEvent(input$plot_type,{
   req(!is.null(input$plot_type))
   req(rv$surv_plotted == "plotted")
+  if(rv$cox_km == "dens"){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}
   x <- rv$plot_type <- input$plot_type
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
@@ -273,45 +285,16 @@ output$cox_plot <- renderPlot({
 # --------- 1a. plot parameters -------------
 output$plot_gear <- renderUI({
   if(if_surv()){
-    fluidRow(
-      column(
-        12,
-        # median thresholds
-        radioGroupButtons(
-          inputId = "ymd",
-          label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
-          choices = ymd_names,
-          selected = rv$ymd,
-          size = "sm",
-          checkIcon = list(
-            yes = icon("check-square"),
-            no = icon("square-o")
-          ),
-          direction = "horizontal"
-        )
-        ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis"
-        ))
-        ,placement = "top")
-        # confidence intervals
-        ,materialSwitch(
-          inputId = "confi",
-          label = HTML(paste0("<b>Plot confidence intervals?</b> ",add_help("confi_q"))),
-          value = rv$confi, inline = F, width = "100%",
-          status = "danger"
-        )
-        ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
-                   ,placement = "top")
-      )
-      ,conditionalPanel(
-        'input.confi',
+    if(rv$cox_km == "cox" | rv$cox_km == "km" ){
+      fluidRow(
         column(
           12,
+          # median thresholds
           radioGroupButtons(
-            inputId = "confi_opt",
-            label = HTML(paste0("Confidence interval style: "),add_help(paste0("confi_opt_q"))),
-            choiceNames = c("Ribbon", "Step"),
-            choiceValues = c("ribbon","step"),
-            selected = rv$confi_opt,
+            inputId = "ymd",
+            label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
+            choices = ymd_names,
+            selected = rv$ymd,
             size = "sm",
             checkIcon = list(
               yes = icon("check-square"),
@@ -319,54 +302,107 @@ output$plot_gear <- renderUI({
             ),
             direction = "horizontal"
           )
-          ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
-                                               ," <b>Step</b> plots boundaries."
-          ))
-          ,placement = "top"),
-          # median thresholds
-          checkboxGroupButtons(
-            inputId = "median",
-            label = HTML(paste0("Draw line(s) at median survival? ",add_help("median_q"))),
-            choices = c("Horizontal"="h",
-                        "Vertical"="v"
-            ),
-            selected = rv$median,
-            size="s",
-            checkIcon = list(
-              no = tags$i(class = "fa fa-times",
-                          style = "color: crimson"),
-              yes = tags$i(class = "fa fa-check",
-                           style = "color: green"))
-          )
-          ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
+          ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis"
           ))
           ,placement = "top")
+          # confidence intervals
+          ,materialSwitch(
+            inputId = "confi",
+            label = HTML(paste0("<b>Plot confidence intervals?</b> ",add_help("confi_q"))),
+            value = rv$confi, inline = F, width = "100%",
+            status = "danger"
+          )
+          ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
+                     ,placement = "top")
+        )
+        ,conditionalPanel(
+          'input.confi',
+          column(
+            12,
+            radioGroupButtons(
+              inputId = "confi_opt",
+              label = HTML(paste0("Confidence interval style: "),add_help(paste0("confi_opt_q"))),
+              choiceNames = c("Ribbon", "Step"),
+              choiceValues = c("ribbon","step"),
+              selected = rv$confi_opt,
+              size = "sm",
+              checkIcon = list(
+                yes = icon("check-square"),
+                no = icon("square-o")
+              ),
+              direction = "horizontal"
+            )
+            ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
+                                                 ," <b>Step</b> plots boundaries."
+            ))
+            ,placement = "top"),
+            # median thresholds
+            checkboxGroupButtons(
+              inputId = "median",
+              label = HTML(paste0("Draw line(s) at median survival? ",add_help("median_q"))),
+              choices = c("Horizontal"="h",
+                          "Vertical"="v"
+              ),
+              selected = rv$median,
+              size="s",
+              checkIcon = list(
+                no = tags$i(class = "fa fa-times",
+                            style = "color: crimson"),
+                yes = tags$i(class = "fa fa-check",
+                             style = "color: green"))
+            )
+            ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
+            ))
+            ,placement = "top")
+          )
+        )
+        # toggle tables for KM plot
+        ,conditionalPanel(
+          'input.cox_km == "km"',
+          column(
+            12,
+            materialSwitch(
+              inputId = "risk_table",
+              label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
+              value = rv$risk_table, inline = F, width = "100%",
+              status = "danger"
+            )
+            ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
+                       ,placement = "top")
+            ,materialSwitch(
+              inputId = "cum_table",
+              label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
+              value = rv$cum_table, inline = F, width = "100%",
+              status = "danger"
+            )
+            ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+                       ,placement = "top")
+          )
         )
       )
-      # toggle tables for KM plot
-      ,conditionalPanel(
-        'input.cox_km == "km"',
+    }else if(rv$cox_km == "dens"){
+      fluidRow(
         column(
           12,
           materialSwitch(
-            inputId = "risk_table",
-            label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
-            value = rv$risk_table, inline = F, width = "100%",
+            inputId = "dens_fill",
+            label = HTML(paste0("<b>Fill density plot?</b>",add_help("dens_fill_q"))),
+            value = rv$dens_fill, inline = F, width = "100%",
             status = "danger"
           )
-          ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
+          ,bsTooltip("dens_fill_q",HTML(paste0("If TRUE, fill the density plot with colors"))
                      ,placement = "top")
-          , materialSwitch(
-            inputId = "cum_table",
-            label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
-            value = rv$cum_table, inline = F, width = "100%",
+          ,materialSwitch(
+            inputId = "dens_mean",
+            label = HTML(paste0("<b>Show mean dependencies</b>",add_help("dens_mean_q"))),
+            value = rv$dens_mean, inline = F, width = "100%",
             status = "danger"
           )
-          ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+          ,bsTooltip("dens_mean_q",HTML(paste0("If TRUE, average dependency scores are plotted for each group"))
                      ,placement = "top")
         )
       )
-    )
+    }
   }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2" & !is.null(rv$scatter_gender)){
     fluidRow(
       column(
@@ -439,7 +475,7 @@ output$plot_gear <- renderUI({
   }
 })
 
-observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
+observeEvent(input$cox_km,{if(input$cox_km!="dens"){rv$cox_kmr <- input$cox_km};rv$cox_km <- input$cox_km})
 observeEvent(input$ymd,{rv$ymd <- input$ymd})
 observeEvent(input$median,{rv$median <- input$median},ignoreNULL = F)
 observeEvent(input$confi,{rv$confi <- input$confi})
@@ -482,6 +518,7 @@ output$download_plot <- downloadHandler(
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
   req(rv$plot_type != "snv_stats" & rv$plot_type != "gsea")
+  req(rv$cox_km != "dens")
   if(if_surv()){
     req(!is.null(rv[["res"]]))
 
@@ -1016,4 +1053,33 @@ output$forest_plot <- renderPlot({
   }
   res <- rv[["res"]]
   ggforest(res[["cox"]][["cox_fit"]], main = maint, data = res[["cox"]][["cox_df"]], fontsize = 0.7)
+})
+
+# ------ 7. density plot, if dependency ---------
+observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
+observeEvent(input$dens_mean,{rv$dens_mean <- rv$dens_mean})
+output$dens_plot <- renderPlotly({
+  df <- rv[["res"]][["km"]][["df"]]
+  df[["dependency"]] <- log10(df[["dependency"]])
+  
+  if(rv$dens_fill){
+    p <- ggplot(df, aes(x=dependency, fill=level, ..scaled..)) + geom_density(alpha=0.4) +
+      scale_fill_manual(values=pal_jco("default")(length(levels(df$level))))
+  }else{
+    p <- ggplot(df, aes(x=dependency, color=level, ..scaled..)) + geom_density() +
+      scale_color_manual(values=pal_jco("default")(length(levels(df$level))))
+  }
+  
+  if(rv$dens_mean){
+    mu <- ddply(df, "level", summarise, grp.mean=mean(dependency))
+    p <- p +
+      geom_vline(data=mu, aes(xintercept=grp.mean, color=level), linetype="dashed") +
+      scale_color_manual(values=pal_jco("default")(length(levels(df$level))))
+  }
+  p <- p +
+    # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
+    labs(x="Dependency score", y = "Density") +
+    theme_classic()
+  
+  ggplotly(p)
 })

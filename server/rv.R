@@ -4,7 +4,7 @@ rv <- reactiveValues(
   show_ui = "", # "yes" upon a successful run
   
   projectStatus="none", project="", max_project_n=3, try_error=0
-  ,tcga=T,target=T,depmap=F
+  ,tcga=T,target=T,depmap=F,depmapr=F
   ,ccleStatus1="none",ccle_cancer_types="",ccle_cancer_subtypes="",depmap_gene=""
   
   ,variable_n_reached=0
@@ -32,6 +32,8 @@ rv <- reactiveValues(
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"
   ,risk_table = T,cum_table=T
+  
+  ,dens_fill=T, dens_mean=T
   
   ,scatter_log_x=T,scatter_log_y=T,scatter_lm=T,lm_method="lm",cor_method="kendall"
   ,scatter_gender_y=F # whether to color the scatter plot by gender
