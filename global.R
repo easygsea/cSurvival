@@ -25,6 +25,7 @@ library(limma)
 library(org.Hs.eg.db)
 library(ids)
 library(pacman)
+library(colorspace)
 options(repos = BiocManager::repositories())
 
 source("global/functions.R")

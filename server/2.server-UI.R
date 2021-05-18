@@ -58,10 +58,30 @@ output$ui_results <- renderUI({
   if(exists("l_plot")){types <- c(types, l_plot)}
   types <- c(types, "Transcriptome analysis by eVITTA"="gsea")
 
-  if(rv$cox_km == "km" & (rv$risk_table | rv$cum_table)){
-    h_plot <- "725px"
+  if(rv$cox_km == "km"){
+    h_plot <- ifelse(
+      rv$plot_type == "all",
+      ifelse(
+        rv$risk_table,
+        ifelse(
+          rv$cum_table,
+          "1050px"
+          ,"900px"
+        )
+        ,"550px"
+      ),
+      ifelse(
+        rv$risk_table,
+        ifelse(
+          rv$cum_table,
+          "650px"
+          ,"600px"
+        )
+        ,"550px"
+      )
+    )
   }else{
-    h_plot <- "580px"
+    h_plot <- "550px"
   }
 
   # check if to generate survival curves
@@ -488,8 +508,10 @@ output$ui_stats <- renderUI({
 
     if(rv$cox_km == "cox"){
       p_w <- 6
+      hf_plot <- ifelse(rv$plot_type == "all","295px","155px")
     }else{
       p_w <- 12
+      hf_plot <- "155px"
     }
 
     if(rv$cox_km == "cox" & rv$plot_type == "all"){
@@ -606,9 +628,15 @@ output$ui_stats <- renderUI({
               )
               ,div(
                 align="center",
-                plotlyOutput("km_hm", height="180px", width = "99.5%")
+                if(typeof(rv[["res"]]) == "list"){
+                  plotlyOutput("km_hm", height="180px", width = "99.5%")
+                }
               )
               ,br()
+            ),
+            conditionalPanel(
+              'input.cox_km == "cox"',
+              plotOutput("forest_plot",height = hf_plot)
             ),
             div(
               align="left",
@@ -989,4 +1017,15 @@ output$ui_error <- renderUI({
   #                                ,dtype_name," data of ", paste0(rv$project, collapse = ", ")
   #                                ,". The selected project(s) only contain(s) ",lels," data."))
   # }
+})
+
+# ------ 6. forest plot -------
+output$forest_plot <- renderPlot({
+  if(rv$plot_type == "all" | rv$plot_type == "gender"){
+    maint <- "Hazard ratios"
+  }else{
+    maint <- "Hazard ratio"
+  }
+  res <- rv[["res"]]
+  ggforest(res[["cox"]][["cox_fit"]], main = maint, data = res[["cox"]][["cox_df"]], fontsize = 0.7)
 })
