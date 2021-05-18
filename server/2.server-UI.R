@@ -60,25 +60,13 @@ output$ui_results <- renderUI({
   
   if(rv$cox_km == "km"){
     h_plot <- ifelse(
-      rv$plot_type == "all",
+      rv$risk_table | rv$risk_table,
       ifelse(
-        rv$risk_table,
-        ifelse(
-          rv$cum_table,
-          "1050px"
-          ,"900px"
-        )
-        ,"550px"
-      ),
-      ifelse(
-        rv$risk_table,
-        ifelse(
-          rv$cum_table,
-          "650px"
-          ,"600px"
-        )
-        ,"550px"
+        rv$cum_table & rv$risk_table,
+        "735px"
+        ,"675px"
       )
+      ,"550px"
     )
   }else{
     h_plot <- "550px"
@@ -508,7 +496,7 @@ output$ui_stats <- renderUI({
     
     if(rv$cox_km == "cox"){
       p_w <- 6
-      hf_plot <- ifelse(rv$plot_type == "all","295px","155px")
+      hf_plot <- ifelse(rv$plot_type == "all","235px","155px")
     }else{
       p_w <- 12
       hf_plot <- "155px"
