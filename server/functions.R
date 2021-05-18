@@ -196,7 +196,7 @@ common_mut <- function(row, mode="int"){
   if(identical(muts,character(0))){
     return(NA)
   }else{
-    return(paste0(muts,collapse = "\\|"))
+    return(paste0(muts,collapse = "|"))
   }
 }
 
