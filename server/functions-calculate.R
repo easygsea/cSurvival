@@ -376,9 +376,9 @@ cal_surv_rna <-
       km.stats <- list(km2,km.stats)
 
       # run Cox regression
-      cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+      cox_fit1 <- coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
       # summary statistics
-      cox.stats <- summary(cox_fit)
+      cox.stats <- summary(cox_fit1)
       # run Cox regression for visualization purpose
       cox_fit <- coxph(Surv(survival_days, censoring_status) ~ level, data = df)
     }
@@ -400,6 +400,7 @@ cal_surv_rna <-
     cox.fit <- survfit(cox_fit,newdata=new_df)
 
     # save df, fit, and statistics
+    if(!exists("cox_fit1")){cox_fit1 <- cox_fit}
     results <- list(
       km = list(
         df = df,
@@ -416,6 +417,8 @@ cal_surv_rna <-
         ,lels = lels
         ,hr = hr.cox
         ,p = p.cox
+        ,cox_fit = cox_fit1
+        ,cox_df = df
       )
     )
     return(results)

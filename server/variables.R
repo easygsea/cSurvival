@@ -158,11 +158,16 @@ ymd_unit <- c(
 )
 
 # ----- Miscellaneous ----
-# red colorscale
-col_scale <- list(c(0, "rgb(255, 255, 255)"), # 0 = white
-               list(0.200687, "rgb(254,224,144)"), # 0.25 = light yellow
-               list(0.333333, "rgb(253,174,97)"), # 0.1 = yellow
-               list(0.433677, "rgb(244,109,67)"), # 0.05 = orange
-               list(0.666667, "rgb(215,48,39)"), # 0.01 = red
-               list(1, "rgb(165,0,38)") # 0.001 = dark red
-)
+# red or yellow colorscale
+col_scale_no <- c(0, 0.20068666377, 0.33333333333, 0.43367666522, 0.66666666666, 1)
+col_scale <- sequential_hcl(5, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
+col_scale <- sapply(1:ncol(col_scale), function(x) {x <- col_scale[,x]; paste0("rgb(",paste0(x, collapse = ", "),")")})
+col_scale <- c("rgb(255, 255, 255)", col_scale)
+col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
+# col_scale <- list(list(0, "rgb(255, 255, 255)"), # 0
+#                list(0.20068666377, "rgb(254,224,144)"), # 0.25 = log10(0.25) / 3
+#                list(0.33333333333, "rgb(253,174,97)"), # 0.1 = log10(0.1) / 3
+#                list(0.43367666522, "rgb(244,109,67)"), # 0.05 = log10(0.05) / 3
+#                list(0.66666666666, "rgb(215,48,39)"), # 0.01 = log10(0.01) / 3
+#                list(1, "rgb(165,0,38)") # 0.001 = log10(0.001) / 3
+# )
