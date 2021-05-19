@@ -154,11 +154,11 @@ output$ui_results <- renderUI({
                 title_div,
               ),
               column(
-                7,
+                6,
                 plotlyOutput("dens_plot",height = "550px", width = "100%")
               ),
               column(
-                5,
+                6,
                 plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
               )
             )
@@ -1028,8 +1028,11 @@ output$snv_stats_plot <- renderPlotly({
   dat <- dat %>% dplyr::arrange(Category,Frequency)
   # patient cases that have each mutation
   Cases <- lapply(dat$Mutation, function(x){
-    names(muts)[muts == x] %>%
-      breakvector(.) %>%
+    xx <- names(muts)[muts == x]
+    # convert to CCLE cell ids if depmap
+    if(rv$depmapr){xx <- paste0(translate_cells(xx),"|",xx)}
+    xx <- xx %>%
+      breakvector(.,max=20) %>%
       paste0(., collapse = ", ") %>% addlinebreaks(.)
   })
 
@@ -1111,14 +1114,16 @@ output$dens_plot <- renderPlotly({
 
 # -------- 7b. stats of density plot ---------
 output$dens_stats_plot <- renderPlotly({
-  df <- retrieve_dens_df()
-  df[["Cell"]] <- translate_cells(df$patient_id)
-  dep_name <- dependency_names()
-
-  p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
-    scale_color_manual(values=pal_jco("default")(length(levels(df$Level)))) +
-    geom_jitter(shape=16, position=position_jitter(0.2)) +
-    labs(title="Cell line distribution",x="", y = dep_name)
-  
-  ggplotly(p,tooltip = c("Line","x","y"))
+  withProgress(value=1,message = "Generating plots ...",{
+    df <- retrieve_dens_df()
+    df[["Cell"]] <- translate_cells(df$patient_id)
+    dep_name <- dependency_names()
+    
+    p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
+      scale_color_manual(values=pal_jco("default")(length(levels(df$Level)))) +
+      geom_jitter(shape=16, position=position_jitter(0.2)) +
+      labs(title="Cell line distribution",x="", y = dep_name)
+    
+    ggplotly(p,tooltip = c("Line","x","y"))
+  })
 })

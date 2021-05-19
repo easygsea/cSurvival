@@ -93,7 +93,11 @@ extract_gene_data <- function(x, type){
   }else{
     data <- rbindlist(l, use.names = T)
   }
-
+  
+  # if depmap, filter patient ID
+  if(rv$depmap){
+    data <- data %>% dplyr::filter(patient_id %in% input$ccle_cells)
+  }
   # # # method 2 fread essential columns
   # ofile <- paste0(rv$indir,"tmp.csv")
   # unlink(ofile)
@@ -591,7 +595,11 @@ translate_cells <- function(patient_ids){
 retrieve_dens_df <- function(){
   df <- rv[["res"]][["km"]][["df"]]
   req(!is.null(df[["dependency"]]))
-  df[["dependency"]] <- log10(df[["dependency"]])
+  if(rv$project == "DepMap-Drug"){
+    df[["dependency"]] <- log2(df[["dependency"]])
+  }else{
+    df[["dependency"]] <- log10(df[["dependency"]])
+  }
   colnames(df)[2] <- dependency_names()
   colnames(df)[ncol(df)] <- "Level"
   return(df)
