@@ -17,6 +17,7 @@ extract_gene_data <- function(x, type){
     ,"manual" = "df_gene_scale.csv"
     ,"cnv" = "df_cnv.csv"
     ,"mir" = "df_mir.csv"
+    ,"pro" = "df_proteomic.csv"
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
@@ -68,7 +69,7 @@ extract_gene_data <- function(x, type){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
     genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
-  }else if(type == "cnv" | type == "mir"){
+  }else if(type == "cnv" | type == "mir" | type == "pro"){
     # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]
   }

@@ -189,6 +189,9 @@ clear_loaded_genes <- function(){
 }
 observeEvent(input$reset_project,{
   rv$project <- ""; rv$tcga <- T; rv$depmap <- F; rv$target <- F
+  rv$depmap_path<-NULL; rv$depmap_genes<-NULL; rv$depmap_ids<-NULL; rv$depmap_ccle<-NULL; rv$cell_lines<-NULL
+  rv$ccle_cancer_types<-"";rv$ccle_cancer_subtypes="";rv$depmap_gene=""
+  
   rv[["cox_1"]] <- NULL
   clear_rds()
   shinyjs::enable("project")
@@ -758,7 +761,8 @@ output$tcga_warning <- renderUI({
 # ----- 1.4a. DepMap UI ------
 output$depmap_pars <- renderUI({
   req(rv$depmap)
-
+  req(!is.null(rv$depmap_ccle))
+  
   div(
     column(
       3,
@@ -788,6 +792,7 @@ output$depmap_pars <- renderUI({
 observeEvent(input$ccle_cancer_types,{rv$ccle_cancer_types <- input$ccle_cancer_types})
 output$ui_ccle_subtypes <- renderUI({
   req(!is.null(input$ccle_cancer_types))
+  req(!is.null(rv$depmap_ccle))
   subtypes <- rv$depmap_ccle %>% dplyr::filter(primary_disease %in% rv$ccle_cancer_types) %>%
     .[["Subtype"]] %>% unique()
   div(
@@ -819,6 +824,7 @@ output$ui_ccle_subtypes <- renderUI({
 observeEvent(input$ccle_cancer_subtypes,{rv$ccle_cancer_subtypes <- input$ccle_cancer_subtypes})
 output$ui_cells <- renderUI({
   req(!is.null(input$ccle_cancer_subtypes))
+  req(!is.null(rv$depmap_ccle))
   cells <- rv$depmap_ccle %>% dplyr::filter(primary_disease %in% rv$ccle_cancer_types) %>%
     dplyr::filter(Subtype %in% rv$ccle_cancer_subtypes)
   cells_names <- cells[["CCLE_Name"]]

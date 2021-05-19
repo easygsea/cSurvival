@@ -310,6 +310,8 @@ retrieve_genes <- function(x){
     infiles <- paste0(rv$indir,"df_cnv.csv")
   }else if(dbt == "mir"){
     infiles <- paste0(rv$indir,"df_mir_scale.csv")
+  }else if(dbt == "pro"){
+    infiles <- paste0(rv$indir,"df_proteomic_scale.csv")
   }
   
   l <- lapply(infiles, function(x){

@@ -230,7 +230,8 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(g_ui_id_q, HTML(paste0("Search and select. If a gene or locus is not found, try its alias names."
                                           ," If still not found, it means its expression/alteration is barely detected in the selected cancer project."
-                                          ,"Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects."))
+                                          ," Or, if proteomics, it has not been quantified."
+                                          ," Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects."))
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")
