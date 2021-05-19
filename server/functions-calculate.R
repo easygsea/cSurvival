@@ -498,7 +498,8 @@ plot_surv <-
         xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25
       }
     }else{
-      xscale <- 1; xlab <- "Exponential of dependency score"; breaktime <- NULL
+      dep_name <- dependency_names() %>% firstlower()
+      xscale <- 1; xlab <- paste0("Exponential of ",dep_name); breaktime <- NULL
     }
 
 
@@ -578,6 +579,22 @@ plot_surv <-
     return(fig)
   }
 
+#==============================================#
+####            DepMap functions            ####
+#==============================================#
+translate_cells <- function(patient_ids){
+  df <- rv$depmap_ccle
+  df %>% dplyr::filter(patient_id %in% patient_ids) %>% .[["CCLE_Name"]]
+}
+
+retrieve_dens_df <- function(){
+  df <- rv[["res"]][["km"]][["df"]]
+  req(!is.null(df[["dependency"]]))
+  df[["dependency"]] <- log10(df[["dependency"]])
+  colnames(df)[2] <- dependency_names()
+  colnames(df)[3] <- "Level"
+  return(df)
+}
 #==============================================#
 ####            eVITTA functions            ####
 #==============================================#

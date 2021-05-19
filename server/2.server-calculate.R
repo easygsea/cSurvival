@@ -141,7 +141,7 @@ observeEvent(input$confirm,{
         )
         req(error_censor == 0)
       }else{
-        rv$censor_time_p <- sprintf(": %s",rv$depmap_gene)
+        rv$censor_time_p <- rv$depmap_gene
       }
 
       # begin analysis after error checking
@@ -361,7 +361,7 @@ observeEvent(input$confirm,{
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2)
           rv[["title_gender"]] <- paste0(rv[["title_1"]]," vs Gender")
         }else{
-          rv[["df_gender"]] <- unique(rv$df_survival[["gender"]])
+          rv[["df_gender"]] <- unique(df_combined[["level.y"]])
         }
       }
     })

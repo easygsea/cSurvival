@@ -60,8 +60,34 @@ depmap_gene_help <- reactive({
 # -------- methods for survival analysis ----------
 surv_methods_r <- reactive({
   if(rv$depmapr){
-    c(surv_methods, "Density plot"="dens")
+    c(surv_methods, "Dependency score distributions"="dens")
   }else{
     surv_methods
+  }
+})
+
+# -------- denpendency score names & descriptions ----------
+dependency_names <- reactive({
+  if(rv$project == "DepMap-CRISPR"){
+    "Gene effect (CERES)"
+  }else if(rv$project == "DepMap-RNAi"){
+    "Gene effect (DEMETER2)"
+  }else if(rv$project == "DepMap-Drug"){
+    "Cell viability"
+  }
+})
+
+dp_ge_q <- reactive({
+  txt <- paste0("According to DepMap (https://depmap.org): The CERES dependency score is based on data from a cell depletion assay."
+                ," A <b>lower CERES score</b> indicates a <b>higher likelihood that the gene of interest is essential</b> in a give cell line."
+                ," A score of 0 indicates a gene is not essential; correspondingly -1 is comparable to the median of all pan-essential genes."
+                ," In our survival curves, values on x-axis are computed as <b>10 ^ CERES</b>; correspondingly 1 means a gene being non-essential in a cell line and -1 is comparable to the median of all pan-essential genes."
+  )
+  if(rv$project == "DepMap-CRISPR"){
+    txt
+  }else if(rv$project == "DepMap-RNAi"){
+    gsub("CERES","DEMETER2",txt)
+  }else if(rv$project == "DepMap-Drug"){
+    "Cell viability as measured by logfold change relative to DMSO"
   }
 })

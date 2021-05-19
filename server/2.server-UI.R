@@ -81,6 +81,18 @@ output$ui_results <- renderUI({
   }else{
     area_w <- 12
   }
+  
+  # title
+  if(rv$depmapr){
+    ge <- paste0(dependency_names(),add_help("dp_ge_q")," by ")
+  }else{
+    ge <- ""
+  }
+  title_div <- div(
+    h3(rv[["title"]]),
+    HTML(paste0('<p style="color:gray;font-size:135%;">',paste0(paste0(rv$project, collapse = " & "),": ",ge,rv$censor_time_p),"</p>"))
+    ,bsTooltip("dp_ge_q",HTML(dp_ge_q()),placement = "right")
+  )
 
   box(
     width = 12, status = "danger",
@@ -125,7 +137,7 @@ output$ui_results <- renderUI({
                                             ,"Cox regression model assesses the effect of several risk factors simultaneously,"
                                             ," while KM describe the survival according to one factor under investigation. "
           ))
-          ,placement = "top")
+          ,placement = "right")
         )
       }
       ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
@@ -134,68 +146,78 @@ output$ui_results <- renderUI({
           uiOutput("ui_error")
         )
       }else{
-        div(
-          column(
-            area_w, align = "left",
-            h3(rv[["title"]]),
-            p(style="color:gray;font-size:135%;",paste0(paste0(rv$project, collapse = " & "),rv$censor_time_p)),
-            if(surv_yn){
-              div(
+        if(surv_yn & rv$cox_km == "dens"){
+          if(typeof(rv[["res"]]) == "list"){
+            div(align="left",
+              column(
+                12,
+                title_div,
+              ),
+              column(
+                7,
+                plotlyOutput("dens_plot",height = "550px", width = "100%")
+              ),
+              column(
+                5,
+                plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
+              )
+            )
+          }
+        }else{
+          div(
+            column(
+              area_w, align = "left",
+              title_div,
+              if(surv_yn){
                 conditionalPanel(
                   'input.cox_km != "dens"',
                   plotOutput("cox_plot",height = h_plot)
                 )
-                ,conditionalPanel(
-                  'input.cox_km == "dens"',
-                  if(typeof(rv[["res"]]) == "list"){
-                    plotlyOutput("dens_plot",height = "550px")
-                  }
-                )
-              )
-            }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
-              plotlyOutput("scatter_plot", height = "585px")
-            }else if(rv$plot_type == "snv_stats"){
-              plotlyOutput("snv_stats_plot", height = "585px")
-            }else if(rv$plot_type == "gsea"){
-              uiOutput("ui_gsea")
-            }
-            ,if(rv$plot_type!="gsea"){
-              div(
-                align = "left",
-                style = "position: absolute; right: 2.5em; top: 1.5em;",
+              }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+                plotlyOutput("scatter_plot", height = "585px")
+              }else if(rv$plot_type == "snv_stats"){
+                plotlyOutput("snv_stats_plot", height = "585px")
+              }else if(rv$plot_type == "gsea"){
+                uiOutput("ui_gsea")
+              }
+              ,if(rv$plot_type!="gsea"){
                 div(
-                  id = "gear_btn",
-                  style="display: inline-block;vertical-align:top;",
-                  if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
-                    dropdown(
-                      uiOutput("plot_gear"),
-                      circle = TRUE, status = "danger", style = "material-circle",
-                      size="sm", right = T,
-                      icon = icon("gear"), width = "300px",
-                      tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-                    )
-                  }
-                )
-                ,div(
-                  id="download_btn",
-                  style="display: inline-block;vertical-align:top;",
-                  downloadBttn(
-                    size = "sm", color = "danger", style = "material-circle",
-                    outputId = "download_plot", label = NULL
+                  align = "left",
+                  style = "position: absolute; right: 2.5em; top: 1.5em;",
+                  div(
+                    id = "gear_btn",
+                    style="display: inline-block;vertical-align:top;",
+                    if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
+                      dropdown(
+                        uiOutput("plot_gear"),
+                        circle = TRUE, status = "danger", style = "material-circle",
+                        size="sm", right = T,
+                        icon = icon("gear"), width = "300px",
+                        tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                      )
+                    }
                   )
-                  ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+                  ,div(
+                    id="download_btn",
+                    style="display: inline-block;vertical-align:top;",
+                    downloadBttn(
+                      size = "sm", color = "danger", style = "material-circle",
+                      outputId = "download_plot", label = NULL
+                    )
+                    ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+                  )
                 )
+              }
+            )
+            ,conditionalPanel(
+              'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
+              column(
+                5, align="left",
+                uiOutput("ui_stats")
               )
-            }
-          )
-          ,conditionalPanel(
-            'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
-            column(
-              5, align="left",
-              uiOutput("ui_stats")
             )
           )
-        )
+        }
       }
       ,conditionalPanel(
         'input.plot_type == "gsea"',
@@ -254,6 +276,7 @@ observeEvent(input$plot_type,{
   req(!is.null(input$plot_type))
   req(rv$surv_plotted == "plotted")
   if(rv$cox_km == "dens"){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}
+  rv[["res"]] <- NULL
   x <- rv$plot_type <- input$plot_type
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
@@ -1052,34 +1075,49 @@ output$forest_plot <- renderPlot({
     maint <- "Hazard ratio"
   }
   res <- rv[["res"]]
+  req(!is.null(res[["cox"]][["cox_fit"]]))
   ggforest(res[["cox"]][["cox_fit"]], main = maint, data = res[["cox"]][["cox_df"]], fontsize = 0.7)
 })
 
-# ------ 7. density plot, if dependency ---------
+# ------ 7a. density plot, if dependency ---------
 observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
 observeEvent(input$dens_mean,{rv$dens_mean <- rv$dens_mean})
 output$dens_plot <- renderPlotly({
-  df <- rv[["res"]][["km"]][["df"]]
-  df[["dependency"]] <- log10(df[["dependency"]])
-  
+  df <- retrieve_dens_df()
+  dep_name <- dependency_names()
+
   if(rv$dens_fill){
-    p <- ggplot(df, aes(x=dependency, fill=level, ..scaled..)) + geom_density(alpha=0.4) +
-      scale_fill_manual(values=pal_jco("default")(length(levels(df$level))))
+    p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level, ..scaled..)) + geom_density(alpha=0.4) +
+      scale_fill_manual(values=pal_jco("default")(length(levels(df$Level))))
   }else{
-    p <- ggplot(df, aes(x=dependency, color=level, ..scaled..)) + geom_density() +
-      scale_color_manual(values=pal_jco("default")(length(levels(df$level))))
+    p <- ggplot(df, aes(x=.data[[dep_name]], color=Level, ..scaled..)) + geom_density() +
+      scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
   }
   
   if(rv$dens_mean){
-    mu <- ddply(df, "level", summarise, grp.mean=mean(dependency))
+    mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
     p <- p +
-      geom_vline(data=mu, aes(xintercept=grp.mean, color=level), linetype="dashed") +
-      scale_color_manual(values=pal_jco("default")(length(levels(df$level))))
+      geom_vline(data=mu, aes(xintercept=grp.mean, color=Level), linetype="dashed") +
+      scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
   }
   p <- p +
     # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
-    labs(x="Dependency score", y = "Density") +
+    labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
     theme_classic()
   
   ggplotly(p)
+})
+
+# -------- 7b. stats of density plot ---------
+output$dens_stats_plot <- renderPlotly({
+  df <- retrieve_dens_df()
+  df[["Cell"]] <- translate_cells(df$patient_id)
+  dep_name <- dependency_names()
+
+  p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
+    scale_color_manual(values=pal_jco("default")(length(levels(df$Level)))) +
+    geom_jitter(shape=16, position=position_jitter(0.2)) +
+    labs(title="Cell line distribution",x="", y = dep_name)
+  
+  ggplotly(p,tooltip = c("Line","x","y"))
 })

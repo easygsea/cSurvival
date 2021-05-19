@@ -167,6 +167,12 @@ vector_names <- function(x, vector){
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# lower case first letter
+firstlower <- function(x) {
+  substr(x, 1, 1) <- tolower(substr(x, 1, 1))
+  x
+}
+
 # function to remove all na per column
 not_all_na <- function(x) any(!is.na(x))
 # function to remove all na per column
