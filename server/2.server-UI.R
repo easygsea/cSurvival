@@ -275,7 +275,7 @@ output$easygeo_iframe <- renderUI({
 observeEvent(input$plot_type,{
   req(!is.null(input$plot_type))
   req(rv$surv_plotted == "plotted")
-  if(rv$cox_km == "dens"){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}
+  if(rv$cox_km == "dens"){if(if_surv(plot_type=input$plot_type)){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}else{rv$cox_km <- rv$cox_kmr}}
   rv[["res"]] <- NULL
   x <- rv$plot_type <- input$plot_type
   if(x == "scatter"){x <- 1}
@@ -478,6 +478,14 @@ output$plot_gear <- renderUI({
         ,conditionalPanel(
           'input.scatter_lm',
           div(
+            materialSwitch(
+              inputId = "sm_conf",
+              label = HTML(paste0("<b>Draw confidence intervals?</b>",add_help("sm_conf_q"))),
+              value = rv$sm_conf, inline = F, width = "100%",
+              status = "danger"
+            )
+            ,bsTooltip("sm_conf_q",HTML(paste0("If TRUE, draw confidence intervals for the regression line"))
+                       ,placement = "top"),
             selectizeInput(
               "lm_method",
               HTML(paste0("Smoothing method:",add_help("lm_method_q"))),
@@ -502,6 +510,7 @@ observeEvent(input$cox_km,{if(input$cox_km!="dens"){rv$cox_kmr <- input$cox_km};
 observeEvent(input$ymd,{rv$ymd <- input$ymd})
 observeEvent(input$median,{rv$median <- input$median},ignoreNULL = F)
 observeEvent(input$confi,{rv$confi <- input$confi})
+observeEvent(input$sm_conf,{rv$sm_conf <- input$sm_conf})
 observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})
 observeEvent(input$risk_table,{rv$risk_table <- input$risk_table})
 observeEvent(input$cum_table,{rv$cum_table <- input$cum_table})
@@ -676,7 +685,7 @@ output$ui_stats <- renderUI({
               )
               ,div(
                 align="center",
-                if(typeof(rv[["res"]]) == "list"){
+                if(typeof(rv[["res"]][["km"]][["df"]]) == "list"){
                   plotlyOutput("km_hm", height="180px", width = "99.5%")
                 }
               )
@@ -731,7 +740,7 @@ observeEvent(input$km_mul,{
   df <- rv[[paste0("df_",rv$plot_type)]]
 
   # update statistics
-  if(rv$depmap){
+  if(rv$depmapr){
     km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
   }else{
     km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
@@ -782,7 +791,7 @@ output$scatter_plot <- renderPlotly({
       # retrieve survival data
       if(typeof(rv[["df_gender"]]) == "list"){
         req(length(rv$scatter_gender) > 0)
-        if(rv$depmap){
+        if(rv$depmapr){
           df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,dependency,level.y) %>%
             dplyr::filter(level.y %in% rv$scatter_gender)
         }else{
@@ -793,7 +802,7 @@ output$scatter_plot <- renderPlotly({
         df_survival <- df_survival %>%
           dplyr::select(-level.y)
       }else{
-        if(rv$depmap){
+        if(rv$depmapr){
           df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,dependency)
         }else{
           df_survival <- rv[["df_1"]] %>% dplyr::select(patient_id,survival_days)
@@ -829,23 +838,33 @@ output$scatter_plot <- renderPlotly({
         }
       }
 
-      if(rv$depmap){
-        ltitle <- "Dependency score"
+      if(rv$depmapr){
+        df[["patient_id"]] <- paste0(translate_cells(df[["patient_id"]]),"|",df[["patient_id"]])
+        pid <- "Cell line"
+        dep_name <- dependency_names()
+        ltitle <- paste0("Exponential of ",firstlower(dep_name))
+        if(rv$project == "DepMap-Drug"){
+          df[["survival_days"]] <- log2(df[["survival_days"]])
+        }else{
+          df[["survival_days"]] <- log10(df[["survival_days"]])
+        }
       }else{
-        ltitle <- "Survival days"
+        pid <- "Patient ID"
+        ltitle <- dep_name <- "Survival days"
       }
+      
       if(rv$scatter_log_x){
-        if(rv$depmap){
+        if(rv$depmapr){
           df_x <- 2 ^ df$survival_days
-          xlab <- "2 ^ Dependency score"
+          xlab <- ltitle
         }else{
           df_x <- log2(df$survival_days+1)
           xlab <- "Log2 (survival days + 1)"
         }
       }else{
         df_x <- df$survival_days
-        if(rv$depmap){
-          xlab <- ltitle
+        if(rv$depmapr){
+          xlab <- dep_name
         }else{
           xlab <- ltitle
         }
@@ -858,7 +877,7 @@ output$scatter_plot <- renderPlotly({
       if(rv$cor_method == "kendall" | rv$cor_method == "spearman"){
         df_x <- rank(df_x,ties.method = "first")
         df_y <- rank(df_y,ties.method = "first")
-        xlab <- paste0("Ranks in ",tolower(ltitle)); ylab <- paste0("Ranks in ",exp_unit)
+        xlab <- paste0("Ranks in ",firstlower(dep_name)); ylab <- paste0("Ranks in ",firstlower(exp_unit))
       }
 
       # draw the figure
@@ -866,12 +885,13 @@ output$scatter_plot <- renderPlotly({
         fig <- ggplot(df
                       ,aes(x=df_x, y=df_y
                            ,text=paste0(
-                             "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                             ltitle,": <b>",.data[["survival_days"]],"</b>\n",
+                             pid,": <b>",.data[["patient_id"]],"</b>\n",
+                             dep_name,": <b>",.data[["survival_days"]],"</b>\n",
                              exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +
           geom_point(aes(color=genders)) + #, shape=genders
+          theme_classic() +
           scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
       }else{
         if(!rv$scatter_gender_y){
@@ -888,10 +908,11 @@ output$scatter_plot <- renderPlotly({
                       ,aes(x=df_x, y=df_y
                            ,text=paste0(
                              "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
-                             ltitle,": <b>",.data[["survival_days"]],"</b>\n",
+                             dep_name,": <b>",.data[["survival_days"]],"</b>\n",
                              exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +
+          theme_classic() +
           geom_point(color=col)
       }
       fig <- fig +
@@ -900,7 +921,7 @@ output$scatter_plot <- renderPlotly({
 
       # draw a regression line
       if(rv$scatter_lm){
-        fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
+        fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y),se=rv$sm_conf,size=0.5)
       }
 
       rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
@@ -961,6 +982,7 @@ output$scatter_plot <- renderPlotly({
                            ,text=txt(.data)
                       )) +
           geom_point(aes(color=genders)) + #, shape=genders
+          theme_classic() +
           scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
       }else{
         if(!rv$scatter_gender_y){
@@ -977,6 +999,7 @@ output$scatter_plot <- renderPlotly({
                       ,aes(x=df_x, y=df_y
                            ,text=txt(.data)
                       )) +
+          theme_classic() +
           geom_point(color=col)
       }
 
@@ -987,7 +1010,7 @@ output$scatter_plot <- renderPlotly({
 
       # draw a regression line
       if(rv$scatter_lm){
-        fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y))
+        fig <- fig + geom_smooth(method=rv$lm_method,fill="#F5DF4D",inherit.aes = F,aes(df_x, df_y),se=rv$sm_conf,size=0.5)
       }
 
       rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
@@ -1116,12 +1139,13 @@ output$dens_plot <- renderPlotly({
 output$dens_stats_plot <- renderPlotly({
   withProgress(value=1,message = "Generating plots ...",{
     df <- retrieve_dens_df()
-    df[["Cell"]] <- translate_cells(df$patient_id)
+    df[["Cell"]] <- paste0(translate_cells(df$patient_id),"|",df$patient_id)
     dep_name <- dependency_names()
     
     p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
       scale_color_manual(values=pal_jco("default")(length(levels(df$Level)))) +
       geom_jitter(shape=16, position=position_jitter(0.2)) +
+      theme_classic() +
       labs(title="Cell line distribution",x="", y = dep_name)
     
     ggplotly(p,tooltip = c("Line","x","y"))

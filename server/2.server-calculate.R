@@ -149,7 +149,8 @@ observeEvent(input$confirm,{
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
-        rv$plot_type <- "1"; if(rv$cor_method=="pearson"){rv$cor_method <- "kendall"}
+        rv$plot_type <- "1"; if(rv$cor_method=="pearson" & !rv$depmap){rv$cor_method <- "kendall"}
+        if(rv$depmap){rv$cor_method<-"pearson";rv$scatter_log_x<-F}
       }else{
         rv$plot_type <- "all"; if(rv$cor_method!="pearson"){rv$cor_method <- "pearson"}
       }
