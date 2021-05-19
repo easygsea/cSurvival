@@ -1048,9 +1048,10 @@ output$snv_stats_plot <- renderPlotly({
 output$ui_error <- renderUI({
   req(!is.null(input$plot_type))
   if(input$plot_type == "gender"){
+    if(rv$depmapr){pname <- "cell lines";pcont <- "contain"}else{pname <- "project(s)";pcont <- "contain(s)"}
     div(
       br(),
-      p(style="color:gray;font-size:120%;","Unable to assess for gender effect. The selected project(s) only contain(s) ",rv[["df_gender"]]," data.")
+      p(style="color:gray;font-size:120%;",paste0("Unable to assess for gender effect. The selected ",pname," only ",pcont," ",rv[["df_gender"]]," data."))
       ,br()
     )
   }#else if(rv$plot_type == "1" | rv$plot_type == "2"){

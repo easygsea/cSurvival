@@ -923,7 +923,11 @@ observeEvent(input$depmap_gene,{
       dplyr::select(-c(CCLE_Name, primary_or_metastasis, primary_disease, Subtype))
     colnames(df_survival_o) <- c("patient_id","dependency","gender")
     df_survival_o <- df_survival_o %>% dplyr::filter(!is.na(dependency))
-    df_survival_o[["dependency"]] <- 10^df_survival_o[["dependency"]]
+    if(rv$project == "DepMap-Drug"){
+      df_survival_o[["dependency"]] <- 2^df_survival_o[["dependency"]]
+    }else{
+      df_survival_o[["dependency"]] <- 10^df_survival_o[["dependency"]]
+    }
     genes_len <- nrow(df_survival_o)
     if(genes_len < 20){
       shinyalert(paste0(gene," only has ",genes_len," data points in the selected cell lines."

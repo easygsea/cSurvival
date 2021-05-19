@@ -593,7 +593,7 @@ retrieve_dens_df <- function(){
   req(!is.null(df[["dependency"]]))
   df[["dependency"]] <- log10(df[["dependency"]])
   colnames(df)[2] <- dependency_names()
-  colnames(df)[3] <- "Level"
+  colnames(df)[ncol(df)] <- "Level"
   return(df)
 }
 #==============================================#

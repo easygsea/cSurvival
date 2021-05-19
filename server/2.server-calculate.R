@@ -368,6 +368,6 @@ observeEvent(input$confirm,{
     
     # update parameters
     rv$show_ui <- "yes"
-    if(rv$cox_km == "dens"){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}
+    rv$cox_km <- rv$cox_kmr
   }
 })

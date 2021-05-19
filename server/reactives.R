@@ -88,6 +88,7 @@ dp_ge_q <- reactive({
   }else if(rv$project == "DepMap-RNAi"){
     gsub("CERES","DEMETER2",txt)
   }else if(rv$project == "DepMap-Drug"){
-    "Cell viability as measured by logfold change relative to DMSO"
+    paste0("Cell viability as measured by logfold change (logFC) relative to DMSO."
+           ," In our survival curves, values on x-axis are converted back to fold change by computation as <b>2 ^ logFC</b>.")
   }
 })
