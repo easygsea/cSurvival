@@ -140,16 +140,16 @@ observeEvent(input$confirm,{
           value = rv$censor_time
         )
         req(error_censor == 0)
+        
+        # automatic adjustment of time units
+        d_max <- max(rv[["df_survival"]][["survival_days"]])
+        if(d_max < 1800){rv$ymd_int_m<-5;rv$ymd_int_d<-200}
+        if(d_max < 1200){rv$ymd_int_m<-3;rv$ymd_int_d<-100}
+        if(d_max < 600){rv$ymd_int_m<-2;rv$ymd_int_d<-50}
+        if(d_max < 400){rv$ymd_int_m<-1;rv$ymd_int_d<-30}
       }else{
         rv$censor_time_p <- rv$depmap_gene
       }
-
-      # automatic adjustment of time units
-      d_max <- max(rv[["df_survival"]][["survival_days"]])
-      if(d_max < 1800){rv$ymd_int_m<-5;rv$ymd_int_d<-200}
-      if(d_max < 1200){rv$ymd_int_m<-3;rv$ymd_int_d<-100}
-      if(d_max < 600){rv$ymd_int_m<-2;rv$ymd_int_d<-50}
-      if(d_max < 400){rv$ymd_int_m<-1;rv$ymd_int_d<-30}
 
       # ------- begin analysis after error checking -----
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
@@ -375,7 +375,8 @@ observeEvent(input$confirm,{
     })
 
     # update parameters
+    rv$cox_km <- "km"
+    
     rv$show_ui <- "yes"
-    rv$cox_km <- rv$cox_kmr
   }
 })

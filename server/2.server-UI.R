@@ -1,5 +1,6 @@
 # ------------ Plots area ------------
 output$ui_results <- renderUI({
+  req(rv$project != "")
   req(rv$try_error < 1)
   req(!is.null(rv[["cox_1"]]))
   x <- rv$variable_nr
@@ -29,7 +30,7 @@ output$ui_results <- renderUI({
     indi <- as.list(1:x)
     names(indi) <- paste0("Survival plot #",1:x)
     types <- list(
-      "Interaction Survival plot" = "all"
+      "Interaction survival plot" = "all"
     ) %>% c(.,indi)
 
     # check data types
@@ -276,7 +277,7 @@ observeEvent(input$plot_type,{
   req(!is.null(input$plot_type))
   req(rv$surv_plotted == "plotted")
   if(rv$cox_km == "dens"){if(if_surv(plot_type=input$plot_type)){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}else{rv$cox_km <- rv$cox_kmr}}
-  rv[["res"]] <- NULL
+  # rv[["res"]] <- NULL
   x <- rv$plot_type <- input$plot_type
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
@@ -600,9 +601,10 @@ output$download_plot <- downloadHandler(
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
-  req(rv$plot_type != "snv_stats" & rv$plot_type != "gsea")
-  req(rv$cox_km != "dens")
-  if(if_surv()){
+  if(rv$depmapr){req(rv$cox_km != "dens")}
+  surv_yn <- if_surv(plot_type=input$plot_type)
+
+  if(surv_yn){
     req(!is.null(rv[["res"]]))
 
     n_lels <- length(rv[["lels"]])
@@ -664,7 +666,7 @@ output$ui_stats <- renderUI({
     ,boxPad(
       color = "light-blue",
       fluidRow(
-        if(if_surv() & rv$cox_km == "cox"){
+        if(surv_yn & rv$cox_km == "cox"){
           column(
             6,
             descriptionBlock(
@@ -697,7 +699,7 @@ output$ui_stats <- renderUI({
     ,boxPad(
       color = "gray",
       fluidRow(
-        if(if_surv()){
+        if(surv_yn){
           column(12,
             uiOutput("ui_cutoff")
             ,tagList(
@@ -715,7 +717,7 @@ output$ui_stats <- renderUI({
             )
           )
         }
-        ,if(if_surv()){
+        ,if(surv_yn){
           column(
             12,
             conditionalPanel(
@@ -1161,6 +1163,7 @@ output$forest_plot <- renderPlot({
 observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
 observeEvent(input$dens_mean,{rv$dens_mean <- rv$dens_mean})
 output$dens_plot <- renderPlotly({
+  req(rv$project != "")
   df <- retrieve_dens_df()
   dep_name <- dependency_names()
 
@@ -1188,6 +1191,7 @@ output$dens_plot <- renderPlotly({
 
 # -------- 7b. stats of density plot ---------
 output$dens_stats_plot <- renderPlotly({
+  req(rv$project != "")
   withProgress(value=1,message = "Generating plots ...",{
     df <- retrieve_dens_df()
     df[["Cell"]] <- paste0(translate_cells(df$patient_id),"|",df$patient_id)
