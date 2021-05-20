@@ -450,11 +450,11 @@ plot_surv <-
     
     # x-axis time intervals
     if(rv$ymd == "d"){
-      xscale <- 1; xlab <- "Days"; breaktime <- NULL
+      xscale <- 1; xlab <- "Days"; breaktime <- rv$ymd_int_d
     }else if(rv$ymd == "m"){
-      xscale <- "d_m"; xlab <- "Months"; breaktime <- 608.75 # 30.4375 * 20 = 365.25
+      xscale <- "d_m"; xlab <- "Months"; breaktime <- 30.4375 * rv$ymd_int_m # 608.75 # 30.4375 * 20 = 365.25
     }else if(rv$ymd == "y"){
-      xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25
+      xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25 * rv$ymd_int_y
     }
     
     if(mode == "km"){

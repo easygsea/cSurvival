@@ -289,9 +289,20 @@ output$plot_gear <- renderUI({
           ),
           direction = "horizontal"
         )
-        ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis"
+        ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
         ))
         ,placement = "top")
+        # fine-tune time intervals
+        ,sliderTextInput(
+          "ymd_int",
+          HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
+          choices = rv$ymd_int_range,
+          selected = rv$ymd_int
+          ,grid=T, force_edges=T
+        )
+        ,bsTooltip("ymd_int_q",HTML(paste0(
+          "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
+        )),placement = "top")
         # confidence intervals
         ,materialSwitch(
           inputId = "confi",
@@ -440,7 +451,16 @@ output$plot_gear <- renderUI({
 })
 
 observeEvent(input$cox_km,{rv$cox_km <- input$cox_km})
-observeEvent(input$ymd,{rv$ymd <- input$ymd})
+observeEvent(input$ymd,{
+  req(rv$ymd != input$ymd)
+  rv$ymd <- input$ymd
+  rv$ymd_int <- rv[[paste0("ymd_int_",input$ymd)]]
+  rv$ymd_int_range <- rv[[paste0("ymd_int_range_",input$ymd)]]
+},ignoreInit = T)
+observeEvent(input$ymd_int,{
+  req(rv$ymd_int != input$ymd_int)
+  rv$ymd_int <- rv[[paste0("ymd_int_",input$ymd)]] <- input$ymd_int
+},ignoreInit = T)
 observeEvent(input$median,{rv$median <- input$median},ignoreNULL = F)
 observeEvent(input$confi,{rv$confi <- input$confi})
 observeEvent(input$confi_opt,{rv$confi_opt <- input$confi_opt})

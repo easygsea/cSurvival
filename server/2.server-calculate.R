@@ -57,7 +57,7 @@ observeEvent(input$confirm,{
     
     req(is.null(error_g) & is.null(error_lib) & is.null(error_manual) & is.null(error_gs))
     
-    #------ 2. begin analysis ------
+    #------ 2. survival data processing ------
     withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
       # update survival df
       # filter OS, DFS, or PFS
@@ -130,7 +130,14 @@ observeEvent(input$confirm,{
       )
       req(error_censor == 0)
       
-      # begin analysis after error checking
+      # automatic adjustment of time units
+      d_max <- max(rv[["df_survival"]][["survival_days"]])
+      if(d_max < 1800){rv$ymd_int_m<-5;rv$ymd_int_d<-200}
+      if(d_max < 1200){rv$ymd_int_m<-3;rv$ymd_int_d<-100}
+      if(d_max < 600){rv$ymd_int_m<-2;rv$ymd_int_d<-50}
+      if(d_max < 400){rv$ymd_int_m<-1;rv$ymd_int_d<-30}
+      
+      # ------- begin analysis after error checking -----
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
