@@ -376,6 +376,7 @@ observeEvent(input$confirm,{
 
     # update parameters
     rv$cox_km <- "km"
+    if(rv$tcga){rv$plot_sstype <- rv$plot_stype}
     
     rv$show_ui <- "yes"
   }

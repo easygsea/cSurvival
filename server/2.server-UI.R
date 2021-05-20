@@ -636,7 +636,7 @@ output$ui_stats <- renderUI({
 
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                    ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
-    stats_title <- paste0(rv$plot_stype," analysis by ",names(surv_methods)[surv_methods == rv$cox_km])
+    stats_title <- paste0(rv$plot_sstype," analysis by ",names(surv_methods)[surv_methods == rv$cox_km])
   }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
     req(!is.null(rv[["res_scatter"]]))
     stats_title <- "Correlation statistics"
@@ -646,7 +646,11 @@ output$ui_stats <- renderUI({
     p <- format(as.numeric(res$p.value), scientific = T, digits = 3)
     p_title <- "P-value"
     p_w <- 6
+  }else{
+    stats_title <- ""
   }
+  
+  req(stats_title != "")
 
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",

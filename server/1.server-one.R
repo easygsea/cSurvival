@@ -103,7 +103,7 @@ observeEvent(input$confirm_project,{
     if(study == "DepMap"){rv$depmap <- T; rv$plot_stype <- paste0(gsub("^DepMap-","",project)," dependency")}else{rv$depmap <- F}
 
     if(study != "DepMap"){
-      rv$indir <- paste0(getwd(),"/project_data/",project,"/")
+      rv$indir <- paste0(pro_dir,project,"/")
       if(rv$tcga){
         infiles <- paste0(rv$indir,"df_survival_o.csv")
         l <- lapply(infiles, function(x){
@@ -131,7 +131,7 @@ observeEvent(input$confirm_project,{
       }
       update_genes_ui(opt="nil")
     }else{
-      rv$indir <- paste0(getwd(),"/project_data/DepMap/")
+      rv$indir <- paste0(pro_dir,"DepMap/")
       rv$depmap_path <- paste0(rv$indir,project,".csv")
       # the genes for initial selection
       rv$depmap_genes <- fread(rv$depmap_path, sep = ",", nrows = 0, quote="")

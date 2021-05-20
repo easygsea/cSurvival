@@ -109,7 +109,7 @@ dyn_list <- function(x){
   )
 }
 # the data that tell what Target projects data have
-TARGET_existing_data <- fread(paste0(getwd(),"/project_data/TARGET_existing_data.csv"), sep = ",") %>%
+TARGET_existing_data <- fread(paste0(pro_dir,"TARGET_existing_data.csv"), sep = ",") %>%
   mutate(existing_data = str_split(existing_data, pattern = ","))
 
 # -------- TCGA survival endpoints ----------
@@ -122,7 +122,7 @@ tcga_stypes <- c(
 )
 
 # -------- TCGA clinical codes ----------
-tcga_codes <- fread(paste0(getwd(),"/project_data/tcga_codes.tsv"), sep = "\t")
+tcga_codes <- fread(paste0(pro_dir,"tcga_codes.tsv"), sep = "\t")
 
 codes_color <- list(
   "yes" = "#339900" #99cc33

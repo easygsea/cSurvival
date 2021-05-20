@@ -1,7 +1,8 @@
 bcols = c("#f0eee9","#e9ebf0") # colors for parameter wellpanels
 
 # ------ available projects -----
-projects <- read_csv(paste0(getwd(),"/project_data/project_name.csv")) %>% arrange(project_id)
+pro_dir <- paste0(getwd(),"/www/project_data/")
+projects <- read_csv(paste0(pro_dir,"project_name.csv")) %>% arrange(project_id)
 
 projects_abbr <- projects$project_id
 projects_full <- projects$name
@@ -21,5 +22,5 @@ projects[["DepMap"]][["DepMap-RNAi: RNAi screening"]] <- "DepMap-RNAi"
 projects <- sort_list(projects)
 
 # ------- CCLE basic info --------
-df_ccle <- fread(paste0(getwd(),"/project_data/DepMap/ccle.csv"), select = c("patient_id","CCLE_Name","gender","primary_or_metastasis","primary_disease","Subtype"))
+df_ccle <- fread(paste0(pro_dir,"DepMap/ccle.csv"), select = c("patient_id","CCLE_Name","gender","primary_or_metastasis","primary_disease","Subtype"))
 
