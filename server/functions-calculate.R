@@ -212,11 +212,15 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
 
     # # test if there is significant difference between high and low level genes
     # if(rv$cox_km == "cox"){
-      surv_diff <- surv_cox(df)
-      p_diff <- coef(summary(surv_diff))[,5]
+      # surv_diff <- surv_cox(df)
+      # p_diff <- coef(summary(surv_diff))[,5]
     # }else if(rv$cox_km == "km"){
-    #   surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-    #   p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+    if(rv$depmap){
+      surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
+    }else{
+      surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+    }
+      p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     # }
     if(!is.na(p_diff)){
       if(p_diff <= least_p_value){
