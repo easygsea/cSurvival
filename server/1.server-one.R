@@ -72,6 +72,7 @@ outputOptions(output, "projectStatus", suspendWhenHidden = FALSE)
 
 # extract genes when project selection is confirmed
 observeEvent(input$confirm_project,{
+  rv$depmap_gene_appear <- "no"
   # check if selected projects are from different studies
   project <- input$project
   study <- sapply(project, function(x){
@@ -789,7 +790,7 @@ output$depmap_pars <- renderUI({
 })
 
 # cancer subtypes
-observeEvent(input$ccle_cancer_types,{rv$ccle_cancer_types <- input$ccle_cancer_types})
+observeEvent(input$ccle_cancer_types,{req(input$ccle_cancer_types!="");rv$ccle_cancer_types <- input$ccle_cancer_types})
 output$ui_ccle_subtypes <- renderUI({
   req(!is.null(input$ccle_cancer_types))
   req(!is.null(rv$depmap_ccle))
@@ -821,12 +822,18 @@ output$ui_ccle_subtypes <- renderUI({
 })
 
 # CCLE cell lines
-observeEvent(input$ccle_cancer_subtypes,{rv$ccle_cancer_subtypes <- input$ccle_cancer_subtypes})
+observeEvent(input$ccle_cancer_subtypes,{req(input$ccle_cancer_subtypes!="");rv$ccle_cancer_subtypes <- input$ccle_cancer_subtypes})
 output$ui_cells <- renderUI({
-  req(!is.null(input$ccle_cancer_subtypes))
+  req(input$ccle_cancer_subtypes != "")
   req(!is.null(rv$depmap_ccle))
-  cells <- rv$depmap_ccle %>% dplyr::filter(primary_disease %in% rv$ccle_cancer_types) %>%
-    dplyr::filter(Subtype %in% rv$ccle_cancer_subtypes)
+  cells <- rv$depmap_ccle %>% dplyr::filter(primary_disease %in% rv$ccle_cancer_types)
+  # execute the following only when newly clicked
+  if(length(rv$ccle_cancer_subtypes)==1){
+    if(rv$ccle_cancer_subtypes != ""){
+      cells <- cells %>%
+        dplyr::filter(Subtype %in% rv$ccle_cancer_subtypes)
+    }
+  }
   cells_names <- cells[["CCLE_Name"]]
   cells <- cells[["patient_id"]]
   names(cells) <- cells_names
@@ -858,7 +865,8 @@ output$ui_cells <- renderUI({
 
 # DepMap gene/drug selection
 output$ui_ccle_gene <- renderUI({
-  req(!is.null(input$ccle_cells))
+  req(input$ccle_cells != "")
+  rv$depmap_gene_appear <- "yes"
   div(
     column(
       3,
@@ -890,7 +898,8 @@ output$ui_ccle_gene <- renderUI({
 })
 
 # update available DepMap genes/drugs for selection
-observeEvent(input$ccle_cells,{
+observeEvent(rv$depmap_gene_appear,{
+  req(rv$depmap_gene_appear == "yes")
   updateSelectizeInput(
     session,"depmap_gene",choices = rv$depmap_genes, server = T, selected = ""
   )

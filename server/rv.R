@@ -7,6 +7,7 @@ rv <- reactiveValues(
   ,tcga=T,target=T,depmap=F,depmapr=F
   ,ccle_cancer_types="",ccle_cancer_subtypes="",depmap_gene=""
   ,depmap_path=NULL,depmap_genes=NULL,depmap_ids=NULL,depmap_ccle=NULL,cell_lines=NULL
+  ,depmap_gene_appear="no"
   
   ,variable_n_reached=0
   ,variable_n = 1

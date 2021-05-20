@@ -807,6 +807,7 @@ observeEvent(input$km_mul,{
 
 # ----------- 3b. pairwise heatmap ----------
 output$km_hm <- renderPlotly({
+  req(length(rv[["res"]][[rv$cox_km]][["stats"]]) == 2)
   pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
   req(is.numeric(pvals))
   counts <- -log10(pvals)
