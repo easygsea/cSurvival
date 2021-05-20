@@ -81,7 +81,7 @@ output$ui_results <- renderUI({
   }else{
     area_w <- 12
   }
-  
+
   # title
   if(rv$depmapr){
     ge <- paste0(dependency_names(),add_help("dp_ge_q")," by ")
@@ -309,7 +309,48 @@ output$cox_plot <- renderPlot({
 output$plot_gear <- renderUI({
   if(if_surv()){
     if(rv$cox_km == "cox" | rv$cox_km == "km" ){
-      fluidRow(
+    fluidRow(
+      column(
+        12,
+        # median thresholds
+        radioGroupButtons(
+          inputId = "ymd",
+          label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
+          choices = ymd_names,
+          selected = rv$ymd,
+          size = "sm",
+          checkIcon = list(
+            yes = icon("check-square"),
+            no = icon("square-o")
+          ),
+          direction = "horizontal"
+        )
+        ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
+        ))
+        ,placement = "top")
+        # fine-tune time intervals
+        ,sliderTextInput(
+          "ymd_int",
+          HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
+          choices = rv$ymd_int_range,
+          selected = rv$ymd_int
+          ,grid=T, force_edges=T
+        )
+        ,bsTooltip("ymd_int_q",HTML(paste0(
+          "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
+        )),placement = "top")
+        # confidence intervals
+        ,materialSwitch(
+          inputId = "confi",
+          label = HTML(paste0("<b>Plot confidence intervals?</b> ",add_help("confi_q"))),
+          value = rv$confi, inline = F, width = "100%",
+          status = "danger"
+        )
+        ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
+                   ,placement = "top")
+      )
+      ,conditionalPanel(
+        'input.confi',
         column(
           12,
           # median thresholds
@@ -507,7 +548,16 @@ output$plot_gear <- renderUI({
 })
 
 observeEvent(input$cox_km,{if(input$cox_km!="dens"){rv$cox_kmr <- input$cox_km};rv$cox_km <- input$cox_km})
-observeEvent(input$ymd,{rv$ymd <- input$ymd})
+observeEvent(input$ymd,{
+  req(rv$ymd != input$ymd)
+  rv$ymd <- input$ymd
+  rv$ymd_int <- rv[[paste0("ymd_int_",input$ymd)]]
+  rv$ymd_int_range <- rv[[paste0("ymd_int_range_",input$ymd)]]
+},ignoreInit = T)
+observeEvent(input$ymd_int,{
+  req(rv$ymd_int != input$ymd_int)
+  rv$ymd_int <- rv[[paste0("ymd_int_",input$ymd)]] <- input$ymd_int
+},ignoreInit = T)
 observeEvent(input$median,{rv$median <- input$median},ignoreNULL = F)
 observeEvent(input$confi,{rv$confi <- input$confi})
 observeEvent(input$sm_conf,{rv$sm_conf <- input$sm_conf})
@@ -852,7 +902,7 @@ output$scatter_plot <- renderPlotly({
         pid <- "Patient ID"
         ltitle <- dep_name <- "Survival days"
       }
-      
+
       if(rv$scatter_log_x){
         if(rv$depmapr){
           df_x <- 2 ^ df$survival_days
@@ -1120,7 +1170,7 @@ output$dens_plot <- renderPlotly({
     p <- ggplot(df, aes(x=.data[[dep_name]], color=Level, ..scaled..)) + geom_density() +
       scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
   }
-  
+
   if(rv$dens_mean){
     mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
     p <- p +
@@ -1131,7 +1181,7 @@ output$dens_plot <- renderPlotly({
     # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
     labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
     theme_classic()
-  
+
   ggplotly(p)
 })
 
@@ -1141,13 +1191,13 @@ output$dens_stats_plot <- renderPlotly({
     df <- retrieve_dens_df()
     df[["Cell"]] <- paste0(translate_cells(df$patient_id),"|",df$patient_id)
     dep_name <- dependency_names()
-    
+
     p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
       scale_color_manual(values=pal_jco("default")(length(levels(df$Level)))) +
       geom_jitter(shape=16, position=position_jitter(0.2)) +
       theme_classic() +
       labs(title="Cell line distribution",x="", y = dep_name)
-    
+
     ggplotly(p,tooltip = c("Line","x","y"))
   })
 })

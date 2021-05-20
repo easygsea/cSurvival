@@ -23,13 +23,17 @@ rv <- reactiveValues(
   ,censor_time_min=1,censor_time_max=100,censor_time_step=1
   ,censor_time_min_y=1,censor_time_max_y=100,censor_time_step_y=1,censor_time_y=10
   ,censor_time_min_m=20,censor_time_max_m=2000,censor_time_step_m=20,censor_time_m=200
-  ,censor_time_min_d=1000,censor_time_max_d=30000,censor_time_step_d=1000,censor_time_d=3000
+  ,censor_time_min_d=400,censor_time_max_d=30000,censor_time_step_d=200,censor_time_d=3000
   
   ,plot_type="all"
   
   ,cox_km = "km",cox_kmr="km"
   ,km_mul = "hommel" # multiple correction method
   ,ymd="y" # default plot survival in months; "d" for days; "m" for months; "y" for years
+  ,ymd_int=1,ymd_int_range=c(1,2,3)
+  ,ymd_int_y=1,ymd_int_range_y=c(1,2,3)
+  ,ymd_int_m=20,ymd_int_range_m=c(1,2,3,5,10,20,40)
+  ,ymd_int_d=1000,ymd_int_range_d=c(30,50,100,200,300,1000)
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"
   ,risk_table = T,cum_table=T

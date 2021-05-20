@@ -93,7 +93,7 @@ extract_gene_data <- function(x, type){
   }else{
     data <- rbindlist(l, use.names = T)
   }
-  
+
   # if depmap, filter patient ID
   if(rv$depmap){
     data <- data %>% dplyr::filter(patient_id %in% input$ccle_cells)
@@ -505,6 +505,14 @@ plot_surv <-
     }else{
       dep_name <- dependency_names() %>% firstlower()
       xscale <- 1; xlab <- paste0("Exponential of ",dep_name); breaktime <- NULL
+
+    # x-axis time intervals
+    if(rv$ymd == "d"){
+      xscale <- 1; xlab <- "Days"; breaktime <- rv$ymd_int_d
+    }else if(rv$ymd == "m"){
+      xscale <- "d_m"; xlab <- "Months"; breaktime <- 30.4375 * rv$ymd_int_m # 608.75 # 30.4375 * 20 = 365.25
+    }else if(rv$ymd == "y"){
+      xscale <- "d_y"; xlab <- "Years"; breaktime <- 365.25 * rv$ymd_int_y
     }
 
 

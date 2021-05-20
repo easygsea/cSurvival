@@ -5,7 +5,7 @@ observeEvent(input$confirm,{
     #------ 0. clear previous data --------
     clear_rds()
     rv$show_ui <- ""
-    
+
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
     for(x in 1:rv$variable_n){
@@ -35,7 +35,7 @@ observeEvent(input$confirm,{
         }
       }
     }
-    
+
     if(!is.null(error_g)){
       txt <- paste0("Analysis #",error_g," step ",error_g,".3") %>% paste0(., collapse = ", ")
       txt <- paste0("Please select a gene in ",txt)
@@ -54,9 +54,9 @@ observeEvent(input$confirm,{
       txt <- paste0("Please select a gene set (GS) in ",txt)
       shinyalert(txt)
     }
-    
+
     req(is.null(error_g) & is.null(error_lib) & is.null(error_manual) & is.null(error_gs))
-    
+
     if(rv$depmap){
       error_depmap <- 0
       if(input$depmap_gene == ""){
@@ -66,8 +66,8 @@ observeEvent(input$confirm,{
       req(error_depmap == 0)
     }
     rv$depmapr <- rv$depmap
-    
-    #------ 2. begin analysis ------
+
+    #------ 2. survival data processing ------
     withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
       # update survival df
       # filter OS, DFS, or PFS
@@ -143,8 +143,20 @@ observeEvent(input$confirm,{
       }else{
         rv$censor_time_p <- rv$depmap_gene
       }
+      updateNumericInput(
+        session,"censor_time", NULL,
+        value = rv$censor_time
+      )
+      req(error_censor == 0)
 
-      # begin analysis after error checking
+      # automatic adjustment of time units
+      d_max <- max(rv[["df_survival"]][["survival_days"]])
+      if(d_max < 1800){rv$ymd_int_m<-5;rv$ymd_int_d<-200}
+      if(d_max < 1200){rv$ymd_int_m<-3;rv$ymd_int_d<-100}
+      if(d_max < 600){rv$ymd_int_m<-2;rv$ymd_int_d<-50}
+      if(d_max < 400){rv$ymd_int_m<-1;rv$ymd_int_d<-30}
+
+      # ------- begin analysis after error checking -----
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
@@ -157,7 +169,7 @@ observeEvent(input$confirm,{
       df_list <- list()
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""
-      
+
       #------ 3. Loop from 1 to rv$variable_n ------
       for(x in 1:rv$variable_n){
         # clear previous RVs
@@ -167,14 +179,14 @@ observeEvent(input$confirm,{
         db_id <- paste0("db_",x)
         gs_mode_id <- paste0("gs_mode_",x)
         g_ui_id <- paste0("g_",x);gs_lib_id <- gs_lib_id <- paste0("gs_l_",x)
-        
+
         #------ 3A. detect type of input data ------
         if((input[[cat_id]] == "g" & !is.null(input[[db_id]])) | (input[[cat_id]] == "gs" & !is.null(input[[gs_mode_id]]))){
           # clear RVs
           rv[[paste0("title_",x)]] <- ""
           # mode of extracting gene expression/mutation data in extract_gene_data
           extract_mode <- input_mode(x)
-          
+
           # title for the survival plot
           rv[[paste0("title_",x)]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
           if(rv[["title_all"]] == ""){
@@ -184,7 +196,7 @@ observeEvent(input$confirm,{
           }
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)
-          
+
           # check if manually input genes exist in database
           if(extract_mode == "manual"){
             n_col <- ncol(data) - 1
@@ -196,7 +208,7 @@ observeEvent(input$confirm,{
                                                  )
             }
           }
-          
+
           req(rv[[paste0("title_",x)]] != "")
 
           # ---------- 3B. perform Surv if expression-like data --------
@@ -208,7 +220,7 @@ observeEvent(input$confirm,{
               min <- ifelse(is.null(input[[lower_id]]), rv[[lower_id]], input[[lower_id]])
               max <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
               step <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
-              
+
               enough_error <- 0
               results <- get_info_most_significant_rna(data, min, max, step, mode=input[[cat_id]])
               if(is.null(results)){
@@ -219,9 +231,9 @@ observeEvent(input$confirm,{
                 }
                 shinyalert(paste0(txt,"."))
               }
-              
+
               req(enough_error == 0)
-              
+
               # extract most significant df
               df <- results[["df"]]
               rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
@@ -236,7 +248,7 @@ observeEvent(input$confirm,{
               df <- get_df_by_cutoff(data, cutoff)
               rv[[paste0("cutoff_",x)]] <- paste0(input[[clow_id]],"%")
             }
-            
+
           # ---------- 3C. survival analysis on SNVs ---------
           }else if(extract_mode == "snv"){
             snv_id <- paste0("snv_method_",x)
@@ -264,7 +276,7 @@ observeEvent(input$confirm,{
             }
 
             req(error == 0)
-            
+
             # create df for survival analysis
             df <- get_df_snv(data, nons, syns)
             error_snv <- 0
@@ -274,13 +286,13 @@ observeEvent(input$confirm,{
             }
             req(error_snv == 0)
             rv[[paste0("cutoff_",x)]] <- ""
-            
+
           # ---------- 3D. survival analysis on CNVs ---------
           }else if(extract_mode == "cnv"){
             cnv_mode <- ifelse_rv(paste0("cnv_par_",x))
-            
+
             results <- get_info_most_significant_cnv(data,cnv_mode)
-            
+
             # extract most significant df
             df <- results[["df"]]
             rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
@@ -289,9 +301,9 @@ observeEvent(input$confirm,{
             }else{
               rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
             }
-            
+
           }
-          
+
           # save df
           df_list[[x]] <- df
           rv[[paste0("df_",x)]] <- df
@@ -300,18 +312,18 @@ observeEvent(input$confirm,{
           lels <- levels(df$level)
           rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
           names(rv[[paste0("lels_",x)]]) <- lels
-          
+
           # perform survival analysis
           cox_id <- paste0("cox_",x)
           rv[[cox_id]] <- cal_surv_rna(df,1)
           # saveRDS(rv[[cox_id]], "cox_dm")
-          
+
           # save data type to rv
           rv[[paste0("data_type_",x)]] <- extract_mode
-          
+
         }
       }
-      
+
       # ------------- 3E. perform n=2 interaction Surv ---------
       if(rv$variable_n > 1){
         # generate interaction df
@@ -319,7 +331,7 @@ observeEvent(input$confirm,{
           function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
           df_list
         )
-        
+
         x_y <- c("x","y")[1:length(df_list)]
         df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
         rv[["df_all"]] <- df_combined
@@ -329,24 +341,24 @@ observeEvent(input$confirm,{
         df_combined$level <- factor(df_combined$level, levels = lels)
         rv[["lels_all"]] <- lapply(lels, function(x) table(df_combined$level == x)["TRUE"] %>% unname(.))
         names(rv[["lels_all"]]) <- lels
-        
+
         # perform survival analysis
         rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n)
         # saveRDS(rv[["cox_all"]], "cox_all")
       }
-      
+
       # ------------- 3F. perform n=1 gender interaction Surv ---------
       if(rv$variable_n == 1){
         # generate interaction df
         df_combined <- df_list[[1]] %>% inner_join(dplyr::select(rv$df_survival, patient_id, gender), by = "patient_id") %>%
           dplyr::filter(gender != "Unknown")
-        
+
         # gender types
         rv$scatter_gender <- rv[["genders"]] <- df_combined %>% dplyr::select(gender) %>% unique(.) %>% unlist(.) %>% unname(.)
 
         df_combined <- dplyr::rename(df_combined, level.x = level, level.y = gender)
         df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",c("x","y"))),1,paste0,collapse="_")
-        
+
         # no of cases in each group
         lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
         if(length(lels) > 2){
@@ -354,7 +366,7 @@ observeEvent(input$confirm,{
           lels_y <- unique(df_combined$`level.y`) %>% sort(.,decreasing = T)
           df_combined$`level.y` <- factor(df_combined$`level.y`, levels = lels_y)
           rv[["df_gender"]] <- df_combined
-          
+
           # level tallies
           rv[["lels_gender"]] <- lapply(lels, function(x) table(df_combined$level == x)["TRUE"] %>% unname(.))
           names(rv[["lels_gender"]]) <- lels
@@ -366,7 +378,7 @@ observeEvent(input$confirm,{
         }
       }
     })
-    
+
     # update parameters
     rv$show_ui <- "yes"
     rv$cox_km <- rv$cox_kmr
