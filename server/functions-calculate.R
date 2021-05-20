@@ -588,7 +588,7 @@ plot_surv <-
 #==============================================#
 translate_cells <- function(patient_ids){
   df <- rv$depmap_ccle
-  df %>% dplyr::filter(patient_id %in% patient_ids) %>% .[["CCLE_Name"]]
+  cells <- tibble(patient_id = patient_ids) %>% dplyr::inner_join(df, by = "patient_id") %>% .[["CCLE_Name"]]
 }
 
 retrieve_dens_df <- function(){
