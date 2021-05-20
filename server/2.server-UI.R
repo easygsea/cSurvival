@@ -309,48 +309,7 @@ output$cox_plot <- renderPlot({
 output$plot_gear <- renderUI({
   if(if_surv()){
     if(rv$cox_km == "cox" | rv$cox_km == "km" ){
-    fluidRow(
-      column(
-        12,
-        # median thresholds
-        radioGroupButtons(
-          inputId = "ymd",
-          label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
-          choices = ymd_names,
-          selected = rv$ymd,
-          size = "sm",
-          checkIcon = list(
-            yes = icon("check-square"),
-            no = icon("square-o")
-          ),
-          direction = "horizontal"
-        )
-        ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
-        ))
-        ,placement = "top")
-        # fine-tune time intervals
-        ,sliderTextInput(
-          "ymd_int",
-          HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
-          choices = rv$ymd_int_range,
-          selected = rv$ymd_int
-          ,grid=T, force_edges=T
-        )
-        ,bsTooltip("ymd_int_q",HTML(paste0(
-          "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
-        )),placement = "top")
-        # confidence intervals
-        ,materialSwitch(
-          inputId = "confi",
-          label = HTML(paste0("<b>Plot confidence intervals?</b> ",add_help("confi_q"))),
-          value = rv$confi, inline = F, width = "100%",
-          status = "danger"
-        )
-        ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
-                   ,placement = "top")
-      )
-      ,conditionalPanel(
-        'input.confi',
+      fluidRow(
         column(
           12,
           # median thresholds
@@ -366,9 +325,20 @@ output$plot_gear <- renderUI({
             ),
             direction = "horizontal"
           )
-          ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis"
+          ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
           ))
           ,placement = "top")
+          # fine-tune time intervals
+          ,sliderTextInput(
+            "ymd_int",
+            HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
+            choices = rv$ymd_int_range,
+            selected = rv$ymd_int
+            ,grid=T, force_edges=T
+          )
+          ,bsTooltip("ymd_int_q",HTML(paste0(
+            "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
+          )),placement = "top")
           # confidence intervals
           ,materialSwitch(
             inputId = "confi",
@@ -383,12 +353,12 @@ output$plot_gear <- renderUI({
           'input.confi',
           column(
             12,
+            # median thresholds
             radioGroupButtons(
-              inputId = "confi_opt",
-              label = HTML(paste0("Confidence interval style: "),add_help(paste0("confi_opt_q"))),
-              choiceNames = c("Ribbon", "Step"),
-              choiceValues = c("ribbon","step"),
-              selected = rv$confi_opt,
+              inputId = "ymd",
+              label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
+              choices = ymd_names,
+              selected = rv$ymd,
               size = "sm",
               checkIcon = list(
                 yes = icon("check-square"),
@@ -396,51 +366,82 @@ output$plot_gear <- renderUI({
               ),
               direction = "horizontal"
             )
-            ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
-                                                 ," <b>Step</b> plots boundaries."
-            ))
-            ,placement = "top"),
-            # median thresholds
-            checkboxGroupButtons(
-              inputId = "median",
-              label = HTML(paste0("Draw line(s) at median survival? ",add_help("median_q"))),
-              choices = c("Horizontal"="h",
-                          "Vertical"="v"
-              ),
-              selected = rv$median,
-              size="s",
-              checkIcon = list(
-                no = tags$i(class = "fa fa-times",
-                            style = "color: crimson"),
-                yes = tags$i(class = "fa fa-check",
-                             style = "color: green"))
-            )
-            ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
+            ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis"
             ))
             ,placement = "top")
-          )
-        )
-        # toggle tables for KM plot
-        ,conditionalPanel(
-          'input.cox_km == "km"',
-          column(
-            12,
-            materialSwitch(
-              inputId = "risk_table",
-              label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
-              value = rv$risk_table, inline = F, width = "100%",
-              status = "danger"
-            )
-            ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
-                       ,placement = "top")
+            # confidence intervals
             ,materialSwitch(
-              inputId = "cum_table",
-              label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
-              value = rv$cum_table, inline = F, width = "100%",
+              inputId = "confi",
+              label = HTML(paste0("<b>Plot confidence intervals?</b> ",add_help("confi_q"))),
+              value = rv$confi, inline = F, width = "100%",
               status = "danger"
             )
-            ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+            ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
                        ,placement = "top")
+          )
+          ,conditionalPanel(
+            'input.confi',
+            column(
+              12,
+              radioGroupButtons(
+                inputId = "confi_opt",
+                label = HTML(paste0("Confidence interval style: "),add_help(paste0("confi_opt_q"))),
+                choiceNames = c("Ribbon", "Step"),
+                choiceValues = c("ribbon","step"),
+                selected = rv$confi_opt,
+                size = "sm",
+                checkIcon = list(
+                  yes = icon("check-square"),
+                  no = icon("square-o")
+                ),
+                direction = "horizontal"
+              )
+              ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
+                                                   ," <b>Step</b> plots boundaries."
+              ))
+              ,placement = "top"),
+              # median thresholds
+              checkboxGroupButtons(
+                inputId = "median",
+                label = HTML(paste0("Draw line(s) at median survival? ",add_help("median_q"))),
+                choices = c("Horizontal"="h",
+                            "Vertical"="v"
+                ),
+                selected = rv$median,
+                size="s",
+                checkIcon = list(
+                  no = tags$i(class = "fa fa-times",
+                              style = "color: crimson"),
+                  yes = tags$i(class = "fa fa-check",
+                               style = "color: green"))
+              )
+              ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
+              ))
+              ,placement = "top")
+            )
+          )
+          # toggle tables for KM plot
+          ,conditionalPanel(
+            'input.cox_km == "km"',
+            column(
+              12,
+              materialSwitch(
+                inputId = "risk_table",
+                label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
+                value = rv$risk_table, inline = F, width = "100%",
+                status = "danger"
+              )
+              ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
+                         ,placement = "top")
+              ,materialSwitch(
+                inputId = "cum_table",
+                label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
+                value = rv$cum_table, inline = F, width = "100%",
+                status = "danger"
+              )
+              ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+                         ,placement = "top")
+            )
           )
         )
       )

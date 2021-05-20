@@ -143,11 +143,6 @@ observeEvent(input$confirm,{
       }else{
         rv$censor_time_p <- rv$depmap_gene
       }
-      updateNumericInput(
-        session,"censor_time", NULL,
-        value = rv$censor_time
-      )
-      req(error_censor == 0)
 
       # automatic adjustment of time units
       d_max <- max(rv[["df_survival"]][["survival_days"]])
