@@ -605,6 +605,10 @@ retrieve_dens_df <- function(){
   }
   colnames(df)[2] <- dependency_names()
   colnames(df)[ncol(df)] <- "Level"
+  df[["Cell"]] <- paste0(translate_cells(df$patient_id),"|",df$patient_id)
+  # df[["Cell"]] <- paste0(gsub("(^.*?)_(.*)","\\1",translate_cells(df$patient_id)),"|",df$patient_id)
+  df <- df %>% dplyr::select(-patient_id)
+  rv[["dens_df"]] <- df
   return(df)
 }
 #==============================================#

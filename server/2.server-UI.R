@@ -149,18 +149,46 @@ output$ui_results <- renderUI({
       }else{
         if(surv_yn & rv$cox_km == "dens"){
           if(typeof(rv[["res"]]) == "list"){
-            div(align="left",
-              column(
-                12,
-                title_div,
+            div(
+              align="left",
+              fluidRow(
+                column(
+                  12,
+                  column(
+                    6,
+                    title_div,
+                  ),
+                  column(
+                    6,align="center",
+                    selectizeInput(
+                      "annot_cells"
+                      ,HTML(paste0("Highlight cell lines:",add_help("annot_cells_q")))
+                      ,choices = c()
+                      ,multiple = T
+                      ,options = list(
+                        `live-search` = TRUE,
+                        placeholder = "Type to search ..."
+                        ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+                      )
+                    )
+                    ,bsTooltip("annot_cells_q",HTML(paste0(
+                      "Select to annotate the cell lines of interest, if any, in the bar plot"
+                    )),placement = "right")
+                  )
+                )
               ),
-              column(
-                6,
-                plotlyOutput("dens_plot",height = "550px", width = "100%")
-              ),
-              column(
-                6,
-                plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
+              fluidRow(
+                column(
+                  12,
+                  column(
+                    6,
+                    plotlyOutput("dens_plot",height = "550px", width = "100%")
+                  ),
+                  column(
+                    6,
+                    plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
+                  )
+                )
               )
             )
           }
@@ -1173,10 +1201,10 @@ output$dens_plot <- renderPlotly({
   dep_name <- dependency_names()
 
   if(rv$dens_fill){
-    p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level, ..scaled..)) + geom_density(alpha=0.4) +
+    p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
       scale_fill_manual(values=pal_jco("default")(length(levels(df$Level))))
   }else{
-    p <- ggplot(df, aes(x=.data[[dep_name]], color=Level, ..scaled..)) + geom_density() +
+    p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
       scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
   }
 
@@ -1197,17 +1225,40 @@ output$dens_plot <- renderPlotly({
 # -------- 7b. stats of density plot ---------
 output$dens_stats_plot <- renderPlotly({
   req(rv$project != "")
+  req(!is.null(rv[["dens_df"]]))
   withProgress(value=1,message = "Generating plots ...",{
-    df <- retrieve_dens_df()
-    df[["Cell"]] <- paste0(translate_cells(df$patient_id),"|",df$patient_id)
+    df <- rv[["dens_df"]]
     dep_name <- dependency_names()
-
+    
+    pos <- position_jitter(0.1, seed = 2)
+    lels_len <- length(levels(df$Level))
+    cols <- pal_jco("default")(lels_len)
     p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
-      scale_color_manual(values=pal_jco("default")(length(levels(df$Level)))) +
-      geom_jitter(shape=16, position=position_jitter(0.2)) +
+      scale_color_manual(values=cols) +
+      geom_jitter(shape=16, position=pos) +
       theme_classic() +
       labs(title="Cell line distribution",x="", y = dep_name)
+    
+    if(length(input$annot_cells) > 0){
+      if(input[["annot_cells"]][1] != ""){
+        p <- p + 
+          # geom_jitter(position=pos, aes(color = paste0(df$Level,", ",ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted")))) +
+          # scale_color_manual(values = c(cols,c(rbind(cols,rep("red",lels_len)))))
+          geom_jitter(position=pos, aes(shape = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"), size = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"))) + #data = subset(df, Cell %in% input$annot_cells)
+          scale_shape_manual(values=c(8,16)) + scale_size_manual(values=c(3,1))
+          #   geom_text(
+        #   data = subset(df, Cell %in% input$annot_cells),
+        #   aes(label = Cell),
+        #   size = 3
+        # )
+      }
+    }
 
     ggplotly(p,tooltip = c("Line","x","y"))
   })
+})
+
+# highlight cells
+observeEvent(rv[["dens_df"]],{
+  updateSelectizeInput(session,"annot_cells",choices = rv[["dens_df"]][["Cell"]],server = T)
 })
