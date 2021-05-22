@@ -790,7 +790,7 @@ output$depmap_pars <- renderUI({
 })
 
 # cancer subtypes
-observeEvent(input$ccle_cancer_types,{req(input$ccle_cancer_types!="");rv$ccle_cancer_types <- input$ccle_cancer_types})
+observeEvent(input$ccle_cancer_types,{req(input$ccle_cancer_types!=""); rv$depmap_gene_appear <- "no"; rv$ccle_cancer_types <- input$ccle_cancer_types})
 output$ui_ccle_subtypes <- renderUI({
   req(!is.null(input$ccle_cancer_types))
   req(!is.null(rv$depmap_ccle))
@@ -822,7 +822,7 @@ output$ui_ccle_subtypes <- renderUI({
 })
 
 # CCLE cell lines
-observeEvent(input$ccle_cancer_subtypes,{req(input$ccle_cancer_subtypes!="");rv$ccle_cancer_subtypes <- input$ccle_cancer_subtypes})
+observeEvent(input$ccle_cancer_subtypes,{req(input$ccle_cancer_subtypes!=""); rv$depmap_gene_appear <- "no"; rv$ccle_cancer_subtypes <- input$ccle_cancer_subtypes})
 output$ui_cells <- renderUI({
   req(input$ccle_cancer_subtypes != "")
   req(!is.null(rv$depmap_ccle))
@@ -898,7 +898,7 @@ output$ui_ccle_gene <- renderUI({
 })
 
 # update available DepMap genes/drugs for selection
-observeEvent(rv$depmap_gene_appear,{
+observeEvent(list(rv$depmap_gene_appear,input$ccle_cells),{
   req(rv$depmap_gene_appear == "yes")
   updateSelectizeInput(
     session,"depmap_gene",choices = rv$depmap_genes, server = T, selected = ""
