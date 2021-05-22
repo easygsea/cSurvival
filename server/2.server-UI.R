@@ -11,7 +11,7 @@ output$ui_results <- renderUI({
   if(x == 1){
     types <- list(
       "Survival plot #1" = 1
-      ,"Gender effect plot" = "gender"
+      ,"Sex effect plot" = "gender"
     )
 
     dtype1 <- rv[["data_type_1"]]
@@ -162,7 +162,7 @@ output$ui_results <- renderUI({
                     6,align="center",
                     selectizeInput(
                       "annot_cells"
-                      ,HTML(paste0("Highlight cell lines:",add_help("annot_cells_q")))
+                      ,HTML(paste0("(Optional) highlight cell lines:",add_help("annot_cells_q")))
                       ,choices = c()
                       ,multiple = T
                       ,options = list(
@@ -503,7 +503,7 @@ output$plot_gear <- renderUI({
         12,
         selectizeInput(
           "scatter_gender",
-          HTML(paste0("Select gender group:",add_help("scatter_gender_q")))
+          HTML(paste0("Select sex group:",add_help("scatter_gender_q")))
           ,choices = rv[["genders"]]
           ,selected = rv$scatter_gender
           ,multiple = T
@@ -514,12 +514,12 @@ output$plot_gear <- renderUI({
         #   "input.scatter_gender.length > 1",
           ,materialSwitch(
             inputId = "scatter_gender_y",
-            label = HTML(paste0("<b>Color data points by gender?</b>",add_help("scatter_gender_y_q"))),
+            label = HTML(paste0("<b>Color data points by sex?</b>",add_help("scatter_gender_y_q"))),
             value = rv$scatter_gender_y, inline = F, width = "100%",
             status = "danger"
           )
           ,bsTooltip("scatter_gender_y_q",HTML(paste0(
-            "If TRUE, color scatter points by gender"
+            "If TRUE, color scatter points by sex"
           )),placement = "top")
         # )
         ,materialSwitch(
@@ -664,7 +664,7 @@ output$ui_stats <- renderUI({
 
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                    ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
-    stats_title <- paste0(rv$plot_sstype," analysis by ",names(surv_methods)[surv_methods == rv$cox_km])
+    stats_title <- paste0("Differential ",firstlower(rv$plot_sstype)," analysis by ",names(surv_methods)[surv_methods == rv$cox_km])
   }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
     req(!is.null(rv[["res_scatter"]]))
     stats_title <- "Correlation statistics"
@@ -1127,9 +1127,9 @@ output$snv_stats_plot <- renderPlotly({
   nons <- ifelse_rv(non_id) %>% tolower(.)
   nons_cat <- sapply(dat$Mutation, function(x){
     if(tolower(x) %in% nons){
-      "Nonsynonymous"
+      "Mutated"
     }else{
-      "Synonymous"
+      "Other"
     }
   }) %>% unname(.)
 
@@ -1163,7 +1163,7 @@ output$ui_error <- renderUI({
     if(rv$depmapr){pname <- "cell lines";pcont <- "contain"}else{pname <- "project(s)";pcont <- "contain(s)"}
     div(
       br(),
-      p(style="color:gray;font-size:120%;",paste0("Unable to assess for gender effect. The selected ",pname," only ",pcont," ",rv[["df_gender"]]," data."))
+      p(style="color:gray;font-size:120%;",paste0("Unable to assess for sex effect. The selected ",pname," only ",pcont," ",rv[["df_gender"]]," data."))
       ,br()
     )
   }#else if(rv$plot_type == "1" | rv$plot_type == "2"){

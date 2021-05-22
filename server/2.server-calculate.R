@@ -377,6 +377,8 @@ observeEvent(input$confirm,{
     # update parameters
     rv$cox_km <- "km"
     if(rv$tcga){rv$plot_sstype <- rv$plot_stype}
+    else if(rv$target){rv$plot_sstype <- "Overall survival (OS)"}
+    else if(rv$depmap){rv$plot_sstype <- dependency_names()}
     
     rv$show_ui <- "yes"
   }
