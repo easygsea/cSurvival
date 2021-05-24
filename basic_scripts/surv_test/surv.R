@@ -86,7 +86,7 @@ df1 <- readRDS("basic_scripts/surv_test/df_1")
 df2 <- readRDS("basic_scripts/surv_test/df_2")
 df_list <- list(df1,df2)
 df_combined <- Reduce(
-  function(x, y, ...) inner_join(x, select(y, patient_id, level), by = "patient_id"), 
+  function(x, y, ...) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"), 
   df_list
 )
 
@@ -103,6 +103,43 @@ lels <- levels(df_combined$level)
 # res_cox <- res_all[["cox"]]
 # res_km <- res_all[["km"]]
 res.km <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined, p.adjust.method = "hommel")
+
+# make matrix for plot
+# red colorscale
+cscale <- list(c(0, "rgb(255, 255, 255)"), # 0 = white
+               list(0.200687, "rgb(254,224,144)"), # 0.25 = light yellow
+               list(0.333333, "rgb(253,174,97)"), # 0.1 = yellow
+               list(0.433677, "rgb(244,109,67)"), # 0.05 = orange
+               list(0.666667, "rgb(215,48,39)"), # 0.01 = red
+               list(1, "rgb(165,0,38)") # 0.001 = dark red
+)
+counts <- -log10(res.km$p.value)
+counts[is.na(counts)] <- 0
+dat <- expand.grid(y = rownames(counts), x = colnames(counts))
+dat$z <- unlist(as.data.frame(counts),recursive = T)
+pvals <- unlist(as.data.frame(res.km$p.value), recursive = T) %>% format(., scientific = T, digits = 3)
+req(length(dat$z)>0)
+
+fig <- plot_ly() %>%
+  add_trace(data = dat, x = ~x, y = ~y, z = ~z, type = "heatmap",
+            colorscale  = cscale,zmax = 3,zmin=0, colorbar = list(title = list(text="-log10(P)", side = "right")),
+            text = pvals,
+            hovertemplate = paste('<b>%{x}</b> vs <b>%{y}</b><br>',
+                                  'P-value: <b>%{text}</b>'
+            )
+  ) %>% layout(
+    title = "Pariwise comparisons",
+    xaxis = list(title = "", showticklabels = T),
+    yaxis = list(title = "", showticklabels = T)
+    # ,margin = list(l=200)
+  ) %>%
+  add_annotations(x = dat$x, y = dat$y,
+                  text = as.character(pvals), 
+                  showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
+                  ,ax = 20, ay = -20
+                  )
+
+fig
 
 res.cox <- coxph(Surv(survival_days, censoring_status) ~ level.x*level.y, data =  df_combined)
 res <- summary(res.cox)

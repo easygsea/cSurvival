@@ -24,7 +24,10 @@ library(edgeR)
 library(limma)
 library(org.Hs.eg.db)
 library(ids)
-
+library(pacman)
+library(colorspace)
+library(ggsci)
+library(plyr)
 options(repos = BiocManager::repositories())
 
 source("global/functions.R")

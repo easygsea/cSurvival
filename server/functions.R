@@ -30,18 +30,19 @@ init_rv <- function(x){
   # feedback on manual gene input
   rv[[paste0("gs_mg_",x)]] <- ""
   # lower bound for quantile loop
-  rv[[paste0("lower_",x)]] <- .15
+  rv[[paste0("lower_",x)]] <- .2
   # upper bound for quantile loop
-  rv[[paste0("upper_",x)]] <- .85
+  rv[[paste0("upper_",x)]] <- .8
   # step size
   rv[[paste0("step_",x)]] <- .01
   # parameters for SNV mutation analysis
   rv[[paste0("snv_method_",x)]] <- "mutect"
   rv[[paste0("nonsynonymous_",x)]] <- variant_types_non
-  # rv[[paste0("synonymous_",x)]] <- variant_types_syn
+  rv[[paste0("synonymous_",x)]] <- variant_types_syn
   rv[[paste0("iter_",x)]] <- "iter"
   rv[[paste0("clow_",x)]] <- 50
   rv[[paste0("cnv_par_",x)]] <- "auto"
+  rv[[paste0("snv_uni_",x)]] <- "int"
 }
 
 # update these into rv when selections change
@@ -75,8 +76,10 @@ req_diff_rv <- function(namespaces){
   suppressWarnings(
     !all(
       sapply(namespaces, function(x){
-        rv[[x]] == input[[x]]
-      })
+        sapply(seq_along(rv[[x]]), function(i){
+          rv[[x]][i] == input[[x]][i]
+        })
+      }) %>% unlist(.)
     )
   )
 }
@@ -127,6 +130,15 @@ ifelse_rv <- function(id){
   }
 }
 
+# pass value rv if input is.na
+ifelse_rv_na <- function(id){
+  if(is.na(input[[id]])){
+    rv[[id]]
+  }else{
+    input[[id]]
+  }
+}
+
 # # specific function to handle the bug when second panel is initiated but not responding to UI update
 # check_array <- function(lst){
 #   # lst_u <- lst %>% unlist() %>% unique()
@@ -148,9 +160,52 @@ wait_msg <- function(msg){
   )
 }
 
+vector_names <- function(x, vector){
+  names(vector)[vector == x]
+}
+
 #======================================================================#
 ####                       Data handling                        ####
 #======================================================================#
+# lower case first letter
+firstlower <- function(x) {
+  substr(x, 1, 1) <- tolower(substr(x, 1, 1))
+  x
+}
+
+# function to remove all na per column
+not_all_na <- function(x) any(!is.na(x))
+# function to remove all na per column
+not_any_na <- function(x) all(!is.na(x))
+# paste without NA
+paste_na <- function(...,sep="\\|") {
+  L <- list(...)
+  L <- lapply(L,function(x) {x[is.na(x)] <- ""; x})
+  ret <-gsub(paste0("(^",sep,"|",sep,"$)"),"",
+             gsub(paste0(sep,sep),sep,
+                  do.call(paste,c(L,list(sep=sep)))))
+  is.na(ret) <- ret==""
+  ret
+}
+
+# find common mutations
+common_mut <- function(row, mode="int"){
+  muts <- sapply(row, function(x){
+    strsplit(x, "\\|")
+  })
+  if(mode == "int"){
+    muts <- Reduce(intersect, muts) 
+  }else if(mode == "uni"){
+    muts <- Reduce(union, muts)
+  }
+  muts <- muts[!is.na(muts)]
+  if(identical(muts,character(0))){
+    return(NA)
+  }else{
+    return(paste0(muts,collapse = "|"))
+  }
+}
+
 # rbind a list of dfs by common columns only
 rbind_common <- function(df_list){
   Reduce(function(df_1,df_2){
@@ -236,8 +291,10 @@ update_gs_by_db <- function(x, mode="nil"){
 # retrieve genes from a project
 retrieve_genes <- function(x){
   db_id <- paste0("db_",x)
-  method <- ifelse(is.null(input[[paste0("snv_method_",x)]]),"mutect",input[[paste0("snv_method_",x)]])
-  
+  snv_id <- paste0("snv_method_",x)
+  if(is.null(input[[snv_id]])){
+    method <- "mutect"
+  }else{method <- input[[snv_id]]}
   dbt <- rv[[db_id]]
   if(is.null(dbt)){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
@@ -253,6 +310,8 @@ retrieve_genes <- function(x){
     infiles <- paste0(rv$indir,"df_cnv.csv")
   }else if(dbt == "mir"){
     infiles <- paste0(rv$indir,"df_mir_scale.csv")
+  }else if(dbt == "pro"){
+    infiles <- paste0(rv$indir,"df_proteomic_scale.csv")
   }
   
   l <- lapply(infiles, function(x){

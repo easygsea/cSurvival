@@ -109,9 +109,9 @@ inc/project_data/TCGA-LUSC/df_snv_type_somaticsniper.csv
 inc/project_data/TCGA-LUSC/df_snv_type_varscan.csv
 inc/project_data/TCGA-LUSC/df_survival.csv
 project_data/project_name.csv
-
 project_data/depmap/df_gene.csv
 project_data/depmap/df_gene.csv
 basic_scripts/df_gene.csv
 project_data/DepMap/df_snv_class.csv
 .DS_Store
+

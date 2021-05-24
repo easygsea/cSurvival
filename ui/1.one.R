@@ -29,7 +29,7 @@ bodyOne <- tabItem(tabName = "one",
               12,
               fluidRow(
                 column(
-                  8,
+                  6,
                   selectizeInput(
                     "project",
                     HTML(paste0("<h4><b>To start, select project(s) to analyze:</b>",add_help("project_q"),"</h4>"))
@@ -43,7 +43,7 @@ bodyOne <- tabItem(tabName = "one",
                     )
                   )
                   ,bsTooltip("project_q",HTML(paste0(
-                    "Select a project(s) from DepMap, TARGET or TCGA. Multiple selections (maximum 5) are allowed for pan-cancer analysis."
+                    "Select a project(s) from DepMap, TARGET or TCGA. Multiple selections (maximum 3) are allowed for TARGET."
                     ," Click button to the right to confirm your selection and proceed."
                   )),placement = "right")
                 )
@@ -52,6 +52,10 @@ bodyOne <- tabItem(tabName = "one",
                   confirm_panel
                   ,reset_panel
                   # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
+                )
+                ,column(
+                  2,
+                  uiOutput("ui_censortime")
                 )
                 ,column(
                   2,#align="right",
@@ -69,19 +73,25 @@ bodyOne <- tabItem(tabName = "one",
                 )
               )
             ,br()
-
-              ,fluidRow(
-                uiOutput("ui_parameters")
-              )
-              ,fluidRow(
-                column(
-                  12, align="center"
-                  ,uiOutput("ui_parameters_confirm")
-                  ,add_gear("par_gear")
-                )
-              )
+            
+            ,fluidRow(
+              # TCGA only disease-free survival and progression-free survival
+              uiOutput("tcga_pars")
+              # DepMap only cell line selection
+              ,uiOutput("depmap_pars")
             )
-
+            
+            # control widgets for individual analysis
+            ,fluidRow(
+              uiOutput("ui_parameters")
+            )
+            
+            # the confirm button
+            ,fluidRow(
+              uiOutput("ui_parameters_confirm")
+            )
+            ,br()
+          )
         )
     )
 

@@ -5,15 +5,22 @@ sidebar <- dashboardSidebar(
     disable = T
 )
 
+# loading message
 loadMsg = "cSurival"
 
+# home buttons style
+db_style <- "color: #fff; background-color: transparent; border-color: #00589b; margin-top:8px; margin-right:8px; border-radius:2rem; border:0.125rem solid #00589b"
+
+# assemble the UI
 shinyUI(
     dashboardPage(
         
         title="cSurival",
 
-        dashboardHeader(title = div(id="ui_title",HTML("<b>McSurvival</b>: Mechanistic cancer survival database"))
-                        ,titleWidth = "100%"
+        dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<b>cSurvival</b>: a mechanistic cancer survival database"))
+                        ,titleWidth = "86.5%"
+                        ,tags$li(class = "dropdown", actionButton("db_download", NULL,icon("database"),style=db_style))
+                        ,tags$li(class = "dropdown", actionButton("db_help", NULL,icon("question"),style=db_style))
         )
         # skin = "black",
         ,sidebar
@@ -23,7 +30,7 @@ shinyUI(
             ),
             # theme = shinytheme("flatly"),
             use_waiter(), # dependencies
-            waiter_show_on_load(tagList(spin_three_bounce(),h4(loadMsg)), color = "#00589b"), # shows before anything else
+            waiter_show_on_load(tagList(spin_orbiter(),h4(loadMsg)), color = "#00589b"), # shows before anything else
             disconnectMessage(text = "Your session has timed out. Please refresh page and start again. For bug report, email us at jcheng@cmmt.ubc.ca. Thank you for your support."),
 
             useShinyalert(),  # Set up shinyalert
@@ -35,6 +42,8 @@ shinyUI(
             
             bodyOne
             
+            ,bsTooltip("db_download","Download source data")
+            ,bsTooltip("db_help","Help")
             
             # ,tags$footer(HTML("<b>Taubert Lab</b> | BC Children's Hospital Research Institute | Centre for Molecular Medicine and Therapeutics | University of British Columbia. 2019-2020. All Rights Reserved."),
             #             align = "left", style = "

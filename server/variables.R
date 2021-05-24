@@ -4,14 +4,17 @@ surv_dir <- paste0(dirname(dirname(getwd())), "/variables/")
 # ------ available GMT gene sets -----
 # gmt_dir <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/hsa/")
 gmt_dir <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/hsa/"
+# gmt_dir <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/hsa/" # tau path
 # # collection in a df
 # in_gmt_lst <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/gmts_list.csv") # code test locally
 in_gmt_lst <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/gmts_list.csv"
+# in_gmt_lst <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/gmts_list.csv" # tau path
 gmt_collection_df <- read_csv(in_gmt_lst,col_names = F) %>% dplyr::filter(X1 == "hsa")
 # available databases
 gmt_dbs <- str_split(gmt_collection_df$X3,";") %>% lapply(function(x) gsub("_"," ",gsub("?[.]gmt$","",x)))
 db_names <- gsub("_"," ",gsub("^\\d+_?","",gmt_collection_df$X2))
 names(gmt_dbs) <- db_names
+gmt_dbs[["Other"]] <- gmt_dbs[["Other"]][-4]
 # function to find the full path to a selected GMT
 retrieve_gmt_path <- function(db){
   db <- paste0(gsub(" ","_",db),".gmt")
@@ -42,14 +45,11 @@ input_mode_names <- c(
 )
 
 # ------- survival analysis methods ---------
-surv_methods <- c("Cox proportional-hazards (PH) model"="cox", "Kaplan-Meier (KM) log rank"="km")
+surv_methods <- c("Kaplan-Meier (KM) log rank"="km","Cox proportional-hazards (PH) model"="cox")
 
 # ------- gene set data types, library or manual -------
 data_types_gs <- c("Gene set"="lib",
                    "Gene set (manual)"="manual")
-
-# ------- placeholder for gene search field ----------
-g_placeholder <- "On top left, select a project(s) and click the confirmation button to load genes ..."
 
 # ------- algorithms for somatic variant calling, e.g. mutect -----------
 snv_algorithms <- list(
@@ -64,14 +64,14 @@ variant_types <- c("Frame_Shift_Del","Frame_Shift_Ins","In_Frame_Del","In_Frame_
                   ,"Missense_Mutation","Nonsense_Mutation","Nonstop_Mutation"
                   ,"Splice_Site","Translation_Start_Site"
                   ,"Silent","Splice_Region","Intron","5'UTR","RNA","3'UTR"        
-                  ,"5'Flank","3'Flank","IGR")
+                  ,"5'Flank","3'Flank","IGR","WT")
 
 variant_types_non <- c("Frame_Shift_Del","Frame_Shift_Ins","In_Frame_Del","In_Frame_Ins"
                        ,"Missense_Mutation","Nonsense_Mutation","Nonstop_Mutation"
                        ,"Splice_Site","Translation_Start_Site")
 
 variant_types_syn <- c("Silent","Splice_Region","Intron","5'UTR","RNA","3'UTR"        
-                       ,"5'Flank","3'Flank","IGR")
+                       ,"5'Flank","3'Flank","IGR","WT")
 
 # ------- dynamic variables need initiatialization and updates according to inputs' changes ------
 dyn_list <- function(x){
@@ -101,12 +101,70 @@ dyn_list <- function(x){
     ,step_id <- paste0("step_",x)
     ,snv_id <- paste0("snv_method_",x)
     ,non_id <- paste0("nonsynonymous_",x)
-    # ,syn_id <- paste0("synonymous_",x)
+    ,syn_id <- paste0("synonymous_",x)
     ,iter_id <- paste0("iter_",x)
     ,clow_id <- paste0("clow_",x)
     ,cnv_id <- paste0("cnv_par_",x)
+    ,snv_uni_id <- paste0("snv_uni_",x)
   )
 }
 # the data that tell what Target projects data have
-TARGET_existing_data <- fread("project_data/TARGET_existing_data.csv") %>%
+TARGET_existing_data <- fread(paste0(pro_dir,"TARGET_existing_data.csv"), sep = ",") %>%
   mutate(existing_data = str_split(existing_data, pattern = ","))
+
+# -------- TCGA survival endpoints ----------
+tcga_stypes <- c(
+  "Overall survival (OS)" = "OS"
+  ,"Progression-free interval (PFI)" = "PFI"
+  ,"Disease-free interval (DFI)" = "DFI"
+  # ,"Progression-specific survival (PSS)" = "pss"
+  ,"Disease-specific survival (DSS)" = "DSS"
+)
+
+# -------- TCGA clinical codes ----------
+tcga_codes <- fread(paste0(pro_dir,"tcga_codes.tsv"), sep = "\t")
+
+codes_color <- list(
+  "yes" = "#339900" #99cc33
+  ,"no" = "#cc3300"
+  ,"caution" = "#f58c00" # ff9966
+  ,"app|caution" = "#f58c00"
+  ,"app" = "#339900"
+  ,"acc" = "#339900"
+)
+
+codes_icon <- list(
+  "yes" = icon("check")
+  ,"no" = icon("times")
+  ,"caution" = icon("exclamation")
+  ,"app|caution" = icon("exclamation")
+  ,"app" = icon("check")
+  ,"acc" = icon("check")
+)
+
+# ----- YMD time units -----
+ymd_names <- c(
+  "Days"="d",
+  "Months"="m",
+  "Years"="y"
+)
+ymd_unit <- c(
+  "y" = 365.25
+  ,"m" = 30.4375
+  ,"d" = 1
+)
+
+# ----- Miscellaneous ----
+# red or yellow colorscale
+col_scale_no <- c(0, 0.20068666377, 0.33333333333, 0.43367666522, 0.66666666666, 1)
+col_scale <- sequential_hcl(5, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
+col_scale <- sapply(1:ncol(col_scale), function(x) {x <- col_scale[,x]; paste0("rgb(",paste0(x, collapse = ", "),")")})
+col_scale <- c("rgb(255, 255, 255)", col_scale)
+col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
+# col_scale <- list(list(0, "rgb(255, 255, 255)"), # 0
+#                list(0.20068666377, "rgb(254,224,144)"), # 0.25 = log10(0.25) / 3
+#                list(0.33333333333, "rgb(253,174,97)"), # 0.1 = log10(0.1) / 3
+#                list(0.43367666522, "rgb(244,109,67)"), # 0.05 = log10(0.05) / 3
+#                list(0.66666666666, "rgb(215,48,39)"), # 0.01 = log10(0.01) / 3
+#                list(1, "rgb(165,0,38)") # 0.001 = log10(0.001) / 3
+# )

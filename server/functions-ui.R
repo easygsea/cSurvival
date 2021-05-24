@@ -30,6 +30,27 @@ link_icon <- function(id, link, title="Click to visit", icon="fas fa-external-li
   ,link,icon,id,color)
 }
 
+# # add a gear button
+add_gear <- function(
+  id, left="6.9em", top="1em", title="Click for advanced run parameters", up = F, width = "80%"
+  , placement="top"
+){
+  div(
+    style=sprintf("position: relative; align: center; left: %s; top: %s;",left, top),
+    dropdownButton(
+      circle = TRUE, status = "info",
+      size = "xs",
+      icon = icon("gear"),# class = "opt"),
+      up = up, width = width,
+      tooltip = tooltipOptions(title = title, placement = placement),
+      
+      fluidRow(
+        uiOutput(id)
+      )
+    )
+  )
+}
+
 #======================================================================#
 ####          function to generate dynamic 1 2, or more G/GS UIs     ####
 #======================================================================#
@@ -105,7 +126,7 @@ plot_ui <- function(n){
             ,selected=rv[[g_ui_id]]
             ,width = "100%"
             ,options = list(
-              placeholder = g_placeholder
+              placeholder = g_placeholder()
               ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
             )
           )
@@ -209,7 +230,8 @@ plot_ui <- function(n){
                    ,placement = "right")
         ,bsTooltip(g_ui_id_q, HTML(paste0("Search and select. If a gene or locus is not found, try its alias names."
                                           ," If still not found, it means its expression/alteration is barely detected in the selected cancer project."
-                                          ,"Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects."))
+                                          ," Or, if proteomics, it has not been quantified."
+                                          ," Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects."))
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")
@@ -228,6 +250,7 @@ plot_ui <- function(n){
         ,radioTooltip(id = db_id, choice = "mir", title = HTML("microRNA expression level"))
         ,radioTooltip(id = db_id, choice = "met", title = HTML("DNA methylation level"))
         ,radioTooltip(id = db_id, choice = "rrpa", title = HTML("Reverse-phase protein array (RPPA)"))
+        ,radioTooltip(id = db_id, choice = "pro", title = HTML("Normalized protein expression data by mass spectrometry"))
       )
       
     )
@@ -257,6 +280,7 @@ plot_run_ui <- function(n){
     col <- extract_color(x)
     
     snv_id <- paste0("snv_method_",x); snv_id_q <- paste0(snv_id,"_q")
+    snv_uni_id <- paste0("snv_uni_",x); snv_uni_id_q <- paste0(snv_uni_id,"_q")
     non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
     syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
@@ -275,6 +299,15 @@ plot_run_ui <- function(n){
       }
     }
     datatype <- call_datatype(x)
+    
+    # preselected SNV callers
+    snv_pre_a <- ifelse(
+      length(rv[[snv_id]]) == 1,
+      paste0('"',rv[[snv_id]],'"'),
+      paste0("['",paste0(rv[[snv_id]],collapse = "','"),"']")
+    )
+    
+    # render the UI
     column(
       col_w,align="center",
       # tags$hr(style="border: .5px solid lightgrey; margin-top: 0.5em; margin-bottom: 0.5em;"),
@@ -377,43 +410,69 @@ plot_run_ui <- function(n){
           
           div(
             if(rv$tcga){
-              # mutation caller options
-              selectizeInput(
-                snv_id
-                ,label = HTML(paste0("Somatic mutation caller:",add_help(snv_id_q)))
-                ,choices = snv_algorithms
-                ,selected = rv[[snv_id]]
-                ,options = list(
-                  # `live-search` = TRUE,
-                  placeholder = 'Type to search ...'
-                  ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[snv_id]])))
+              div(
+                # mutation caller options
+                selectizeInput(
+                  snv_id
+                  ,label = HTML(paste0("Select somatic mutation caller(s):",add_help(snv_id_q)))
+                  ,choices = snv_algorithms
+                  ,selected = rv[[snv_id]]
+                  ,multiple = T
+                  ,options = list(
+                    # `live-search` = TRUE,
+                    placeholder = 'Type to search ...'
+                    ,onInitialize = I(sprintf('function() { this.setValue(%s); }',snv_pre_a)))
+                )
+                ,bsTooltip(snv_id_q
+                           ,HTML("Algorithm(s) used for calling somatic nucleotide variations. Multiple selections are allowed")
+                                 ,placement = "top")
+                # intersect or union
+                ,conditionalPanel(
+                  sprintf('input.%s.length > 1',snv_id),
+                  radioGroupButtons(
+                    inputId = snv_uni_id,
+                    label = HTML(paste0("Select method to handle results by different callers: ",add_help(snv_uni_id_q))),
+                    choices = c(
+                      "Intersect" = "int"
+                      ,"Union" = "uni"
+                    ),
+                    selected = rv[[snv_uni_id]],
+                    size = "sm",
+                    checkIcon = list(
+                      yes = icon("check-square"),
+                      no = icon("square-o")
+                    ),
+                    # status = "primary",
+                    direction = "horizontal"
+                  )
+                )
+                ,bsTooltip(snv_uni_id_q,HTML(paste0(
+                  "When multiple callers are selected, select <b>Intersect</b> to extract consensus results for analysis, or <b>Union</b> to find a positive hit in any algorithm."
+                )),placement = "top")
               )
             }
-            ,bsTooltip(snv_id_q
-                       ,HTML("The algorithm used for calling somatic nucleotide variations")
-                       ,placement = "top")
             
             # non-silent variants classifications
             ,selectizeInput(
               non_id
-              ,label = HTML(paste0("Non-synomynous variants:",add_help(non_id_q)))
+              ,label = HTML(paste0("Select variants of interest (Mutated): ",add_help(non_id_q)))
               ,choices = variant_types
               ,selected = rv[[non_id]]
               ,multiple = T
             )
-            ,bsTooltip(non_id_q,HTML("Variants to be classified as High/Moderate variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+            ,bsTooltip(non_id_q,HTML("By default, variants to be classified as High/Moderate variant consequences are selected. Adjust to suit the purpose of your study. For more information about variant classification: http://uswest.ensembl.org/Help/Glossary?id=535")
                        ,placement = "top")
             
-            # # silent variants classifications
-            # ,selectizeInput(
-            #   syn_id
-            #   ,label = HTML(paste0("Synomynous variants:",add_help(syn_id_q)))
-            #   ,choices = variant_types
-            #   ,selected = rv[[syn_id]]
-            #   ,multiple = T
-            # )
-            # ,bsTooltip(syn_id_q,HTML("Variants to be classified as Low/No variant consequences. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
-            #            ,placement = "top")
+            # silent variants classifications
+            ,selectizeInput(
+              syn_id
+              ,label = HTML(paste0("Select control group (Other): ",add_help(syn_id_q)))
+              ,choices = variant_types
+              ,selected = rv[[syn_id]]
+              ,multiple = T
+            )
+            ,bsTooltip(syn_id_q,HTML("By default, wild-type (WT) and variants to be classified as Low/No variant consequences are selected. Adjust to suit the purpose of your study. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
+                       ,placement = "top")
             
             ,if(x == 1 & rv$variable_n > 1){
               if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){

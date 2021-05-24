@@ -4,7 +4,10 @@ rv <- reactiveValues(
   show_ui = "", # "yes" upon a successful run
   
   projectStatus="none", project="", max_project_n=3, try_error=0
-  ,tcga=T,target=T,depmap=F
+  ,tcga=T,target=T,depmap=F,depmapr=F
+  ,ccle_cancer_types="",ccle_cancer_subtypes="",depmap_gene=""
+  ,depmap_path=NULL,depmap_genes=NULL,depmap_ids=NULL,depmap_ccle=NULL,cell_lines=NULL
+  ,depmap_gene_appear="no"
   
   ,variable_n_reached=0
   ,variable_n = 1
@@ -12,16 +15,33 @@ rv <- reactiveValues(
   ,verbTxtStyle2 = ""
   
   ,tcga=T # check if TCGA project
+  ,tcga_stype="OS" # if TCGA, type of survival analysis
+  ,plot_stype="OS" # label to display
+  ,tcga_code="" # clinical data quality info for the selected TCGA project
+  ,tcga_msg="" # warning message if NA annotation for TCGA clinical outcome codes; "" means no NA
+  ,censor_time_ymd="y" # default censor time unit: years
+  ,censor_time=10 # default censor time 10 yrs
+  ,censor_time_min=1,censor_time_max=100,censor_time_step=1
+  ,censor_time_min_y=1,censor_time_max_y=100,censor_time_step_y=1,censor_time_y=10
+  ,censor_time_min_m=20,censor_time_max_m=2000,censor_time_step_m=20,censor_time_m=200
+  ,censor_time_min_d=400,censor_time_max_d=30000,censor_time_step_d=200,censor_time_d=3000
   
   ,plot_type="all"
   
-  ,cox_km = "cox"
+  ,cox_km = "km",cox_kmr="km"
   ,km_mul = "hommel" # multiple correction method
+  ,ymd="y" # default plot survival in months; "d" for days; "m" for months; "y" for years
+  ,ymd_int=1,ymd_int_range=c(1,2,3)
+  ,ymd_int_y=1,ymd_int_range_y=c(1,2,3)
+  ,ymd_int_m=20,ymd_int_range_m=c(1,2,3,5,10,20,40)
+  ,ymd_int_d=1000,ymd_int_range_d=c(30,50,100,200,300,1000)
   ,median = NULL
   ,confi = T,confi_opt = "ribbon"
   ,risk_table = T,cum_table=T
   
-  ,scatter_log_x=T,scatter_log_y=T,scatter_lm=T,lm_method="lm",cor_method="kendall"
+  ,dens_fill=T, dens_mean=T
+  
+  ,scatter_log_x=T,scatter_log_y=T,scatter_lm=T,lm_method="lm",cor_method="kendall",sm_conf=T
   ,scatter_gender_y=F # whether to color the scatter plot by gender
   
   # eVITTA parameters
