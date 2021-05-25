@@ -155,3 +155,4 @@ www/project_data/TCGA-LUSC/df_survival.csv
 www/project_data/tcga_codes.tsv
 www/project_data/DepMap/df_snv_class.csv
 www/project_data/TCGA-LUAD/df_snv_class_977.csv
+cox_dm

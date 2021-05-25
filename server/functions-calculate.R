@@ -123,7 +123,7 @@ extract_gene_data <- function(x, type){
 
     # save mean scaled FPKM data
     rv[[paste0("exprs_",x)]] <- data %>%
-      mutate(Mean=rowMeans(dplyr::select(., !patient_id))) %>%
+      mutate(Mean=rowMeans(data[,-1],na.rm=T)) %>%
       dplyr::select(patient_id, Mean)
   }
 
@@ -198,14 +198,14 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   if(mode == "g"){
     exp <-data[,2] %>% unlist(.) %>% unname(.)
   }else if(mode == "gs"){
-    exp <- rowMeans(data[,-1]) %>% unlist(.) %>% unname(.)
+    exp <- rowMeans(data[,-1],na.rm=T) %>% unlist(.) %>% unname(.)
   }
 
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)
 
   # the quantiles we will use to define the level of gene percentages
-  quantiles <- quantile(exp, quantile_s)
+  quantiles <- quantile(exp, quantile_s, na.rm = T)
 
   for(i in seq_along(quantiles)){
     q <- quantiles[i]
