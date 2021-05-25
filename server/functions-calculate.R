@@ -635,6 +635,11 @@ de_dfgene <- function(){
 
   # whole gene expression table
   df_gene <- rbind_common(l) %>% dplyr::filter(patient_id %in% patients)
+  
+  # filter ? genes
+  if(rv$depmap | rv$tcga){
+    df_gene <- df_gene %>% dplyr::select(-starts_with("\\?"))
+  }
 
   # remaining patient ids
   patients <- df_gene$patient_id
@@ -644,39 +649,46 @@ de_dfgene <- function(){
   incProgress(amount = 0.1, message = wait_msg("Formatting gene expression matrix for DE analysis..."))
 
   # transpose
-  df_gene <- transpose(df_gene) %>% .[-1,] %>% as.data.frame()
+  df_gene <- data.table::transpose(df_gene) %>% .[-1,] %>% as.data.frame()
   # reassign patient ids
   colnames(df_gene) <- patients
   rownames(df_gene) <- genes
 
   incProgress(amount = 0.2, message = wait_msg("Converting gene IDs..."))
 
-  # id conversion
-  # create individual tables using org.Hs
-  egENS <- toTable(org.Hs.egENSEMBL)
-  egSYMBOL <- toTable(org.Hs.egSYMBOL)
-
-  # bind the tables
-  id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
-
-  # extract the gene ids from df_gene and find their names from id conversion table
-  gene_ids <- as_tibble_col(rownames(df_gene), column_name = "ensembl_id")
-  gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
-
-  # convert gene ids
-  df_gene <- df_gene %>% dplyr::mutate(ensembl_id=rownames(df_gene)) %>%
-    left_join(gene_ids_table, by = "ensembl_id")
-
-  # remove unnecessary columns
-  df_gene <- df_gene %>%
-    dplyr::distinct(symbol,.keep_all = TRUE) %>%
-    dplyr::filter(!is.na(symbol))
-
-  genes <- df_gene$symbol
+  if(rv$target){
+    # id conversion
+    egSYMBOL <- toTable(org.Hs.egSYMBOL)
+    
+    # create individual tables using org.Hs
+    egENS <- toTable(org.Hs.egENSEMBL)
+    
+    # bind the tables
+    id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
+    
+    # extract the gene ids from df_gene and find their names from id conversion table
+    gene_ids <- as_tibble_col(rownames(df_gene), column_name = "ensembl_id")
+    gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
+    
+    # convert gene ids
+    df_gene <- df_gene %>% dplyr::mutate(ensembl_id=rownames(df_gene)) %>%
+      left_join(gene_ids_table, by = "ensembl_id")
+    
+    # remove unnecessary columns
+    df_gene <- df_gene %>%
+      dplyr::distinct(symbol,.keep_all = TRUE) %>%
+      dplyr::filter(!is.na(symbol))
+    
+    genes <- df_gene$symbol
+    
+    df_gene <- df_gene %>%
+      dplyr::select(-c(ensembl_id, gene_id, symbol))
+  }else{
+    genes <- sapply(genes, function(x) str_split(x, "\\|")[[1]][1])
+  }
 
   # convert to numeric matrix
   df_gene <- df_gene %>%
-    dplyr::select(-c(ensembl_id, gene_id, symbol)) %>%
     dplyr::mutate_all(as.numeric) %>%
     as.matrix(.)
 

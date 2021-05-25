@@ -53,7 +53,27 @@ add_gear <- function(
 
 # # download link with download btn
 dlink <- function(link, basename){
-  paste0("<a href='",link,"' download='",basename,"'> <i class='fa fa-download'> </i>",basename,"</a><br/>")
+  paste0("<a href='",link,"' download='",basename,"' target='_blank'> <i class='fa fa-download'> </i>",basename,"</a><br/>")
+}
+
+# # red title
+red_title <- function(txt,color = "#CF5C78", size="120%"){
+  strong(style = sprintf("color:%s;font-size:%s",color,size),txt)
+}
+
+# # default hr
+default_hr <- function(border="0.5px",line="solid", color="#F0EEE9", margin="0em"){
+  tags$hr(style=sprintf("border: %s %s %s; margin: %s;",border,line,color,margin))
+}
+
+# # strong h4
+strong_h4 <- function(txt, h="4"){
+  HTML(paste0("<h",h,"><b>",txt,"</b></h",h,">"))
+}
+
+# # grey h4
+grey_h4 <- function(txt,color="#939597",h="4"){
+  HTML(paste0('<h',h,' style="color:',color,';">',txt,'</h',h,'>'))
 }
 
 #======================================================================#

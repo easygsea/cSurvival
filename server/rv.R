@@ -46,4 +46,7 @@ rv <- reactiveValues(
   
   # eVITTA parameters
   ,gsea_done="" # whether analyzed or not; "yes" if done
+  
+  # source data options
+  ,project_tcga="TCGA-ACC"
 )
