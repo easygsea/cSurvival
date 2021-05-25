@@ -143,7 +143,7 @@ observeEvent(input$confirm_project,{
       rv$cell_lines <- rv$depmap_ccle$CCLE_Name
       names(rv$cell_lines) <- rv$depmap_ccle$patient_id
       # primary cancers
-      rv$ccle_cancers <- unique(rv$depmap_ccle$primary_disease)
+      rv$ccle_cancers <- sort(unique(rv$depmap_ccle$primary_disease))
       rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
     }
   })
@@ -795,7 +795,7 @@ output$ui_ccle_subtypes <- renderUI({
   req(!is.null(input$ccle_cancer_types))
   req(!is.null(rv$depmap_ccle))
   subtypes <- rv$depmap_ccle %>% dplyr::filter(primary_disease %in% rv$ccle_cancer_types) %>%
-    .[["Subtype"]] %>% unique()
+    .[["Subtype"]] %>% unique() %>% sort()
   div(
     column(
       3,

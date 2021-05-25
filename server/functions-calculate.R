@@ -38,7 +38,7 @@ extract_gene_data <- function(x, type){
 
     # selected gene
     genes <- input[[g_ui_id]]
-    if(!rv$depmap){
+    if(rv$target){
       # extract ENSG info
       genes <- strsplit(genes,"\\|")[[1]]
       if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
@@ -49,11 +49,12 @@ extract_gene_data <- function(x, type){
 
     # detect mutation method
     if(rv$tcga){
-      snv_id <- paste0("snv_method_",x)
-      method <- ifelse_rv(snv_id)
+      # snv_id <- paste0("snv_method_",x)
+      # method <- ifelse_rv(snv_id)
 
-      df_file[["snv"]] = paste0("df_snv_class_",method,".csv")
-
+      # df_file[["snv"]] = paste0("df_snv_class_",method,".csv")
+      df_file[["snv"]] = paste0("df_snv_class_977.csv")
+      
     }else{
       df_file <- c(
         df_file
@@ -82,17 +83,17 @@ extract_gene_data <- function(x, type){
   l <- lapply(infiles,function(y){
     fread(y,sep=",",header=T,select = c("patient_id", genes))
   })
-  if(type == "snv"){
-    data <- Reduce(
-      function(x, y) inner_join(x, dplyr::select(y, patient_id, genes), by = "patient_id"),
-      l
-    )
-    uni_mode <- ifelse_rv(paste0("snv_uni_",x))
-    data[[genes]] <- apply(data[ ,2:ncol(data)] , 1 , function(x) common_mut(x,mode=uni_mode))
-    data <- data %>% dplyr::select(patient_id, genes)
-  }else{
+  # if(type == "snv" & rv$tcga){
+  #   data <- Reduce(
+  #     function(x, y) inner_join(x, dplyr::select(y, patient_id, genes), by = "patient_id"),
+  #     l
+  #   )
+  #   uni_mode <- ifelse_rv(paste0("snv_uni_",x))
+  #   data[[genes]] <- apply(data[ ,2:ncol(data)] , 1 , function(x) common_mut(x,mode=uni_mode))
+  #   data <- data %>% dplyr::select(patient_id, genes)
+  # }else{
     data <- rbindlist(l, use.names = T)
-  }
+  # }
 
   # if depmap, filter patient ID
   if(rv$depmap){
@@ -267,6 +268,7 @@ get_df_snv <- function(data, nons, syns){
   mutations <- data[,2] %>% unlist(.) %>% unname(.)
   # check if nonsyn
   mutations[is.na(mutations)] <- "WT" #"Synonymous"
+  mutations[mutations == ""] <- "WT" #"Synonymous"
   mm <- mutations #[!is.na(mutations)]
   mm <- sapply(mm, function(x){
     x <- strsplit(x, "\\|")[[1]]

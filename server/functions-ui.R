@@ -51,6 +51,11 @@ add_gear <- function(
   )
 }
 
+# # download link with download btn
+dlink <- function(link, basename){
+  paste0("<a href='",link,"' download='",basename,"'> <i class='fa fa-download'> </i>",basename,"</a><br/>")
+}
+
 #======================================================================#
 ####          function to generate dynamic 1 2, or more G/GS UIs     ####
 #======================================================================#
@@ -409,51 +414,51 @@ plot_run_ui <- function(n){
         }else{
           
           div(
-            if(rv$tcga){
-              div(
-                # mutation caller options
-                selectizeInput(
-                  snv_id
-                  ,label = HTML(paste0("Select somatic mutation caller(s):",add_help(snv_id_q)))
-                  ,choices = snv_algorithms
-                  ,selected = rv[[snv_id]]
-                  ,multiple = T
-                  ,options = list(
-                    # `live-search` = TRUE,
-                    placeholder = 'Type to search ...'
-                    ,onInitialize = I(sprintf('function() { this.setValue(%s); }',snv_pre_a)))
-                )
-                ,bsTooltip(snv_id_q
-                           ,HTML("Algorithm(s) used for calling somatic nucleotide variations. Multiple selections are allowed")
-                                 ,placement = "top")
-                # intersect or union
-                ,conditionalPanel(
-                  sprintf('input.%s.length > 1',snv_id),
-                  radioGroupButtons(
-                    inputId = snv_uni_id,
-                    label = HTML(paste0("Select method to handle results by different callers: ",add_help(snv_uni_id_q))),
-                    choices = c(
-                      "Intersect" = "int"
-                      ,"Union" = "uni"
-                    ),
-                    selected = rv[[snv_uni_id]],
-                    size = "sm",
-                    checkIcon = list(
-                      yes = icon("check-square"),
-                      no = icon("square-o")
-                    ),
-                    # status = "primary",
-                    direction = "horizontal"
-                  )
-                )
-                ,bsTooltip(snv_uni_id_q,HTML(paste0(
-                  "When multiple callers are selected, select <b>Intersect</b> to extract consensus results for analysis, or <b>Union</b> to find a positive hit in any algorithm."
-                )),placement = "top")
-              )
-            }
+            # if(rv$tcga){
+            #   div(
+            #     # mutation caller options
+            #     selectizeInput(
+            #       snv_id
+            #       ,label = HTML(paste0("Select somatic mutation caller(s):",add_help(snv_id_q)))
+            #       ,choices = snv_algorithms
+            #       ,selected = rv[[snv_id]]
+            #       ,multiple = T
+            #       ,options = list(
+            #         # `live-search` = TRUE,
+            #         placeholder = 'Type to search ...'
+            #         ,onInitialize = I(sprintf('function() { this.setValue(%s); }',snv_pre_a)))
+            #     )
+            #     ,bsTooltip(snv_id_q
+            #                ,HTML("Algorithm(s) used for calling somatic nucleotide variations. Multiple selections are allowed")
+            #                      ,placement = "top")
+            #     # intersect or union
+            #     ,conditionalPanel(
+            #       sprintf('input.%s.length > 1',snv_id),
+            #       radioGroupButtons(
+            #         inputId = snv_uni_id,
+            #         label = HTML(paste0("Select method to handle results by different callers: ",add_help(snv_uni_id_q))),
+            #         choices = c(
+            #           "Intersect" = "int"
+            #           ,"Union" = "uni"
+            #         ),
+            #         selected = rv[[snv_uni_id]],
+            #         size = "sm",
+            #         checkIcon = list(
+            #           yes = icon("check-square"),
+            #           no = icon("square-o")
+            #         ),
+            #         # status = "primary",
+            #         direction = "horizontal"
+            #       )
+            #     )
+            #     ,bsTooltip(snv_uni_id_q,HTML(paste0(
+            #       "When multiple callers are selected, select <b>Intersect</b> to extract consensus results for analysis, or <b>Union</b> to find a positive hit in any algorithm."
+            #     )),placement = "top")
+            #   )
+            # }
             
             # non-silent variants classifications
-            ,selectizeInput(
+            selectizeInput(
               non_id
               ,label = HTML(paste0("Select variants of interest (Mutated): ",add_help(non_id_q)))
               ,choices = variant_types

@@ -302,7 +302,8 @@ retrieve_genes <- function(x){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(dbt == "snv"){
     if(rv$tcga){
-      infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
+      # infiles <- paste0(rv$indir,"df_snv_class_",method,".csv")
+      infiles <- paste0(rv$indir,"df_snv_class_977.csv")
     }else{
       infiles <- paste0(rv$indir,"df_snv_class",".csv")
     }
