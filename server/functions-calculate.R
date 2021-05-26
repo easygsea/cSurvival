@@ -191,7 +191,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   quantile_s = seq(min, max, by = step)
 
   # initialize the most significant p value and df
-  least_p_value <- 1; df_most_significant <- NULL
+  least_p_value <- 1; df_most_significant <- NULL; least_hr <- 0
 
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
@@ -216,6 +216,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       # surv_diff <- surv_cox(df)
       # p_diff <- coef(summary(surv_diff))[,5]
     # }else if(rv$cox_km == "km"){
+    hr <- coef(summary(surv_cox(df)))[,2]
     if(rv$depmap){
       surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
     }else{
@@ -227,6 +228,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       if(p_diff <= least_p_value){
         least_p_value <- p_diff
         df_most_significant <- df
+        least_hr <- hr
         cutoff_most_significant <- names(quantiles[i])
       }
     }
@@ -239,6 +241,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
     results <- list(
       df = df_most_significant,
       cutoff = cutoff_most_significant
+      ,hr = least_hr
     )
     return(results)
   }
