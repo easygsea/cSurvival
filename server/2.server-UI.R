@@ -169,6 +169,7 @@ output$ui_results <- renderUI({
                       ,HTML(paste0("(Optional) highlight cell lines:",add_help("annot_cells_q")))
                       ,choices = c()
                       ,multiple = T
+                      ,width = "85%"
                       ,options = list(
                         `live-search` = TRUE,
                         placeholder = "Type to search ..."
@@ -187,10 +188,49 @@ output$ui_results <- renderUI({
                   column(
                     6,
                     plotlyOutput("dens_plot",height = "550px", width = "100%")
+                    ,div(
+                      align = "left",
+                      style = "position: absolute; right: 1.5em; top: -3em;",
+                      div(
+                        id = "gear_btn_dens",
+                        style="display: inline-block;vertical-align:top;",
+                        if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
+                          dropdown(
+                            uiOutput("plot_gear_dens"),
+                            circle = TRUE, status = "danger", style = "material-circle",
+                            size="sm", right = T,
+                            icon = icon("gear"), width = "300px",
+                            tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                          )
+                        }
+                      )
+                      ,div(
+                        id="download_btn_dens",
+                        style="display: inline-block;vertical-align:top;",
+                        downloadBttn(
+                          size = "sm", color = "danger", style = "material-circle",
+                          outputId = "download_plot_dens", label = NULL
+                        )
+                        ,bsTooltip("download_btn_dens","Click to download plot", placement = "top")
+                      )
+                    )
                   ),
                   column(
                     6,
                     plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
+                    ,div(
+                      align = "left",
+                      style = "position: absolute; right: 1.5em; top: -3em;",
+                      div(
+                        id="download_btn_box",
+                        style="display: inline-block;vertical-align:top;",
+                        downloadBttn(
+                          size = "sm", color = "danger", style = "material-circle",
+                          outputId = "download_plot_box", label = NULL
+                        )
+                        ,bsTooltip("download_btn_box","Click to download plot", placement = "top")
+                      )
+                    )
                   )
                 )
               )
@@ -237,7 +277,7 @@ output$ui_results <- renderUI({
                       size = "sm", color = "danger", style = "material-circle",
                       outputId = "download_plot", label = NULL
                     )
-                    ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+                    ,bsTooltip("download_btn","Click to download plot", placement = "top")
                   )
                 )
               }
@@ -338,7 +378,7 @@ output$cox_plot <- renderPlot({
   })
 })
 
-# --------- 1a. plot parameters -------------
+# --------- 1a-i. plot parameters -------------
 output$plot_gear <- renderUI({
   if(if_surv()){
     if(rv$cox_km == "cox" | rv$cox_km == "km" ){
@@ -478,28 +518,6 @@ output$plot_gear <- renderUI({
           )
         )
       )
-    }else if(rv$cox_km == "dens"){
-      fluidRow(
-        column(
-          12,
-          materialSwitch(
-            inputId = "dens_fill",
-            label = HTML(paste0("<b>Fill density plot?</b>",add_help("dens_fill_q"))),
-            value = rv$dens_fill, inline = F, width = "100%",
-            status = "danger"
-          )
-          ,bsTooltip("dens_fill_q",HTML(paste0("If TRUE, fill the density plot with colors"))
-                     ,placement = "top")
-          ,materialSwitch(
-            inputId = "dens_mean",
-            label = HTML(paste0("<b>Show mean dependencies</b>",add_help("dens_mean_q"))),
-            value = rv$dens_mean, inline = F, width = "100%",
-            status = "danger"
-          )
-          ,bsTooltip("dens_mean_q",HTML(paste0("If TRUE, average dependency scores are plotted for each group"))
-                     ,placement = "top")
-        )
-      )
     }
   }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2" & !is.null(rv$scatter_gender)){
     fluidRow(
@@ -605,8 +623,32 @@ observeEvent(input$scatter_log_x,{rv$scatter_log_x <- input$scatter_log_x})
 observeEvent(input$scatter_log_y,{rv$scatter_log_y <- input$scatter_log_y})
 observeEvent(input$scatter_lm,{rv$scatter_lm <- input$scatter_lm})
 
+# --------- 1a-ii. plot parameters for density -------------
+output$plot_gear_dens <- renderUI({
+  fluidRow(
+    column(
+      12,
+      materialSwitch(
+        inputId = "dens_fill",
+        label = HTML(paste0("<b>Fill density plot?</b>",add_help("dens_fill_q"))),
+        value = rv$dens_fill, inline = F, width = "100%",
+        status = "danger"
+      )
+      ,bsTooltip("dens_fill_q",HTML(paste0("If TRUE, fill the density plot with colors"))
+                 ,placement = "top")
+      ,materialSwitch(
+        inputId = "dens_mean",
+        label = HTML(paste0("<b>Show mean dependencies</b>",add_help("dens_mean_q"))),
+        value = rv$dens_mean, inline = F, width = "100%",
+        status = "danger"
+      )
+      ,bsTooltip("dens_mean_q",HTML(paste0("If TRUE, average dependency scores are plotted for each group"))
+                 ,placement = "top")
+    )
+  )
+})
 
-# --------- 1b. download plot -------------
+# --------- 1b-i. download plot -------------
 output$download_plot <- downloadHandler(
   filename = function(){
     if(if_surv()){
@@ -628,6 +670,26 @@ output$download_plot <- downloadHandler(
     }else if(rv$plot_type == "snv_stats"){
       saveWidget(as_widget(rv[["snv_stats_fig"]] ), file, selfcontained = TRUE)
     }
+  }
+)
+
+# --------- 1b-ii. download dens plot -------------
+output$download_plot_dens <- downloadHandler(
+  filename = function(){
+    paste0("dpdens_",Sys.time(),".html")
+  },
+  content = function(file) {
+    saveWidget(as_widget(ggplotly(rv[["ggdens"]])), file, selfcontained = TRUE)
+  }
+)
+
+# --------- 1b-iii. download dens's box plot -------------
+output$download_plot_box <- downloadHandler(
+  filename = function(){
+    paste0("dpbox_",Sys.time(),".html")
+  },
+  content = function(file) {
+    saveWidget(as_widget(ggplotly(rv[["ggbox"]])), file, selfcontained = TRUE)
   }
 )
 
@@ -1198,7 +1260,7 @@ output$forest_plot <- renderPlot({
 
 # ------ 7a. density plot, if dependency ---------
 observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
-observeEvent(input$dens_mean,{rv$dens_mean <- rv$dens_mean})
+observeEvent(input$dens_mean,{rv$dens_mean <- input$dens_mean})
 output$dens_plot <- renderPlotly({
   req(rv$project != "")
   df <- retrieve_dens_df()
@@ -1222,7 +1284,7 @@ output$dens_plot <- renderPlotly({
     # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
     labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
     theme_classic()
-
+  rv[["ggdens"]] <- p
   ggplotly(p)
 })
 
@@ -1258,7 +1320,7 @@ output$dens_stats_plot <- renderPlotly({
         # )
       }
     }
-
+    rv[["ggbox"]] <- p
     ggplotly(p,tooltip = c("Line","x","y"))
   })
 })
