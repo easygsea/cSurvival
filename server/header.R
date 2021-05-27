@@ -38,12 +38,19 @@ observeEvent(input$db_download,{
               div(
                 grey_h4(x_name)
                 ,tags$li(HTML(paste0("<b>Clinical outcome</b>: ",dlink(paste0(db_dir,x,"/df_survival_o.csv"),paste0(x,"_clinical.csv")))))
-                ,tags$li(HTML(paste0("<b>Gene expression (RNA-seq, upper quantile normalized RESM)</b>: ",dlink(paste0(db_dir,x,"/df_gene.csv"),paste0(x,"_expression.csv")))))
+                ,if(x != "TCGA-LAML"){
+                  tags$li(HTML(paste0("<b>Gene expression (RNA-seq, upper quantile normalized RESM)</b>: ",dlink(paste0(db_dir,x,"/df_gene.csv"),paste0(x,"_expression.csv")))))
+                }
                 # ,tags$li(HTML(paste0("<b>Z-score-transformed gene expression (RNA-seq)</b>: ",dlink(paste0(db_dir,x,"/df_gene_scale.csv"),paste0(x,"_expression_scaled.csv")))))
                 ,tags$li(HTML(paste0("<b>Simple nucleotide variation (SNV)</b>: ",dlink(paste0(db_dir,x,"/df_snv_class_977.csv"),paste0(x,"_mutation.csv")))))
                 ,tags$li(HTML(paste0("<b>Copy number variation (CNV)</b>: ",dlink(paste0(db_dir,x,"/df_cnv.csv"),paste0(x,"_copy_number.csv")))))
-                ,tags$li(HTML(paste0("<b>MicroRNA expression</b>: ",dlink(paste0(db_dir,x,"/df_mir.csv"),paste0(x,"_mir.csv")))))
+                ,if(x != "TCGA-GBM"){
+                  tags$li(HTML(paste0("<b>MicroRNA expression</b>: ",dlink(paste0(db_dir,x,"/df_mir.csv"),paste0(x,"_mir.csv")))))
+                }
                 ,tags$li(HTML(paste0("<b>Methylation levels</b>: ",dlink(paste0(db_dir,x,"/df_met.csv"),paste0(x,"_methylation.csv")))))
+                ,if(x != "TCGA-LAML"){
+                  tags$li(HTML(paste0("<b>Protein expression (reverse-phase protein array, RPPA)</b>: ",dlink(paste0(db_dir,x,"/df_rrpa.csv"),paste0(x,"_rrpa.csv")))))
+                }
                 ,br()
                 # ,bsTooltip("clinical_o_q",HTML(paste0(
                 #   "<b>OS</b>: overall survival (OS) status, 0=alive, 1=dead;"
