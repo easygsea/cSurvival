@@ -11,6 +11,7 @@ output$ui_results <- renderUI({
   if(x == 1){
     types <- list(
       "Survival plot #1" = 1
+      ,"Percentile tracking" = "track"
       ,"Sex effect plot" = "gender"
     )
 
@@ -31,6 +32,7 @@ output$ui_results <- renderUI({
     names(indi) <- paste0("Survival plot #",1:x)
     types <- list(
       "Interaction survival plot" = "all"
+      ,"Percentile tracking" = "track"
     ) %>% c(.,indi)
 
     # check data types
@@ -141,11 +143,13 @@ output$ui_results <- renderUI({
           ,placement = "right")
         )
       }
-      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
+      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats" & rv$plot_type != "gsea" & rv$plot_type != "track"){
         column(
           12, align="center",
           uiOutput("ui_error")
         )
+      }else if(rv$plot_type == "track"){
+        uiOutput("ui_track")
       }else{
         if(surv_yn & rv$cox_km == "dens"){
           if(typeof(rv[["res"]]) == "list"){
@@ -1262,4 +1266,11 @@ output$dens_stats_plot <- renderPlotly({
 # highlight cells
 observeEvent(rv[["dens_df"]],{
   updateSelectizeInput(session,"annot_cells",choices = rv[["dens_df"]][["Cell"]],server = T)
+})
+
+# --------- 8. P-value tracking -------------
+output$ui_track <- renderUI({
+  column(
+    12
+  )
 })

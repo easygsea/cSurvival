@@ -621,8 +621,34 @@ observe({
 
 # parameters for KM analysis
 output$par_gear <- renderUI({
-  rv[["ui_run_parameters"]]
+  div(
+    if(rv$tcga){
+      column(
+        12,align="center",
+        wellPanel(
+          style="background-color:#F0EEE9; border: .5px solid #fff;",
+          radioGroupButtons(
+            inputId = "flagged",
+            label = HTML(paste0("<h4>If TCGA, exclude flagged cases from analysis? ",add_help("flagged_q"),"</h4>")),
+            choices = c("Yes"="y","No"="n"),
+            selected = rv$flagged,
+            status = "danger", #size = "sm",
+            checkIcon = list(
+              yes = icon("check-square"),
+              no = icon("square-o")
+            )
+          )
+          ,bsTooltip("flagged_q",HTML(flagged_exp),placement = "right")
+          ,radioTooltip(id = "flagged", choice = "y", title = HTML("Remove flagged cases"))
+          ,radioTooltip(id = "flagged", choice = "n", title = HTML("Keep all cases"))
+        )
+      )
+    },
+    rv[["ui_run_parameters"]]
+  )
 })
+
+observeEvent(input$flagged,{rv$flagged <- input$flagged})
 
 # update all run parameters according to analysis #1
 observeEvent(input$toall,{

@@ -191,6 +191,9 @@ observeEvent(input$confirm,{
           }
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)
+          if(rv$flagged == "y"){
+            data <- data %>% dplyr::filter(!patient_id %in% flagged_cases)
+          }
 
           # check if manually input genes exist in database
           if(extract_mode == "manual"){

@@ -13,11 +13,12 @@ extract_gene_data <- function(x, type){
 
   df_file <- list(
     "rna" = "df_gene.csv"
-    ,"lib" = "df_gene_scale.csv"
+    ,"lib" = "df_gene.csv"
     ,"manual" = "df_gene_scale.csv"
     ,"cnv" = "df_cnv.csv"
     ,"mir" = "df_mir.csv"
     ,"pro" = "df_proteomic.csv"
+    ,"rrpa" = "df_rrpa.csv"
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
@@ -70,7 +71,7 @@ extract_gene_data <- function(x, type){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
     genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
-  }else if(type == "cnv" | type == "mir" | type == "pro"){
+  }else if(type == "cnv" | type == "mir" | type == "pro" | type == "rrpa"){
     # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]
   }
@@ -107,7 +108,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
 
   # save original expression or mutation data, if applicable
-  if(type == "rna" | type == "mir"){
+  if(type == "rna" | type == "mir" | type == "rrpa"){
     # save original expression data
     rv[[paste0("exprs_",x)]] <- data
   }else if(type == "snv"){
@@ -191,7 +192,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   quantile_s = seq(min, max, by = step)
 
   # initialize the most significant p value and df
-  least_p_value <- 1; df_most_significant <- NULL
+  least_p_value <- 1; df_most_significant <- NULL; least_hr <- 0
 
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
@@ -216,6 +217,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       # surv_diff <- surv_cox(df)
       # p_diff <- coef(summary(surv_diff))[,5]
     # }else if(rv$cox_km == "km"){
+    hr <- coef(summary(surv_cox(df)))[,2]
     if(rv$depmap){
       surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
     }else{
@@ -227,6 +229,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       if(p_diff <= least_p_value){
         least_p_value <- p_diff
         df_most_significant <- df
+        least_hr <- hr
         cutoff_most_significant <- names(quantiles[i])
       }
     }
@@ -239,6 +242,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
     results <- list(
       df = df_most_significant,
       cutoff = cutoff_most_significant
+      ,hr = least_hr
     )
     return(results)
   }
@@ -635,6 +639,11 @@ de_dfgene <- function(){
 
   # whole gene expression table
   df_gene <- rbind_common(l) %>% dplyr::filter(patient_id %in% patients)
+  
+  # filter ? genes
+  if(rv$depmap | rv$tcga){
+    df_gene <- df_gene %>% dplyr::select(-starts_with("\\?"))
+  }
 
   # remaining patient ids
   patients <- df_gene$patient_id
@@ -644,39 +653,46 @@ de_dfgene <- function(){
   incProgress(amount = 0.1, message = wait_msg("Formatting gene expression matrix for DE analysis..."))
 
   # transpose
-  df_gene <- transpose(df_gene) %>% .[-1,] %>% as.data.frame()
+  df_gene <- data.table::transpose(df_gene) %>% .[-1,] %>% as.data.frame()
   # reassign patient ids
   colnames(df_gene) <- patients
   rownames(df_gene) <- genes
 
   incProgress(amount = 0.2, message = wait_msg("Converting gene IDs..."))
 
-  # id conversion
-  # create individual tables using org.Hs
-  egENS <- toTable(org.Hs.egENSEMBL)
-  egSYMBOL <- toTable(org.Hs.egSYMBOL)
-
-  # bind the tables
-  id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
-
-  # extract the gene ids from df_gene and find their names from id conversion table
-  gene_ids <- as_tibble_col(rownames(df_gene), column_name = "ensembl_id")
-  gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
-
-  # convert gene ids
-  df_gene <- df_gene %>% dplyr::mutate(ensembl_id=rownames(df_gene)) %>%
-    left_join(gene_ids_table, by = "ensembl_id")
-
-  # remove unnecessary columns
-  df_gene <- df_gene %>%
-    dplyr::distinct(symbol,.keep_all = TRUE) %>%
-    dplyr::filter(!is.na(symbol))
-
-  genes <- df_gene$symbol
+  if(rv$target){
+    # id conversion
+    egSYMBOL <- toTable(org.Hs.egSYMBOL)
+    
+    # create individual tables using org.Hs
+    egENS <- toTable(org.Hs.egENSEMBL)
+    
+    # bind the tables
+    id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
+    
+    # extract the gene ids from df_gene and find their names from id conversion table
+    gene_ids <- as_tibble_col(rownames(df_gene), column_name = "ensembl_id")
+    gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
+    
+    # convert gene ids
+    df_gene <- df_gene %>% dplyr::mutate(ensembl_id=rownames(df_gene)) %>%
+      left_join(gene_ids_table, by = "ensembl_id")
+    
+    # remove unnecessary columns
+    df_gene <- df_gene %>%
+      dplyr::distinct(symbol,.keep_all = TRUE) %>%
+      dplyr::filter(!is.na(symbol))
+    
+    genes <- df_gene$symbol
+    
+    df_gene <- df_gene %>%
+      dplyr::select(-c(ensembl_id, gene_id, symbol))
+  }else{
+    genes <- sapply(genes, function(x) str_split(x, "\\|")[[1]][1])
+  }
 
   # convert to numeric matrix
   df_gene <- df_gene %>%
-    dplyr::select(-c(ensembl_id, gene_id, symbol)) %>%
     dplyr::mutate_all(as.numeric) %>%
     as.matrix(.)
 
