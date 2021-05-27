@@ -22,16 +22,7 @@ observeEvent(input$db_download,{
             ,br(),default_hr(),br()
             ,red_title("Flagged data:")
             ,tags$li(HTML(paste0("<b>Flagged cases</b>",add_help("flagged_case_q")," with annotations: ",dlink(paste0(db_dir,"977/flagged_cases.tsv"),"TCGA_flagged_cases.tsv"))))
-            ,bsTooltip("flagged_case_q",HTML(paste0(
-              "Cases identified as any of the following categories are considered problematic and excluded from cSurvival database:"
-              ,"<br>* Possible tumor/normal sample swap, cross-contamination, and/or sample purity issues;"
-              ,"<br>* Case submitted is found to be a recurrence after submission;"
-              ,"<br>* History of unacceptable prior treatment related to a prior/other malignancy;"
-              ,"<br>* Prior malignancy;"
-              ,"<br>* Item does not meet study protocol, e.g. misclassified cancer type;"
-              ,"<br>* Item is noncanonical as validated by FFPE;"
-              ,"<br>* Redaction."
-            )),placement = "right",options = list(container = "body"))
+            ,bsTooltip("flagged_case_q",HTML(flagged_exp),placement = "right",options = list(container = "body"))
             ,tags$li(HTML(paste0("<b>Flagged samples</b>",add_help("flagged_sample_q")," with annotations: ",dlink(paste0(db_dir,"977/all_bad.tsv"),"TCGA_flagged_samples.tsv"))))
             ,bsTooltip("flagged_sample_q",HTML(paste0(
               "Samples annotated as <b>Do_not_use</b> by Hoadley et al, Cell, 2018."

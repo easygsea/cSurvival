@@ -33,6 +33,9 @@ retrieve_gmt_path <- function(db){
 #     gmtPathways(x)
 #   })
 # names(gmts) <- gsub("?[.]gmt$","",basename(gmt_files))
+# ------ flagged cases -----
+flagged_cases <- fread(paste0(pro_dir,"/977/flagged_cases.tsv"),sep="\t") %>% .[["patient_id"]]
+
 # ------- names for input modes ----------
 input_mode_names <- c(
   "Expression (FPKM)" = "rna"
@@ -155,6 +158,18 @@ ymd_unit <- c(
 )
 
 # ----- Miscellaneous ----
+# explanations for flagged cases
+flagged_exp <- paste0(
+  "Cases identified as any of the following categories are considered problematic and can be excluded from cSurvival analysis:"
+  ,"<br>* Possible tumor/normal sample swap, cross-contamination, and/or sample purity issues;"
+  ,"<br>* Case submitted is found to be a recurrence after submission;"
+  ,"<br>* History of unacceptable prior treatment related to a prior/other malignancy;"
+  ,"<br>* Prior malignancy;"
+  ,"<br>* Item does not meet study protocol, e.g. misclassified cancer type;"
+  ,"<br>* Item is noncanonical as validated by FFPE;"
+  ,"<br>* Redaction."
+)
+
 # red or yellow colorscale
 col_scale_no <- c(0, 0.20068666377, 0.33333333333, 0.43367666522, 0.66666666666, 1)
 col_scale <- sequential_hcl(5, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
