@@ -543,13 +543,17 @@ generate_mir_data <- function(project_ids, abbreviate_position = 12L){
     # all cases extracted from the query
     cases_name_complete <- query_mir[[1]][[1]]$cases
     # the vector contains the shorten name of all patient ids
-    cases_name_shorten <-
-      map_chr(cases_name_complete, function(x){
-        str_sub(x, start = 1L, end = abbreviate_position)
-      })
+    cases_name_shorten <- sapply(cases_name_complete, function(x) paste0(strsplit(x,"-")[[1]][1:3],collapse = "-"))
+    # cases_name_shorten <-
+    #   map_chr(cases_name_complete, function(x){
+    #     str_sub(x, start = 1L, end = abbreviate_position)
+    #   })
     # the list to store the duplicated and non-duplicated patient information
     cases_info <- list()
     for(i in seq_along(cases_name_shorten)){
+      case_name <- cases_name_complete[i]
+      ctype <- strsplit(case_name,"-")[[1]][4]
+      if(!grepl("^01|03|09",ctype)){next}
       patient_name <- cases_name_shorten[i]
       file_name <- query_mir[[1]][[1]]$file_name[i]
       if(is.null(cases_info[[patient_name]])){
@@ -569,7 +573,7 @@ generate_mir_data <- function(project_ids, abbreviate_position = 12L){
       unlink(df_mir_path, recursive = T)
     } else {next}
 
-    write(paste0("patient_id,", paste(gsub("[.]\\d+$","",sample_mirna_id), collapse = ",")), file = df_mir_path, append = T)
+    write(paste0("patient_id,", paste(sample_mirna_id, collapse = ",")), file = df_mir_path, append = T)
     # go through all files and manipulate the duplicates
     for(name in names(cases_info)){
       if(length(cases_info[[name]]) == 1){
@@ -1097,7 +1101,6 @@ for(k in seq_along(project_id)){
 # generate the cnv file----------------------------------------
 # loop through all projects
 for(j in seq_along(project_id)){
-  # ----------------generate the df_survival.csv--------------------------------------
   project_name <- project_id[j]
   # the path to output our cnv df
   df_cnv_path <- paste0(project_name, "/df_cnv.csv")
@@ -1112,14 +1115,17 @@ for(j in seq_along(project_id)){
   GDCdownload(query_cnv, method = "api", directory = paste0(project_name, "/", "cnv_data"))
 
   # the abbreviated patient ids
+  pcases <- query_cnv[[1]][[1]][["cases"]]
   patient_id_TARGET <- try(
-    map_chr(query_cnv[[1]][[1]]$cases, function(x){
-      str_sub(x, start = 1L, end = 16L)
-    })
+    str_split(pcases,"-") %>% lapply(function(x) paste0(x[1:3],collapse = "-")) %>% unlist()
+    # map_chr(query_cnv[[1]][[1]]$cases, function(x){
+    #   str_sub(x, start = 1L, end = 16L)
+    # })
   )
   if(!inherits(patient_id_TARGET, "try-error")){
     unlink(df_cnv_path, recursive = T)
   } else {next}
+  pcases <- pcases[str_split(pcases,"-") %>% lapply(function(x) grepl("^01|03|09",x[4])) %>% unlist()]
 
   chromosome <- list()
   df_target_cnv <- list()
@@ -1195,7 +1201,7 @@ for(j in seq_along(project_id)){
   #
 }
 
-# apply the function to generate miRNA data for TARGET projects
+# ------ apply the function to generate miRNA data for TARGET projects --------
 generate_mir_data(project_ids = project_id, abbreviate_position = 16L)
 
 #-------- delete unnecessary files-------------------

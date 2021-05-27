@@ -113,9 +113,12 @@ dyn_list <- function(x){
     ,snv_uni_id <- paste0("snv_uni_",x)
   )
 }
-# the data that tell what Target projects data have
+# ----- the data that tell what TCGA/TARGET has -----
 TARGET_existing_data <- fread(paste0(pro_dir,"TARGET_existing_data.csv"), sep = ",") %>%
   mutate(existing_data = str_split(existing_data, pattern = ","))
+
+TCGA_missing_data <- fread(paste0(pro_dir,"TCGA_missing_data.csv"), sep = ",") %>%
+  mutate(missing_data = str_split(missing_data, pattern = ","))
 
 # -------- TCGA survival endpoints ----------
 tcga_stypes <- c(

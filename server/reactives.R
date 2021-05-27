@@ -1,13 +1,27 @@
 # ------- TCGA data types, e.g expression, snv ---------
 data_types <- reactive({
-  if(rv$tcga | (!rv$tcga & !rv$target & !rv$depmap)){
-    c("Expression"="rna", 
-      "Mutation"="snv",
-      "CNV"="cnv",
-      "miRNA"="mir",
-      "Methylation"="met",
-      "RPPA"="rrpa"
-    )
+  dtype <- c("Expression"="rna", 
+             "Mutation"="snv",
+             "CNV"="cnv",
+             "miRNA"="mir",
+             "Methylation"="met",
+             "RPPA"="rrpa"
+  )
+  if(!rv$tcga & !rv$target & !rv$depmap){
+    dtype
+  }else if(rv$tcga){
+    if(rv$project != ""){
+      # get current target projects
+      selected_target_projects <- rv$project
+      
+      # the list that contains all the parameters of target projects
+      parameters_target_projects <- (TCGA_missing_data %>%
+                                       filter(project_name %in% selected_target_projects))$missing_data
+      overlapped_parameter <- Reduce(intersect, parameters_target_projects)
+      dtype[!dtype %in% overlapped_parameter]
+    }else{
+      dtype
+    }
   }else if(rv$target){
     
     # get current target projects
