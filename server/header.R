@@ -90,9 +90,10 @@ observeEvent(input$db_download,{
             strong_h4("DepMap cell line"),
             red_title("Source data:")
             ,tags$li(HTML("DepMap, Broad (2021): DepMap 21Q2 Public. figshare. Dataset. <a href='https://doi.org/10.6084/m9.figshare.14541774.v2' target='_blank'>https://doi.org/10.6084/m9.figshare.14541774.v2</a>"))
+            ,tags$li(HTML("Nusinow, D.P., Szpyt, J., Ghandi, M., Rose, C.M., McDonald III, E.R., Kalocsay, M., Jané-Valbuena, J., Gelfand, E., Schweppe, D.K., Jedrychowski, M. and Golji, J., 2020. Quantitative proteomics of the cancer cell line encyclopedia. Cell, 180(2), pp.387-402."))
             ,tags$li(HTML("Ghandi, M., Huang, F.W., Jané-Valbuena, J., Kryukov, G.V., Lo, C.C., McDonald, E.R., Barretina, J., Gelfand, E.T., Bielski, C.M., Li, H. and Hu, K., 2019. Next-generation characterization of the cancer cell line encyclopedia. Nature, 569(7757), pp.503-508."))
-            ,tags$li(HTML("Meyers, R.M., Bryan, J.G., McFarland, J.M., Weir, B.A., Sizemore, A.E., Xu, H., Dharia, N.V., Montgomery, P.G., Cowley, G.S., Pantel, S. and Goodale, A., 2017. Computational correction of copy number effect improves specificity of CRISPR–Cas9 essentiality screens in cancer cells. Nature genetics, 49(12), pp.1779-1784."))
             ,tags$li(HTML("Dempster, J.M., Rossen, J., Kazachkova, M., Pan, J., Kugener, G., Root, D.E. and Tsherniak, A., 2019. Extracting biological insights from the project achilles genome-scale CRISPR screens in cancer cell lines. BioRxiv, p.720243."))
+            ,tags$li(HTML("Meyers, R.M., Bryan, J.G., McFarland, J.M., Weir, B.A., Sizemore, A.E., Xu, H., Dharia, N.V., Montgomery, P.G., Cowley, G.S., Pantel, S. and Goodale, A., 2017. Computational correction of copy number effect improves specificity of CRISPR–Cas9 essentiality screens in cancer cells. Nature genetics, 49(12), pp.1779-1784."))
             ,tags$li(HTML("Tsherniak, A., Vazquez, F., Montgomery, P.G., Weir, B.A., Kryukov, G., Cowley, G.S., Gill, S., Harrington, W.F., Pantel, S., Krill-Burger, J.M. and Meyers, R.M., 2017. Defining a cancer dependency map. Cell, 170(3), pp.564-576."))
             ,br(),default_hr(),br()
             # ------------- 3. curated DepMap data --------------

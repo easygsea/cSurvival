@@ -136,10 +136,7 @@ output$ui_results <- renderUI({
             ),
             direction = "horizontal"
           )
-          ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
-                                            ,"Cox regression model assesses the effect of several risk factors simultaneously,"
-                                            ," while KM describe the survival according to one factor under investigation. "
-          ))
+          ,bsTooltip("cox_km_q",HTML(cox_km_txt)
           ,placement = "right")
         )
       }
@@ -238,7 +235,7 @@ output$ui_results <- renderUI({
           }
         }else{
           div(
-            column(
+            column(id="div_surv",
               area_w, align = "left",
               title_div,
               if(surv_yn){
@@ -262,6 +259,7 @@ output$ui_results <- renderUI({
                     style="display: inline-block;vertical-align:top;",
                     if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
                       dropdown(
+                        inputId = "div_plot_gear",
                         uiOutput("plot_gear"),
                         circle = TRUE, status = "danger", style = "material-circle",
                         size="sm", right = T,
@@ -285,7 +283,7 @@ output$ui_results <- renderUI({
             ,conditionalPanel(
               'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
               column(
-                5, align="left",
+                5, align="left",id="div_ui_stats",
                 uiOutput("ui_stats")
               )
             )

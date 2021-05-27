@@ -13,6 +13,7 @@ server <- function(input, output, session) {
   source("server/functions-vis.R", local = TRUE)
   source("server/functions-calculate.R", local = TRUE)
   source("server/header.R", local = TRUE)
+  source("server/help.R", local = TRUE)
   source("server/1.server-one.R", local = TRUE)
   source("server/2.server-calculate.R", local = TRUE)
   source("server/2.server-UI.R", local = TRUE)

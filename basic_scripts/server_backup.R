@@ -1042,14 +1042,18 @@ for(k in seq_along(project_id)){
       )@data[,c("Hugo_Symbol", "Entrez_Gene_Id", "Gene",
                 "Tumor_Sample_Barcode","Variant_Type", "Variant_Classification")] %>%
         mutate(full_name = paste(Hugo_Symbol, Entrez_Gene_Id, Gene, sep = "|")) %>%
-        mutate(Tumor_Sample_Barcode = str_sub(Tumor_Sample_Barcode, start = 1L, end = 16L))
+        mutate(cctype = str_split(Tumor_Sample_Barcode,"-", simplify = TRUE)[,4])
     )
     if(!inherits(df_maf_target_snv, "try-error")){
+      df_maf_target_snv <- df_maf_target_snv %>%
+        dplyr::filter(str_detect(cctype,"^01|03|09"))
       df_target_snv_list[[j]] <- df_maf_target_snv
     }else{next}
   }
   # combine together all the .mafs
   df_snv <- try(bind_rows(df_target_snv_list))
+  
+  df_snv[["Tumor_Sample_Barcode"]] <- str_split(df_snv[["Tumor_Sample_Barcode"]],"-") %>% lapply(function(x) paste0(x[1:3],collapse = "-")) %>% unlist(.)
 
   # if the data is read successfully, delete the older version of csv
   if(!inherits(df_snv, "try-error")){

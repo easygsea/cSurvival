@@ -38,6 +38,7 @@ add_gear <- function(
   div(
     style=sprintf("position: relative; align: center; left: %s; top: %s;",left, top),
     dropdownButton(
+      inputId = paste0("div_",id),
       circle = TRUE, status = "info",
       size = "xs",
       icon = icon("gear"),# class = "opt"),
@@ -145,15 +146,17 @@ plot_ui <- function(n){
               no = tags$i(class = "fa fa-square-o", 
                           style = "color: white"))
           )
-          ,selectizeInput(
-            g_ui_id,
-            HTML(paste0(x,".3. Select your gene of interest:",add_help(g_ui_id_q)))
-            ,choices=c()
-            ,selected=rv[[g_ui_id]]
-            ,width = "100%"
-            ,options = list(
-              placeholder = g_placeholder()
-              ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
+          ,div(id = "div_g",
+            selectizeInput(
+              g_ui_id,
+              HTML(paste0(x,".3. Select your gene of interest:",add_help(g_ui_id_q)))
+              ,choices=c()
+              ,selected=rv[[g_ui_id]]
+              ,width = "100%"
+              ,options = list(
+                placeholder = g_placeholder()
+                ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_id]]))
+              )
             )
           )
         )
@@ -250,14 +253,11 @@ plot_ui <- function(n){
         )
         
         # tooltip for data category
-        ,bsTooltip(cat_id_q, HTML("<b>Gene or locus</b>: To study if the expression level, mutational status, copy number, or methylation level of a gene or locus correlates with poorer/better survival.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.")
+        ,bsTooltip(cat_id_q, HTML(cat_id_q_txt)
                    ,placement = "right")
-        ,bsTooltip(db_id_q, HTML("To study if cancer survival is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment.")
+        ,bsTooltip(db_id_q, HTML(db_id_q_txt)
                    ,placement = "right")
-        ,bsTooltip(g_ui_id_q, HTML(paste0("Search and select. If a gene or locus is not found, try its alias names."
-                                          ," If still not found, it means its expression/alteration is barely detected in the selected cancer project."
-                                          ," Or, if proteomics, it has not been quantified."
-                                          ," Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects."))
+        ,bsTooltip(g_ui_id_q, HTML(g_id_txt)
                    ,placement = "right")
         ,bsTooltip(gs_mode_id_q, HTML("Select <b>Library</b> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene\\'s interacting partners.<br>Alternatively, select <b>Manual</b> to enter your own list of genes.")
                    ,placement = "right")

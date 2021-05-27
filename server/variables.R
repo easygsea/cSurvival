@@ -46,6 +46,7 @@ input_mode_names <- c(
   ,"Mean Z-score" = "lib"
   ,"Mean Z-score" = "manual"
   ,"Median-centered RRPA value" = "rrpa"
+  ,"Normalized protein expression" = "pro"
 )
 
 # ------- survival analysis methods ---------
@@ -156,6 +157,19 @@ ymd_unit <- c(
   "y" = 365.25
   ,"m" = 30.4375
   ,"d" = 1
+)
+
+# -------- bstooltip help text --------
+cat_id_q_txt <- "<b>Gene or locus</b>: To study if the expression level, mutational status, copy number, methylation, or protein level of a gene or locus correlates with poorer/better survival.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes."
+db_id_q_txt <- "To study if cancer survival is associated with a gene\\'s expression level, mutational status, copy number variation; a microRNA\\'s expression; or the methylation level of a DNA segment."
+g_id_txt <- paste0("Search and select. If a gene or locus is not found, try its alias names."
+                   ," If still not found, it means its expression/alteration is barely detected in the selected cancer project."
+                   ," Or, if proteomics, it has not been quantified."
+                   ," Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects.")
+cox_km_txt <- paste0("Select the method for analyzing and summarizing survival data. "
+                     ,"KM describe the survival according to one factor under investigation; "
+                     ,"Cox regression model assesses the effect of several risk factors simultaneously; "
+                     ,"additional density and box plots are provided for DepMap data analysis and visualization."
 )
 
 # ----- Miscellaneous ----

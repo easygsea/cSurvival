@@ -706,7 +706,7 @@ output$tcga_pars <- renderUI({
 
   # render the UI
   column(
-    12, align="center",
+    12, id="div_tcga_stype",align="center",
     radioGroupButtons(
       inputId = "tcga_stype",
       label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
