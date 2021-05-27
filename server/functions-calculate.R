@@ -18,6 +18,7 @@ extract_gene_data <- function(x, type){
     ,"cnv" = "df_cnv.csv"
     ,"mir" = "df_mir.csv"
     ,"pro" = "df_proteomic.csv"
+    ,"rrpa" = "df_rrpa.csv"
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
@@ -70,7 +71,7 @@ extract_gene_data <- function(x, type){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
     genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
-  }else if(type == "cnv" | type == "mir" | type == "pro"){
+  }else if(type == "cnv" | type == "mir" | type == "pro" | type == "rrpa"){
     # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]
   }
@@ -107,7 +108,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
 
   # save original expression or mutation data, if applicable
-  if(type == "rna" | type == "mir"){
+  if(type == "rna" | type == "mir" | type == "rrpa"){
     # save original expression data
     rv[[paste0("exprs_",x)]] <- data
   }else if(type == "snv"){

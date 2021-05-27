@@ -45,6 +45,7 @@ input_mode_names <- c(
   ,"Methylation beta-value" = "met"
   ,"Mean Z-score" = "lib"
   ,"Mean Z-score" = "manual"
+  ,"Median-centered RRPA value" = "rrpa"
 )
 
 # ------- survival analysis methods ---------

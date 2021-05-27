@@ -241,7 +241,15 @@ input_mode <- function(x){
 
 input_mode_name <- function(x){
   inmode <- input_mode(x)
-  names(input_mode_names)[input_mode_names == inmode]
+  y <- names(input_mode_names)[input_mode_names == inmode]
+  if(inmode == "rna"){
+    if(rv$tcga){
+      y <- gsub("FPKM","upper quartile normalized RSEM",y)
+    }else if(rv$depmap){
+      y <- gsub("FPKM","TPM",y)
+    }
+  }
+  return(y)
 }
 
 # call the data type
@@ -313,6 +321,8 @@ retrieve_genes <- function(x){
     infiles <- paste0(rv$indir,"df_mir_scale.csv")
   }else if(dbt == "pro"){
     infiles <- paste0(rv$indir,"df_proteomic_scale.csv")
+  }else if(dbt == "rrpa"){
+    infiles <- paste0(rv$indir,"df_rrpa_scale.csv")
   }
   
   l <- lapply(infiles, function(x){
@@ -324,7 +334,7 @@ retrieve_genes <- function(x){
   df_gene <- rbind_common(l)
   
   # the genes
-  genes <- names(df_gene) %>% .[-1]
+  genes <- names(df_gene) %>% .[-1] %>% sort()
   
   # save into rv$snv_genes
   if(!is.null(input[[db_id]])){

@@ -5,8 +5,9 @@ data_types <- reactive({
       "Mutation"="snv",
       "CNV"="cnv",
       "miRNA"="mir",
-      "Methylation"="met"
-      )
+      "Methylation"="met",
+      "RPPA"="rrpa"
+    )
   }else if(rv$target){
     
     # get current target projects
