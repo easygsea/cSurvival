@@ -110,6 +110,7 @@ plot_ui <- function(n){
     gs_manual_btn_id <- paste0("add_btn_",x)
     gs_genes_id <- paste0("gs_mg_",x)
 
+    if(!rv[[db_id]] %in% data_types()){rv[[db_id]] <- data_types()[1]}
     # the UI
     column(
       col_w,

@@ -24,8 +24,8 @@ extract_gene_data <- function(x, type){
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
 
   if(type == "rna"){
-    # original file that stores raw FPKM values
-    all_file <- paste0(rv$indir,"df_gene.csv")[[1]]
+    # # original file that stores raw FPKM values
+    # all_file <- paste0(rv$indir,"df_gene.csv")[[1]]
     # # read in all genes
     # all_genes <- fread(all_file,sep=",",header=T,nrows=0) %>% names(.)
     # # all_genes <- sapply(all_genes, function(x){
@@ -39,11 +39,11 @@ extract_gene_data <- function(x, type){
 
     # selected gene
     genes <- input[[g_ui_id]]
-    if(rv$target){
-      # extract ENSG info
-      genes <- strsplit(genes,"\\|")[[1]]
-      if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
-    }
+    # if(rv$target){
+    #   # extract ENSG info
+    #   genes <- strsplit(genes,"\\|")[[1]]
+    #   if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
+    # }
   }else if(type == "snv"){
     # selected gene
     genes <- input[[g_ui_id]]
