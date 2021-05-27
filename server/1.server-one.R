@@ -629,7 +629,7 @@ output$par_gear <- renderUI({
           style="background-color:#F0EEE9; border: .5px solid #fff;",
           radioGroupButtons(
             inputId = "flagged",
-            label = HTML(paste0("<h4>Exclude flagged cases from analysis? ",add_help("flagged_q"),"</h4>")),
+            label = HTML(paste0("<h4>If TCGA, exclude flagged cases from analysis? ",add_help("flagged_q"),"</h4>")),
             choices = c("Yes"="y","No"="n"),
             selected = rv$flagged,
             status = "danger", #size = "sm",

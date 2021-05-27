@@ -13,7 +13,7 @@ extract_gene_data <- function(x, type){
 
   df_file <- list(
     "rna" = "df_gene.csv"
-    ,"lib" = "df_gene_scale.csv"
+    ,"lib" = "df_gene.csv"
     ,"manual" = "df_gene_scale.csv"
     ,"cnv" = "df_cnv.csv"
     ,"mir" = "df_mir.csv"

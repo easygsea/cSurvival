@@ -8,8 +8,8 @@ observeEvent(input$db_download,{
         column(
           12, style = "font-size:120%;",
           p(paste0("cSurvival aims to provide reliable and integrated resources for both clinicians and experimental biologists to evaluate prognostic values of biomarkers and investigate interactions between genes, loci, pathways/gene sets, and drugs in cancers."))
-          ,p(paste0("For each dataset, we controlled for quality by removing flagged (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC) samples",
-                    ", extracted primary tumor data (Sample Type Code 01; for TCGA-SKCM, 01 or 06) to suit the purpose of survival analysis, and transformed the data into a standardized format for customizable and reproducible studies."))
+          ,p(paste0("For each dataset, we controlled for quality by flagging problematic samples (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC)",
+                    ", extracted primary tumor data (Sample Type Code 03 for TCGA-LAML and TARGET-AML; 01 or 06 for TCGA-SKCM; 01 for others) to suit the purpose of survival analysis, and transformed the data into a standardized format for customizable and reproducible studies."))
           ,br()
         ),
         tabBox(id="db_panel",
@@ -39,7 +39,7 @@ observeEvent(input$db_download,{
                 grey_h4(x_name)
                 ,tags$li(HTML(paste0("<b>Clinical outcome</b>: ",dlink(paste0(db_dir,x,"/df_survival_o.csv"),paste0(x,"_clinical.csv")))))
                 ,tags$li(HTML(paste0("<b>Gene expression (RNA-seq)</b>: ",dlink(paste0(db_dir,x,"/df_gene.csv"),paste0(x,"_expression.csv")))))
-                ,tags$li(HTML(paste0("<b>Z-score-transformed gene expression (RNA-seq)</b>: ",dlink(paste0(db_dir,x,"/df_gene_scale.csv"),paste0(x,"_expression_scaled.csv")))))
+                # ,tags$li(HTML(paste0("<b>Z-score-transformed gene expression (RNA-seq)</b>: ",dlink(paste0(db_dir,x,"/df_gene_scale.csv"),paste0(x,"_expression_scaled.csv")))))
                 ,tags$li(HTML(paste0("<b>Simple nucleotide variation (SNV)</b>: ",dlink(paste0(db_dir,x,"/df_snv_class_977.csv"),paste0(x,"_mutation.csv")))))
                 ,tags$li(HTML(paste0("<b>Copy number variation (CNV)</b>: ",dlink(paste0(db_dir,x,"/df_cnv.csv"),paste0(x,"_copy_number.csv")))))
                 ,tags$li(HTML(paste0("<b>MicroRNA expression</b>: ",dlink(paste0(db_dir,x,"/df_mir.csv"),paste0(x,"_mir.csv")))))
