@@ -383,33 +383,37 @@ output$plot_gear <- renderUI({
       fluidRow(
         column(
           12,
-          # median thresholds
-          radioGroupButtons(
-            inputId = "ymd",
-            label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
-            choices = ymd_names,
-            selected = rv$ymd,
-            size = "sm",
-            checkIcon = list(
-              yes = icon("check-square"),
-              no = icon("square-o")
-            ),
-            direction = "horizontal"
-          )
-          ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
-          ))
-          ,placement = "top")
-          # fine-tune time intervals
-          ,sliderTextInput(
-            "ymd_int",
-            HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
-            choices = rv$ymd_int_range,
-            selected = rv$ymd_int
-            ,grid=T, force_edges=T
-          )
-          ,bsTooltip("ymd_int_q",HTML(paste0(
-            "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
-          )),placement = "top")
+          if(rv$tcga | rv$target){
+            div(
+              # median thresholds
+              radioGroupButtons(
+                inputId = "ymd",
+                label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
+                choices = ymd_names,
+                selected = rv$ymd,
+                size = "sm",
+                checkIcon = list(
+                  yes = icon("check-square"),
+                  no = icon("square-o")
+                ),
+                direction = "horizontal"
+              )
+              ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
+              ))
+              ,placement = "top")
+              # fine-tune time intervals
+              ,sliderTextInput(
+                "ymd_int",
+                HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
+                choices = rv$ymd_int_range,
+                selected = rv$ymd_int
+                ,grid=T, force_edges=T
+              )
+              ,bsTooltip("ymd_int_q",HTML(paste0(
+                "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
+              )),placement = "top")
+            )
+          }
           # color scheme
           ,selectInput(
             "palette",
