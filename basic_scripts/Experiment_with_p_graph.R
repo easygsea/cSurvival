@@ -15,12 +15,6 @@ rvdepmap <- readRDS("~/Downloads/rstudio-export/rv_depmap.rds")
 
 #Helper function
 # original survival df
-original_surv_df <- function(patient_ids){
-  df_o <- rv$df_survival
-  df_o %>% dplyr::filter(patient_id %in% patient_ids)
-  df_o[match(patient_ids,df_o$patient_id),] %>%
-    dplyr::select(-gender)
-}
 
 
 # generate survival df
@@ -39,6 +33,40 @@ generate_surv_df <- function(df, patient_ids, exp, q){
   df <- df %>% dplyr::filter(!is.na(patient_id))
   return(df)
 }
+
+
+
+surv_cox <- function(df, mode=1){
+  if(rvdepmap){
+    if(mode == 1){
+      coxph(Surv(dependency) ~ level, data = df)
+    }else if(mode == 2){
+      coxph(Surv(dependency) ~ level.x * level.y, data = df)
+    }
+  }else{
+    if(mode == 1){
+      coxph(Surv(survival_days, censoring_status) ~ level, data = df)
+    }else if(mode == 2){
+      coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+    }
+  }
+}
+# surv_km <- function(df, mode=1){
+#   if(rv$depmap){
+#     if(mode == 1){
+#       survfit(Surv(dependency) ~ level, data = df)
+#     }else if(mode == 2){
+#       survfit(Surv(dependency) ~ level.x * level.y, data = df)
+#     }
+#   }else{
+#     if(mode == 1){
+#       survfit(Surv(survival_days, censoring_status) ~ level, data = df)
+#     }else if(mode == 2){
+#       survfit(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
+#     }
+#   }
+# }
+
 
 #Function
 get_info_most_significant_rna <- function(data, min, max, step, mode="g", df_o){
@@ -73,6 +101,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g", df_o){
   for(i in seq_along(quantiles)){
     q <- quantiles[i]
     df <- generate_surv_df(df_o, patient_ids, exp, q)
+    hr <- coef(summary(surv_cox(df)))[,2]
     
     # # test if there is significant difference between high and low level genes
     # if(rv$cox_km == "cox"){
@@ -89,22 +118,25 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g", df_o){
     p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     
     #append current p value to the p value df
-    new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i])
+    new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
     p_df <- rbind(p_df,new_row)
     # }
     if(!is.na(p_diff)){
       if(p_diff <= least_p_value){
         least_p_value <- p_diff
         df_most_significant <- df
+        least_hr <- hr
         cutoff_most_significant <- names(quantiles[i])
+        
       }
     }
   }
   #Transform the p_df a little bit to make it work with the ggplot
-  colnames(p_df) = c('p_value','quantile','expression')
+  colnames(p_df) = c('p_value','quantile','expression','hr')
   p_df$p_value = as.numeric(p_df$p_value)
   p_df$quantile = as.numeric(p_df$quantile)
   p_df$expression = as.numeric(p_df$expression)
+  p_df$hr = as.numeric(p_df$hr)
   # proceed only if enough data
   if(is.null(df_most_significant)){
     return(NULL)
@@ -113,15 +145,15 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g", df_o){
       df = df_most_significant,
       cutoff = cutoff_most_significant,
       p_df = p_df
+      ,hr = least_hr
     )
     return(results)
   }
 }
 
 res <- get_info_most_significant_rna(data,min = 0.2,max = 0.8, step = 0.01, df_o = df_o)
-res$p_df
 
-
+res$p_df$hr
 # 
 # graph <- ggplot(data=res$p_df, aes(x = res$p_df$quantile, y = res$p_df$p_value, group=1)) +
 #   geom_line(linetype = "dashed")+
@@ -135,13 +167,16 @@ res$p_df
 #   
 #custom_colorscale = brewer.pal(n = length(res$p_df$p_value), "YlOrRd")[1,length(res$p_df$p_value)]
 
-fig <- plot_ly(res$p_df, x = res$p_df$quantile, line = list(color = 'rgb(147,149,151)', width = 2))
+fig <- plot_ly(res$p_df, x = res$p_df$quantile)
 fig <- fig %>% add_trace(y = ~res$p_df$p_value,type = 'scatter',#color =~p_value,
+                         line = list(color = 'rgb(147,149,151)', width = 2),
+                         
+                         name = 'P Value',
                          marker=list(
                            color=~p_value,
-                           colorbar=list(
-                             title='Colorbar'
-                           ),
+                           # colorbar=list(
+                           #   title='Colorbar'
+                           # ),
                            colorscale='YlOrRd',#custom_colorscale,
                            reversescale =FALSE
                          ),
@@ -150,16 +185,31 @@ fig <- fig %>% add_trace(y = ~res$p_df$p_value,type = 'scatter',#color =~p_value
                          #colors = brewer.pal("YlOrRd "),
                          #rev('YlOrRd'),#brewer.pal(length(res$p_df$p_value),"YlOrRd "),
   name = '',mode = 'lines+markers', hovertemplate = paste(
-  "P value is : %{y:.3f}<br>",
-  "Quantile(in %) is: %{x:.0f}<br>",
-  "Expression is : %{text:.3f}<br>"
+  #"P value is : %{y:.3f}<br>",
+    "%{y:.3f}<br>",
+  "Quantile(in %) : %{x:.0f}<br>",
+  "ExpressionS : %{text:.3f}<br>"
 )) %>%
+  add_trace(y = res$p_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',
+            line = list(color = 'rgb(0,88,155)', width = 2),
+            marker=list(
+              color=res$p_df$hr,
+              colorscale='YlOrRd',#custom_colorscale,
+              reversescale =TRUE
+            ),#hovertemplate = '',
+            yaxis = "y2"
+            )%>%
 layout(title = 'P Values of Different Quantiles',
        xaxis = list(title = 'Quantile(%)'),
-       yaxis = list (title = 'P Value'))
+       yaxis = list (title = 'P Value'),
+       yaxis2 = list(overlaying = "y",
+                     side = "right",
+                     title = "Harzard Ratio"),
+       hovermode = "x unified"
+       )
+       
 
 fig
-
 
 #hovertemplate = paste('P Value: $%{y:.2f}','<br>Quantile: %{x}<br>')
 
