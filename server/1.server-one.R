@@ -334,6 +334,14 @@ observeEvent(lib_input_lst(),{
         output[[gs_lib_genes_id]] <- renderText({
           paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
         })
+        
+        gs_lib_dn_id <- paste0(gs_lib_id,"dn")
+        output[[gs_lib_dn_id]] <- downloadHandler(
+          filename = function(){paste0(gs,".txt")},
+          content = function(file) {
+            fwrite(as.list(paste0(genes,collapse = "\n")),file,quote = F)
+          }
+        )
       }
 
     }

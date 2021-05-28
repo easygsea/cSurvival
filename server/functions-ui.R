@@ -103,6 +103,7 @@ plot_ui <- function(n){
     gs_mode_id <- paste0("gs_mode_",x); gs_mode_id_q <- paste0(gs_mode_id,"_q")
     gs_db_id <- paste0("gs_db_",x); gs_db_id_q <- paste0(gs_db_id,"_q")
     gs_lib_id <- paste0("gs_l_",x); gs_lib_id_q <- paste0(gs_lib_id,"_q")
+    gs_lib_dn_id <- paste0(gs_lib_id,"dn"); gs_lib_dn_id_q <- paste0(gs_lib_dn_id,"_q")
     gs_lib_genes_id <- paste0("gs_lgs_",x) # verbatimTextOutput on gs genes
     gs_gene_id <- paste0("gs_lg_",x); gs_gene_id_q <- paste0(gs_gene_id,"_q") # gene to search
     gs_gene_genes_id <- paste0("gs_lgg_",x) # verbatimTextOutput on input genes to filter GS
@@ -226,6 +227,14 @@ plot_ui <- function(n){
                     8,
                     conditionalPanel(
                       condition = sprintf("input.%s != ''", gs_lib_id),
+                      div(id=gs_lib_dn_id_q,
+                        style = "position: absolute; right: -1.5em; top: 0.2em;",
+                        downloadBttn(
+                          gs_lib_dn_id,NULL
+                          ,size = "xs", color = "danger", style = "material-circle",
+                        )
+                      )
+                      ,bsTooltip(gs_lib_dn_id_q,"Click to download the genes in the selected GS",placement = "right"),
                       span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
                     )
               )
