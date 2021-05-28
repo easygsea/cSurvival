@@ -13,7 +13,7 @@ library(maftools) # read the .maf files
 library(readxl) # read the .xlsx files
 library(TCGAutils) # aliquot UUID to patient barcode conversion
 
-setwd("~/ShinyApps/project_data")
+setwd("~/ShinyApps/www/project_data")
 select <- dplyr::select
 
 #-------small functions--------------
@@ -543,13 +543,17 @@ generate_mir_data <- function(project_ids, abbreviate_position = 12L){
     # all cases extracted from the query
     cases_name_complete <- query_mir[[1]][[1]]$cases
     # the vector contains the shorten name of all patient ids
-    cases_name_shorten <-
-      map_chr(cases_name_complete, function(x){
-        str_sub(x, start = 1L, end = abbreviate_position)
-      })
+    cases_name_shorten <- sapply(cases_name_complete, function(x) paste0(strsplit(x,"-")[[1]][1:3],collapse = "-"))
+    # cases_name_shorten <-
+    #   map_chr(cases_name_complete, function(x){
+    #     str_sub(x, start = 1L, end = abbreviate_position)
+    #   })
     # the list to store the duplicated and non-duplicated patient information
     cases_info <- list()
     for(i in seq_along(cases_name_shorten)){
+      case_name <- cases_name_complete[i]
+      ctype <- strsplit(case_name,"-")[[1]][4]
+      if(!grepl("^01|03|09",ctype)){next}
       patient_name <- cases_name_shorten[i]
       file_name <- query_mir[[1]][[1]]$file_name[i]
       if(is.null(cases_info[[patient_name]])){
@@ -569,7 +573,7 @@ generate_mir_data <- function(project_ids, abbreviate_position = 12L){
       unlink(df_mir_path, recursive = T)
     } else {next}
 
-    write(paste0("patient_id,", paste(gsub("[.]\\d+$","",sample_mirna_id), collapse = ",")), file = df_mir_path, append = T)
+    write(paste0("patient_id,", paste(sample_mirna_id, collapse = ",")), file = df_mir_path, append = T)
     # go through all files and manipulate the duplicates
     for(name in names(cases_info)){
       if(length(cases_info[[name]]) == 1){
@@ -750,14 +754,14 @@ for(w in seq_along(project_id)){
 # input: a list of project names;
 # input: shorten_position: the length of the string of case name that you would like to have
 # output: two csvs
-generate_gene_dfs <- function(project_id, shorten_position = 16L){
+generate_gene_dfs <- function(project_id, shorten_position = 22L){
   for(k in seq_along(project_id)){
     # the name of the cancer project
     project_name <- project_id[k]  # for example, "TCGA-LUAD"
     # the path to write all the csvs
     df_gene_path = paste0(project_name, "/", "df_gene.csv")
     df_gene_scale_path = paste0(project_name, "/", "df_gene_scale.csv")
-
+    
     # The path for reading and writing the patient data frames
     dir.create(project_name)
     # the query to download the gene information of all patients
@@ -773,14 +777,18 @@ generate_gene_dfs <- function(project_id, shorten_position = 16L){
       unlink(paste0(project_name, "/", "gene_data"), recursive = T)
     } else {next}
     GDCdownload(query_gene_counts, method = "api", directory = paste0(project_name, "/", "gene_data"))
-
+    
     # the vector contain all patient ids
     cases_name_complete <- query_gene_counts[[1]][[1]]$cases
+    # cancer type
+    ctype <- sapply(cases_name_complete, function(x) strsplit(x,"-")[[1]][4])
+    # filter by cancer types
+    cases_name_complete <- names(ctype[grepl("^01|03|09",ctype)])
     # the vector contains the shorten name of all patient ids
-    cases_name_shorten <-
-      map_chr(cases_name_complete, function(x){
-        str_sub(x, start = 1L, end = shorten_position)
-      })
+    cases_name_shorten <- sapply(cases_name_complete, function(x) paste0(strsplit(x,"-")[[1]][1:3],collapse = "-"))
+    # map_chr(cases_name_complete, function(x){
+    #   str_sub(x, start = 1L, end = shorten_position)
+    # })
     # the list to store the duplicated and non-duplicated patient information
     cases_info <- list()
     for(i in seq_along(cases_name_shorten)){
@@ -794,29 +802,106 @@ generate_gene_dfs <- function(project_id, shorten_position = 16L){
         cases_info[[patient_name]][[length(cases_info[[patient_name]])+1]] <- file_name
       }
     }
-
-
+    
+    
     # write the gene names into a file a file as the first line
     filename_first_FPKM <- list.files(pattern = cases_info[[1]][[1]], recursive = TRUE)[1]
     # sample_FPKM_name <- read_tsv(gzfile(filename_first_FPKM), col_names = FALSE)$X1
     sample_FPKM_name <- try(read_tsv(gzfile(filename_first_FPKM), col_names = FALSE)$X1)
     if(!inherits(sample_FPKM_name, "try-error")){
+      sample_FPKM_name <- sapply(sample_FPKM_name, function(x) strsplit(x, "\\.")[[1]][1])
       unlink(df_gene_path, recursive = T)
     } else {next}
-
-    # # Create the table for id conversion --------------------------------------
-    # if(i==1){
+    
+    # Create the table for id conversion --------------------------------------
+    if(i==1){
+      # create individual tables using org.Hs
+      egENS <- toTable(org.Hs.egENSEMBL)
+      egSYMBOL <- toTable(org.Hs.egSYMBOL)
+      
+      # bind the tables
+      id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
+      
+      # extract the gene ids from df_gene and find their names from id conversion table
+      # df_tmp <- cbind(sample_FPKM_name,names(sample_FPKM_name))
+      # colnames(df_tmp) <- c("ensembl_id","ensembl_id_full")
+      # gene_ids <- as_tibble(df_tmp)
+      gene_ids <- as_tibble_col(sample_FPKM_name, column_name = "ensembl_id")
+      gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
+      
+      # extract the ids that do not exist in the id conversion table
+      gene_na_table <- gene_ids_table %>%
+        filter(is.na(gene_id)) %>%
+        mutate(full_name = ensembl_id) #%>% dplyr::select(-ensembl_id_full)
+      # extract the ids that exist in the id conversion table
+      gene_not_na <- gene_ids_table %>%
+        filter(!is.na(gene_id))
+      # summarise the duplicated gene_ids and symbols in the df
+      unique_ids_symbols <-
+        aggregate(x= tibble(gene_not_na["gene_id"], gene_not_na["symbol"]),
+                  by=gene_not_na["ensembl_id"],
+                  FUN = function(X) paste(unique(X), collapse="|")) %>%
+        mutate(full_name = paste(symbol, gene_id, ensembl_id, sep = "|"))
+      # the table that contains all the full name of "ENSG...."
+      full_name_table <- rbind(unique_ids_symbols, gene_na_table)
+      # colnames(full_name_table) <- c("ensembl_id",colnames(full_name_table)[-1])
+    }
+    # generate the correct name of df_gene and df_gene_scale by joining them with the table that contains all the names
+    gene_full_names <-
+      left_join(as_tibble_col(sample_FPKM_name, column_name = "ensembl_id"), #gsub("[.]\\d+$","",)
+                full_name_table,
+                by = "ensembl_id")$full_name
+    # gene_full_names <- sapply(gene_full_names, function(x){ay <- strsplit(x,"\\|")[[1]];ay[length(ay)]})
+    # write the gene names as the first line
+    write(paste0("patient_id,", paste0(gene_full_names, collapse = ",")), file = df_gene_path) #paste(gsub("[.]\\d+$","",sample_FPKM_name)
+    # go through all files and manipulate the duplicates
+    for(name in names(cases_info)){
+      if(length(cases_info[[name]]) == 1){
+        # when no duplicate samples of the patient, write a line to the output file
+        filename_gene_info = list.files(pattern = cases_info[[name]][[1]], recursive = T)
+        df_gene_write <- read_tsv(file = gzfile(filename_gene_info[1]), col_names = FALSE)
+        df_gene_write <- left_join(tibble(X1 = names(sample_FPKM_name)), df_gene_write, by = "X1")
+        write(paste0(name, ",", paste(df_gene_write$X2, collapse = ",")), file = df_gene_path, append = T)
+        
+      } else {
+        # the list to store data frames with duplicated patient ids
+        df_duplicated_list <- list()
+        for(i in seq_along(cases_info[[name]])){
+          df_duplicated_list[[i]] <-
+            read_tsv(file = gzfile(list.files(pattern = cases_info[[name]][[i]], recursive = T)[1]), col_names = FALSE) %>%
+            mutate(X2 = log1p(as.numeric(X2))) # log(x+1)
+          names(df_duplicated_list[[i]])[names(df_duplicated_list[[i]]) == "X2"] <- paste0(name, "_", i)
+          # print(list.files(pattern = cases_info[[name]][[i]], recursive = T)[1])
+        }
+        # calculate the means of all duplicates
+        df_duplicated <- left_join(tibble(X1 = names(sample_FPKM_name)),
+                                   Reduce(function(...) base::merge(..., by = "X1", all.x = T), df_duplicated_list),
+                                   by = "X1") %>%
+          mutate(mean = rowMeans(select(.,-X1),na.rm = F)) %>%
+          mutate(output_col = expm1(mean)) # exp()-1
+        
+        write(paste0(name, ",", paste(df_duplicated$output_col, collapse = ",")), file = df_gene_path, append = T)
+        
+        
+      }
+    }
+    
+    # generate the df_gene_scale.csv ------------------------------------------
+    # df_gene_scale <- read_csv(df_gene_path)
+    df_gene <- data.table::fread(df_gene_path)
+    # # create the table for gene id conversion to full names
+    # if(k==1){
     #   # create individual tables using org.Hs
     #   egENS <- toTable(org.Hs.egENSEMBL)
     #   egSYMBOL <- toTable(org.Hs.egSYMBOL)
-    #
+    #   
     #   # bind the tables
     #   id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
-    #
+    #   
     #   # extract the gene ids from df_gene and find their names from id conversion table
-    #   gene_ids <- as_tibble_col(sample_FPKM_name, column_name = "ensembl_id")
+    #   gene_ids <- as_tibble_col(colnames(df_gene)[-1], column_name = "ensembl_id")
     #   gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
-    #
+    #   
     #   # extract the ids that do not exist in the id conversion table
     #   gene_na_table <- gene_ids_table %>%
     #     filter(is.na(gene_id)) %>%
@@ -833,77 +918,7 @@ generate_gene_dfs <- function(project_id, shorten_position = 16L){
     #   # the table that contains all the full name of "ENSG...."
     #   full_name_table <- rbind(unique_ids_symbols, gene_na_table)
     # }
-    # # generate the correct name of df_gene and df_gene_scale by joining them with the table that contains all the names
-    # gene_full_names <-
-    #   left_join(as_tibble_col(gsub("[.]\\d+$","",sample_FPKM_name), column_name = "ensembl_id"),
-    #             full_name_table,
-    #             by = "ensembl_id")$full_name
-    # write the gene names as the first line
-    write(paste0("patient_id,", paste(gsub("[.]\\d+$","",sample_FPKM_name), collapse = ",")), file = df_gene_path, append = T)
-    # go through all files and manipulate the duplicates
-    for(name in names(cases_info)){
-      if(length(cases_info[[name]]) == 1){
-        # when no duplicate samples of the patient, write a line to the output file
-        filename_gene_info = list.files(pattern = cases_info[[name]][[1]], recursive = T)
-        df_gene_write <- read_tsv(file = gzfile(filename_gene_info[1]), col_names = FALSE)
-        df_gene_write <- left_join(tibble(X1 = sample_FPKM_name), df_gene_write, by = "X1")
-        write(paste0(name, ",", paste(df_gene_write$X2, collapse = ",")), file = df_gene_path, append = T)
-
-      } else {
-        # the list to store data frames with duplicated patient ids
-        df_duplicated_list <- list()
-        for(i in seq_along(cases_info[[name]])){
-          df_duplicated_list[[i]] <-
-            read_tsv(file = gzfile(list.files(pattern = cases_info[[name]][[i]], recursive = T)[1]), col_names = FALSE) %>%
-            mutate(X2 = log1p(as.numeric(X2))) # log(x+1)
-          names(df_duplicated_list[[i]])[names(df_duplicated_list[[i]]) == "X2"] <- paste0(name, "_", i)
-          # print(list.files(pattern = cases_info[[name]][[i]], recursive = T)[1])
-        }
-        # calculate the means of all duplicates
-        df_duplicated <- left_join(tibble(X1 = sample_FPKM_name),
-                                   Reduce(function(...) base::merge(..., by = "X1", all.x = T), df_duplicated_list),
-                                   by = "X1") %>%
-          mutate(mean = rowMeans(select(.,-X1),na.rm = F)) %>%
-          mutate(output_col = expm1(mean)) # exp()-1
-        write(paste0(name, ",", paste(df_duplicated$output_col, collapse = ",")), file = df_gene_path, append = T)
-
-
-      }
-    }
-
-    # generate the df_gene_scale.csv ------------------------------------------
-    # df_gene_scale <- read_csv(df_gene_path)
-    df_gene <- data.table::fread(df_gene_path)
-    # create the table for gene id conversion to full names
-    if(k==1){
-      # create individual tables using org.Hs
-      egENS <- toTable(org.Hs.egENSEMBL)
-      egSYMBOL <- toTable(org.Hs.egSYMBOL)
-
-      # bind the tables
-      id_table <- egENS %>% left_join(egSYMBOL, by = "gene_id")
-
-      # extract the gene ids from df_gene and find their names from id conversion table
-      gene_ids <- as_tibble_col(colnames(df_gene)[-1], column_name = "ensembl_id")
-      gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
-
-      # extract the ids that do not exist in the id conversion table
-      gene_na_table <- gene_ids_table %>%
-        filter(is.na(gene_id)) %>%
-        mutate(full_name = ensembl_id)
-      # extract the ids that exist in the id conversion table
-      gene_not_na <- gene_ids_table %>%
-        filter(!is.na(gene_id))
-      # summarise the duplicated gene_ids and symbols in the df
-      unique_ids_symbols <-
-        aggregate(x= tibble(gene_not_na["gene_id"], gene_not_na["symbol"]),
-                  by=gene_not_na["ensembl_id"],
-                  FUN = function(X) paste(unique(X), collapse="|")) %>%
-        mutate(full_name = paste(symbol, gene_id, ensembl_id, sep = "|"))
-      # the table that contains all the full name of "ENSG...."
-      full_name_table <- rbind(unique_ids_symbols, gene_na_table)
-    }
-
+    
     # start to do the data transformation of df_gene_scale
     patient_ids <- df_gene$patient_id
     # scale the df_gene and generate df_gene_scale
@@ -917,18 +932,18 @@ generate_gene_dfs <- function(project_id, shorten_position = 16L){
         mutate(patient_id = patient_ids) %>%
         dplyr::select(patient_id, everything())
     )
-    # generate the correct name of df_gene_scale by joining them with the table that contains all the names
-    colnames(df_gene_scale)[-1] <-
-      left_join(as_tibble_col(colnames(df_gene_scale)[-1], column_name = "ensembl_id"),
-                full_name_table,
-                by = "ensembl_id")$full_name
-
+    # # generate the correct name of df_gene_scale by joining them with the table that contains all the names
+    # colnames(df_gene_scale)[-1] <-
+    #   left_join(as_tibble_col(colnames(df_gene_scale)[-1], column_name = "ensembl_id"),
+    #             full_name_table,
+    #             by = "ensembl_id")$full_name
+    
     if(!inherits(df_gene_scale, "try-error")){
       unlink(df_gene_scale_path, recursive = T)
     } else {next}
     # write the data out
     fwrite(df_gene_scale, file = df_gene_scale_path)
-
+    
     # delete unnecessary files
     unlink(paste0(project_name, "/", "gene_data"), recursive = T)
   }
@@ -1031,14 +1046,18 @@ for(k in seq_along(project_id)){
       )@data[,c("Hugo_Symbol", "Entrez_Gene_Id", "Gene",
                 "Tumor_Sample_Barcode","Variant_Type", "Variant_Classification")] %>%
         mutate(full_name = paste(Hugo_Symbol, Entrez_Gene_Id, Gene, sep = "|")) %>%
-        mutate(Tumor_Sample_Barcode = str_sub(Tumor_Sample_Barcode, start = 1L, end = 16L))
+        mutate(cctype = str_split(Tumor_Sample_Barcode,"-", simplify = TRUE)[,4])
     )
     if(!inherits(df_maf_target_snv, "try-error")){
+      df_maf_target_snv <- df_maf_target_snv %>%
+        dplyr::filter(str_detect(cctype,"^01|03|09"))
       df_target_snv_list[[j]] <- df_maf_target_snv
     }else{next}
   }
   # combine together all the .mafs
   df_snv <- try(bind_rows(df_target_snv_list))
+  
+  df_snv[["Tumor_Sample_Barcode"]] <- str_split(df_snv[["Tumor_Sample_Barcode"]],"-") %>% lapply(function(x) paste0(x[1:3],collapse = "-")) %>% unlist(.)
 
   # if the data is read successfully, delete the older version of csv
   if(!inherits(df_snv, "try-error")){
@@ -1082,7 +1101,6 @@ for(k in seq_along(project_id)){
 # generate the cnv file----------------------------------------
 # loop through all projects
 for(j in seq_along(project_id)){
-  # ----------------generate the df_survival.csv--------------------------------------
   project_name <- project_id[j]
   # the path to output our cnv df
   df_cnv_path <- paste0(project_name, "/df_cnv.csv")
@@ -1097,14 +1115,17 @@ for(j in seq_along(project_id)){
   GDCdownload(query_cnv, method = "api", directory = paste0(project_name, "/", "cnv_data"))
 
   # the abbreviated patient ids
+  pcases <- query_cnv[[1]][[1]][["cases"]]
   patient_id_TARGET <- try(
-    map_chr(query_cnv[[1]][[1]]$cases, function(x){
-      str_sub(x, start = 1L, end = 16L)
-    })
+    str_split(pcases,"-") %>% lapply(function(x) paste0(x[1:3],collapse = "-")) %>% unlist()
+    # map_chr(query_cnv[[1]][[1]]$cases, function(x){
+    #   str_sub(x, start = 1L, end = 16L)
+    # })
   )
   if(!inherits(patient_id_TARGET, "try-error")){
     unlink(df_cnv_path, recursive = T)
   } else {next}
+  pcases <- pcases[str_split(pcases,"-") %>% lapply(function(x) grepl("^01|03|09",x[4])) %>% unlist()]
 
   chromosome <- list()
   df_target_cnv <- list()
@@ -1180,7 +1201,7 @@ for(j in seq_along(project_id)){
   #
 }
 
-# apply the function to generate miRNA data for TARGET projects
+# ------ apply the function to generate miRNA data for TARGET projects --------
 generate_mir_data(project_ids = project_id, abbreviate_position = 16L)
 
 #-------- delete unnecessary files-------------------

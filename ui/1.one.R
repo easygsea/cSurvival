@@ -29,7 +29,7 @@ bodyOne <- tabItem(tabName = "one",
               12,
               fluidRow(
                 column(
-                  6,
+                  6,id="div_project",
                   selectizeInput(
                     "project",
                     HTML(paste0("<h4><b>To start, select project(s) to analyze:</b>",add_help("project_q"),"</h4>"))
@@ -48,17 +48,17 @@ bodyOne <- tabItem(tabName = "one",
                   )),placement = "right")
                 )
                 ,column(
-                  2,
+                  2,id="div_confirm_project",
                   confirm_panel
                   ,reset_panel
                   # ,tags$style(type='text/css', "#variable_n { margin-top: 10px;}"),
                 )
                 ,column(
-                  2,
+                  2,id="div_censor",
                   uiOutput("ui_censortime")
                 )
                 ,column(
-                  2,#align="right",
+                  2,id="div_nos",#align="right",
                   numericInput(
                     "variable_n",
                     HTML(paste0("<h4><b>No. of analysis:</b>",add_help("variable_n_q"),"</h4>")),

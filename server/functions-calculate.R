@@ -24,8 +24,8 @@ extract_gene_data <- function(x, type){
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
 
   if(type == "rna"){
-    # original file that stores raw FPKM values
-    all_file <- paste0(rv$indir,"df_gene.csv")[[1]]
+    # # original file that stores raw FPKM values
+    # all_file <- paste0(rv$indir,"df_gene.csv")[[1]]
     # # read in all genes
     # all_genes <- fread(all_file,sep=",",header=T,nrows=0) %>% names(.)
     # # all_genes <- sapply(all_genes, function(x){
@@ -39,11 +39,11 @@ extract_gene_data <- function(x, type){
 
     # selected gene
     genes <- input[[g_ui_id]]
-    if(rv$target){
-      # extract ENSG info
-      genes <- strsplit(genes,"\\|")[[1]]
-      if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
-    }
+    # if(rv$target){
+    #   # extract ENSG info
+    #   genes <- strsplit(genes,"\\|")[[1]]
+    #   if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
+    # }
   }else if(type == "snv"){
     # selected gene
     genes <- input[[g_ui_id]]
@@ -487,13 +487,24 @@ plot_surv <-
     , risk.table = rv$risk_table, cumevents = rv$cum_table, ncensor.plot = FALSE # parameters for KM mode
     , conf.int=rv$confi, conf.int.style = rv$confi_opt# "ribbon" "step"
     # , surv.median.line="none" # "hv", "h", "v"
-    , palette="jco"
+    , palette=rv$palette
     , base_size=20
   ){
     df <- res[[mode]][["df"]]
+    # extract data
     fit <- res[[mode]][["fit"]]
     lels <- res[[mode]][["lels"]]
     req(!is.null(fit))
+    # adjust colors, if applicable
+    if(palette == "br"){
+      n_lel <- length(lels)
+      col_alt <- c("#939597","#F0A1BF") # grey pink
+      if(n_lel > 2){
+        palette <- c("black",col_alt[1:(n_lel-2)],"red")
+      }else{
+        palette <- c("black","red")
+      }
+    }
     # median survival lines
     if(is.null(rv$median)){
       surv.median.line="none"

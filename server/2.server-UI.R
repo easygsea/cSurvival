@@ -136,10 +136,7 @@ output$ui_results <- renderUI({
             ),
             direction = "horizontal"
           )
-          ,bsTooltip("cox_km_q",HTML(paste0("Select the method for analyzing and summarizing survival data. "
-                                            ,"Cox regression model assesses the effect of several risk factors simultaneously,"
-                                            ," while KM describe the survival according to one factor under investigation. "
-          ))
+          ,bsTooltip("cox_km_q",HTML(cox_km_txt)
           ,placement = "right")
         )
       }
@@ -169,6 +166,7 @@ output$ui_results <- renderUI({
                       ,HTML(paste0("(Optional) highlight cell lines:",add_help("annot_cells_q")))
                       ,choices = c()
                       ,multiple = T
+                      ,width = "85%"
                       ,options = list(
                         `live-search` = TRUE,
                         placeholder = "Type to search ..."
@@ -187,10 +185,49 @@ output$ui_results <- renderUI({
                   column(
                     6,
                     plotlyOutput("dens_plot",height = "550px", width = "100%")
+                    ,div(
+                      align = "left",
+                      style = "position: absolute; right: 1.5em; top: -3em;",
+                      div(
+                        id = "gear_btn_dens",
+                        style="display: inline-block;vertical-align:top;",
+                        if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
+                          dropdown(
+                            uiOutput("plot_gear_dens"),
+                            circle = TRUE, status = "danger", style = "material-circle",
+                            size="sm", right = T,
+                            icon = icon("gear"), width = "300px",
+                            tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                          )
+                        }
+                      )
+                      ,div(
+                        id="download_btn_dens",
+                        style="display: inline-block;vertical-align:top;",
+                        downloadBttn(
+                          size = "sm", color = "danger", style = "material-circle",
+                          outputId = "download_plot_dens", label = NULL
+                        )
+                        ,bsTooltip("download_btn_dens","Click to download plot", placement = "top")
+                      )
+                    )
                   ),
                   column(
                     6,
                     plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
+                    ,div(
+                      align = "left",
+                      style = "position: absolute; right: 1.5em; top: -3em;",
+                      div(
+                        id="download_btn_box",
+                        style="display: inline-block;vertical-align:top;",
+                        downloadBttn(
+                          size = "sm", color = "danger", style = "material-circle",
+                          outputId = "download_plot_box", label = NULL
+                        )
+                        ,bsTooltip("download_btn_box","Click to download plot", placement = "top")
+                      )
+                    )
                   )
                 )
               )
@@ -198,7 +235,7 @@ output$ui_results <- renderUI({
           }
         }else{
           div(
-            column(
+            column(id="div_surv",
               area_w, align = "left",
               title_div,
               if(surv_yn){
@@ -222,6 +259,7 @@ output$ui_results <- renderUI({
                     style="display: inline-block;vertical-align:top;",
                     if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
                       dropdown(
+                        inputId = "div_plot_gear",
                         uiOutput("plot_gear"),
                         circle = TRUE, status = "danger", style = "material-circle",
                         size="sm", right = T,
@@ -237,7 +275,7 @@ output$ui_results <- renderUI({
                       size = "sm", color = "danger", style = "material-circle",
                       outputId = "download_plot", label = NULL
                     )
-                    ,bsTooltip("download_btn","Click to download the plot", placement = "top")
+                    ,bsTooltip("download_btn","Click to download plot", placement = "top")
                   )
                 )
               }
@@ -245,7 +283,7 @@ output$ui_results <- renderUI({
             ,conditionalPanel(
               'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
               column(
-                5, align="left",
+                5, align="left",id="div_ui_stats",
                 uiOutput("ui_stats")
               )
             )
@@ -338,40 +376,52 @@ output$cox_plot <- renderPlot({
   })
 })
 
-# --------- 1a. plot parameters -------------
+# --------- 1a-i. plot parameters -------------
 output$plot_gear <- renderUI({
   if(if_surv()){
     if(rv$cox_km == "cox" | rv$cox_km == "km" ){
       fluidRow(
         column(
           12,
-          # median thresholds
-          radioGroupButtons(
-            inputId = "ymd",
-            label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
-            choices = ymd_names,
-            selected = rv$ymd,
-            size = "sm",
-            checkIcon = list(
-              yes = icon("check-square"),
-              no = icon("square-o")
-            ),
-            direction = "horizontal"
+          if(rv$tcga | rv$target){
+            div(
+              # median thresholds
+              radioGroupButtons(
+                inputId = "ymd",
+                label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
+                choices = ymd_names,
+                selected = rv$ymd,
+                size = "sm",
+                checkIcon = list(
+                  yes = icon("check-square"),
+                  no = icon("square-o")
+                ),
+                direction = "horizontal"
+              )
+              ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
+              ))
+              ,placement = "top")
+              # fine-tune time intervals
+              ,sliderTextInput(
+                "ymd_int",
+                HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
+                choices = rv$ymd_int_range,
+                selected = rv$ymd_int
+                ,grid=T, force_edges=T
+              )
+              ,bsTooltip("ymd_int_q",HTML(paste0(
+                "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
+              )),placement = "top")
+            )
+          }
+          # color scheme
+          ,selectInput(
+            "palette",
+            HTML(paste0("Select color scheme:",add_help("palette_q"))),
+            choices = c("Journal of Clinical Oncology palette"="jco","Classic black and red"="br")
+            ,selected = rv$palette
           )
-          ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
-          ))
-          ,placement = "top")
-          # fine-tune time intervals
-          ,sliderTextInput(
-            "ymd_int",
-            HTML(paste0("Time inverval on x-axis: ",add_help("ymd_int_q"))),
-            choices = rv$ymd_int_range,
-            selected = rv$ymd_int
-            ,grid=T, force_edges=T
-          )
-          ,bsTooltip("ymd_int_q",HTML(paste0(
-            "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
-          )),placement = "top")
+          ,bsTooltip("palette_q","Select color palette",placement = "top")
           # confidence intervals
           ,materialSwitch(
             inputId = "confi",
@@ -386,12 +436,12 @@ output$plot_gear <- renderUI({
           'input.confi',
           column(
             12,
-            # median thresholds
             radioGroupButtons(
-              inputId = "ymd",
-              label = HTML(paste0("Plot survival in ? ",add_help("ymd_q"))),
-              choices = ymd_names,
-              selected = rv$ymd,
+              inputId = "confi_opt",
+              label = HTML(paste0("Confidence interval style: "),add_help(paste0("confi_opt_q"))),
+              choiceNames = c("Ribbon", "Step"),
+              choiceValues = c("ribbon","step"),
+              selected = rv$confi_opt,
               size = "sm",
               checkIcon = list(
                 yes = icon("check-square"),
@@ -399,105 +449,52 @@ output$plot_gear <- renderUI({
               ),
               direction = "horizontal"
             )
-            ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis"
+            ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
+                                                 ," <b>Step</b> plots boundaries."
+            ))
+            ,placement = "top"),
+            # median thresholds
+            checkboxGroupButtons(
+              inputId = "median",
+              label = HTML(paste0("Draw line(s) at median survival? ",add_help("median_q"))),
+              choices = c("Horizontal"="h",
+                          "Vertical"="v"
+              ),
+              selected = rv$median,
+              size="s",
+              checkIcon = list(
+                no = tags$i(class = "fa fa-times",
+                            style = "color: crimson"),
+                yes = tags$i(class = "fa fa-check",
+                             style = "color: green"))
+            )
+            ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
             ))
             ,placement = "top")
-            # confidence intervals
-            ,materialSwitch(
-              inputId = "confi",
-              label = HTML(paste0("<b>Plot confidence intervals?</b> ",add_help("confi_q"))),
-              value = rv$confi, inline = F, width = "100%",
-              status = "danger"
-            )
-            ,bsTooltip("confi_q",HTML(paste0("If TRUE, plots 95% confidence intervals"))
-                       ,placement = "top")
-          )
-          ,conditionalPanel(
-            'input.confi',
-            column(
-              12,
-              radioGroupButtons(
-                inputId = "confi_opt",
-                label = HTML(paste0("Confidence interval style: "),add_help(paste0("confi_opt_q"))),
-                choiceNames = c("Ribbon", "Step"),
-                choiceValues = c("ribbon","step"),
-                selected = rv$confi_opt,
-                size = "sm",
-                checkIcon = list(
-                  yes = icon("check-square"),
-                  no = icon("square-o")
-                ),
-                direction = "horizontal"
-              )
-              ,bsTooltip("confi_opt_q",HTML(paste0("Select the confidence interval style. <b>Ribbon</b> plots areas."
-                                                   ," <b>Step</b> plots boundaries."
-              ))
-              ,placement = "top"),
-              # median thresholds
-              checkboxGroupButtons(
-                inputId = "median",
-                label = HTML(paste0("Draw line(s) at median survival? ",add_help("median_q"))),
-                choices = c("Horizontal"="h",
-                            "Vertical"="v"
-                ),
-                selected = rv$median,
-                size="s",
-                checkIcon = list(
-                  no = tags$i(class = "fa fa-times",
-                              style = "color: crimson"),
-                  yes = tags$i(class = "fa fa-check",
-                               style = "color: green"))
-              )
-              ,bsTooltip("median_q",HTML(paste0("Select to draw (a) horizontal and/or vertical line(s) at median (50%) survival"
-              ))
-              ,placement = "top")
-            )
-          )
-          # toggle tables for KM plot
-          ,conditionalPanel(
-            'input.cox_km == "km"',
-            column(
-              12,
-              materialSwitch(
-                inputId = "risk_table",
-                label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
-                value = rv$risk_table, inline = F, width = "100%",
-                status = "danger"
-              )
-              ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
-                         ,placement = "top")
-              ,materialSwitch(
-                inputId = "cum_table",
-                label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
-                value = rv$cum_table, inline = F, width = "100%",
-                status = "danger"
-              )
-              ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
-                         ,placement = "top")
-            )
           )
         )
-      )
-    }else if(rv$cox_km == "dens"){
-      fluidRow(
-        column(
-          12,
-          materialSwitch(
-            inputId = "dens_fill",
-            label = HTML(paste0("<b>Fill density plot?</b>",add_help("dens_fill_q"))),
-            value = rv$dens_fill, inline = F, width = "100%",
-            status = "danger"
+        # toggle tables for KM plot
+        ,conditionalPanel(
+          'input.cox_km == "km"',
+          column(
+            12,
+            materialSwitch(
+              inputId = "risk_table",
+              label = HTML(paste0("<b>Plot survival table?</b>",add_help("risk_table_q"))),
+              value = rv$risk_table, inline = F, width = "100%",
+              status = "danger"
+            )
+            ,bsTooltip("risk_table_q",HTML(paste0("If TRUE, plots a table showing the number at risk over time"))
+                       ,placement = "top")
+            ,materialSwitch(
+              inputId = "cum_table",
+              label = HTML(paste0("<b>Plot cumulative events table?</b>",add_help("cum_table_q"))),
+              value = rv$cum_table, inline = F, width = "100%",
+              status = "danger"
+            )
+            ,bsTooltip("cum_table_q",HTML(paste0("If TRUE, plots a table showing the cumulative number of events over time"))
+                       ,placement = "top")
           )
-          ,bsTooltip("dens_fill_q",HTML(paste0("If TRUE, fill the density plot with colors"))
-                     ,placement = "top")
-          ,materialSwitch(
-            inputId = "dens_mean",
-            label = HTML(paste0("<b>Show mean dependencies</b>",add_help("dens_mean_q"))),
-            value = rv$dens_mean, inline = F, width = "100%",
-            status = "danger"
-          )
-          ,bsTooltip("dens_mean_q",HTML(paste0("If TRUE, average dependency scores are plotted for each group"))
-                     ,placement = "top")
         )
       )
     }
@@ -580,7 +577,7 @@ output$plot_gear <- renderUI({
     )
   }
 })
-
+observeEvent(input$palette,{req(!is.null(input$palette));req(input$palette != "");rv$palette <- input$palette})
 observeEvent(input$cox_km,{if(input$cox_km!="dens"){rv$cox_kmr <- input$cox_km};rv$cox_km <- input$cox_km})
 observeEvent(input$ymd,{
   req(rv$ymd != input$ymd)
@@ -605,8 +602,42 @@ observeEvent(input$scatter_log_x,{rv$scatter_log_x <- input$scatter_log_x})
 observeEvent(input$scatter_log_y,{rv$scatter_log_y <- input$scatter_log_y})
 observeEvent(input$scatter_lm,{rv$scatter_lm <- input$scatter_lm})
 
+# --------- 1a-ii. plot parameters for density -------------
+output$plot_gear_dens <- renderUI({
+  fluidRow(
+    column(
+      12,
+      materialSwitch(
+        inputId = "dens_fill",
+        label = HTML(paste0("<b>Fill density plot?</b>",add_help("dens_fill_q"))),
+        value = rv$dens_fill, inline = F, width = "100%",
+        status = "danger"
+      )
+      ,bsTooltip("dens_fill_q",HTML(paste0("If TRUE, fill the density plot with colors"))
+                 ,placement = "top")
+      ,materialSwitch(
+        inputId = "dens_mean",
+        label = HTML(paste0("<b>Show mean dependencies</b>",add_help("dens_mean_q"))),
+        value = rv$dens_mean, inline = F, width = "100%",
+        status = "danger"
+      )
+      ,bsTooltip("dens_mean_q",HTML(paste0("If TRUE, average dependency scores are plotted for each group"))
+                 ,placement = "top")
+      # color scheme
+      ,selectInput(
+        "palette_dens",
+        HTML(paste0("Select color scheme:",add_help("palette_dens_q"))),
+        choices = c("Journal of Clinical Oncology palette"="jco","Classic black and red"="br")
+        ,selected = rv$palette
+      )
+      ,bsTooltip("palette_dens_q","Select color palette",placement = "top")
+    )
+  )
+})
 
-# --------- 1b. download plot -------------
+observeEvent(input$palette_dens,{req(!is.null(input$palette_dens));req(input$palette_dens!="");rv$palette <- input$palette_dens})
+
+# --------- 1b-i. download plot -------------
 output$download_plot <- downloadHandler(
   filename = function(){
     if(if_surv()){
@@ -628,6 +659,26 @@ output$download_plot <- downloadHandler(
     }else if(rv$plot_type == "snv_stats"){
       saveWidget(as_widget(rv[["snv_stats_fig"]] ), file, selfcontained = TRUE)
     }
+  }
+)
+
+# --------- 1b-ii. download dens plot -------------
+output$download_plot_dens <- downloadHandler(
+  filename = function(){
+    paste0("dpdens_",Sys.time(),".html")
+  },
+  content = function(file) {
+    saveWidget(as_widget(ggplotly(rv[["ggdens"]])), file, selfcontained = TRUE)
+  }
+)
+
+# --------- 1b-iii. download dens's box plot -------------
+output$download_plot_box <- downloadHandler(
+  filename = function(){
+    paste0("dpbox_",Sys.time(),".html")
+  },
+  content = function(file) {
+    saveWidget(as_widget(ggplotly(rv[["ggbox"]])), file, selfcontained = TRUE)
   }
 )
 
@@ -1197,32 +1248,47 @@ output$forest_plot <- renderPlot({
 })
 
 # ------ 7a. density plot, if dependency ---------
+lel_colors <- function(n_lel){
+  # adjust colors, if applicable
+  if(rv$palette == "br"){
+    col_alt <- c("#939597","#F0A1BF") # grey pink
+    if(n_lel > 2){
+      c("black",col_alt[1:(n_lel-2)],"red")
+    }else{
+      c("black","red")
+    }
+  }else{
+    pal_jco("default")(n_lel)
+  }
+}
 observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
-observeEvent(input$dens_mean,{rv$dens_mean <- rv$dens_mean})
+observeEvent(input$dens_mean,{rv$dens_mean <- input$dens_mean})
 output$dens_plot <- renderPlotly({
   req(rv$project != "")
   df <- retrieve_dens_df()
   dep_name <- dependency_names()
+  n_lel <- length(levels(df$Level))
+  c_values <- lel_colors(n_lel)
 
   if(rv$dens_fill){
     p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
-      scale_fill_manual(values=pal_jco("default")(length(levels(df$Level))))
+      scale_fill_manual(values=c_values)
   }else{
     p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
-      scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
+      scale_color_manual(values=c_values)
   }
 
   if(rv$dens_mean){
     mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
     p <- p +
       geom_vline(data=mu, aes(xintercept=grp.mean, color=Level), linetype="dashed") +
-      scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
+      scale_color_manual(values=c_values)
   }
   p <- p +
     # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
     labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
     theme_classic()
-
+  rv[["ggdens"]] <- p
   ggplotly(p)
 })
 
@@ -1236,7 +1302,7 @@ output$dens_stats_plot <- renderPlotly({
     
     pos <- position_jitter(0.1, seed = 2)
     lels_len <- length(levels(df$Level))
-    cols <- pal_jco("default")(lels_len)
+    cols <- lel_colors(lels_len)
     p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
       scale_color_manual(values=cols) +
       geom_jitter(shape=16, position=pos) +
@@ -1258,7 +1324,7 @@ output$dens_stats_plot <- renderPlotly({
         # )
       }
     }
-
+    rv[["ggbox"]] <- p
     ggplotly(p,tooltip = c("Line","x","y"))
   })
 })
