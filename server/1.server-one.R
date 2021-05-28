@@ -502,8 +502,8 @@ observeEvent(lg_input_clearbtn_lst(),{
 # ------- [1E] read and process user input gene list ---------
 manual_lst <- reactive({
   lapply(1:rv$variable_n, function(x){
-    db_id <- paste0("add_btn_",x)
-    input[[db_id]]
+    gs_manual_btn_id <- paste0("add_btn_",x)
+    input[[gs_manual_btn_id]]
   })
 })
 
@@ -557,14 +557,14 @@ observeEvent(manual_lst(),{
 },ignoreInit = T)
 
 # ------- [1F] update loaded genes when user changed to other mutation callers ---------
-manual_lst <- reactive({
+snv_lst <- reactive({
   lapply(1:rv$variable_n, function(x){
     snv_id <- paste0("snv_method_",x)
     input[[snv_id]]
   })
 })
 
-observeEvent(manual_lst(),{
+observeEvent(snv_lst(),{
   req(rv$project != "")
   array <- 1:rv$variable_n
   namespaces <- paste0("snv_method_",array)
