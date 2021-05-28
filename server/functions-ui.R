@@ -234,7 +234,7 @@ plot_ui <- function(n){
                           ,size = "xs", color = "danger", style = "material-circle",
                         )
                       )
-                      ,bsTooltip(gs_lib_dn_id_q,"Click to download the genes in the selected GS",placement = "right"),
+                      ,bsTooltip(gs_lib_dn_id_q,HTML("Click to download the gene list. Adjust and re-upload using the <b>Manual</b> mode if necessary."),placement = "top"),
                       span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
                     )
               )
