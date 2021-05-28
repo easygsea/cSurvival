@@ -339,7 +339,7 @@ observeEvent(lib_input_lst(),{
         output[[gs_lib_dn_id]] <- downloadHandler(
           filename = function(){paste0(gs,".txt")},
           content = function(file) {
-            fwrite(as.list(paste0(genes,collapse = "\n")),file,quote = F)
+            fwrite(as.list(paste0(sort(genes),collapse = "\n")),file,quote = F)
           }
         )
       }

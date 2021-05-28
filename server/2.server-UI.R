@@ -308,11 +308,21 @@ output$ui_results <- renderUI({
       )
     )
     ,absolutePanel(
-      actionBttn(
-        inputId = "up_button", label=NULL,
-        icon = icon("angle-double-up"), style="material-circle", color="default", size="md"
-      ),
-      tags$script(HTML(
+      div(
+        style="display: inline-block;vertical-align:top;",
+        actionBttn(
+          inputId = "up_button", label=NULL,
+          icon = icon("angle-double-up"), style="material-circle", color="default", size="md"
+        )
+      )
+      ,div(
+        style="display: inline-block;vertical-align:top;",
+        actionBttn(
+          inputId = "help_button2", label=NULL,
+          icon = icon("question"), style="material-circle", color="default", size="md"
+        )
+      )
+      ,tags$script(HTML(
         "document.getElementById('up_button').onclick= function(){
                     document.getElementById('ui_title').scrollIntoView()
                 };"
