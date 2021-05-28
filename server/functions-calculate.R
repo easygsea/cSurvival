@@ -487,13 +487,24 @@ plot_surv <-
     , risk.table = rv$risk_table, cumevents = rv$cum_table, ncensor.plot = FALSE # parameters for KM mode
     , conf.int=rv$confi, conf.int.style = rv$confi_opt# "ribbon" "step"
     # , surv.median.line="none" # "hv", "h", "v"
-    , palette="jco"
+    , palette=rv$palette
     , base_size=20
   ){
     df <- res[[mode]][["df"]]
+    # extract data
     fit <- res[[mode]][["fit"]]
     lels <- res[[mode]][["lels"]]
     req(!is.null(fit))
+    # adjust colors, if applicable
+    if(palette == "br"){
+      n_lel <- length(lels)
+      col_alt <- c("#939597","#F0A1BF") # grey pink
+      if(n_lel > 2){
+        palette <- c("black",col_alt[1:(n_lel-2)],"red")
+      }else{
+        palette <- c("black","red")
+      }
+    }
     # median survival lines
     if(is.null(rv$median)){
       surv.median.line="none"

@@ -21,9 +21,9 @@ observeEvent(input$db_download,{
             ,tags$li(HTML("Hoadley, K.A., Yau, C., Hinoue, T., Wolf, D.M., Lazar, A.J., Drill, E., Shen, R., Taylor, A.M., Cherniack, A.D., Thorsson, V. and Akbani, R., 2018. Cell-of-origin patterns dominate the molecular classification of 10,000 tumors from 33 types of cancer. Cell, 173(2), pp.291-304. <a href='https://gdc.cancer.gov/about-data/publications/PanCan-Clinical-2018' target='_blank'>https://gdc.cancer.gov/about-data/publications/PanCan-Clinical-2018</a>"))
             ,br(),default_hr(),br()
             ,red_title("Flagged data:")
+            ,tags$li(HTML(paste0("<b>Flagged samples</b>",add_help("flagged_sample_q")," (problematic samples; excluded from cSurvival analysis; non-adjustable): ",dlink(paste0(db_dir,"977/all_bad.tsv"),"TCGA_flagged_samples.tsv"))))
             ,tags$li(HTML(paste0("<b>Flagged cases</b>",add_help("flagged_case_q")," (excluded from cSurvival analysis by default; adjustable in advanced run parameters): ",dlink(paste0(db_dir,"977/flagged_cases.tsv"),"TCGA_flagged_cases.tsv"))))
             ,bsTooltip("flagged_case_q",HTML(flagged_exp),placement = "right",options = list(container = "body"))
-            ,tags$li(HTML(paste0("<b>Flagged samples</b>",add_help("flagged_sample_q")," (problematic samples; excluded from cSurvival analysis; non-adjustable): ",dlink(paste0(db_dir,"977/all_bad.tsv"),"TCGA_flagged_samples.tsv"))))
             ,bsTooltip("flagged_sample_q",HTML(paste0(
               "Samples annotated as <b>Do_not_use</b> by Hoadley et al, Cell, 2018."
             )),placement = "right",options = list(container = "body"))
