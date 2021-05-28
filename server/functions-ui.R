@@ -351,7 +351,7 @@ plot_run_ui <- function(n){
         h4(paste0("Advanced run parameters for Analysis #",x), align = "center"),
         h4(paste0("(",datatype,")")),
         tags$hr(style="border-color: #c2bfb5;"),
-        if(check_inputs() & ifelse_rv(db_id) != "cnv"){
+        if((!rv$depmap & check_inputs() & ifelse_rv(db_id) != "cnv")|(rv$depmap & check_inputs())){
           div(
             radioGroupButtons(
               inputId = iter_id,

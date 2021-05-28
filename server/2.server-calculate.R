@@ -210,7 +210,7 @@ observeEvent(input$confirm,{
           req(rv[[paste0("title_",x)]] != "")
 
           # ---------- 3B. perform Surv if expression-like data --------
-          if(extract_mode != "snv" & extract_mode != "cnv"){
+          if(extract_mode != "snv" & ((!rv$depmap & extract_mode != "cnv") | rv$depmap)){
             iter_id <- paste0("iter_",x)
             yn <- ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
             if(yn){
@@ -286,7 +286,7 @@ observeEvent(input$confirm,{
             rv[[paste0("cutoff_",x)]] <- ""
 
           # ---------- 3D. survival analysis on CNVs ---------
-          }else if(extract_mode == "cnv"){
+          }else if(!rv$depmap & extract_mode == "cnv"){
             cnv_mode <- ifelse_rv(paste0("cnv_par_",x))
 
             results <- get_info_most_significant_cnv(data,cnv_mode)
