@@ -619,9 +619,19 @@ output$plot_gear_dens <- renderUI({
       )
       ,bsTooltip("dens_mean_q",HTML(paste0("If TRUE, average dependency scores are plotted for each group"))
                  ,placement = "top")
+      # color scheme
+      ,selectInput(
+        "palette_dens",
+        HTML(paste0("Select color scheme:",add_help("palette_dens_q"))),
+        choices = c("Journal of Clinical Oncology palette"="jco","Classic black and red"="br")
+        ,selected = rv$palette
+      )
+      ,bsTooltip("palette_dens_q","Select color palette",placement = "top")
     )
   )
 })
+
+observeEvent(input$palette_dens,{req(!is.null(input$palette_dens));req(input$palette_dens!="");rv$palette <- input$palette_dens})
 
 # --------- 1b-i. download plot -------------
 output$download_plot <- downloadHandler(
@@ -1234,26 +1244,41 @@ output$forest_plot <- renderPlot({
 })
 
 # ------ 7a. density plot, if dependency ---------
+lel_colors <- function(n_lel){
+  # adjust colors, if applicable
+  if(rv$palette == "br"){
+    col_alt <- c("#939597","#F0A1BF") # grey pink
+    if(n_lel > 2){
+      c("black",col_alt[1:(n_lel-2)],"red")
+    }else{
+      c("black","red")
+    }
+  }else{
+    pal_jco("default")(n_lel)
+  }
+}
 observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
 observeEvent(input$dens_mean,{rv$dens_mean <- input$dens_mean})
 output$dens_plot <- renderPlotly({
   req(rv$project != "")
   df <- retrieve_dens_df()
   dep_name <- dependency_names()
+  n_lel <- length(levels(df$Level))
+  c_values <- lel_colors(n_lel)
 
   if(rv$dens_fill){
     p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
-      scale_fill_manual(values=pal_jco("default")(length(levels(df$Level))))
+      scale_fill_manual(values=c_values)
   }else{
     p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
-      scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
+      scale_color_manual(values=c_values)
   }
 
   if(rv$dens_mean){
     mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
     p <- p +
       geom_vline(data=mu, aes(xintercept=grp.mean, color=Level), linetype="dashed") +
-      scale_color_manual(values=pal_jco("default")(length(levels(df$Level))))
+      scale_color_manual(values=c_values)
   }
   p <- p +
     # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
@@ -1273,7 +1298,7 @@ output$dens_stats_plot <- renderPlotly({
     
     pos <- position_jitter(0.1, seed = 2)
     lels_len <- length(levels(df$Level))
-    cols <- pal_jco("default")(lels_len)
+    cols <- lel_colors(lels_len)
     p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
       scale_color_manual(values=cols) +
       geom_jitter(shape=16, position=pos) +
