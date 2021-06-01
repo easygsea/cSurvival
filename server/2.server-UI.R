@@ -1346,7 +1346,64 @@ observeEvent(rv[["dens_df"]],{
 
 # --------- 8. P-value tracking -------------
 output$ui_track <- renderUI({
+  req(nrow(rv$quantile_graph >= 1))
+  
+  
   column(
-    12
+    width = (12 / rv$variable_nr),
+    plotlyOutput("quantile_graph")
   )
 })
+
+#Quantile Plot Output
+output$quantile_graph <- renderPlotly({
+  #Check at lease some rows are in the quantile graph
+  req(nrow(rv$quantile_graph >= 1))
+  
+  View(rv$quantile_graph)
+  
+  fig <- plot_ly(rv$quantile_graph, x = rv$quantile_graph$quantile)
+  fig <- fig %>% add_trace(y = rv$quantile_graph$p_value,type = 'scatter',
+                           line = list(color = 'rgb(147,149,151)', width = 2),
+                           
+                           name = 'P Value',
+                           marker=list(
+                             color=~p_value,
+                             # colorbar=list(
+                             #   title='Colorbar'
+                             # ),
+                             colorscale=col_scale,zmax = 1,zmin=0,#'YlOrRd',#custom_colorscale,
+                             reversescale =FALSE
+                           ),
+                           text = rv$quantile_graph$expression,
+                           
+                           #colors = brewer.pal("YlOrRd "),
+                           #rev('YlOrRd'),#brewer.pal(length(rv$quantile_graph$p_value),"YlOrRd "),
+                           name = '',mode = 'lines+markers', hovertemplate = paste(
+                             #"P value is : %{y:.3f}<br>",
+                             "%{y:.3f}<br>",
+                             "Quantile(in %) : %{x:.0f}<br>",
+                             "Expressions : %{text:.3f}<br>"
+                           )) %>%
+    add_trace(y = rv$quantile_graph$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
+              line = list(color = 'rgb(0,88,155)', width = 2),
+              marker=list(
+                color=rv$quantile_graph$hr,
+                colorscale='YlOrRd',#custom_colorscale,
+                reversescale =TRUE
+              ),#hovertemplate = '',
+              yaxis = "y2"
+    )%>%
+    layout(title = 'P Values of Different Quantiles',
+           xaxis = list(title = 'Quantile(%)'),
+           yaxis = list (title = 'P Value'),
+           yaxis2 = list(overlaying = "y",
+                         side = "right",
+                         title = "Harzard Ratio"),
+           hovermode = "x unified"
+    )
+  fig
+})
+
+
+

@@ -164,3 +164,6 @@ www/apple-touch-icon.png
 www/android-chrome-512x512.png
 www/android-chrome-192x192.png
 www/project_data/DepMap/df_cnv.csv
+www/project_data/TARGET_missing_data.csv
+www/project_data/TCGA-LUSC/df_survival_o.csv
+www/project_data/TCGA-LUSC/*

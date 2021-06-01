@@ -4,6 +4,7 @@ install.packages("htmlwidgets")
 library(plotly)
 library(tidyverse)
 library(htmlwidgets)
+library(colorspace)
 
 #SET UP----
 #read data.rds
@@ -167,9 +168,30 @@ res$p_df$hr
 #   
 #custom_colorscale = brewer.pal(n = length(res$p_df$p_value), "YlOrRd")[1,length(res$p_df$p_value)]
 
+
+
+col_scale_no <- c(0, 0.16666666, 0.33333333333, 0.5, 0.66666666, 1)
+col_scale <- sequential_hcl(5, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
+col_scale <- sapply(1:ncol(col_scale), function(x) {x <- col_scale[,x]; paste0("rgb(",paste0(x, collapse = ", "),")")})
+col_scale <- c("rgb(255, 255, 255)", col_scale)
+col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
+
+#TODO: ADD COLORSCALE FOR HR PLOT
+#Blue and Red Orange Yellow colorscale for Hazard Ratio graph
+#col_scale_no <- c(0, 0.20068666377, 0.33333333333, 0.43367666522, 0.66666666666, 1)
+col_scale_temp <- sequential_hcl(3, palette = "blues3") %>% col2rgb()
+col_scale_hr <- sequential_hcl(2, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
+col_scale_hr <- append(col_scale_temp, col_scale_hr)
+rm(col_scale_temp)
+col_scale_hr <- sapply(1:ncol(col_scale_hr), function(x) {x <- col_scale_hr[,x]; paste0("rgb(",paste0(x, collapse = ", "),")")})
+col_scale_hr <- c("rgb(255, 255, 255)", col_scale_hr)
+#col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
+
+
+
 fig <- plot_ly(res$p_df, x = res$p_df$quantile)
 fig <- fig %>% add_trace(y = ~res$p_df$p_value,type = 'scatter',#color =~p_value,
-                         line = list(color = 'rgb(147,149,151)', width = 2),
+                         line = list(color = 'rgb(173,173,173)', width = 2),
                          
                          name = 'P Value',
                          marker=list(
@@ -177,8 +199,8 @@ fig <- fig %>% add_trace(y = ~res$p_df$p_value,type = 'scatter',#color =~p_value
                            # colorbar=list(
                            #   title='Colorbar'
                            # ),
-                           colorscale='YlOrRd',#custom_colorscale,
-                           reversescale =FALSE
+                           colorscale=col_scale,#'YlOrRd',#custom_colorscale,
+                           reversescale =TRUE
                          ),
                          text = res$p_df$expression,
                          
