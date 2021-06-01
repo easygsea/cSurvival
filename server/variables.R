@@ -35,7 +35,6 @@ retrieve_gmt_path <- function(db){
 # names(gmts) <- gsub("?[.]gmt$","",basename(gmt_files))
 # ------ flagged cases -----
 flagged_cases <- fread(paste0(pro_dir,"/977/flagged_cases.tsv"),sep="\t") %>% .[["patient_id"]]
-
 # ------- names for input modes ----------
 input_mode_names <- c(
   "Expression (FPKM)" = "rna"
@@ -194,6 +193,15 @@ col_scale <- sequential_hcl(5, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
 col_scale <- sapply(1:ncol(col_scale), function(x) {x <- col_scale[,x]; paste0("rgb(",paste0(x, collapse = ", "),")")})
 col_scale <- c("rgb(255, 255, 255)", col_scale)
 col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
+
+#TODO: ADD COLORSCALE FOR HR PLOT
+#Blue and Red Orange Yellow colorscale for Hazard Ratio graph
+col_scale_no <- c(0, 0.20068666377, 0.33333333333, 0.43367666522, 0.66666666666, 2)
+col_scale_temp <- sequential_hcl(5, palette = "blues3") %>% col2rgb()
+col_scale_hr <- sequential_hcl(5, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
+col_scale_hr <- append(col_scale_temp, col_scale_hr)
+
+
 # col_scale <- list(list(0, "rgb(255, 255, 255)"), # 0
 #                list(0.20068666377, "rgb(254,224,144)"), # 0.25 = log10(0.25) / 3
 #                list(0.33333333333, "rgb(253,174,97)"), # 0.1 = log10(0.1) / 3

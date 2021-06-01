@@ -52,4 +52,7 @@ rv <- reactiveValues(
   
   # source data options
   ,project_tcga="TCGA-ACC"
+  
+  # hr & p value VS quantile graph
+  ,quantile_graph=NULL
 )

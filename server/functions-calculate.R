@@ -190,6 +190,11 @@ surv_km <- function(df, mode=1){
 get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
+  
+  #initialize p value dataframe
+  p_df <- data.frame(integer(),
+                     character(),
+                     stringsAsFactors=FALSE)
 
   # initialize the most significant p value and df
   least_p_value <- 1; df_most_significant <- NULL; least_hr <- 0
@@ -211,6 +216,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   for(i in seq_along(quantiles)){
     q <- quantiles[i]
     df <- generate_surv_df(df_o, patient_ids, exp, q)
+    
 
     # # test if there is significant difference between high and low level genes
     # if(rv$cox_km == "cox"){
@@ -224,6 +230,10 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
     }
       p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+      
+      #append current p value to the p value df
+      new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
+      p_df <- rbind(p_df,new_row)
     # }
     if(!is.na(p_diff)){
       if(p_diff <= least_p_value){
@@ -234,6 +244,13 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       }
     }
   }
+  
+  #Transform the p_df a little bit to make it work with the ggplot
+  colnames(p_df) = c('p_value','quantile','expression','hr')
+  p_df$p_value = as.numeric(p_df$p_value)
+  p_df$quantile = as.numeric(p_df$quantile)
+  p_df$expression = as.numeric(p_df$expression)
+  p_df$hr = as.numeric(p_df$hr)
 
   # proceed only if enough data
   if(is.null(df_most_significant)){
@@ -243,6 +260,8 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       df = df_most_significant,
       cutoff = cutoff_most_significant
       ,hr = least_hr
+      ,p_df = p_df
+      
     )
     return(results)
   }

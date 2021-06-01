@@ -28,6 +28,7 @@ library(pacman)
 library(colorspace)
 library(ggsci)
 library(plyr)
+library(plotly)
 options(repos = BiocManager::repositories())
 
 source("global/functions.R")
