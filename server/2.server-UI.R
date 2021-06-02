@@ -361,6 +361,7 @@ observeEvent(input$plot_type,{
   x <- rv$plot_type <- input$plot_type
   if(x == "scatter"){x <- 1}
   rv[["title"]] <- rv[[paste0("title_",x)]]
+  if(!if_surv()){rv$annot_cells_y <- ""}
 })
 
 observeEvent(list(rv[["title_1"]],rv[["title_all"]]),{
@@ -588,7 +589,7 @@ output$plot_gear <- renderUI({
   }
 })
 observeEvent(input$palette,{req(!is.null(input$palette));req(input$palette != "");rv$palette <- input$palette})
-observeEvent(input$cox_km,{if(input$cox_km!="dens"){rv$cox_kmr <- input$cox_km};rv$cox_km <- input$cox_km})
+observeEvent(input$cox_km,{if(input$cox_km!="dens"){rv$cox_kmr <- input$cox_km;rv$annot_cells_y <- ""}else{rv$annot_cells_y <- "yes"};rv$cox_km <- input$cox_km})
 observeEvent(input$ymd,{
   req(rv$ymd != input$ymd)
   rv$ymd <- input$ymd
@@ -1340,7 +1341,8 @@ output$dens_stats_plot <- renderPlotly({
 })
 
 # highlight cells
-observeEvent(rv[["dens_df"]],{
+observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
+  req(rv$annot_cells_y == "yes")
   updateSelectizeInput(session,"annot_cells",choices = rv[["dens_df"]][["Cell"]],server = T)
 })
 
