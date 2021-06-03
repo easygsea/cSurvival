@@ -176,17 +176,46 @@ col_scale <- sapply(1:ncol(col_scale), function(x) {x <- col_scale[,x]; paste0("
 col_scale <- c("rgb(255, 255, 255)", col_scale)
 col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
 
-#TODO: ADD COLORSCALE FOR HR PLOT
+#TODO: ADD COLORSCALE FOR HR PLOT----
 #Blue and Red Orange Yellow colorscale for Hazard Ratio graph
-#col_scale_no <- c(0, 0.20068666377, 0.33333333333, 0.43367666522, 0.66666666666, 1)
-col_scale_temp <- sequential_hcl(3, palette = "blues3") %>% col2rgb()
-col_scale_hr <- sequential_hcl(2, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
-col_scale_hr <- append(col_scale_temp, col_scale_hr)
+col_scale_hr_no <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+col_scale_temp <- sequential_hcl(5, palette = "blues3", rev = TRUE) %>% rev(.) %>%  col2rgb()
+col_scale_temp<-col_scale_temp[,-ncol(col_scale_temp)] # delete last column
+
+col_scale_hr <- sequential_hcl(1, palette = "YlOrRd") %>% rev(.) %>% col2rgb()
+col_scale_hr <- cbind(col_scale_temp, col_scale_hr)
 rm(col_scale_temp)
 col_scale_hr <- sapply(1:ncol(col_scale_hr), function(x) {x <- col_scale_hr[,x]; paste0("rgb(",paste0(x, collapse = ", "),")")})
 col_scale_hr <- c("rgb(255, 255, 255)", col_scale_hr)
-#col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
+col_scale_hr <- lapply(1:length(col_scale_hr), function(i) list(col_scale_hr_no[i], col_scale_hr[i]))
+col_scale_hr
 
+
+#Plot----
+#This is a helper function that returns the correct cmin and cmax such that
+#The color scale for Hazard Ratio Map can correctly map where 1 is the mid point
+# determine_mid_color <- function(plot_data, mode = 'HR'){
+#   if(mode == 'HR'){
+#     threshold = 1
+#   }
+#   else{
+#     threshold = 0.5
+#   }
+#   
+#   if(min(plot_data) >= threshold){
+#     result[["cmin"]] = max(plot_data) - threshold
+#     result[["cmax"]] = max(plot_data)
+#   }
+#   
+#   if(max(plot_data) <= threhold){
+#     result[["cmin"]] = min(plot_data)
+#     result[["cmax"]] = min(plot_data) + (threshold - min(plot_data))
+#   }
+#   
+#   if((min(plot_data) - threshold) <= (max(plot_data) - threshold)){
+#     
+#   }
+# }
 
 
 fig <- plot_ly(res$p_df, x = res$p_df$quantile)
@@ -200,6 +229,7 @@ fig <- fig %>% add_trace(y = ~res$p_df$p_value,type = 'scatter',#color =~p_value
                            #   title='Colorbar'
                            # ),
                            colorscale=col_scale,#'YlOrRd',#custom_colorscale,
+                           cmid = 0.5,
                            reversescale =TRUE
                          ),
                          text = res$p_df$expression,
@@ -212,12 +242,17 @@ fig <- fig %>% add_trace(y = ~res$p_df$p_value,type = 'scatter',#color =~p_value
   "Quantile(in %) : %{x:.0f}<br>",
   "ExpressionS : %{text:.3f}<br>"
 )) %>%
-  add_trace(y = res$p_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',
+  add_trace(y = res$p_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
             line = list(color = 'rgb(0,88,155)', width = 2),
             marker=list(
+              symbol = 'diamond',
               color=res$p_df$hr,
-              colorscale='YlOrRd',#custom_colorscale,
-              reversescale =TRUE
+              colorscale='RdBu',#'RdBu',#col_scale_hr,
+              #'YlOrRd',#custom_colorscale,
+              #cmin = min(res$p_df$hr),
+              #cmax = max(res$p_df$hr)-0.2,
+              cmid = 1,
+              reversescale =FALSE
             ),#hovertemplate = '',
             yaxis = "y2"
             )%>%
@@ -237,3 +272,13 @@ fig
 
 
 
+#Subplot----
+
+library(plotly)
+fig1 <- plot_ly(economics, x = ~date, y = ~unemploy)
+fig1 <- fig1 %>% add_lines(name = ~"unemploy")
+fig2 <- plot_ly(economics, x = ~date, y = ~uempmed)
+fig2 <- fig2 %>% add_lines(name = ~"uempmed")
+fig <- subplot(fig1, fig2)
+
+fig

@@ -1361,12 +1361,11 @@ output$ui_track <- renderUI({
 output$quantile_graph <- renderPlotly({
   #Check at lease some rows are in the quantile graph
   req(nrow(rv$quantile_graph >= 1))
-  
-  # View(rv$quantile_graph)
-  
+   
+  #NEW ONE
   fig <- plot_ly(rv$quantile_graph, x = rv$quantile_graph$quantile)
-  fig <- fig %>% add_trace(y = rv$quantile_graph$p_value,type = 'scatter',
-                           line = list(color = 'rgb(147,149,151)', width = 2),
+  fig <- fig %>% add_trace(y = ~rv$quantile_graph$p_value,type = 'scatter',#color =~p_value,
+                           line = list(color = 'rgb(173,173,173)', width = 2),
                            
                            name = 'P Value',
                            marker=list(
@@ -1374,8 +1373,9 @@ output$quantile_graph <- renderPlotly({
                              # colorbar=list(
                              #   title='Colorbar'
                              # ),
-                             colorscale=col_scale,zmax = 1,zmin=0,#'YlOrRd',#custom_colorscale,
-                             reversescale =FALSE
+                             colorscale=col_scale,#'YlOrRd',#custom_colorscale,
+                             cmid = 0.5,
+                             reversescale =TRUE
                            ),
                            text = rv$quantile_graph$expression,
                            
@@ -1385,14 +1385,19 @@ output$quantile_graph <- renderPlotly({
                              #"P value is : %{y:.3f}<br>",
                              "%{y:.3f}<br>",
                              "Quantile(in %) : %{x:.0f}<br>",
-                             "Expressions : %{text:.3f}<br>"
+                             "ExpressionS : %{text:.3f}<br>"
                            )) %>%
     add_trace(y = rv$quantile_graph$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
               line = list(color = 'rgb(0,88,155)', width = 2),
               marker=list(
+                symbol = 'diamond',
                 color=rv$quantile_graph$hr,
-                colorscale='YlOrRd',#custom_colorscale,
-                reversescale =TRUE
+                colorscale='RdBu',#'RdBu',#col_scale_hr,
+                #'YlOrRd',#custom_colorscale,
+                #cmin = min(rv$quantile_graph$hr),
+                #cmax = max(rv$quantile_graph$hr)-0.2,
+                cmid = 1,
+                reversescale =FALSE
               ),#hovertemplate = '',
               yaxis = "y2"
     )%>%
@@ -1405,6 +1410,7 @@ output$quantile_graph <- renderPlotly({
            hovermode = "x unified"
     )
   fig
+
 })
 
 
