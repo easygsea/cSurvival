@@ -58,4 +58,7 @@ rv <- reactiveValues(
   
   # annotate cells
   ,annot_cells_y="" # yes
+  
+  # # permutations
+  # ,nitem = 100
 )

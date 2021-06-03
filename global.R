@@ -29,6 +29,7 @@ library(colorspace)
 library(ggsci)
 library(plyr)
 library(plotly)
+# library(arrangements) # permutations
 options(repos = BiocManager::repositories())
 
 source("global/functions.R")

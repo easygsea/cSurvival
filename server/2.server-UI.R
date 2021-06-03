@@ -1362,7 +1362,7 @@ output$quantile_graph <- renderPlotly({
   #Check at lease some rows are in the quantile graph
   req(nrow(rv$quantile_graph >= 1))
   
-  View(rv$quantile_graph)
+  # View(rv$quantile_graph)
   
   fig <- plot_ly(rv$quantile_graph, x = rv$quantile_graph$quantile)
   fig <- fig %>% add_trace(y = rv$quantile_graph$p_value,type = 'scatter',

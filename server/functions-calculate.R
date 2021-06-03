@@ -206,10 +206,45 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   }else if(mode == "gs"){
     exp <- rowMeans(data[,-1],na.rm=T) %>% unlist(.) %>% unname(.)
   }
-
+  
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)
-
+  
+  # # execute permutations
+  # exps <- permutations(exp, layout = "list", nitem = rv$nitem)
+  # perm_results <- lapply(seq_along(exps), function(perm_i){
+  #   exp_i <- exps[[perm_i]]
+  #   
+  #   # the highest stats score
+  #   highest_chisq <- 0
+  #   
+  #   # the quantiles we will use to define the level of gene percentages
+  #   quantiles <- quantile(exp_i, quantile_s, na.rm = T)
+  #   
+  #   for(i in seq_along(quantiles)){
+  #     q <- quantiles[i]
+  #     df <- generate_surv_df(df_o, patient_ids, exp, q)
+  # 
+  #     # # test if there is significant difference between high and low level genes
+  #     hr <- coef(summary(surv_cox(df)))[,2]
+  #     if(rv$depmap){
+  #       surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
+  #     }else{
+  #       surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+  #     }
+  #     chisq_diff <- surv_diff$chisq
+  # 
+  #     if(!is.na(chisq_diff)){
+  #       if(chisq_diff > highest_chisq){
+  #         highest_chisq <- chisq_diff
+  #       }
+  #     }
+  #   }
+  #   
+  #   return(highest_chisq)
+  # })
+  # print(str(perm_results))
+  # # # calculate stats for the original expression-like data
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s, na.rm = T)
 
