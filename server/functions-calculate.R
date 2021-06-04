@@ -453,86 +453,104 @@ cal_surv_rna <-
     df,n
     ,p.adjust.method = rv[["km_mul"]]
   ){
+    lels <- levels(df$level)
     # # 1. KM # #
     # summary statistics
     if(rv$depmap){
-      km.stats <- survdiff(Surv(dependency) ~ level, data = df)
+      # km.stats <- survdiff(Surv(dependency) ~ level, data = df)
+      if(n == 1){
+        surv_diff <- wilcox.test(dependency ~ level, data = df)
+        p_diff <- surv_diff$p.value
+      }else if(n == 2){
+        surv_diff <- kruskal.test(dependency ~ level, data = df)
+        p_diff <- surv_diff$p.value
+        surv_diff <- pairwise.wilcox.test(df$dependency, df$level, p.adjust.method = "hommel")
+      }
+      
+      results = list(
+        df = df
+        ,fit = surv_diff
+        # ,stats = km.stats
+        ,lels = lels
+        # ,hr = "NA"
+        ,p = format(as.numeric(p_diff), scientific = T, digits = 3)
+      )
     }else{
       km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-    }
-    p.km <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
-
-    # run KM
-    km.fit <- surv_km(df)
-
-    # # 2. Cox # #
-    if(n == 1){
-      # run Cox regression
-      cox_fit <- surv_cox(df)
-      # summary statistics
-      cox.stats <- summary(cox_fit)
-    }else if(n == 2){
-      if(rv$depmap){
-        km2 <- try(pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = p.adjust.method))
-      }else{
-        km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+      p.km <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
+      
+      # run KM
+      km.fit <- surv_km(df)
+      
+      # # 2. Cox # #
+      if(n == 1){
+        # run Cox regression
+        cox_fit <- surv_cox(df)
+        # summary statistics
+        cox.stats <- summary(cox_fit)
+      }else if(n == 2){
+        # if(rv$depmap){
+        #   km2 <- try(pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = p.adjust.method))
+        # }else{
+          km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+        # }
+        if(inherits(km2, "try-error")) {
+          rv$try_error <- rv$try_error + 1
+          shinyalert(paste0("The selected two genes/loci have exactly the same data."
+                            ," If CNV, you might have selected genes from the same cytoband."
+                            ," Please contrast genes from different cytobands."))
+        }
+        req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
+        
+        km.stats <- list(km2,km.stats)
+        
+        # run Cox regression
+        cox_fit1 <- surv_cox(df, mode=2)
+        # summary statistics
+        cox.stats <- summary(cox_fit1)
+        # run Cox regression for visualization purpose
+        cox_fit <- surv_cox(df)
       }
-      if(inherits(km2, "try-error")) {
-        rv$try_error <- rv$try_error + 1
-        shinyalert(paste0("The selected two genes/loci have exactly the same data."
-                          ," If CNV, you might have selected genes from the same cytoband."
-                          ," Please contrast genes from different cytobands."))
-      }
-      req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
-
-      km.stats <- list(km2,km.stats)
-
-      # run Cox regression
-      cox_fit1 <- surv_cox(df, mode=2)
-      # summary statistics
-      cox.stats <- summary(cox_fit1)
-      # run Cox regression for visualization purpose
-      cox_fit <- surv_cox(df)
+      
+      hr.cox <- sapply(cox.stats$coefficients[,2], function(x){
+        round(as.numeric(x), 2)
+      }) %>% paste0(.,collapse = ", ")
+      p.cox <- sapply(cox.stats$coefficients[,5], function(x){
+        format(as.numeric(x), scientific = T, digits = 3)
+      }) %>% paste0(.,collapse = ", ")
+      
+      # # run Cox survival analysis
+      # lels_x <- levels(df$`level.x`)
+      # lels_y <- levels(df$`level.y`)
+      # # lels <- apply(expand.grid(lels_x,lels_y),1,paste0,collapse="_")
+      # create new df to seperate effects in Cox regression
+      new_df <- with(df,data.frame(level = lels))
+      cox.fit <- survfit(cox_fit,newdata=new_df)
+      
+      # save df, fit, and statistics
+      if(!exists("cox_fit1")){cox_fit1 <- cox_fit}
+      results <- list(
+        km = list(
+          df = df,
+          fit = km.fit,
+          stats = km.stats
+          ,lels = lels
+          ,hr = "NA"
+          ,p = format(as.numeric(p.km), scientific = T, digits = 3)
+        )
+        ,cox = list(
+          df = new_df,
+          fit = cox.fit,
+          stats = cox.stats
+          ,lels = lels
+          ,hr = hr.cox
+          ,p = p.cox
+          ,cox_fit = cox_fit1
+          ,cox_df = df
+        )
+      )
     }
-
-    hr.cox <- sapply(cox.stats$coefficients[,2], function(x){
-      round(as.numeric(x), 2)
-    }) %>% paste0(.,collapse = ", ")
-    p.cox <- sapply(cox.stats$coefficients[,5], function(x){
-      format(as.numeric(x), scientific = T, digits = 3)
-    }) %>% paste0(.,collapse = ", ")
-
-    # run Cox survival analysis
-    lels_x <- levels(df$`level.x`)
-    lels_y <- levels(df$`level.y`)
-    # lels <- apply(expand.grid(lels_x,lels_y),1,paste0,collapse="_")
-    # create new df to seperate effects in Cox regression
-    lels <- levels(df$level)
-    new_df <- with(df,data.frame(level = lels))
-    cox.fit <- survfit(cox_fit,newdata=new_df)
-
-    # save df, fit, and statistics
-    if(!exists("cox_fit1")){cox_fit1 <- cox_fit}
-    results <- list(
-      km = list(
-        df = df,
-        fit = km.fit,
-        stats = km.stats
-        ,lels = lels
-        ,hr = "NA"
-        ,p = format(as.numeric(p.km), scientific = T, digits = 3)
-      )
-      ,cox = list(
-        df = new_df,
-        fit = cox.fit,
-        stats = cox.stats
-        ,lels = lels
-        ,hr = hr.cox
-        ,p = p.cox
-        ,cox_fit = cox_fit1
-        ,cox_df = df
-      )
-    )
+    
     return(results)
   }
 
@@ -670,7 +688,7 @@ translate_cells <- function(patient_ids){
 }
 
 retrieve_dens_df <- function(){
-  df <- rv[["res"]][["km"]][["df"]]
+  df <- rv[["res"]][["df"]]
   req(!is.null(df[["dependency"]]))
   # if(rv$project == "DepMap-Drug"){
   #   df[["dependency"]] <- log2(df[["dependency"]])

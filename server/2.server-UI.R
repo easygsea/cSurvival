@@ -41,10 +41,13 @@ output$ui_results <- renderUI({
     dtypes_names <- call_datatype_from_rv(dtypes)
 
     # check if both SNV, a single SNV; then decide plot type and add to pre-set plot options
-    if(unique(dtypes) == "snv"){
-      # l_plot <- list("Mutation statistics"="snv_stats")
-    }else if(unique(dtypes) == "cnv"){
-
+    dtypes_u <- unique(dtypes)
+    if(length(dtypes_u) == 1){
+      # if(dtypes_u == "snv"){
+      #   # l_plot <- list("Mutation statistics"="snv_stats")
+      # }else if(dtypes_u == "cnv"){
+      #   
+      # }
     }else if(any(c("snv","cnv") %in% dtypes)){
       # l_plot <- list("Violin plot"="violin")
     }else{
@@ -146,14 +149,21 @@ output$ui_results <- renderUI({
             column(
               12,
               column(
+                12,
+                title_div
+              ),
+              uiOutput("depmap_stats")
+            ),
+            column(
+              12,
+              column(
                 6,
-                title_div,
               ),
               column(
                 6,align="center",
                 selectizeInput(
                   "annot_cells"
-                  ,HTML(paste0("(Optional) highlight cell lines:",add_help("annot_cells_q")))
+                  ,HTML(paste0("(Optional) highlight cell lines in box plot:",add_help("annot_cells_q")))
                   ,choices = c()
                   ,multiple = T
                   ,width = "85%"
@@ -164,7 +174,7 @@ output$ui_results <- renderUI({
                   )
                 )
                 ,bsTooltip("annot_cells_q",HTML(paste0(
-                  "Select to annotate the cell lines of interest, if any, in the bar plot"
+                  "Select to annotate the cell lines of interest, if any, in the box plot"
                 )),placement = "right")
               )
             )
@@ -174,7 +184,7 @@ output$ui_results <- renderUI({
               12,
               column(
                 6,
-                plotlyOutput("dens_plot",height = "550px", width = "100%")
+                plotlyOutput("dens_plot",height = "500px", width = "100%")
                 ,div(
                   align = "left",
                   style = "position: absolute; right: 1.5em; top: -3em;",
@@ -204,7 +214,7 @@ output$ui_results <- renderUI({
               ),
               column(
                 6,
-                plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
+                plotlyOutput("dens_stats_plot",height = "500px", width = "100%")
                 ,div(
                   align = "left",
                   style = "position: absolute; right: 1.5em; top: -3em;",
@@ -251,7 +261,7 @@ output$ui_results <- renderUI({
               }else if(rv$plot_type == "gsea"){
                 uiOutput("ui_gsea")
               }
-              ,if(rv$plot_type!="gsea" & !rv$depmapr){
+              ,if((rv$plot_type!="gsea" & !rv$depmapr)|(rv$plot_type=="scatter"|rv$plot_type=="scatter2" & rv$depmapr)){
                 div(
                   align = "left",
                   style = "position: absolute; right: 2.5em; top: 1.5em;",
@@ -281,15 +291,13 @@ output$ui_results <- renderUI({
                 )
               }
             )
-            ,if(!rv$depmapr){
-              conditionalPanel(
-                'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
-                column(
-                  5, align="left",id="div_ui_stats",
-                  uiOutput("ui_stats")
-                )
+            ,conditionalPanel(
+              'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
+              column(
+                5, align="left",id="div_ui_stats",
+                uiOutput("ui_stats")
               )
-            }
+            )
           )
       }
       ,conditionalPanel(
@@ -703,7 +711,7 @@ output$download_plot_box <- downloadHandler(
 
 # --------- 2. display the statistics -------------
 output$ui_stats <- renderUI({
-  if(rv$depmapr){req(rv$cox_km != "dens")}
+  # if(rv$depmapr){req(rv$cox_km != "dens")}
   surv_yn <- if_surv(plot_type=input$plot_type)
 
   if(surv_yn){
@@ -772,7 +780,7 @@ output$ui_stats <- renderUI({
     ,boxPad(
       color = "light-blue",
       fluidRow(
-        if(surv_yn & rv$cox_km == "cox"){
+        if(surv_yn & rv$cox_km == "cox" & !rv$depmapr){
           column(
             6,
             descriptionBlock(
@@ -805,7 +813,7 @@ output$ui_stats <- renderUI({
     ,boxPad(
       color = "gray",
       fluidRow(
-        if(surv_yn){
+        if(surv_yn & !rv$depmapr){
           column(12,
             uiOutput("ui_cutoff")
             ,tagList(
@@ -823,7 +831,7 @@ output$ui_stats <- renderUI({
             )
           )
         }
-        ,if(surv_yn){
+        ,if(surv_yn & !rv$depmapr){
           column(
             12,
             conditionalPanel(
@@ -831,15 +839,7 @@ output$ui_stats <- renderUI({
               selectizeInput(
                 "km_mul",
                 NULL,
-                choices = list(
-                  "Multiple comparisons test by Holm (1979)" = "holm"
-                  ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
-                  ,"Multiple comparisons test by Hommel (1988)" = "hommel"
-                  ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
-                  ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
-                  ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
-                  ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
-                )
+                choices = pairwise_methods
                 ,selected = rv[["km_mul"]]
               )
               ,div(
@@ -898,27 +898,24 @@ observeEvent(input$km_mul,{
   # retrieve df for survival analysis
   df <- rv[[paste0("df_",rv$plot_type)]]
 
-  # update statistics
-  if(rv$depmapr){
-    km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
-  }else{
+  # # update statistics
+  # if(rv$depmapr){
+  #   km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
+  # }else{
     km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
-  }
+  # }
   rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
 },ignoreInit = T)
 
 # ----------- 3b. pairwise heatmap ----------
-output$km_hm <- renderPlotly({
-  req(length(rv[["res"]][[rv$cox_km]][["stats"]]) == 2)
-  pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
-  req(is.numeric(pvals))
+plot_heatmap <- function(pvals,mul_methods=rv$km_mul){
   counts <- -log10(pvals)
   counts[is.na(counts)] <- 0
   dat <- expand.grid(y = rownames(counts), x = colnames(counts))
   dat$z <- unlist(as.data.frame(counts),recursive = T)
   pvals <- unlist(as.data.frame(pvals), recursive = T) %>% format(., scientific = T, digits = 3)
   req(length(dat$z)>0)
-
+  
   fig <- plot_ly() %>%
     add_trace(data = dat, x = ~x, y = ~y, z = ~z, type = "heatmap",
               colorscale  = col_scale,zmax = 3,zmin=0,
@@ -931,7 +928,7 @@ output$km_hm <- renderPlotly({
               )
     ) %>% layout(
       # title = "Pariwise comparisons",
-      xaxis = list(title = paste0("Pariwise comparisons adjusted by ",rv$km_mul), showticklabels = T),
+      xaxis = list(title = paste0("Pariwise comparisons adjusted by ",mul_methods), showticklabels = T),
       yaxis = list(title = "", showticklabels = T)
       # ,margin = list(l=200)
     ) %>%
@@ -940,8 +937,15 @@ output$km_hm <- renderPlotly({
                     showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
                     ,ax = 20, ay = -20
     )
-
+  
   fig
+}
+
+output$km_hm <- renderPlotly({
+  req(length(rv[["res"]][[rv$cox_km]][["stats"]]) == 2)
+  pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
+  req(is.numeric(pvals))
+  plot_heatmap(pvals)
 })
 
 # ----------- 4[A]. expression-survival days scatter plot ---------------
@@ -1266,7 +1270,94 @@ output$forest_plot <- renderPlot({
   ggforest(res[["cox"]][["cox_fit"]], main = maint, data = res[["cox"]][["cox_df"]], fontsize = 0.7)
 })
 
-# ------ 7a. density plot, if dependency ---------
+# ------ 7a. stats & heatmap, if dependency ---------
+output$depmap_stats <- renderUI({
+  req(rv$project != "")
+  x <- rv$plot_type
+  req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
+  extract_plot_data(x)
+  
+  # stats names
+  x_numeric <- suppressWarnings(!is.na(as.numeric(x)))
+  if(x_numeric){
+    stats_name <- "Mann-Whitney U test,"
+  }else{
+    stats_name <- "Kruskal-Wallis rank sum test, overall"
+  }
+  
+  column(
+    12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
+    boxPad(
+      color = "light-blue",
+      fluidRow(
+        column(
+          12,align="center",
+          h4(paste0(stats_name," P-value = ",rv[["res"]][["p"]]))
+        )
+        ,if(!x_numeric){
+          div(
+            column(
+              12,align="center",
+              selectizeInput(
+                "km_mul_dp",
+                NULL,
+                choices = pairwise_methods
+                ,selected = rv[["km_mul_dp"]]
+              )
+            ),
+            uiOutput("dm_stats_render")
+          )
+        }
+      )
+    )
+  )
+})
+
+# depmap heatmap
+observeEvent(input$km_mul_dp,{
+  req(input$km_mul_dp != "")
+  rv$km_mul_dp <- input$km_mul_dp
+  
+  # retrieve df for survival analysis
+  df <- rv[[paste0("df_",rv$plot_type)]]
+  levl <- length(levels(df$level))
+  
+  # the height of the heatmap
+  if(levl > 3){
+    dp_h <- "218px"
+  }else if(levl == 3){
+    dp_h <- "198px"
+  }else if(levl == 2){
+    dp_h <- "178px"
+  }
+  
+  # update statistics
+  surv_diff <- pairwise.wilcox.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
+  rv[["res"]][["fit"]] <- surv_diff
+  
+  output$dm_stats_render <- renderUI({
+    div(
+      column(
+        6,
+        renderPrint({print(surv_diff)})
+      ),
+      column(
+        6,
+        plotlyOutput("dp_hm", height=dp_h, width = "100%")
+      )
+    )
+  })
+},ignoreInit = F)
+
+output$dp_hm <- renderPlotly({
+  pvals <- rv[["res"]][["fit"]]$p.value
+  req(is.numeric(pvals))
+  dims <- dim(pvals)
+  req(dims[1] * dims[2] > 1)
+  plot_heatmap(pvals,mul_methods=rv$km_mul_dp)
+})
+
+# ------ 7b. density plot, if dependency ---------
 lel_colors <- function(n_lel){
   # adjust colors, if applicable
   if(rv$palette == "br"){
@@ -1283,40 +1374,35 @@ lel_colors <- function(n_lel){
 observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
 observeEvent(input$dens_mean,{rv$dens_mean <- input$dens_mean})
 output$dens_plot <- renderPlotly({
-  req(rv$project != "")
-  x <- rv$plot_type
-  req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
-  withProgress(value = 1, message = "Generating plot...",{
-    extract_plot_data(x)
-    df <- retrieve_dens_df()
-    dep_name <- dependency_names()
-    n_lel <- length(levels(df$Level))
-    c_values <- lel_colors(n_lel)
-    
-    if(rv$dens_fill){
-      p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
-        scale_fill_manual(values=c_values)
-    }else{
-      p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
-        scale_color_manual(values=c_values)
-    }
-    
-    if(rv$dens_mean){
-      mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
-      p <- p +
-        geom_vline(data=mu, aes(xintercept=grp.mean, color=Level), linetype="dashed") +
-        scale_color_manual(values=c_values)
-    }
+  req(rv$depmapr)
+  df <- retrieve_dens_df()
+  dep_name <- dependency_names()
+  n_lel <- length(levels(df$Level))
+  c_values <- lel_colors(n_lel)
+  
+  if(rv$dens_fill){
+    p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
+      scale_fill_manual(values=c_values)
+  }else{
+    p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
+      scale_color_manual(values=c_values)
+  }
+  
+  if(rv$dens_mean){
+    mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
     p <- p +
-      # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
-      labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
-      theme_classic()
-    rv[["ggdens"]] <- p
-    ggplotly(p)
-  })
+      geom_vline(data=mu, aes(xintercept=grp.mean, color=Level), linetype="dashed") +
+      scale_color_manual(values=c_values)
+  }
+  p <- p +
+    # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
+    labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
+    theme_classic()
+  rv[["ggdens"]] <- p
+  ggplotly(p)
 })
 
-# -------- 7b. stats of density plot ---------
+# -------- 7c. stats of density plot ---------
 output$dens_stats_plot <- renderPlotly({
   req(rv$project != "")
   req(!is.null(rv[["dens_df"]]))

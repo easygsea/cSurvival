@@ -175,6 +175,17 @@ cox_km_txt <- paste0("Select the method for analyzing and summarizing survival d
 )
 
 # ----- Miscellaneous ----
+# correction methods for pairwise comparisons
+pairwise_methods <- list(
+  "Multiple comparisons test by Holm (1979)" = "holm"
+  ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
+  ,"Multiple comparisons test by Hommel (1988)" = "hommel"
+  ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
+  ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
+  ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
+  ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
+)
+
 # explanations for flagged cases
 flagged_exp <- paste0(
   "Cases identified as any of the following categories are considered problematic and can be excluded from cSurvival analysis:"
