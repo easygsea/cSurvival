@@ -672,17 +672,18 @@ translate_cells <- function(patient_ids){
 retrieve_dens_df <- function(){
   df <- rv[["res"]][["km"]][["df"]]
   req(!is.null(df[["dependency"]]))
-  if(rv$project == "DepMap-Drug"){
-    df[["dependency"]] <- log2(df[["dependency"]])
-  }else{
-    df[["dependency"]] <- log10(df[["dependency"]])
-  }
+  # if(rv$project == "DepMap-Drug"){
+  #   df[["dependency"]] <- log2(df[["dependency"]])
+  # }else{
+  #   df[["dependency"]] <- log10(df[["dependency"]])
+  # }
   colnames(df)[2] <- dependency_names()
   colnames(df)[ncol(df)] <- "Level"
   df[["Cell"]] <- paste0(translate_cells(df$patient_id),"|",df$patient_id)
   # df[["Cell"]] <- paste0(gsub("(^.*?)_(.*)","\\1",translate_cells(df$patient_id)),"|",df$patient_id)
   df <- df %>% dplyr::select(-patient_id)
   rv[["dens_df"]] <- df
+  rv$annot_cells_y <- "yes"
   return(df)
 }
 #==============================================#
