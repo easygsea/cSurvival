@@ -1280,7 +1280,7 @@ output$depmap_stats <- renderUI({
   x <- rv$plot_type
   req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
   extract_plot_data(x)
-  
+  rv$annot_cells_y <- "yes"
   # stats names
   x_numeric <- suppressWarnings(!is.na(as.numeric(x)))
   if(x_numeric){
@@ -1327,8 +1327,10 @@ observeEvent(input$km_mul_dp,{
   levl <- length(unique(df$level))
   
   # the height of the heatmap
-  if(levl > 2){
+  if(levl > 3){
     dp_h <- "218px"
+  }else if(levl == 3){
+    dp_h <- "198px"
   }else if(levl == 2){
     dp_h <- "178px"
   }else if(levl < 2){

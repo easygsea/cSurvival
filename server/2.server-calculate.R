@@ -386,7 +386,7 @@ observeEvent(input$confirm,{
     if(rv$tcga){rv$plot_sstype <- rv$plot_stype}
     else if(rv$target){rv$plot_sstype <- "Overall survival (OS)"}
     else if(rv$depmap){rv$plot_sstype <- dependency_names()}
-    
+    rv$annot_cells_y <- ""
     rv$show_ui <- "yes"
   }
 })
