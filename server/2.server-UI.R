@@ -1,7 +1,7 @@
 # ------------ Plots area ------------
 output$ui_results <- renderUI({
   req(rv$project != "")
-  req(rv$try_error < 1)
+  req(rv$try_error == 0)
   req(!is.null(rv[["cox_1"]]))
   x <- rv$variable_nr
   rv[["dtypes"]] <- ""
@@ -155,6 +155,10 @@ output$ui_results <- renderUI({
             ),
             column(
               12,
+              column(
+                12,
+                tags$hr(style="border-color: light-blue;")
+              ),
               column(
                 6,
               ),
@@ -913,7 +917,7 @@ plot_heatmap <- function(pvals,mul_methods=rv$km_mul){
   counts[is.na(counts)] <- 0
   dat <- expand.grid(y = rownames(counts), x = colnames(counts))
   dat$z <- unlist(as.data.frame(counts),recursive = T)
-  pvals <- unlist(as.data.frame(pvals), recursive = T) %>% format(., scientific = T, digits = 3)
+  pvals <- unlist(as.data.frame(pvals), recursive = T) %>% format(., scientific = F, digits = 2)
   req(length(dat$z)>0)
   
   fig <- plot_ly() %>%

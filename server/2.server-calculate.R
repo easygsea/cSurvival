@@ -69,7 +69,7 @@ observeEvent(input$confirm,{
     rv$depmapr <- rv$depmap
 
     #------ 2. survival data processing ------
-    withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
+    withProgress(value = 1, message = wait_msg("Performing analysis..."),{
       # update survival df
       # filter OS, DFS, or PFS
       rv$df_survival <- rv$df_survival_o
@@ -284,6 +284,7 @@ observeEvent(input$confirm,{
             if(length(unique(df$level)) < 2){
               shinyalert("Not enough data found for the selected endpoint and parameters")
               error_snv <- 1
+              rv$try_error <- 1
             }
             req(error_snv == 0)
             rv[[paste0("cutoff_",x)]] <- ""

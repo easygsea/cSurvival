@@ -158,34 +158,34 @@ generate_surv_df <- function(df, patient_ids, exp, q){
 
 # generate survival df for analysis
 surv_cox <- function(df, mode=1){
-  if(rv$depmap){
-    if(mode == 1){
-      coxph(Surv(dependency) ~ level, data = df)
-    }else if(mode == 2){
-      coxph(Surv(dependency) ~ level.x + level.y, data = df)
-    }
-  }else{
+  # if(rv$depmap){
+  #   if(mode == 1){
+  #     coxph(Surv(dependency) ~ level, data = df)
+  #   }else if(mode == 2){
+  #     coxph(Surv(dependency) ~ level.x + level.y, data = df)
+  #   }
+  # }else{
     if(mode == 1){
       coxph(Surv(survival_days, censoring_status) ~ level, data = df)
     }else if(mode == 2){
       coxph(Surv(survival_days, censoring_status) ~ level.x + level.y, data = df)
     }
-  }
+  # }
 }
 surv_km <- function(df, mode=1){
-  if(rv$depmap){
-    if(mode == 1){
-      survfit(Surv(dependency) ~ level, data = df)
-    }else if(mode == 2){
-      survfit(Surv(dependency) ~ level.x * level.y, data = df)
-    }
-  }else{
+  # if(rv$depmap){
+  #   if(mode == 1){
+  #     survfit(Surv(dependency) ~ level, data = df)
+  #   }else if(mode == 2){
+  #     survfit(Surv(dependency) ~ level.x * level.y, data = df)
+  #   }
+  # }else{
     if(mode == 1){
       survfit(Surv(survival_days, censoring_status) ~ level, data = df)
     }else if(mode == 2){
       survfit(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
     }
-  }
+  # }
 }
 get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initiate quantiles according to margin and step values
@@ -473,7 +473,7 @@ cal_surv_rna <-
         # ,stats = km.stats
         ,lels = lels
         # ,hr = "NA"
-        ,p = format(as.numeric(p_diff), scientific = T, digits = 3)
+        ,p = format(as.numeric(p_diff), scientific = F, digits = 2)
       )
     }else{
       km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
@@ -536,7 +536,7 @@ cal_surv_rna <-
           stats = km.stats
           ,lels = lels
           ,hr = "NA"
-          ,p = format(as.numeric(p.km), scientific = T, digits = 3)
+          ,p = format(as.numeric(p.km), scientific = F, digits = 2)
         )
         ,cox = list(
           df = new_df,
