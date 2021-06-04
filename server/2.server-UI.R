@@ -120,7 +120,7 @@ output$ui_results <- renderUI({
         direction = "horizontal"
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
-      ,if(surv_yn & typeof(rv[[paste0("df_",input$plot_type)]]) == "list"){
+      ,if(surv_yn & typeof(rv[[paste0("df_",input$plot_type)]]) == "list" & !rv$depmapr){
         column(12,align="left",
           # survival analysis method
           radioGroupButtons(
@@ -139,6 +139,89 @@ output$ui_results <- renderUI({
           ,bsTooltip("cox_km_q",HTML(cox_km_txt)
           ,placement = "right")
         )
+      }else if(surv_yn & rv$depmapr){
+        div(
+          align="left",
+          fluidRow(
+            column(
+              12,
+              column(
+                6,
+                title_div,
+              ),
+              column(
+                6,align="center",
+                selectizeInput(
+                  "annot_cells"
+                  ,HTML(paste0("(Optional) highlight cell lines:",add_help("annot_cells_q")))
+                  ,choices = c()
+                  ,multiple = T
+                  ,width = "85%"
+                  ,options = list(
+                    `live-search` = TRUE,
+                    placeholder = "Type to search ..."
+                    ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+                  )
+                )
+                ,bsTooltip("annot_cells_q",HTML(paste0(
+                  "Select to annotate the cell lines of interest, if any, in the bar plot"
+                )),placement = "right")
+              )
+            )
+          ),
+          fluidRow(
+            column(
+              12,
+              column(
+                6,
+                plotlyOutput("dens_plot",height = "550px", width = "100%")
+                ,div(
+                  align = "left",
+                  style = "position: absolute; right: 1.5em; top: -3em;",
+                  div(
+                    id = "gear_btn_dens",
+                    style="display: inline-block;vertical-align:top;",
+                    if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
+                      dropdown(
+                        uiOutput("plot_gear_dens"),
+                        circle = TRUE, status = "danger", style = "material-circle",
+                        size="sm", right = T,
+                        icon = icon("gear"), width = "300px",
+                        tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                      )
+                    }
+                  )
+                  ,div(
+                    id="download_btn_dens",
+                    style="display: inline-block;vertical-align:top;",
+                    downloadBttn(
+                      size = "sm", color = "danger", style = "material-circle",
+                      outputId = "download_plot_dens", label = NULL
+                    )
+                    ,bsTooltip("download_btn_dens","Click to download plot", placement = "top")
+                  )
+                )
+              ),
+              column(
+                6,
+                plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
+                ,div(
+                  align = "left",
+                  style = "position: absolute; right: 1.5em; top: -3em;",
+                  div(
+                    id="download_btn_box",
+                    style="display: inline-block;vertical-align:top;",
+                    downloadBttn(
+                      size = "sm", color = "danger", style = "material-circle",
+                      outputId = "download_plot_box", label = NULL
+                    )
+                    ,bsTooltip("download_btn_box","Click to download plot", placement = "top")
+                  )
+                )
+              )
+            )
+          )
+        )
       }
       ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats" & rv$plot_type != "gsea" & rv$plot_type != "track"){
         column(
@@ -148,101 +231,19 @@ output$ui_results <- renderUI({
       }else if(rv$plot_type == "track"){
         uiOutput("ui_track")
       }else{
-        if(surv_yn & rv$cox_km == "dens"){
-          if(typeof(rv[["res"]]) == "list"){
-            div(
-              align="left",
-              fluidRow(
-                column(
-                  12,
-                  column(
-                    6,
-                    title_div,
-                  ),
-                  column(
-                    6,align="center",
-                    selectizeInput(
-                      "annot_cells"
-                      ,HTML(paste0("(Optional) highlight cell lines:",add_help("annot_cells_q")))
-                      ,choices = c()
-                      ,multiple = T
-                      ,width = "85%"
-                      ,options = list(
-                        `live-search` = TRUE,
-                        placeholder = "Type to search ..."
-                        ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
-                      )
-                    )
-                    ,bsTooltip("annot_cells_q",HTML(paste0(
-                      "Select to annotate the cell lines of interest, if any, in the bar plot"
-                    )),placement = "right")
-                  )
-                )
-              ),
-              fluidRow(
-                column(
-                  12,
-                  column(
-                    6,
-                    plotlyOutput("dens_plot",height = "550px", width = "100%")
-                    ,div(
-                      align = "left",
-                      style = "position: absolute; right: 1.5em; top: -3em;",
-                      div(
-                        id = "gear_btn_dens",
-                        style="display: inline-block;vertical-align:top;",
-                        if(rv$plot_type != "snv_stats" & rv$plot_type != "gsea"){
-                          dropdown(
-                            uiOutput("plot_gear_dens"),
-                            circle = TRUE, status = "danger", style = "material-circle",
-                            size="sm", right = T,
-                            icon = icon("gear"), width = "300px",
-                            tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
-                          )
-                        }
-                      )
-                      ,div(
-                        id="download_btn_dens",
-                        style="display: inline-block;vertical-align:top;",
-                        downloadBttn(
-                          size = "sm", color = "danger", style = "material-circle",
-                          outputId = "download_plot_dens", label = NULL
-                        )
-                        ,bsTooltip("download_btn_dens","Click to download plot", placement = "top")
-                      )
-                    )
-                  ),
-                  column(
-                    6,
-                    plotlyOutput("dens_stats_plot",height = "550px", width = "100%")
-                    ,div(
-                      align = "left",
-                      style = "position: absolute; right: 1.5em; top: -3em;",
-                      div(
-                        id="download_btn_box",
-                        style="display: inline-block;vertical-align:top;",
-                        downloadBttn(
-                          size = "sm", color = "danger", style = "material-circle",
-                          outputId = "download_plot_box", label = NULL
-                        )
-                        ,bsTooltip("download_btn_box","Click to download plot", placement = "top")
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          }
-        }else{
           div(
             column(id="div_surv",
               area_w, align = "left",
-              title_div,
+              if(!rv$depmapr & rv$plot_type != "gsea"){
+                title_div
+              },
               if(surv_yn){
-                conditionalPanel(
-                  'input.cox_km != "dens"',
-                  plotOutput("cox_plot",height = h_plot)
-                )
+                if(!rv$depmapr){
+                  conditionalPanel(
+                    'input.cox_km != "dens"',
+                    plotOutput("cox_plot",height = h_plot)
+                  )
+                }
               }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
                 plotlyOutput("scatter_plot", height = "585px")
               }else if(rv$plot_type == "snv_stats"){
@@ -250,7 +251,7 @@ output$ui_results <- renderUI({
               }else if(rv$plot_type == "gsea"){
                 uiOutput("ui_gsea")
               }
-              ,if(rv$plot_type!="gsea"){
+              ,if(rv$plot_type!="gsea" & !rv$depmapr){
                 div(
                   align = "left",
                   style = "position: absolute; right: 2.5em; top: 1.5em;",
@@ -280,15 +281,16 @@ output$ui_results <- renderUI({
                 )
               }
             )
-            ,conditionalPanel(
-              'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
-              column(
-                5, align="left",id="div_ui_stats",
-                uiOutput("ui_stats")
+            ,if(!rv$depmapr){
+              conditionalPanel(
+                'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
+                column(
+                  5, align="left",id="div_ui_stats",
+                  uiOutput("ui_stats")
+                )
               )
-            )
+            }
           )
-        }
       }
       ,conditionalPanel(
         'input.plot_type == "gsea"',
@@ -368,22 +370,26 @@ observeEvent(list(rv[["title_1"]],rv[["title_all"]]),{
   rv[["title"]] <- rv[[paste0("title_",rv$plot_type)]]
 })
 
+extract_plot_data <- function(x){
+  # no of cases in each group
+  rv[["lels"]] <- rv[[paste0("lels_",x)]]
+  
+  # the cutoff percentile
+  rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
+  
+  
+  # extract statistics
+  rv[["res"]] <- rv[[paste0("cox_",x)]]
+  rv$surv_plotted <- "plotted"
+}
+
 output$cox_plot <- renderPlot({
   x <- rv$plot_type
   req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
   withProgress(value = 1, message = "Generating plot ...",{
-    # no of cases in each group
-    rv[["lels"]] <- rv[[paste0("lels_",x)]]
-
-    # the cutoff percentile
-    rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
-
-
-    # extract statistics
-    res <- rv[["res"]] <- rv[[paste0("cox_",x)]]
-    rv$surv_plotted <- "plotted"
+    extract_plot_data(x)
     # generate survival curve
-    plot_surv(res,two_rows=x)
+    plot_surv(rv[["res"]],two_rows=x)
   })
 })
 
@@ -1276,31 +1282,36 @@ observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
 observeEvent(input$dens_mean,{rv$dens_mean <- input$dens_mean})
 output$dens_plot <- renderPlotly({
   req(rv$project != "")
-  df <- retrieve_dens_df()
-  dep_name <- dependency_names()
-  n_lel <- length(levels(df$Level))
-  c_values <- lel_colors(n_lel)
-
-  if(rv$dens_fill){
-    p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
-      scale_fill_manual(values=c_values)
-  }else{
-    p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
-      scale_color_manual(values=c_values)
-  }
-
-  if(rv$dens_mean){
-    mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
+  x <- rv$plot_type
+  req(if_surv() & typeof(rv[[paste0("df_",x)]]) == "list")
+  withProgress(value = 1, message = "Generating plot...",{
+    extract_plot_data(x)
+    df <- retrieve_dens_df()
+    dep_name <- dependency_names()
+    n_lel <- length(levels(df$Level))
+    c_values <- lel_colors(n_lel)
+    
+    if(rv$dens_fill){
+      p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
+        scale_fill_manual(values=c_values)
+    }else{
+      p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
+        scale_color_manual(values=c_values)
+    }
+    
+    if(rv$dens_mean){
+      mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
+      p <- p +
+        geom_vline(data=mu, aes(xintercept=grp.mean, color=Level), linetype="dashed") +
+        scale_color_manual(values=c_values)
+    }
     p <- p +
-      geom_vline(data=mu, aes(xintercept=grp.mean, color=Level), linetype="dashed") +
-      scale_color_manual(values=c_values)
-  }
-  p <- p +
-    # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
-    labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
-    theme_classic()
-  rv[["ggdens"]] <- p
-  ggplotly(p)
+      # geom_histogram(aes(y=..density..), alpha=0.5, position="identity", binwidth=0.02) +
+      labs(title=paste0(dep_name," distribution"),x=dep_name, y = "Density") +
+      theme_classic()
+    rv[["ggdens"]] <- p
+    ggplotly(p)
+  })
 })
 
 # -------- 7b. stats of density plot ---------

@@ -258,13 +258,16 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       # surv_diff <- surv_cox(df)
       # p_diff <- coef(summary(surv_diff))[,5]
     # }else if(rv$cox_km == "km"){
-    hr <- coef(summary(surv_cox(df)))[,2]
     if(rv$depmap){
-      surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
+      # surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
+      surv_diff <- wilcox.test(dependency ~ level, data = df)
+      hr <- NA
+      p_diff <- surv_diff$p.value
     }else{
+      hr <- coef(summary(surv_cox(df)))[,2]
       surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-    }
       p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+    }
       
       #append current p value to the p value df
       new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
