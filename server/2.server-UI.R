@@ -42,9 +42,8 @@ output$ui_results <- renderUI({
 
     # check if both SNV, a single SNV; then decide plot type and add to pre-set plot options
     dtypes_u <- unique(dtypes)
-    if(length(dtypes_u) == 1){
-      # if(dtypes_u == "snv"){
-      #   # l_plot <- list("Mutation statistics"="snv_stats")
+    if(length(dtypes_u) == 1 & (dtypes_u == "snv" | dtypes_u == "cnv")){
+      # # l_plot <- list("Mutation statistics"="snv_stats")
       # }else if(dtypes_u == "cnv"){
       #   
       # }
@@ -761,6 +760,7 @@ output$ui_stats <- renderUI({
   }
   
   req(stats_title != "")
+  req(!(rv$depmapr & rv$plot_type != "scatter" & rv$plot_type != "scatter2"))
 
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
@@ -780,7 +780,7 @@ output$ui_stats <- renderUI({
     ,boxPad(
       color = "light-blue",
       fluidRow(
-        if(surv_yn & rv$cox_km == "cox" & !rv$depmapr){
+        if(surv_yn & rv$cox_km == "cox"){
           column(
             6,
             descriptionBlock(
@@ -831,7 +831,7 @@ output$ui_stats <- renderUI({
             )
           )
         }
-        ,if(surv_yn & !rv$depmapr){
+        ,if(surv_yn){
           column(
             12,
             conditionalPanel(
@@ -1320,15 +1320,15 @@ observeEvent(input$km_mul_dp,{
   
   # retrieve df for survival analysis
   df <- rv[[paste0("df_",rv$plot_type)]]
-  levl <- length(levels(df$level))
+  levl <- length(unique(df$level))
   
   # the height of the heatmap
-  if(levl > 3){
+  if(levl > 2){
     dp_h <- "218px"
-  }else if(levl == 3){
-    dp_h <- "198px"
   }else if(levl == 2){
     dp_h <- "178px"
+  }else if(levl < 2){
+    dp_h <- "158px"
   }
   
   # update statistics
@@ -1353,7 +1353,7 @@ output$dp_hm <- renderPlotly({
   pvals <- rv[["res"]][["fit"]]$p.value
   req(is.numeric(pvals))
   dims <- dim(pvals)
-  req(dims[1] * dims[2] > 1)
+  req(dims[1] * dims[2] >= 1)
   plot_heatmap(pvals,mul_methods=rv$km_mul_dp)
 })
 
