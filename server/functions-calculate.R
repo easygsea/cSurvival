@@ -264,9 +264,11 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       hr <- NA
       p_diff <- surv_diff$p.value
     }else{
-      hr <- coef(summary(surv_cox(df)))[,2]
-      surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-      p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+      surv_diff <- surv_cox(df)
+      hr <- coef(summary(surv_diff))[,2]
+      p_diff <- summary(surv_diff)$sctest[3]
+      # surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
+      # p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     }
       
       #append current p value to the p value df
