@@ -449,11 +449,28 @@ get_info_most_significant_cnv <- function(data, mode){
   return(results)
 }
 
+## multiple test p value correction
+correct_p <- function(p_diff,min,max,step){
+  p_z <- qnorm(1 - p_diff/2) # (1-Pmin/2)-quantile of the standard normal distribution
+  p_dens <- dnorm(p_z) # probability density funciton
+  p_diff_adj <- p_dens * (p_z - (1/p_z)) * log((max*(1-min))/((1-max)*min)) + 4 * p_dens/p_z
+  # p_zz <- p_zz ^ 2
+  # p_acc <- 0
+  # quantiles <- seq(min,max,step)
+  # for(i in 1:(length(quantiles)-1)){
+  #   qqs <- 1 - (quantiles[i]*(1-quantiles[i+1]))/((1-quantiles[i])*quantiles[i+1])
+  #   p_acc <- p_acc + sqrt(qqs) - ((p_zz / 4 - 1) * (sqrt(qqs))^3 / 6)
+  # }
+  # p_diff_adj <- p_diff + exp(-(p_zz)/2) / pi * p_acc
+  return(p_diff_adj)
+}
+
 ## Perform survival analysis
 cal_surv_rna <-
   function(
-    df,n
+    df,n,min,max,step
     ,p.adjust.method = rv[["km_mul"]]
+    ,iter_mode=T
   ){
     lels <- levels(df$level)
     # # 1. KM # #
@@ -469,6 +486,12 @@ cal_surv_rna <-
         surv_diff <- pairwise.wilcox.test(df$dependency, df$level, p.adjust.method = "hommel")
       }
       
+      if(iter_mode){
+        p_diff_adj <- correct_p(p_diff,min,max,step) %>% format(as.numeric(.), scientific = F, digits = 2)
+      }else{
+        p_diff_adj <- NULL
+      }
+      
       results = list(
         df = df
         ,fit = surv_diff
@@ -476,6 +499,7 @@ cal_surv_rna <-
         ,lels = lels
         # ,hr = "NA"
         ,p = format(as.numeric(p_diff), scientific = F, digits = 2)
+        ,p.adj = p_diff_adj
       )
     }else{
       km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
@@ -518,8 +542,21 @@ cal_surv_rna <-
         round(as.numeric(x), 2)
       }) %>% paste0(.,collapse = ", ")
       p.cox <- sapply(cox.stats$coefficients[,5], function(x){
-        format(as.numeric(x), scientific = T, digits = 3)
+        format(as.numeric(x), scientific = F, digits = 2)
       }) %>% paste0(.,collapse = ", ")
+      
+      # multiple p correction
+      if(iter_mode){
+        p.km.adj <- correct_p(p.km,min,max,step) %>% format(as.numeric(.), scientific = F, digits = 2)
+        p.cox.adj <- sapply(cox.stats$coefficients[,5], function(x){
+          x <- correct_p(as.numeric(x),min,max,step)
+          format(x, scientific = F, digits = 2)
+        }) %>% paste0(.,collapse = ", ")
+      }else{
+        p.km.adj <- NULL
+        p.cox.adj <- NULL
+      }
+      
       
       # # run Cox survival analysis
       # lels_x <- levels(df$`level.x`)
@@ -539,6 +576,7 @@ cal_surv_rna <-
           ,lels = lels
           ,hr = "NA"
           ,p = format(as.numeric(p.km), scientific = F, digits = 2)
+          ,p.adj = p.km.adj
         )
         ,cox = list(
           df = new_df,
@@ -547,6 +585,7 @@ cal_surv_rna <-
           ,lels = lels
           ,hr = hr.cox
           ,p = p.cox
+          ,p.adj = p.cox.adj
           ,cox_fit = cox_fit1
           ,cox_df = df
         )

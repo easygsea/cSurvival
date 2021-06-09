@@ -728,23 +728,26 @@ output$ui_stats <- renderUI({
     res <- rv[["res"]][[rv$cox_km]]
     hr <- res[["hr"]]
     p <- res[["p"]]
+    p.adj <- res[["p.adj"]]
 
     if(rv$cox_km == "cox"){
-      p_w <- 6
+      if(!is.null(p.adj)){p_w <- hr_w <- 4;p_w_r <- T}else{p_w <- hr_w <- 6;p_w_r <- F}
       hf_plot <- ifelse(rv$plot_type == "all","235px","155px")
     }else{
-      p_w <- 12
+      if(!is.null(p.adj)){p_w <- 6;p_w_r <- T}else{p_w <- 12;p_w_r <- F}
       hf_plot <- "155px"
     }
 
     if(rv$cox_km == "cox" & rv$plot_type == "all"){
       hr_title <- "HR (hazard ratios)"
       p_title <- "P-values"
+      p_adj_title <- "adjusted P-values"
       lel1 <- gsub("_"," and/or ",lel1)
       lel2 <- gsub("_"," and/or ",lel2)
     }else{
       hr_title <- "HR (hazard ratio)"
       p_title <- "P-value"
+      p_adj_title <- "adjusted P-value"
     }
 
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
@@ -786,7 +789,7 @@ output$ui_stats <- renderUI({
       fluidRow(
         if(surv_yn & rv$cox_km == "cox"){
           column(
-            6,
+            hr_w,
             descriptionBlock(
               header = hr,
               text = HTML(paste0(hr_title,add_help("hr_q")))
@@ -809,9 +812,20 @@ output$ui_stats <- renderUI({
           descriptionBlock(
             header = p,
             text = p_title
-            ,rightBorder = F
+            ,rightBorder = p_w_r
           )
         )
+        ,if(!is.null(p.adj)){
+          column(
+            p_w,
+            descriptionBlock(
+              header = p.adj,
+              text = HTML(paste0(p_adj_title,add_help("padj_q")))
+              ,rightBorder = F
+            )
+            ,bsTooltip("padj_q",HTML(padj_q_txt),placement = "bottom")
+          )
+        }
       )
     )
     ,boxPad(
@@ -1289,6 +1303,9 @@ output$depmap_stats <- renderUI({
     stats_name <- "Kruskal-Wallis rank sum test, overall"
   }
   
+  p_title <- paste0(stats_name," P-value = ",rv[["res"]][["p"]])
+  if(!is.null(rv[["res"]][["p.adj"]])){p_title <- paste0(p_title,", adjusted P-value",add_help("padj_dp_q")," = ",rv[["res"]][["p.adj"]])}
+  
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     boxPad(
@@ -1296,7 +1313,8 @@ output$depmap_stats <- renderUI({
       fluidRow(
         column(
           12,align="center",
-          h4(paste0(stats_name," P-value = ",rv[["res"]][["p"]]))
+          HTML(paste0("<h4>",p_title,"</h4>"))
+          ,bsTooltip("padj_dp_q",HTML(padj_q_txt),placement = "bottom")
         )
         ,if(!x_numeric){
           div(
