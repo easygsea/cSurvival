@@ -761,7 +761,7 @@ output$ui_stats <- renderUI({
     hr_title <- "Coefficient"
     p <- format(as.numeric(res$p.value), scientific = T, digits = 3)
     p_title <- "P-value"
-    p_w <- 6
+    p_w <- 6; p_w_r <- F; p.adj <- NULL
   }else{
     stats_title <- ""
   }
@@ -815,7 +815,7 @@ output$ui_stats <- renderUI({
             ,rightBorder = p_w_r
           )
         )
-        ,if(!is.null(p.adj)){
+        ,if(surv_yn & !is.null(p.adj)){
           column(
             p_w,
             descriptionBlock(

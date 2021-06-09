@@ -276,7 +276,8 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
       p_df <- rbind(p_df,new_row)
     # }
     if(!is.na(p_diff)){
-      if(p_diff <= least_p_value){
+      q_value <- as.numeric(sub("%", "", names(q)))
+      if((q_value <= 50 & p_diff <= least_p_value)|(q_value > 50 & p_diff < least_p_value)){
         least_p_value <- p_diff
         df_most_significant <- df
         least_hr <- hr
