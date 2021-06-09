@@ -1025,11 +1025,11 @@ output$scatter_plot <- renderPlotly({
         pid <- "Cell line"
         dep_name <- dependency_names()
         ltitle <- paste0("Exponential of ",firstlower(dep_name))
-        if(rv$project == "DepMap-Drug"){
-          df[["survival_days"]] <- log2(df[["survival_days"]])
-        }else{
-          df[["survival_days"]] <- log10(df[["survival_days"]])
-        }
+        # if(rv$project == "DepMap-Drug"){
+        #   df[["survival_days"]] <- log2(df[["survival_days"]])
+        # }else{
+        #   df[["survival_days"]] <- log10(df[["survival_days"]])
+        # }
       }else{
         pid <- "Patient ID"
         ltitle <- dep_name <- "Survival days"
