@@ -198,6 +198,8 @@ observeEvent(input$reset_project,{
   clear_rds()
   shinyjs::enable("project")
   rv$projectStatus <- "none"
+  
+  rv$surv_plotted <- ""
 
   updateSelectizeInput(
     session,

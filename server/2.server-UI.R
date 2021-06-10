@@ -1342,6 +1342,8 @@ output$depmap_stats <- renderUI({
   p_title <- paste0(stats_name," P-value = ",p)
   if(!is.null(p.adj)){p_title <- paste0(p_title,", adjusted P-value",add_help("padj_dp_q")," = ",p.adj)}
   
+  col_w <- 12 / length(rv[["lels"]])
+  
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     boxPad(
@@ -1352,20 +1354,42 @@ output$depmap_stats <- renderUI({
           HTML(paste0("<h4>",p_title,"</h4>"))
           ,bsTooltip("padj_dp_q",HTML(padj_q_txt),placement = "bottom")
         )
-        ,if(!x_numeric){
-          div(
-            column(
-              12,align="center",
-              selectizeInput(
-                "km_mul_dp",
-                NULL,
-                choices = pairwise_methods
-                ,selected = rv[["km_mul_dp"]]
+      )
+    )
+    ,boxPad(
+      color = "gray",
+      fluidRow(
+        column(
+          12,
+          uiOutput("ui_cutoff")
+          ,tagList(
+            lapply(names(rv[["lels"]]), function(x){
+              no <- rv[["lels"]][[x]]
+              column(
+                col_w,
+                descriptionBlock(
+                  header = no,
+                  text = x
+                  ,rightBorder = F
+                )
               )
-            ),
-            uiOutput("dm_stats_render")
+            })
           )
-        }
+          ,if(!x_numeric){
+            div(
+              column(
+                12,align="center",
+                selectizeInput(
+                  "km_mul_dp",
+                  NULL,
+                  choices = pairwise_methods
+                  ,selected = rv[["km_mul_dp"]]
+                )
+              ),
+              uiOutput("dm_stats_render")
+            )
+          }
+        )
       )
     )
   )
@@ -1435,6 +1459,7 @@ observeEvent(input$dens_fill,{rv$dens_fill <- input$dens_fill})
 observeEvent(input$dens_mean,{rv$dens_mean <- input$dens_mean})
 output$dens_plot <- renderPlotly({
   req(rv$depmapr)
+  req(rv$surv_plotted == "plotted")
   df <- retrieve_dens_df()
   dep_name <- dependency_names()
   n_lel <- length(levels(df$Level))
