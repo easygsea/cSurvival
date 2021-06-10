@@ -594,7 +594,7 @@ single_plot <- function(quantile_df, index){
       layout(title = 'P Values of Different Percentiles',
              xaxis = list(title = 'Quantile(%)'),
              yaxis2 = P_Axis,
-             yaxis3 = HR_Axis_special,
+             yaxis3 = HR_Axis,
              hovermode = "x unified"
       )
   }
