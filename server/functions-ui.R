@@ -523,3 +523,88 @@ plot_run_ui <- function(n){
   do.call(tagList, ui)
   
 }
+
+
+
+
+#======================================================================#
+####           function to deynamically plot the percentile graphs     ####
+#======================================================================#
+
+single_plot <- function(quantile_df, index){
+  #Due to bug in Plotly, I am using the solution mentioned in this website:
+  #https://stackoverflow.com/questions/55251470/missing-data-when-supplying-a-dual-axis-multiple-traces-to-subplot
+  #If index == 1, this is first graph and we need to pass in normal y axis
+  if(index == 1){
+    yaxes = c("y","y2")
+    HR_Axis <- list(overlaying = yaxes[1],
+                    side = "right", title = "Hazard Ratio")
+    P_Axis <- list(side = "left", title = "P Value")
+  }
+  else{
+    yaxes = c("y2","y3")
+    HR_Axis <- list(overlaying = yaxes[2],
+                    side = "right", title = "Hazard Ratio")
+    P_Axis <- list(side = "left", title = "P Value")
+  }
+  
+  fig <- plot_ly(quantile_df, x = quantile_df$quantile)
+  fig <- fig %>% add_trace(y = ~quantile_df$p_value,type = 'scatter',#color =~p_value,
+                           line = list(color = 'rgb(173,173,173)', width = 2),
+                           yaxis = yaxes[1],
+                           name = 'P Value',
+                           marker=list(
+                             color=~p_value,
+                             colorscale=col_scale,
+                             cmid = 0.5,
+                             reversescale =TRUE
+                           ),
+                           text = quantile_df$expression,
+                           name = '',mode = 'lines+markers', hovertemplate = paste(
+                             "%{y:.3f}<br>",
+                             "Quantile(in %) : %{x:.0f}<br>",
+                             "ExpressionS : %{text:.3f}<br>"
+                           )) %>%
+    add_trace(y = quantile_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
+              line = list(color = 'rgb(212, 235, 242)', width = 2),
+              marker=list(
+                symbol = 'diamond',
+                color=quantile_df$hr,
+                colorscale='RdBu',
+                cmid = 1,
+                reversescale =FALSE
+              ),
+              yaxis = yaxes[2]
+    )
+  #different layout setting for first graph and second graph
+  if(index == 1){
+    fig <- fig %>%
+      layout(title = 'P Values of Different Percentiles',
+             xaxis = list(title = 'Quantile(%)'),
+             yaxis = P_Axis,
+             yaxis2 = HR_Axis,
+             hovermode = "x unified"
+      )
+  }
+  else{
+    fig <- fig %>%
+      layout(title = 'P Values of Different Percentiles',
+             xaxis = list(title = 'Quantile(%)'),
+             yaxis2 = P_Axis,
+             yaxis3 = HR_Axis_special,
+             hovermode = "x unified"
+      )
+  }
+  
+  return(fig)
+}
+
+
+assemble_percentile_plot <- function(quantile_df_list){
+  fig_list <- c()
+  for(index in 1:length(quantile_df_list)){
+    fig_list[[index]] <- single_plot(quantile_df_list[[index]], index = index)
+  }
+  
+  return(fig_list)
+}

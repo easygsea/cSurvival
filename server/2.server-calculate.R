@@ -5,7 +5,7 @@ observeEvent(input$confirm,{
     #------ 0. clear previous data --------
     clear_rds()
     rv$show_ui <- ""
-    rv$quantile_graph <- NULL
+    rv$quantile_graph <- c()
 
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
@@ -233,8 +233,8 @@ observeEvent(input$confirm,{
 
               req(enough_error == 0)
               
-              #TODO: CHANGE THE RESULT FUNCTION AND ADD RV HERE----
-              rv$quantile_graph <- results[["p_df"]]
+              #CHANGE THE RESULT FUNCTION AND ADD RV$quantile_graph HERE
+              rv[["quantile_graph"]][[x]] <- results[["p_df"]]
               # extract most significant df
               df <- results[["df"]]
               rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")

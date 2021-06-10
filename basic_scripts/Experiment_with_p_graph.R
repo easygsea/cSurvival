@@ -1,6 +1,7 @@
 install.packages("plotly")
 install.packages("tidyverse")
 install.packages("htmlwidgets")
+library(circlize)
 library(plotly)
 library(tidyverse)
 library(htmlwidgets)
@@ -154,9 +155,9 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g", df_o){
 
 res <- get_info_most_significant_rna(data,min = 0.2,max = 0.8, step = 0.01, df_o = df_o)
 
-res$p_df$hr
+quantile_df$hr
 # 
-# graph <- ggplot(data=res$p_df, aes(x = res$p_df$quantile, y = res$p_df$p_value, group=1)) +
+# graph <- ggplot(data=quantile_df, aes(x = quantile_df$quantile, y = quantile_df$p_value, group=1)) +
 #   geom_line(linetype = "dashed")+
 #   geom_point()+labs(x = "Quantile(%)", y = "P Value") +
 #   scale_y_continuous(limits=c(0, 1), breaks=c(0, 0.25, 0.5, 0.75,1))+
@@ -166,7 +167,7 @@ res$p_df$hr
 #   layout(hovermode = "x unified")
 # graph
 #   
-#custom_colorscale = brewer.pal(n = length(res$p_df$p_value), "YlOrRd")[1,length(res$p_df$p_value)]
+#custom_colorscale = brewer.pal(n = length(quantile_df$p_value), "YlOrRd")[1,length(quantile_df$p_value)]
 
 
 
@@ -191,94 +192,143 @@ col_scale_hr <- lapply(1:length(col_scale_hr), function(i) list(col_scale_hr_no[
 col_scale_hr
 
 
-#Plot----
-#This is a helper function that returns the correct cmin and cmax such that
-#The color scale for Hazard Ratio Map can correctly map where 1 is the mid point
-# determine_mid_color <- function(plot_data, mode = 'HR'){
-#   if(mode == 'HR'){
-#     threshold = 1
-#   }
-#   else{
-#     threshold = 0.5
-#   }
-#   
-#   if(min(plot_data) >= threshold){
-#     result[["cmin"]] = max(plot_data) - threshold
-#     result[["cmax"]] = max(plot_data)
-#   }
-#   
-#   if(max(plot_data) <= threhold){
-#     result[["cmin"]] = min(plot_data)
-#     result[["cmax"]] = min(plot_data) + (threshold - min(plot_data))
-#   }
-#   
-#   if((min(plot_data) - threshold) <= (max(plot_data) - threshold)){
-#     
-#   }
-# }
 
+#FUNCTIONS ARE HERE----
+single_plot <- function(quantile_df, index){
+  #Due to bug in Plotly, I am using the solution mentioned in this website:
+  #https://stackoverflow.com/questions/55251470/missing-data-when-supplying-a-dual-axis-multiple-traces-to-subplot
+  #If index == 1, this is first graph and we need to pass in normal y axis
+  if(index == 1){
+    yaxes = c("y","y2")
+    HR_Axis <- list(overlaying = yaxes[1],
+                            side = "right", title = "Hazard Ratio")
+    P_Axis <- list(side = "left", title = "P Value")
+    }
+  else{
+    yaxes = c("y2","y3")
+    HR_Axis <- list(overlaying = yaxes[2],
+                    side = "right", title = "Hazard Ratio")
+    P_Axis <- list(side = "left", title = "P Value")
+  }
+  
+  fig <- plot_ly(quantile_df, x = quantile_df$quantile)
+  fig <- fig %>% add_trace(y = ~quantile_df$p_value,type = 'scatter',#color =~p_value,
+                           line = list(color = 'rgb(173,173,173)', width = 2),
+                           yaxis = yaxes[1],
+                           name = 'P Value',
+                           marker=list(
+                             color=~p_value,
+                             colorscale=col_scale,
+                             cmid = 0.5,
+                             reversescale =TRUE
+                           ),
+                           text = quantile_df$expression,
+                           name = '',mode = 'lines+markers', hovertemplate = paste(
+                             "%{y:.3f}<br>",
+                             "Quantile(in %) : %{x:.0f}<br>",
+                             "ExpressionS : %{text:.3f}<br>"
+                           )) %>%
+    add_trace(y = quantile_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
+              line = list(color = 'rgb(212, 235, 242)', width = 2),
+              marker=list(
+                symbol = 'diamond',
+                color=quantile_df$hr,
+                colorscale='RdBu',
+                cmid = 1,
+                reversescale =FALSE
+              ),
+              yaxis = yaxes[2]
+    )
+  #different layout setting for first graph and second graph
+  if(index == 1){
+    fig <- fig %>%
+      layout(title = 'P Values of Different Quantiles',
+             xaxis = list(title = 'Quantile(%)'),
+             yaxis = P_Axis,
+             yaxis2 = HR_Axis,
+             hovermode = "x unified"
+      )
+  }
+    else{
+      fig <- fig %>%
+        layout(title = 'P Values of Different Quantiles',
+             xaxis = list(title = 'Quantile(%)'),
+             yaxis2 = P_Axis,
+             yaxis3 = HR_Axis_special,
+             hovermode = "x unified"
+      )
+      }
+  
+  return(fig)
+}
 
-fig <- plot_ly(res$p_df, x = res$p_df$quantile)
-fig <- fig %>% add_trace(y = ~res$p_df$p_value,type = 'scatter',#color =~p_value,
-                         line = list(color = 'rgb(173,173,173)', width = 2),
-                         
-                         name = 'P Value',
-                         marker=list(
-                           color=~p_value,
-                           # colorbar=list(
-                           #   title='Colorbar'
-                           # ),
-                           colorscale=col_scale,#'YlOrRd',#custom_colorscale,
-                           cmid = 0.5,
-                           reversescale =TRUE
-                         ),
-                         text = res$p_df$expression,
-                         
-                         #colors = brewer.pal("YlOrRd "),
-                         #rev('YlOrRd'),#brewer.pal(length(res$p_df$p_value),"YlOrRd "),
-  name = '',mode = 'lines+markers', hovertemplate = paste(
-  #"P value is : %{y:.3f}<br>",
-    "%{y:.3f}<br>",
-  "Quantile(in %) : %{x:.0f}<br>",
-  "ExpressionS : %{text:.3f}<br>"
-)) %>%
-  add_trace(y = res$p_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
-            line = list(color = 'rgb(0,88,155)', width = 2),
-            marker=list(
-              symbol = 'diamond',
-              color=res$p_df$hr,
-              colorscale='RdBu',#'RdBu',#col_scale_hr,
-              #'YlOrRd',#custom_colorscale,
-              #cmin = min(res$p_df$hr),
-              #cmax = max(res$p_df$hr)-0.2,
-              cmid = 1,
-              reversescale =FALSE
-            ),#hovertemplate = '',
-            yaxis = "y2"
-            )%>%
-layout(title = 'P Values of Different Quantiles',
-       xaxis = list(title = 'Quantile(%)'),
-       yaxis = list (title = 'P Value'),
-       yaxis2 = list(overlaying = "y",
-                     side = "right",
-                     title = "Harzard Ratio"),
-       hovermode = "x unified"
-       )
-       
-
-fig
-
-#hovertemplate = paste('P Value: $%{y:.2f}','<br>Quantile: %{x}<br>')
-
-
+assemble_percentile_plot <- function(quantile_df_list){
+  fig_list <- c()
+  for(index in 1:length(quantile_df_list)){
+    fig_list[[index]] <- single_plot(quantile_df_list[[index]], index = index)
+  }
+  
+  return(fig_list)
+}
 
 #Subplot----
 
-library(plotly)
-fig1 <- plot_ly(economics, x = ~date, y = ~unemploy)
-fig1 <- fig1 %>% add_lines(name = ~"unemploy")
-fig2 <- plot_ly(economics, x = ~date, y = ~uempmed)
-fig2 <- fig2 %>% add_lines(name = ~"uempmed")
-fig <- subplot(fig1, fig2)
+test <- c()
+test[["quantile"]][[1]] <- res$p_df
+test[["quantile"]][[2]] <- res$p_df
 
-fig
+
+
+fig_list <- assemble_percentile_plot(test$quantile)
+subplot(fig_list[[1]], fig_list[[2]])
+
+
+
+
+
+
+
+#Circular Graph----
+library(circlize)
+#TEST QUICK GUIDE
+set.seed(999)
+n = 1000
+df = data.frame(sectors = sample(letters[1:8], n, replace = TRUE),x = rnorm(n), y = runif(n))
+
+
+circos.par("track.height" = 0.1)
+circos.initialize(df$sectors, x = df$x)
+
+circos.track(df$sectors, y = df$y,
+             panel.fun = function(x, y) {
+               circos.text(CELL_META$xcenter, 
+                           CELL_META$cell.ylim[2] + mm_y(5), 
+                           CELL_META$sector.index)
+               circos.axis(labels.cex = 0.6)
+             })
+col = rep(c("#FF0000", "#00FF00"), 4)
+circos.trackPoints(df$sectors, df$x, df$y, col = col, pch = 16, cex = 0.5)
+circos.text(-1, 0.5, "text", sector.index = "a", track.index = 1)
+
+bgcol = rep(c("#EFEFEF", "#CCCCCC"), 4)
+circos.trackHist(df$sectors, df$x, bin.size = 0.2, bg.col = bgcol, col = NA)
+circos.clear()
+
+
+
+sectors = letters[1:3]
+set.seed(999)
+n = 1000
+df = data.frame(sectors = sample(letters[1:3], n, replace = TRUE),x = rnorm(n), y = runif(n))
+
+circos.par(points.overflow.warning = FALSE)
+circos.initialize(df$sectors, x = df$x)
+circos.trackPlotRegion(df$sectors, y = df$y,
+                       track.height = 0.25, panel.fun = function(x, y) {
+                         circos.text(median(df$x),median(df$y),"ABC", facing = "bending.outside", niceFacing = TRUE,
+                                     cex = 1.2)
+                       })
+circos.update(sector.index = "c", track.index = 1)
+circos.text(CELL_META$xcenter, CELL_META$ycenter, "DepMap", col = "black")
+
+circos.clear()
