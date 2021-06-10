@@ -60,10 +60,7 @@ extract_gene_data <- function(x, type){
       df_file[["snv"]] = paste0("df_snv_class_977.csv")
       
     }else{
-      df_file <- c(
-        df_file
-        ,"snv" = paste0("df_snv_class.csv")
-      )
+      df_file[["snv"]] = paste0("df_snv_class.csv")
     }
 
   }else if(type == "lib"){
@@ -100,7 +97,7 @@ extract_gene_data <- function(x, type){
     ## remove NA data
     if(!(type == "lib" | type == "manual")){
       data_s <- unlist(data[,2])
-      data <- data[!is.na(data_s) & data_s != "",]
+      # data <- data[!is.na(data_s) & data_s != "",]
     }
   # }
 
