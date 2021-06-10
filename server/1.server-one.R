@@ -185,6 +185,7 @@ clear_loaded_genes <- function(){
       ,options = list(
         placeholder = g_placeholder()
       )
+      ,server = T
     )
   })
 }
@@ -331,10 +332,12 @@ observeEvent(lib_input_lst(),{
         genes <- rv[[paste0("gmts",x)]][[gs]]
         rv[[paste0("gs_genes_",x)]] <- genes
 
+        # verbatimTextOutput feedback
         output[[gs_lib_genes_id]] <- renderText({
           paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
         })
         
+        # gene list download handler
         gs_lib_dn_id <- paste0(gs_lib_id,"dn")
         output[[gs_lib_dn_id]] <- downloadHandler(
           filename = function(){paste0(gs,".txt")},
@@ -342,10 +345,24 @@ observeEvent(lib_input_lst(),{
             fwrite(as.list(paste0(sort(genes),collapse = "\n")),file,quote = F)
           }
         )
+        
+        # official site link
+        gs_db_id <- paste0("gs_db_",x)
+        gs_lib_link_id <- paste0(gs_lib_id,"link"); gs_lib_link_ui_id <- paste0(gs_lib_link_id,"_ui")
+        if(input[[gs_db_id]] %in% names(gmt_links)){
+          gs_lib_link_id_q <- paste0(gs_lib_link_id,"_q")
+          output[[gs_lib_link_ui_id]] <- renderUI({
+            div(id=gs_lib_link_id_q,style="z-index:1000;word-break: break-all;",
+                style = "position: absolute; right: -3.5em; top: -0.2em;",
+                HTML(paste0("<h4>",link_icon(gs_lib_link_id,paste0(gmt_links[[input[[gs_db_id]]]],tail(strsplit(rv[[gs_lib_id]],"%")[[1]],n=1)),color="#CF5C78"),"</h4>"))
+                ,bsTooltip(gs_lib_link_id_q,HTML(paste0("Click to visit official ",rv[[gs_db_id]]," website describing ",rv[[gs_lib_id]],".")),placement = "top")
+            )
+          })
+        }else{
+          output[[gs_lib_link_ui_id]] <- NULL
+        }
       }
-
     }
-
   })
 }, ignoreInit = T)
 
@@ -455,6 +472,7 @@ observeEvent(lg_input_btn_lst(),{
                   placeholder = rv[[paste0("gs_placeholder",x)]]
                   ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
                 )
+                ,server = T
               )
 
               output[[paste0("gs_lgg_",x)]] <- renderText({

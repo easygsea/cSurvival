@@ -104,6 +104,7 @@ plot_ui <- function(n){
     gs_db_id <- paste0("gs_db_",x); gs_db_id_q <- paste0(gs_db_id,"_q")
     gs_lib_id <- paste0("gs_l_",x); gs_lib_id_q <- paste0(gs_lib_id,"_q")
     gs_lib_dn_id <- paste0(gs_lib_id,"dn"); gs_lib_dn_id_q <- paste0(gs_lib_dn_id,"_q")
+    gs_lib_link_id <- paste0(gs_lib_id,"link"); gs_lib_link_ui_id <- paste0(gs_lib_link_id,"_ui")
     gs_lib_genes_id <- paste0("gs_lgs_",x) # verbatimTextOutput on gs genes
     gs_gene_id <- paste0("gs_lg_",x); gs_gene_id_q <- paste0(gs_gene_id,"_q") # gene to search
     gs_gene_genes_id <- paste0("gs_lgg_",x) # verbatimTextOutput on input genes to filter GS
@@ -227,15 +228,16 @@ plot_ui <- function(n){
                     8,
                     conditionalPanel(
                       condition = sprintf("input.%s != ''", gs_lib_id),
-                      div(id=gs_lib_dn_id_q,
+                      div(id=gs_lib_dn_id_q,style="z-index:1000;",
                         style = "position: absolute; right: -1.5em; top: 0.2em;",
                         downloadBttn(
                           gs_lib_dn_id,NULL
                           ,size = "xs", color = "danger", style = "material-circle",
                         )
                       )
-                      ,bsTooltip(gs_lib_dn_id_q,HTML("Click to download the gene list. Adjust and re-upload using the <b>Manual</b> mode if necessary."),placement = "top"),
-                      span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
+                      ,uiOutput(gs_lib_link_ui_id)
+                      ,bsTooltip(gs_lib_dn_id_q,HTML("Click to download the gene list. Adjust and re-upload using the <b>Manual</b> mode if necessary."),placement = "top")
+                      ,span(verbatimTextOutput(gs_lib_genes_id), style = rv$verbTxtStyle1)
                     )
               )
               ,column(

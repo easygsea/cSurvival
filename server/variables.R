@@ -33,6 +33,25 @@ retrieve_gmt_path <- function(db){
 #     gmtPathways(x)
 #   })
 # names(gmts) <- gsub("?[.]gmt$","",basename(gmt_files))
+
+# ------- GMT original DB links --------
+gmt_links <- list(
+  "KEGG" = "https://www.genome.jp/kegg-bin/show_pathway?"
+  ,"Reactome Pathway" = "https://reactome.org/content/detail/"
+  ,"WikiPathways" = "https://www.wikipathways.org/index.php/Pathway:"
+  ,"Biological Process" = "https://www.ebi.ac.uk/QuickGO/term/GO:"
+  ,"Cellular Component" = "https://www.ebi.ac.uk/QuickGO/term/GO:"
+  ,"Molecular Function" = "https://www.ebi.ac.uk/QuickGO/term/GO:"
+  ,"Approved Drugs" = "https://go.drugbank.com/drugs/"
+  ,"Experimental Drugs" = "https://go.drugbank.com/drugs/"
+  ,"Illicit Drugs" = "https://go.drugbank.com/drugs/"
+  ,"Investigational Drugs" = "https://go.drugbank.com/drugs/"
+  ,"Nutraceuticals" = "https://go.drugbank.com/drugs/"
+  ,"Withdrawn drugs" = "https://go.drugbank.com/drugs/"
+  ,"DisGeNET all" = "https://www.disgenet.org/search/0/"
+  ,"DisGeNET curated" = "https://www.disgenet.org/search/0/"
+)
+
 # ------ flagged cases -----
 flagged_cases <- fread(paste0(pro_dir,"/977/flagged_cases.tsv"),sep="\t") %>% .[["patient_id"]]
 # ------- names for input modes ----------
