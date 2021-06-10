@@ -462,6 +462,9 @@ get_info_most_significant_cnv <- function(data, mode){
 correct_p <- function(p_diff,min,max,step){
   p_z <- qnorm(1 - p_diff/2) # (1-Pmin/2)-quantile of the standard normal distribution
   # p_dens <- dnorm(p_z) # probability density funciton
+  if(is.infinite(p_z)){
+    p_z <- 10
+  }
   # if(is.infinite(p_z)){
   #   p_diff_adj <- p_diff
   # }else{
@@ -478,7 +481,7 @@ correct_p <- function(p_diff,min,max,step){
     p_acc_3 <- p_acc_3 + qqs^3
     # p_acc <- p_acc + sqrt(qqs) - ((p_zz / 4 - 1) * (sqrt(qqs))^3 / 6)
   }
-  p_diff_adj <- p_diff + exp(-(p_zz)/2) / pi * (p_acc_2 - (p_zz / 4 - 1) * p_acc_3 / 6)
+  p_diff_adj <- exp(-(p_zz)/2) / pi * (p_acc_2 - (p_zz / 4 - 1) * p_acc_3 / 6)
   return(p_diff_adj)
 }
 
@@ -504,7 +507,7 @@ cal_surv_rna <-
       }
       
       if(iter_mode){
-        p_diff_adj <- correct_p(p_diff,min,max,step) %>% format(as.numeric(.), scientific = F, digits = 2)
+        p_diff_adj <- correct_p(p_diff,min,max,step)
       }else{
         p_diff_adj <- NULL
       }
@@ -515,7 +518,7 @@ cal_surv_rna <-
         # ,stats = km.stats
         ,lels = lels
         # ,hr = "NA"
-        ,p = format(as.numeric(p_diff), scientific = F, digits = 2)
+        ,p = p_diff
         ,p.adj = p_diff_adj
       )
     }else{
@@ -562,16 +565,15 @@ cal_surv_rna <-
         round(as.numeric(x), 2)
       }) %>% paste0(.,collapse = ", ")
       p.cox <- sapply(cox.stats$coefficients[,5], function(x){
-        format(as.numeric(x), scientific = F, digits = 2)
-      }) %>% paste0(.,collapse = ", ")
+        as.numeric(x)
+      })
       
       # multiple p correction
       if(iter_mode){
-        p.km.adj <- correct_p(p.km,min,max,step) %>% format(as.numeric(.), scientific = F, digits = 2)
+        p.km.adj <- correct_p(p.km,min,max,step)
         p.cox.adj <- sapply(cox.stats$coefficients[,5], function(x){
           x <- correct_p(as.numeric(x),min,max,step)
-          format(x, scientific = F, digits = 2)
-        }) %>% paste0(.,collapse = ", ")
+        })
       }else{
         p.km.adj <- NULL
         p.cox.adj <- NULL
@@ -595,7 +597,7 @@ cal_surv_rna <-
           stats = km.stats
           ,lels = lels
           ,hr = "NA"
-          ,p = format(as.numeric(p.km), scientific = F, digits = 2)
+          ,p = p.km
           ,p.adj = p.km.adj
         )
         ,cox = list(

@@ -414,3 +414,15 @@ name_project_choices <- function(overlapped_parameter){
   }
   overlapped_parameter
 }
+
+#======================================================================#
+####                           Calculations                         ####
+#======================================================================#
+# format p values
+format_p <- function(p, max = 0.0001){
+  if(p < max){
+    format(p, scientific = T, digits = 2)
+  }else{
+    format(p, scientific = F, digits = 2)
+  }
+}

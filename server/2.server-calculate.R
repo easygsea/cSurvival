@@ -352,6 +352,19 @@ observeEvent(input$confirm,{
 
         # perform survival analysis
         rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n,0,1,.1,iter_mode=F)
+        if(rv$depmap){
+          for(x in 1:rv$variable_n){
+            cox_x <- paste0("cox_",x)
+            if(!is.null(rv[[cox_x]][["p.adj"]])){rv[["cox_all"]][["p.adj"]] <- rv[["cox_all"]][["p"]] + rv[[cox_x]][["p.adj"]]}
+          }
+        }else{
+          for(x in 1:rv$variable_n){
+            cox_x <- paste0("cox_",x)
+            if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){rv[["cox_all"]][["km"]][["p.adj"]] <- rv[["cox_all"]][["km"]][["p"]] + rv[[cox_x]][["km"]][["p.adj"]]}
+            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]][x] <- rv[["cox_all"]][["cox"]][["p"]][x] + correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
+          }
+        }
+
         # saveRDS(rv[["cox_all"]], "cox_all")
       }
 
@@ -380,6 +393,16 @@ observeEvent(input$confirm,{
           names(rv[["lels_gender"]]) <- lels
           # perform survival analysis
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2,0,1,.1,iter_mode=F)
+          if(rv$depmap){
+            if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- rv[["cox_gender"]][["p"]] + rv[["cox_1"]][["p.adj"]]}
+          }else{
+            if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- rv[["cox_gender"]][["km"]][["p"]] + rv[["cox_1"]][["km"]][["p.adj"]]}
+            if(!is.null(rv[["cox_1"]][["cox"]][["p.adj"]])){
+              rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_gender"]][["cox"]][["p"]][1] + correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
+              rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p"]][2]
+              # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
+            }
+          }
           rv[["title_gender"]] <- paste0(rv[["title_1"]]," vs Gender")
         }else{
           rv[["df_gender"]] <- unique(df_combined[["level.y"]])

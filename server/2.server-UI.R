@@ -737,8 +737,15 @@ output$ui_stats <- renderUI({
       if(!is.null(p.adj)){p_w <- 6;p_w_r <- T}else{p_w <- 12;p_w_r <- F}
       hf_plot <- "155px"
     }
-
-    if(rv$cox_km == "cox" & rv$plot_type == "all"){
+    
+    if(!is.null(p.adj)){
+      p.adj <- p+p.adj
+      p.adj <- ifelse(p.adj > 1, 1, p.adj)
+      p.adj <- format_p(p.adj) %>% paste0(.,collapse = ", ")
+    }
+    p <- sapply(p, function(x) format_p(x)) %>% paste0(.,collapse = ", ")
+    
+    if(rv$cox_km == "cox" & (rv$plot_type == "all" | rv$plot_type == "gender")){
       hr_title <- "HR (hazard ratios)"
       p_title <- "P-values"
       p_adj_title <- "adjusted P-values"
@@ -759,7 +766,7 @@ output$ui_stats <- renderUI({
     res <- rv[["res_scatter"]]
     hr <- round(res$estimate, 2)
     hr_title <- "Coefficient"
-    p <- format(as.numeric(res$p.value), scientific = F, digits = 2)
+    p <- format_p(as.numeric(res$p.value))
     p_title <- "P-value"
     p_w <- 6; p_w_r <- F; p.adj <- NULL
   }else{
@@ -931,7 +938,7 @@ plot_heatmap <- function(pvals,mul_methods=rv$km_mul){
   counts[is.na(counts)] <- 0
   dat <- expand.grid(y = rownames(counts), x = colnames(counts))
   dat$z <- unlist(as.data.frame(counts),recursive = T)
-  pvals <- unlist(as.data.frame(pvals), recursive = T) %>% format(., scientific = F, digits = 2)
+  pvals <- unlist(as.data.frame(pvals), recursive = T) %>% sapply(., function(x) if(!is.na(x)){format_p(x)}else{"NA"})
   req(length(dat$z)>0)
   
   fig <- plot_ly() %>%
@@ -1324,8 +1331,16 @@ output$depmap_stats <- renderUI({
     stats_name <- "Kruskal-Wallis rank sum test, overall"
   }
   
-  p_title <- paste0(stats_name," P-value = ",rv[["res"]][["p"]])
-  if(!is.null(rv[["res"]][["p.adj"]])){p_title <- paste0(p_title,", adjusted P-value",add_help("padj_dp_q")," = ",rv[["res"]][["p.adj"]])}
+  p <- rv[["res"]][["p"]]
+  p.adj <- rv[["res"]][["p.adj"]]
+  if(!is.null(p.adj)){
+    p.adj <- p + p.adj
+    p.adj <- ifelse(p.adj > 1, 1, p.adj)
+    p.adj <- format_p(p.adj)
+  }
+  p <- format_p(p)
+  p_title <- paste0(stats_name," P-value = ",p)
+  if(!is.null(p.adj)){p_title <- paste0(p_title,", adjusted P-value",add_help("padj_dp_q")," = ",p.adj)}
   
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
