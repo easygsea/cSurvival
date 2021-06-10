@@ -461,12 +461,12 @@ get_info_most_significant_cnv <- function(data, mode){
 ## multiple test p value correction
 correct_p <- function(p_diff,min,max,step){
   p_z <- qnorm(1 - p_diff/2) # (1-Pmin/2)-quantile of the standard normal distribution
-  p_dens <- dnorm(p_z) # probability density funciton
-  if(is.infinite(p_z)){
-    p_diff_adj <- p_diff
-  }else{
-    p_diff_adj <- p_dens * (p_z - (1/p_z)) * log((max*(1-min))/((1-max)*min)) + 4 * p_dens/p_z
-  }
+  # p_dens <- dnorm(p_z) # probability density funciton
+  # if(is.infinite(p_z)){
+  #   p_diff_adj <- p_diff
+  # }else{
+  #   p_diff_adj <- p_dens * (p_z - (1/p_z)) * log((max*(1-min))/((1-max)*min)) + 4 * p_dens/p_z
+  # }
   p_zz <- p_z ^ 2
   p_acc_2 <- 0
   p_acc_3 <- 0

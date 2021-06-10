@@ -759,7 +759,7 @@ output$ui_stats <- renderUI({
     res <- rv[["res_scatter"]]
     hr <- round(res$estimate, 2)
     hr_title <- "Coefficient"
-    p <- format(as.numeric(res$p.value), scientific = T, digits = 3)
+    p <- format(as.numeric(res$p.value), scientific = F, digits = 2)
     p_title <- "P-value"
     p_w <- 6; p_w_r <- F; p.adj <- NULL
   }else{
