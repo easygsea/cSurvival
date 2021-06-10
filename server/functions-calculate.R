@@ -467,14 +467,18 @@ correct_p <- function(p_diff,min,max,step){
   }else{
     p_diff_adj <- p_dens * (p_z - (1/p_z)) * log((max*(1-min))/((1-max)*min)) + 4 * p_dens/p_z
   }
-  # p_zz <- p_zz ^ 2
-  # p_acc <- 0
-  # quantiles <- seq(min,max,step)
-  # for(i in 1:(length(quantiles)-1)){
-  #   qqs <- 1 - (quantiles[i]*(1-quantiles[i+1]))/((1-quantiles[i])*quantiles[i+1])
-  #   p_acc <- p_acc + sqrt(qqs) - ((p_zz / 4 - 1) * (sqrt(qqs))^3 / 6)
-  # }
-  # p_diff_adj <- p_diff + exp(-(p_zz)/2) / pi * p_acc
+  p_zz <- p_z ^ 2
+  p_acc_2 <- 0
+  p_acc_3 <- 0
+  quantiles <- seq(min,max,step)
+  for(i in 1:(length(quantiles)-1)){
+    qqs <- 1 - (quantiles[i]*(1-quantiles[i+1]))/((1-quantiles[i])*quantiles[i+1])
+    qqs <- sqrt(qqs)
+    p_acc_2 <- p_acc_2 + qqs
+    p_acc_3 <- p_acc_3 + qqs^3
+    # p_acc <- p_acc + sqrt(qqs) - ((p_zz / 4 - 1) * (sqrt(qqs))^3 / 6)
+  }
+  p_diff_adj <- p_diff + exp(-(p_zz)/2) / pi * (p_acc_2 - (p_zz / 4 - 1) * p_acc_3 / 6)
   return(p_diff_adj)
 }
 
