@@ -46,6 +46,9 @@ input_mode_names <- c(
   ,"Mean Z-score" = "manual"
   ,"Median-centered RRPA value" = "rrpa"
   ,"Normalized protein expression" = "pro"
+  ,"Gene effect (CERES)" = "crispr"
+  ,"Gene effect (DEMETER2)" = "rnai"
+  ,"Cell viability" = "drug"
 )
 
 # ------- survival analysis methods ---------

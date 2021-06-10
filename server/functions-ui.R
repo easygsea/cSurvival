@@ -286,6 +286,9 @@ plot_ui <- function(n){
         ,radioTooltip(id = db_id, choice = "met", title = HTML("DNA methylation level"))
         ,radioTooltip(id = db_id, choice = "rrpa", title = HTML("Reverse-phase protein array (RPPA)"))
         ,radioTooltip(id = db_id, choice = "pro", title = HTML("Normalized protein expression data by mass spectrometry"))
+        ,radioTooltip(id = db_id, choice = "crispr", title = HTML("Gene effect measured by CRISPR-Cas9"))
+        ,radioTooltip(id = db_id, choice = "rnai", title = HTML("Gene effect measured by RNA interference"))
+        ,radioTooltip(id = db_id, choice = "drug", title = HTML("Drug sensitivity assays by PRISM compound repurposing screening"))
       )
       
     )

@@ -948,8 +948,8 @@ observeEvent(input$depmap_gene,{
   withProgress(value = 1, message = "Loading data ...",{
     # error if too few cell lines
     error <- 0
-    if(length(input$ccle_cells) < 20){
-      shinyalert(paste0("Please select at least 20 cell lines to proceed."))
+    if(length(input$ccle_cells) < 10){
+      shinyalert(paste0("Please select at least 10 cell lines to proceed."))
       error <- 1
     }
     req(error == 0)
@@ -972,9 +972,9 @@ observeEvent(input$depmap_gene,{
     #   df_survival_o[["dependency"]] <- 10^df_survival_o[["dependency"]]
     # }
     genes_len <- nrow(df_survival_o)
-    if(genes_len < 20){
+    if(genes_len < 10){
       shinyalert(paste0(gene," only has ",genes_len," data points in the selected cell lines."
-                        ," At least 20 are needed. Please select another ",agene()," or adjust cell line choices"))
+                        ," At least 10 are needed. Please select another ",agene()," or adjust cell line choices"))
       error <- 1
     }
     req(error == 0)

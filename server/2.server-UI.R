@@ -559,7 +559,7 @@ output$plot_gear <- renderUI({
           value = rv$scatter_log_x, inline = F, width = "100%",
           status = "danger"
         )
-        ,bsTooltip("scatter_log_x_q",HTML(paste0("If TRUE, values along the x-axis are log2 transformed"))
+        ,bsTooltip("scatter_log_x_q",HTML(paste0("If TRUE, values along the x-axis are log2 transformed. Not applicable for DepMap CRISPR-Cas9, RNAi, and drug sensitivity data."))
                    ,placement = "top")
         ,materialSwitch(
           inputId = "scatter_log_y",
@@ -567,7 +567,7 @@ output$plot_gear <- renderUI({
           value = rv$scatter_log_y, inline = F, width = "100%",
           status = "danger"
         )
-        ,bsTooltip("scatter_log_y_q",HTML(paste0("If TRUE, values along the y-axis are log2 transformed"))
+        ,bsTooltip("scatter_log_y_q",HTML(paste0("If TRUE, values along the y-axis are log2 transformed. Not applicable for DepMap CRISPR-Cas9, RNAi, and drug sensitivity data."))
                    ,placement = "top")
         ,materialSwitch(
           inputId = "scatter_lm",
@@ -998,12 +998,18 @@ output$scatter_plot <- renderPlotly({
 
       df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
       if(ncol(df) == 3){
+        gene_name <- colnames(df)[3]
         colnames(df) <- c("patient_id","survival_days","exp")
         exprs <- df$exp
         rv[["gs_no"]] = T; exp_type = exp_unit
         if(rv$scatter_log_y){
-          df_y <- log2(df$exp+1)
-          ylab <- paste0("Log2 (",exp_unit," + 1)")
+          if(input$db_1 == "crispr" | input$db_1 == "rnai" | input$db_1 == "drug"){
+            df_y <- df$exp
+            ylab <- exp_unit
+          }else{
+            df_y <- log2(df$exp+1)
+            ylab <- paste0("Log2 (",exp_unit," + 1)")
+          }
         }else{
           df_y <- df$exp
           ylab <- exp_unit
@@ -1023,8 +1029,7 @@ output$scatter_plot <- renderPlotly({
       if(rv$depmapr){
         df[["patient_id"]] <- paste0(translate_cells(df[["patient_id"]]),"|",df[["patient_id"]])
         pid <- "Cell line"
-        dep_name <- dependency_names()
-        ltitle <- paste0("Exponential of ",firstlower(dep_name))
+        ltitle <- dep_name <- dependency_names()
         # if(rv$project == "DepMap-Drug"){
         #   df[["survival_days"]] <- log2(df[["survival_days"]])
         # }else{
@@ -1037,7 +1042,7 @@ output$scatter_plot <- renderPlotly({
 
       if(rv$scatter_log_x){
         if(rv$depmapr){
-          df_x <- 2 ^ df$survival_days
+          df_x <- df$survival_days
           xlab <- ltitle
         }else{
           df_x <- log2(df$survival_days+1)
@@ -1050,6 +1055,12 @@ output$scatter_plot <- renderPlotly({
         }else{
           xlab <- ltitle
         }
+      }
+      
+      # if DepMap, add gene names on to axises
+      if(rv$depmapr){
+        ylab <- paste0(gene_name,": ",ylab)
+        xlab <- paste0(rv$depmap_gener,": ",xlab)
       }
 
       # calculate correlation
@@ -1122,8 +1133,13 @@ output$scatter_plot <- renderPlotly({
 
       # log y, if prompted
       if(rv$scatter_log_y){
-        df_y <- log2(df$expb+1)
-        ylab <- paste0("Log2 (",exp_unitb," + 1)")
+        if(input$db_2 == "crispr" | input$db_2 == "rnai" | input$db_2 == "drug"){
+          df_y <- df$expb
+          ylab <- exp_unitb
+        }else{
+          df_y <- log2(df$expb+1)
+          ylab <- paste0("Log2 (",exp_unitb," + 1)")
+        }
       }else{
         df_y <- df$expb
         ylab <- exp_unitb
@@ -1131,8 +1147,13 @@ output$scatter_plot <- renderPlotly({
 
       # log x, if prompted
       if(rv$scatter_log_x){
-        df_x <- log2(df$expa+1)
-        xlab <- paste0("Log2 (",exp_unita," + 1)")
+        if(input$db_1 == "crispr" | input$db_1 == "rnai" | input$db_1 == "drug"){
+          df_x <- df$expa
+          xlab <- exp_unita
+        }else{
+          df_x <- log2(df$expa+1)
+          xlab <- paste0("Log2 (",exp_unita," + 1)")
+        }
       }else{
         df_x <- df$expa
         xlab <- exp_unita

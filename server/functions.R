@@ -323,6 +323,12 @@ retrieve_genes <- function(x){
     infiles <- paste0(rv$indir,"df_proteomic_scale.csv")
   }else if(dbt == "rrpa"){
     infiles <- paste0(rv$indir,"df_rrpa_scale.csv")
+  }else if(dbt == "crispr"){
+    infiles <- paste0(rv$indir,"DepMap-CRISPR.csv")
+  }else if(dbt == "rnai"){
+    infiles <- paste0(rv$indir,"DepMap-RNAi.csv")
+  }else if(dbt == "drug"){
+    infiles <- paste0(rv$indir,"DepMap-Drug.csv")
   }
   
   l <- lapply(infiles, function(x){

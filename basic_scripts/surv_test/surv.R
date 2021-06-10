@@ -150,7 +150,7 @@ df_exp1 <- readRDS("basic_scripts/surv_test/df_exp1")
 df_exp2 <- readRDS("basic_scripts/surv_test/df_exp2")
 
 df_exp_combined <- Reduce(
-  function(x, y) inner_join(x, select(y, patient_id, level, exp), by = "patient_id"), 
+  function(x, y) inner_join(x, dplyr::select(y, patient_id, level, exp), by = "patient_id"), 
   list(df_exp1,df_exp2)
 )
 

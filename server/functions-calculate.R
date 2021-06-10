@@ -19,6 +19,9 @@ extract_gene_data <- function(x, type){
     ,"mir" = "df_mir.csv"
     ,"pro" = "df_proteomic.csv"
     ,"rrpa" = "df_rrpa.csv"
+    ,"crispr" = "DepMap-CRISPR.csv"
+    ,"rni" = "DepMap-RNAi.csv"
+    ,"drug" = "DepMap-Drug.csv"
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
@@ -71,7 +74,7 @@ extract_gene_data <- function(x, type){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
     genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
-  }else if(type == "cnv" | type == "mir" | type == "pro" | type == "rrpa"){
+  }else if(type == "cnv" | type == "mir" | type == "pro" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
     # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]
   }
@@ -94,6 +97,11 @@ extract_gene_data <- function(x, type){
   #   data <- data %>% dplyr::select(patient_id, genes)
   # }else{
     data <- rbindlist(l, use.names = T)
+    ## remove NA data
+    if(!(type == "lib" | type == "manual")){
+      data_s <- unlist(data[,2])
+      data <- data[!is.na(data_s) & data_s != "",]
+    }
   # }
 
   # if depmap, filter patient ID
@@ -108,7 +116,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
 
   # save original expression or mutation data, if applicable
-  if(type == "rna" | type == "mir" | type == "rrpa"){
+  if(type == "rna" | type == "mir" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
     # save original expression data
     rv[[paste0("exprs_",x)]] <- data
   }else if(type == "snv"){
@@ -454,7 +462,11 @@ get_info_most_significant_cnv <- function(data, mode){
 correct_p <- function(p_diff,min,max,step){
   p_z <- qnorm(1 - p_diff/2) # (1-Pmin/2)-quantile of the standard normal distribution
   p_dens <- dnorm(p_z) # probability density funciton
-  p_diff_adj <- p_dens * (p_z - (1/p_z)) * log((max*(1-min))/((1-max)*min)) + 4 * p_dens/p_z
+  if(is.infinite(p_z)){
+    p_diff_adj <- p_diff
+  }else{
+    p_diff_adj <- p_dens * (p_z - (1/p_z)) * log((max*(1-min))/((1-max)*min)) + 4 * p_dens/p_z
+  }
   # p_zz <- p_zz ^ 2
   # p_acc <- 0
   # quantiles <- seq(min,max,step)
@@ -529,6 +541,9 @@ cal_surv_rna <-
         }
         req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
         
+        # if(iter_mode){
+        #   km2$p.value <- paste0(res.km$p.value," (",correct_p(km2$p.value,min,max,step),")")
+        # }
         km.stats <- list(km2,km.stats)
         
         # run Cox regression
