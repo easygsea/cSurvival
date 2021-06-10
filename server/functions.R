@@ -323,6 +323,12 @@ retrieve_genes <- function(x){
     infiles <- paste0(rv$indir,"df_proteomic_scale.csv")
   }else if(dbt == "rrpa"){
     infiles <- paste0(rv$indir,"df_rrpa_scale.csv")
+  }else if(dbt == "crispr"){
+    infiles <- paste0(rv$indir,"DepMap-CRISPR.csv")
+  }else if(dbt == "rnai"){
+    infiles <- paste0(rv$indir,"DepMap-RNAi.csv")
+  }else if(dbt == "drug"){
+    infiles <- paste0(rv$indir,"DepMap-Drug.csv")
   }
   
   l <- lapply(infiles, function(x){
@@ -407,4 +413,16 @@ name_project_choices <- function(overlapped_parameter){
     names(overlapped_parameter)[which(overlapped_parameter=="mir")] <- "miRNA"
   }
   overlapped_parameter
+}
+
+#======================================================================#
+####                           Calculations                         ####
+#======================================================================#
+# format p values
+format_p <- function(p, max = 0.0001){
+  if(p < max){
+    format(p, scientific = T, digits = 2)
+  }else{
+    format(p, scientific = F, digits = 2)
+  }
 }

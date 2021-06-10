@@ -46,6 +46,9 @@ input_mode_names <- c(
   ,"Mean Z-score" = "manual"
   ,"Median-centered RRPA value" = "rrpa"
   ,"Normalized protein expression" = "pro"
+  ,"Gene effect (CERES)" = "crispr"
+  ,"Gene effect (DEMETER2)" = "rnai"
+  ,"Cell viability" = "drug"
 )
 
 # ------- survival analysis methods ---------
@@ -173,8 +176,20 @@ cox_km_txt <- paste0("Select the method for analyzing and summarizing survival d
                      ,"Cox regression model assesses the effect of several risk factors simultaneously; "
                      ,"additional density and box plots are provided for DepMap data analysis and visualization."
 )
+padj_q_txt <- paste0("Improved Bonferroni-inequality-based adjustment for multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method (Lausen and Schumacher, 1993)")
 
 # ----- Miscellaneous ----
+# correction methods for pairwise comparisons
+pairwise_methods <- list(
+  "Multiple comparisons test by Holm (1979)" = "holm"
+  ,"Multiple comparisons test by Hochberg (1988)" = "hochberg"
+  ,"Multiple comparisons test by Hommel (1988)" = "hommel"
+  ,"Multiple comparisons test by Bonferroni correction" = "bonferroni"
+  ,"Multiple comparisons test by Benjamini & Hochberg (1995)" = "BH"
+  ,"Multiple comparisons test by Benjamini & Yekutieli (2001)" = "BY"
+  ,"Multiple comparisons test by false discovery rate (FDR)" = "fdr"
+)
+
 # explanations for flagged cases
 flagged_exp <- paste0(
   "Cases identified as any of the following categories are considered problematic and can be excluded from cSurvival analysis:"

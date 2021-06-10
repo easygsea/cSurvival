@@ -69,7 +69,7 @@ observeEvent(input$confirm,{
     rv$depmapr <- rv$depmap
 
     #------ 2. survival data processing ------
-    withProgress(value = 1, message = "Performing analysis... Please wait a minute. Thank you.",{
+    withProgress(value = 1, message = wait_msg("Performing analysis..."),{
       # update survival df
       # filter OS, DFS, or PFS
       rv$df_survival <- rv$df_survival_o
@@ -165,7 +165,6 @@ observeEvent(input$confirm,{
       df_list <- list()
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""
-
       #------ 3. Loop from 1 to rv$variable_n ------
       for(x in 1:rv$variable_n){
         # clear previous RVs
@@ -211,14 +210,21 @@ observeEvent(input$confirm,{
           req(rv[[paste0("title_",x)]] != "")
 
           # ---------- 3B. perform Surv if expression-like data --------
+          iter_mode_value <- paste0("iter_mode_",x)
+          assign(iter_mode_value,F)
+          min_value <- paste0("min_",x); max_value <- paste0("max_",x); step_value <- paste0("step_",x)
+          assign(min_value, 0);assign(max_value, 1);assign(step_value, .1)
           if(extract_mode != "snv" & ((!rv$depmap & extract_mode != "cnv") | rv$depmap)){
             iter_id <- paste0("iter_",x)
             yn <- ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
+            assign(iter_mode_value,yn)
             if(yn){
               lower_id <- paste0("lower_",x); higher_id <- paste0("upper_",x); step_id <- paste0("step_",x)
               min <- ifelse(is.null(input[[lower_id]]), rv[[lower_id]], input[[lower_id]])
               max <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
               step <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
+              
+              assign(min_value, min);assign(max_value, max);assign(step_value, step)
 
               enough_error <- 0
               results <- get_info_most_significant_rna(data, min, max, step, mode=input[[cat_id]])
@@ -284,6 +290,7 @@ observeEvent(input$confirm,{
             if(length(unique(df$level)) < 2){
               shinyalert("Not enough data found for the selected endpoint and parameters")
               error_snv <- 1
+              rv$try_error <- 1
             }
             req(error_snv == 0)
             rv[[paste0("cutoff_",x)]] <- ""
@@ -316,7 +323,7 @@ observeEvent(input$confirm,{
 
           # perform survival analysis
           cox_id <- paste0("cox_",x)
-          rv[[cox_id]] <- cal_surv_rna(df,1)
+          rv[[cox_id]] <- cal_surv_rna(df,1,get(min_value),get(max_value),get(step_value),iter_mode=get(iter_mode_value))
           # saveRDS(rv[[cox_id]], "cox_dm")
 
           # save data type to rv
@@ -344,7 +351,20 @@ observeEvent(input$confirm,{
         names(rv[["lels_all"]]) <- lels
 
         # perform survival analysis
-        rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n)
+        rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n,0,1,.1,iter_mode=F)
+        if(rv$depmap){
+          for(x in 1:rv$variable_n){
+            cox_x <- paste0("cox_",x)
+            if(!is.null(rv[[cox_x]][["p.adj"]])){rv[["cox_all"]][["p.adj"]] <- rv[["cox_all"]][["p"]] + rv[[cox_x]][["p.adj"]]}
+          }
+        }else{
+          for(x in 1:rv$variable_n){
+            cox_x <- paste0("cox_",x)
+            if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){rv[["cox_all"]][["km"]][["p.adj"]] <- rv[["cox_all"]][["km"]][["p"]] + rv[[cox_x]][["km"]][["p.adj"]]}
+            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]][x] <- rv[["cox_all"]][["cox"]][["p"]][x] + correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
+          }
+        }
+
         # saveRDS(rv[["cox_all"]], "cox_all")
       }
 
@@ -372,7 +392,17 @@ observeEvent(input$confirm,{
           rv[["lels_gender"]] <- lapply(lels, function(x) table(df_combined$level == x)["TRUE"] %>% unname(.))
           names(rv[["lels_gender"]]) <- lels
           # perform survival analysis
-          rv[["cox_gender"]] <- cal_surv_rna(df_combined,2)
+          rv[["cox_gender"]] <- cal_surv_rna(df_combined,2,0,1,.1,iter_mode=F)
+          if(rv$depmap){
+            if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- rv[["cox_gender"]][["p"]] + rv[["cox_1"]][["p.adj"]]}
+          }else{
+            if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- rv[["cox_gender"]][["km"]][["p"]] + rv[["cox_1"]][["km"]][["p.adj"]]}
+            if(!is.null(rv[["cox_1"]][["cox"]][["p.adj"]])){
+              rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_gender"]][["cox"]][["p"]][1] + correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
+              rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p"]][2]
+              # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
+            }
+          }
           rv[["title_gender"]] <- paste0(rv[["title_1"]]," vs Gender")
         }else{
           rv[["df_gender"]] <- unique(df_combined[["level.y"]])
@@ -384,8 +414,8 @@ observeEvent(input$confirm,{
     rv$cox_km <- "km"
     if(rv$tcga){rv$plot_sstype <- rv$plot_stype}
     else if(rv$target){rv$plot_sstype <- "Overall survival (OS)"}
-    else if(rv$depmap){rv$plot_sstype <- dependency_names()}
-    
+    else if(rv$depmap){rv$plot_sstype <- dependency_names();rv$depmap_gener <- rv$depmap_gene}
+    rv$annot_cells_y <- ""
     rv$show_ui <- "yes"
   }
 })
