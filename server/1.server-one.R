@@ -86,15 +86,15 @@ observeEvent(input$confirm_project,{
   }
   req(!study_length_check)
 
-  # check if exceed maximum no of projects
-  if(study == "TARGET"){rv$max_project_n <- 3}else{rv$max_project_n <- 1}
-  project_length_check <- length(input$project) > rv$max_project_n
-  if(project_length_check){
-    shinyalert(paste0("We support analysis with up to ",rv$max_project_n," project(s) in ",study,"."
-                      , " You have selected ",length(input$project),"."
-                      , " Please delete unrelated project(s). Thank you."))
-  }
-  req(!project_length_check)
+  # # check if exceed maximum no of projects
+  # if(study == "TARGET"){rv$max_project_n <- 3}else{rv$max_project_n <- 3}
+  # project_length_check <- length(input$project) > rv$max_project_n
+  # if(project_length_check){
+  #   shinyalert(paste0("We support analysis with up to ",rv$max_project_n," project(s) in ",study,"."
+  #                     , " You have selected ",length(input$project),"."
+  #                     , " Please delete unrelated project(s). Thank you."))
+  # }
+  # req(!project_length_check)
 
   # retrieve data
   withProgress(value = 1, message = "Retrieving data from project(s) .... ",{
@@ -708,11 +708,16 @@ output$tcga_pars <- renderUI({
 
   # check if certain outcomes available for selected TCGA project
   if(rv$project != ""){
-    code <- rv$tcga_code <- tcga_codes %>% dplyr::filter(type == rv$project) %>% dplyr::select(-type)
-    cords <- code %>% dplyr::select(-msg)
+    code <- tcga_codes %>% dplyr::filter(Study %in% rv$project)
+    cords <- code %>% dplyr::select(-Study,-Note)
+    if(length(rv$project) > 1){
+      cords <- lapply(cords, function(x) if(anyNA(x)){NA}else{"hi"})
+      rv$tcga_code <- code
+    }
     cords <- codes <- unlist(cords)
+    if(length(rv$project) == 1){code <- rv$tcga_code <- code %>% dplyr::select(-Study)}
     # if any NA, render a warning msg on UI
-    if(anyNA(cords)){rv$tcga_msg <- code$msg}else{rv$tcga_msg <- ""}
+    if(anyNA(cords)){rv$tcga_msg <- code$Note}else{rv$tcga_msg <- ""}
     cords <- c(1:4)[!is.na(cords)]
   }else{
     cords <- c(1:4); rv$tcga_code <- ""; rv$tcga_msg <- ""
@@ -722,12 +727,18 @@ output$tcga_pars <- renderUI({
 
   # choice names
   if(rv$project != ""){
-    tcga_stypess_names <- sapply(cords, function(x){
-      y <- codes[[x]]
-      c <- codes_color[[y]]
-      i <- codes_icon[[y]]
-      return(paste0(names(tcga_stypes)[[x]],span(style=sprintf("color:%s;",c),i)))
-    }) %>% unname(.)
+    if(length(rv$project) == 1){
+      tcga_stypess_names <- sapply(cords, function(x){
+        y <- codes[[x]]
+        c <- codes_color[[y]]
+        i <- codes_icon[[y]]
+        return(paste0(names(tcga_stypes)[[x]],span(style=sprintf("color:%s;",c),i)))
+      }) %>% unname(.)
+    }else{
+      tcga_stypess_names <- sapply(cords, function(x){
+        return(names(tcga_stypes)[[x]])
+      }) %>% unname(.)
+    }
   }else{
     tcga_stypess_names <- names(tcga_stypess)
   }
@@ -737,7 +748,7 @@ output$tcga_pars <- renderUI({
     12, id="div_tcga_stype",align="center",
     radioGroupButtons(
       inputId = "tcga_stype",
-      label = HTML(paste0("If TCGA, select the endpoint to measure survival outcomes: ",add_help("tcga_stype_q"))),
+      label = label_with_help_bttn("If TCGA, select the endpoint to measure survival outcomes: ","tcga_stype_q"),
       choiceNames = tcga_stypess_names,
       choiceValues = unname(tcga_stypess),
       selected = rv$tcga_stype,
@@ -751,7 +762,7 @@ output$tcga_pars <- renderUI({
     )
     ,uiOutput("tcga_warning")
     ,bsTooltip("tcga_stype_q",HTML(paste0(
-      "Curated clinical and survival outcome data by Liu et al., <i>Cell</i>, 2018."
+      "Curated clinical and survival outcome data by pan-cancer clinical study (Liu et al., <i>Cell</i>, 2018). <b>Click</b> for full assessment table and recommendations."
       # ," To last known disease status, <b>OS</b> assesses all cases"
       # ,"; <b>PFI</b> assesses cases without tumor recurrence"
       # ,"; <b>DFI</b> assesses cases without detectable tumors"
@@ -772,44 +783,88 @@ observeEvent(input$tcga_stype,{rv$tcga_stype <- input$tcga_stype; rv$plot_stype 
 # warning messages about recommendations by Liu 2018
 output$tcga_warning <- renderUI({
   req(typeof(rv$tcga_code) == "list")
-  # recommendations by Liu, Cell, 2018
-  code <- rv[["tcga_code"]][[rv$tcga_stype]]
-
-  # beginning wording
-  green <- 0
-  if(code == "yes"){
-    s_msg <- " is recommended"; green <- 1
-  }else if(code == "acc"){
-    s_msg <- " is accurate and recommended"; green <- 1
-  }else if(code == "app"){
-    s_msg <- " is approximate and recommended"; green <- 1
-  }else if(code == "app|caution"){
-    s_msg <- " is approximate and should be <b>used with caution</b>"
-  }else if(code == "no"){
-    s_msg <- " is <b>not recommended</b>"
-  }else if(code == "caution"){
-    s_msg <- " should be <b>used with caution</b>"
-  }
-
-  # assemble msg
-  msg <- paste0(rv$plot_stype,s_msg," for ",rv$project)
-  if(green == 0){
-    msg <- paste0(msg,". Reason: ",rv[["tcga_code"]][["msg"]])
-  }else{
-    if(rv$tcga_msg != ""){
-      msg <- paste0(msg,". Note: ",rv$project," ",rv$tcga_msg)
+  if(length(rv$project) == 1){
+    # recommendations by Liu, Cell, 2018
+    code <- rv[["tcga_code"]][[rv$tcga_stype]]
+    
+    # beginning wording
+    green <- 0
+    if(code == "yes"){
+      s_msg <- " is recommended"; green <- 1
+    }else if(code == "acc"){
+      s_msg <- " is accurate and recommended"; green <- 1
+    }else if(code == "app"){
+      s_msg <- " is approximate and recommended"; green <- 1
+    }else if(code == "app|caution"){
+      s_msg <- " is approximate and should be <b>used with caution</b>"
+    }else if(code == "no"){
+      s_msg <- " is <b>not recommended</b>"
+    }else if(code == "caution"){
+      s_msg <- " should be <b>used with caution</b>"
     }
-  }
-
-  # render msg
-  div(
-    p(
-      style=sprintf("color:%s;", codes_color[[code]]),
-      HTML(paste0(codes_icon[[code]],msg," ",link_icon("liu_link","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/",color="#363B48",icon="fas fa-book")))
+    
+    # assemble msg
+    msg <- paste0(rv$plot_stype,s_msg," for ",rv$project)
+    if(green == 0){
+      msg <- paste0(msg,". Reason: ",rv[["tcga_code"]][["Note"]])
+    }else{
+      if(rv$tcga_msg != ""){
+        msg <- paste0(msg,". Note: ",rv$project," ",rv$tcga_msg)
+      }
+    }
+    
+    # render msg
+    div(
+      p(
+        style=sprintf("color:%s;", codes_color[[code]]),
+        HTML(paste0(codes_icon[[code]],msg)) #," ",link_icon("liu_link","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/",color="#363B48",icon="fas fa-book")
+      )
+      # ,bsTooltip("liu_link",HTML(paste0(
+      #   "Assessment by Liu et al, <i>Cell</i>, 2018. Click for full text at PubMed Central."
+      # )),placement = "top")
     )
-    ,bsTooltip("liu_link",HTML(paste0(
-      "Assessment by Liu et al, <i>Cell</i>, 2018. Click for full text at PubMed Central."
-    )),placement = "top")
+  }else{
+    div(
+      p(
+        style=sprintf("color:%s;", "#939597"),
+        HTML(paste0("Reminder: Commonly available clinical endpoints and molecular data are provided. Click above blue book button to check recommended use of endpoints for each study."))
+      )
+    )
+    # code_table <- rv$tcga_code
+    # code_table[is.na(code_table)] <- "N/A"
+    # div(
+    #   style = "background:#939597;color:white;",
+    #   HTML(paste0("<span style='color:#fff;'><b>Recommended use of clinical endpoints by study:</b></span> ",add_help("liu_rec_q",color = "#F5DF4D"))),
+    #   renderTable({code_table},escape = FALSE, spacing = "xs", align = "c", na = "NA")
+    # )
+  }
+})
+
+# ----- 1.b. TCGA OS, DFI, PFI, DSS modal -------
+observeEvent(input$tcga_stype_q,{
+  tcga_table <- tcga_codes
+  tcga_table[["Study"]] <- gsub("^TCGA-","",tcga_table[["Study"]])
+  showModal(
+    modalDialog(
+      title = HTML(paste0("<h3>Recommended use of the endpoints of OS, PFI, DFI, and DSS "
+                          ,add_help("liu_rec_q",size="extra-large")
+                          ,"</h3><br><div style='font-size:100%'>by <b><a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/' target='_blank'>TCGA pan-cancer clinical study (Liu et al., <i>Cell</i>, 2018)</a></b></div>")),
+      div(
+        style="font-size:100%",
+        renderTable({
+          tcga_table
+        },escape = FALSE, spacing = "xs", align = "l", na = "NA", hover = T, striped = F)
+        ,bsTooltip("liu_rec_q",HTML(paste0(
+          "<b>yes</b> = Recommended;"
+          ,"<br><b>no</b> = Not recommended;"
+          ,"<br><b>caution</b> = Use with caution;"
+          ,"<br><b>acc</b> = Accurate;"
+          ,"<br><b>app</b> = Approximate;"
+          ,"<br><b>NA</b> = Unavailable."
+        )),placement = "bottom")
+      ),
+      size = "l", easyClose = T, footer = modalButton("OK")
+    )
   )
 })
 

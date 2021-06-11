@@ -43,7 +43,7 @@ bodyOne <- tabItem(tabName = "one",
                     )
                   )
                   ,bsTooltip("project_q",HTML(paste0(
-                    "Select a project(s) from DepMap, TARGET or TCGA. Multiple selections (maximum 3) are allowed for TARGET."
+                    "Select a project(s) from DepMap, TARGET or TCGA. Multiple selections are allowed for TARGET and TCGA."
                     ," Click button to the right to confirm your selection and proceed."
                   )),placement = "right")
                 )

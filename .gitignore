@@ -167,3 +167,6 @@ www/project_data/DepMap/df_cnv.csv
 www/project_data/TARGET_missing_data.csv
 www/project_data/TCGA-LUSC/df_survival_o.csv
 www/project_data/TCGA-LUSC/*
+www/project_data/TCGA-BRCA/df_gene.csv
+www/project_data/TCGA-BRCA/df_gene_scale.csv
+www/project_data/TCGA-BRCA/df_survival_o.csv
