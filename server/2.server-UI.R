@@ -61,7 +61,7 @@ output$ui_results <- renderUI({
 
   # assemble all types of plots
   if(exists("l_plot")){types <- c(types, l_plot)}
-  types <- c(types, "Transcriptome analysis by eVITTA"="gsea")
+  # types <- c(types, "Transcriptome analysis by eVITTA"="gsea")
 
   if(rv$cox_km == "km"){
     h_plot <- ifelse(
