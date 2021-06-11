@@ -17,7 +17,7 @@ data_types <- reactive({
       # the list that contains all the parameters of target projects
       parameters_target_projects <- (TCGA_missing_data %>%
                                        filter(project_name %in% selected_target_projects))$missing_data
-      overlapped_parameter <- Reduce(intersect, parameters_target_projects)
+      overlapped_parameter <- unlist(parameters_target_projects)
       dtype[!dtype %in% overlapped_parameter]
     }else{
       dtype

@@ -827,7 +827,7 @@ output$tcga_warning <- renderUI({
     div(
       p(
         style=sprintf("color:%s;", "#939597"),
-        HTML(paste0("Reminder: Commonly available clinical endpoints and molecular data are provided. Click above blue book button to check recommended use of endpoints for each study."))
+        HTML(paste0("Reminder: Commonly available clinical endpoints and molecular data are extracted and provided. Click the blue book button above to check recommended use of endpoints for each study."))
       )
     )
     # code_table <- rv$tcga_code

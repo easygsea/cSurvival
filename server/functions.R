@@ -411,6 +411,8 @@ name_project_choices <- function(overlapped_parameter){
     names(overlapped_parameter)[which(overlapped_parameter=="snv")] <- "Mutation"
     names(overlapped_parameter)[which(overlapped_parameter=="cnv")] <- "CNV"
     names(overlapped_parameter)[which(overlapped_parameter=="mir")] <- "miRNA"
+    names(overlapped_parameter)[which(overlapped_parameter=="met")] <- "Methylation"
+    names(overlapped_parameter)[which(overlapped_parameter=="rrpa")] <- "RRPA"
   }
   overlapped_parameter
 }
