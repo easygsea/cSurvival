@@ -167,6 +167,8 @@ observeEvent(input$confirm,{
       rv[["cutoff_all"]] = ""
       #------ 3. Loop from 1 to rv$variable_n ------
       for(x in 1:rv$variable_n){
+        iter_mode_value <- paste0("iter_mode_",x)
+        assign(iter_mode_value,F)
         # clear previous RVs
         rv[[paste0("mutations_",x)]] <- NULL
         # perform analysis according to input type
@@ -210,8 +212,6 @@ observeEvent(input$confirm,{
           req(rv[[paste0("title_",x)]] != "")
 
           # ---------- 3B. perform Surv if expression-like data --------
-          iter_mode_value <- paste0("iter_mode_",x)
-          assign(iter_mode_value,F)
           min_value <- paste0("min_",x); max_value <- paste0("max_",x); step_value <- paste0("step_",x)
           assign(min_value, 0);assign(max_value, 1);assign(step_value, .1)
           if(extract_mode != "snv" & ((!rv$depmap & extract_mode != "cnv") | rv$depmap)){
