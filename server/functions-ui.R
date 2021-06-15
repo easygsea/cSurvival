@@ -259,7 +259,7 @@ plot_ui <- function(n){
               ,placeholder = "Type to enter..."
             )
             ,span(verbatimTextOutput(gs_genes_id), style = paste0(rv$verbTxtStyle1))
-            ,bsButton(gs_manual_btn_id,tags$strong("Submit"),style = "warning")
+            ,bsButton(gs_manual_btn_id,tags$strong("Submit"),icon=icon("upload"),style = "warning")
           )
         )
         
@@ -319,8 +319,8 @@ plot_run_ui <- function(n){
 
     col <- extract_color(x)
     
-    snv_id <- paste0("snv_method_",x); snv_id_q <- paste0(snv_id,"_q")
-    snv_uni_id <- paste0("snv_uni_",x); snv_uni_id_q <- paste0(snv_uni_id,"_q")
+    # snv_id <- paste0("snv_method_",x); snv_id_q <- paste0(snv_id,"_q")
+    # snv_uni_id <- paste0("snv_uni_",x); snv_uni_id_q <- paste0(snv_uni_id,"_q")
     non_id <- paste0("nonsynonymous_",x); non_id_q <- paste0(non_id,"_q")
     syn_id <- paste0("synonymous_",x); syn_id_q <- paste0(syn_id,"_q")
     
@@ -340,12 +340,12 @@ plot_run_ui <- function(n){
     }
     datatype <- call_datatype(x)
     
-    # preselected SNV callers
-    snv_pre_a <- ifelse(
-      length(rv[[snv_id]]) == 1,
-      paste0('"',rv[[snv_id]],'"'),
-      paste0("['",paste0(rv[[snv_id]],collapse = "','"),"']")
-    )
+    # # preselected SNV callers
+    # snv_pre_a <- ifelse(
+    #   length(rv[[snv_id]]) == 1,
+    #   paste0('"',rv[[snv_id]],'"'),
+    #   paste0("['",paste0(rv[[snv_id]],collapse = "','"),"']")
+    # )
     
     # render the UI
     column(
@@ -405,12 +405,6 @@ plot_run_ui <- function(n){
                 min = 10,max = 90,step=.5
               )
             )
-            
-            ,if(x == 1 & rv$variable_n > 1){
-              if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input")){
-                bsButton("toall", strong("Apply to all"), style = "warning")
-              }
-            }
             ,bsTooltip(iter_id_q,HTML(paste0("<b>Dynamic iteration</b>: Determine the optimal cutoff by searching for the percentile yielding the lowest P-value"
                                              ,"<br><b>Manual cutoffs</b>: Manually enter the cutoffs for high- and low-",datatype," groups"))
                        ,placement = "top")
@@ -513,13 +507,24 @@ plot_run_ui <- function(n){
             )
             ,bsTooltip(syn_id_q,HTML("By default, wild-type (WT) and variants to be classified as Low/No variant consequences are selected. Adjust to suit the purpose of your study. For more information, visit http://uswest.ensembl.org/Help/Glossary?id=535")
                        ,placement = "top")
-            
-            ,if(x == 1 & rv$variable_n > 1){
-              if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){
-                bsButton("toall_m", strong("Apply to all"), style = "warning")
-              }
-            }
           )
+        }
+        ,div(
+          style="display: inline-block;vertical-align:top;",
+          bsButton(paste0("todefault",x), strong("Reset to default"), icon = icon("redo"), style = "primary")
+        )
+        ,if(x == 1 & rv$variable_n > 1){
+          if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input")){
+            div(
+              style="display: inline-block;vertical-align:top;",
+              bsButton("toall", strong("Apply to all"), icon = icon("globe"), style = "primary")
+            )
+          }else if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){
+            div(
+              style="display: inline-block;vertical-align:top;",
+              bsButton("toall_m", strong("Apply to all"), icon = icon("globe"), style = "primary")
+            )
+          }
         }
       )
     )

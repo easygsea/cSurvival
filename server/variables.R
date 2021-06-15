@@ -131,7 +131,7 @@ dyn_list <- function(x){
     ,iter_id <- paste0("iter_",x)
     ,clow_id <- paste0("clow_",x)
     ,cnv_id <- paste0("cnv_par_",x)
-    ,snv_uni_id <- paste0("snv_uni_",x)
+    # ,snv_uni_id <- paste0("snv_uni_",x)
   )
 }
 # ----- the data that tell what TCGA/TARGET has -----

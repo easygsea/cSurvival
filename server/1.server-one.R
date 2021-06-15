@@ -642,7 +642,7 @@ observeEvent(genes_lst(),{
   })
 },ignoreInit = T)
 
-# ----- 1.2. run parameters -------
+# ----- 1.2. RUN PARAMETERS -------
 observe({
   rv[["ui_run_parameters"]] <- plot_run_ui(rv$variable_n)
 })
@@ -678,7 +678,7 @@ output$par_gear <- renderUI({
 
 observeEvent(input$flagged,{rv$flagged <- input$flagged})
 
-# update all run parameters according to analysis #1
+# ------- 1.2a update all run parameters according to analysis #1 --------
 observeEvent(input$toall,{
   lapply(2:rv$variable_n, function(x){
     updateRadioGroupButtons(session, paste0("iter_",x), selected = input[["iter_1"]])
@@ -695,10 +695,45 @@ observeEvent(input$toall,{
 
 observeEvent(input$toall_m,{
   lapply(2:rv$variable_n, function(x){
-    updateSelectInput(session, paste0("snv_method_",x), selected = input[["snv_method_1"]])
-    updateRadioGroupButtons(session, paste0("snv_uni_",x), selected = input[["snv_uni_1"]])
+    # updateSelectInput(session, paste0("snv_method_",x), selected = input[["snv_method_1"]])
+    # updateRadioGroupButtons(session, paste0("snv_uni_",x), selected = input[["snv_uni_1"]])
     updateSelectizeInput(session, paste0("nonsynonymous_",x), selected = input[["nonsynonymous_1"]])
     updateSelectizeInput(session, paste0("synonymous_",x), selected = input[["synonymous_1"]])
+  })
+})
+
+# ------- 1.2b reset to default run parameters --------
+todefault_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    db_id <- paste0("todefault",x)
+    input[[db_id]]
+  })
+})
+
+observeEvent(todefault_lst(),{
+  array <- 1:rv$variable_n
+  namespaces <- paste0("todefault",array)
+  req(req_diff_rv_btn(namespaces))
+  withProgress(value = 1, message = "Setting to default parameters...",{
+    lapply(1:rv$variable_n, function(x){
+      todefault_id <- paste0("todefault",x)
+      if(rv[[todefault_id]] < input[[todefault_id]][1]){
+        rv[[todefault_id]] <- input[[todefault_id]][1]
+        cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
+        
+        if(input[[cat_id]] == "gs" | (!rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv" & input[[db_id]] != "cnv") | (rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv")){
+          updateRadioGroupButtons(session, paste0("iter_",x), selected = "iter")
+          updateSliderTextInput(session, paste0("lower_",x), selected = .2)
+          updateSliderTextInput(session, paste0("upper_",x), selected = .8)
+          updateSliderTextInput(session, paste0("step_",x), selected = .02)
+        }else if(input[[cat_id]] == "g" & input[[db_id]] == "snv"){
+          updateSelectizeInput(session, paste0("nonsynonymous_",x), selected = variant_types_non)
+          updateSelectizeInput(session, paste0("synonymous_",x), selected = variant_types_syn)
+        }else if(!rv$depmap & input[[cat_id]] == "g" & input[[db_id]] == "cnv"){
+          updateRadioGroupButtons(session, paste0("cnv_par_",x), selected = "auto")
+        }
+      }
+    })
   })
 })
 
