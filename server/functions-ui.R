@@ -259,7 +259,7 @@ plot_ui <- function(n){
               ,placeholder = "Type to enter..."
             )
             ,span(verbatimTextOutput(gs_genes_id), style = paste0(rv$verbTxtStyle1))
-            ,bsButton(gs_manual_btn_id,tags$strong("Submit"),icon=icon("upload"),style = "warning")
+            ,bsButton(gs_manual_btn_id,tags$strong("Submit"),icon=icon("upload"),style = "primary")
           )
         )
         

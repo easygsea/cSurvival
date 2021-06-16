@@ -741,7 +741,7 @@ output$ui_stats <- renderUI({
     if(!is.null(p.adj)){
       p.adj <- p+ifelse(is.na(p.adj), 0, p.adj)
       p.adj <- ifelse(p.adj > 1, 1, p.adj)
-      p.adj <- format_p(p.adj) %>% paste0(.,collapse = ", ")
+      p.adj <- sapply(p.adj, format_p) %>% paste0(.,collapse = ", ")
     }
     p <- sapply(p, function(x) format_p(x)) %>% paste0(.,collapse = ", ")
     
