@@ -364,6 +364,22 @@ observeEvent(input$confirm,{
             if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]][x] <- rv[["cox_all"]][["cox"]][["p"]][x] + correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
           }
         }
+        # p adj on pairwise heatmap
+        if(!rv$depmap & rv$km_mul_padj == "padj"){
+          if(!is.null(rv[["cox_all"]][["km"]][["p.adj"]])){
+            km2 <- rv[["cox_all"]][["km"]][["stats"]][[1]]
+            km2$p.value <- km2$p.value + rv[["cox_all"]][["km"]][["p.adj"]]
+            km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
+            rv[["cox_all"]][["km"]][["stats"]][[1]] <- km2
+          }
+        }else if(rv$depmap & rv$km_mul_padj == "padj"){
+          if(!is.null(rv[["cox_all"]][["p.adj"]])){
+            km2 <- rv[["cox_all"]][["stats"]][[1]]
+            km2$p.value <- km2$p.value + rv[["cox_all"]][["p.adj"]]
+            km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
+            rv[["cox_all"]][["stats"]][[1]] <- km2
+          }
+        }
 
         # saveRDS(rv[["cox_all"]], "cox_all")
       }
@@ -401,6 +417,22 @@ observeEvent(input$confirm,{
               rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_gender"]][["cox"]][["p"]][1] + correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
               rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p"]][2]
               # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
+            }
+          }
+          # p adj on pairwise heatmap
+          if(!rv$depmap & rv$km_mul_padj == "padj"){
+            if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){
+              km2 <- rv[["cox_gender"]][["km"]][["stats"]][[1]]
+              km2$p.value <- km2$p.value + rv[["cox_gender"]][["km"]][["p.adj"]]
+              km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
+              rv[["cox_gender"]][["km"]][["stats"]][[1]] <- km2
+            }
+          }else if(rv$depmap & rv$km_mul_padj == "padj"){
+            if(!is.null(rv[["cox_1"]][["p.adj"]])){
+              km2 <- rv[["cox_gender"]][["stats"]][[1]]
+              km2$p.value <- km2$p.value + rv[["cox_gender"]][["p.adj"]]
+              km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
+              rv[["cox_gender"]][["stats"]][[1]] <- km2
             }
           }
           rv[["title_gender"]] <- paste0(rv[["title_1"]]," vs Gender")

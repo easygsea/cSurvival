@@ -861,12 +861,7 @@ output$ui_stats <- renderUI({
             12,
             conditionalPanel(
               '(input.plot_type == "all" | input.plot_type == "gender") & input.cox_km == "km"',
-              selectizeInput(
-                "km_mul",
-                NULL,
-                choices = pairwise_methods
-                ,selected = rv[["km_mul"]]
-              )
+              uiOutput("ui_km_mul")
               ,div(
                 align="center",
                 if(typeof(rv[["res"]][["km"]][["df"]]) == "list"){
@@ -881,11 +876,7 @@ output$ui_stats <- renderUI({
             ),
             div(
               align="left",
-              if(length(res[["stats"]]) == 2){
-                renderPrint({print(res[["stats"]][[1]]); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])})
-              }else{
-                renderPrint({print(res[["stats"]])})
-              }
+              verbatimTextOutput("ui_stats_details")
             )
           )
         }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
@@ -899,7 +890,7 @@ output$ui_stats <- renderUI({
   )
 })
 
-# cutoffs
+# --------- 2a. cutoffs -------------
 output$ui_cutoff <- renderUI({
   cutoff <- rv[[paste0("cutoff_",rv$plot_type)]]
   req(cutoff != "")
@@ -914,25 +905,88 @@ output$ui_cutoff <- renderUI({
   )
 })
 
-# ------------- 3a. pairwise comparison statistics -------
-observeEvent(input$km_mul,{
+# --------- 2b. stats details -------------
+output$ui_stats_details <- renderPrint({
+  res <- rv[["res"]][[rv$cox_km]]
+  if(length(res[["stats"]]) == 2){
+    print(res[["stats"]][[1]]); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
+  }else{
+    print(res[["stats"]])
+  }
+})
+
+# ------------- 3a. pairwise comparison UI ---------------
+output$ui_km_mul <- renderUI({
+  req(rv$surv_plotted == "plotted")
+  p.adj <- rv[["res"]][["km"]][["p.adj"]]
+  padj_y <- any(!is.null(p.adj))
+  if(padj_y){
+    km_mul_w <- 8
+  }else{
+    km_mul_w <- 12
+  }
+  
+  fluidRow(
+    column(
+      km_mul_w,
+      selectizeInput(
+        "km_mul",
+        NULL,
+        choices = pairwise_methods
+        ,selected = rv[["km_mul"]]
+      )
+    )
+    ,if(padj_y){
+      column(
+        4,
+        selectizeInput(
+          "km_mul_padj",
+          NULL,
+          choices = c("Adjusted P-value"="padj","P-value"="p")
+          ,selected = rv[["km_mul_padj"]]
+        )
+      )
+    }
+  )
+})
+
+# ------------- 3b. pairwise comparison statistics -------
+observeEvent(list(input$km_mul,input$km_mul_padj),{
   req(input$km_mul != "")
-  req(input$km_mul != rv$km_mul)
-  rv$km_mul <- input$km_mul
-
-  # retrieve df for survival analysis
-  df <- rv[[paste0("df_",rv$plot_type)]]
-
-  # # update statistics
-  # if(rv$depmapr){
-  #   km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
-  # }else{
+  if(input$km_mul != rv$km_mul | input$km_mul_padj != rv$km_mul_padj){
+    rv$km_mul <- input$km_mul
+    rv$km_mul_padj <- input$km_mul_padj
+    
+    # retrieve df for survival analysis
+    df <- rv[[paste0("df_",rv$plot_type)]]
+    
+    # # update statistics
+    # if(rv$depmapr){
+    #   km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
+    # }else{
     km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
-  # }
-  rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
+    if(rv$km_mul_padj == "padj"){
+      if(!is.null(rv[["res"]][["km"]][["p.adj"]])){
+        km2$p.value <- km2$p.value + rv[["res"]][["km"]][["p.adj"]]
+      }
+      km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
+    }
+    
+    # }
+    rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
+    
+    output$km_hm <- renderPlotly({
+      plot_heatmap(km2$p.value)
+    })
+    
+    output$ui_stats_details <- renderPrint({
+      res <- rv[["res"]][[rv$cox_km]]
+      print(km2); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
+    })
+  }
 },ignoreInit = T)
 
-# ----------- 3b. pairwise heatmap ----------
+# ----------- 3c. pairwise heatmap ----------
 plot_heatmap <- function(pvals,mul_methods=rv$km_mul){
   counts <- -log10(pvals)
   counts[is.na(counts)] <- 0
@@ -1377,15 +1431,7 @@ output$depmap_stats <- renderUI({
           )
           ,if(!x_numeric){
             div(
-              column(
-                12,align="center",
-                selectizeInput(
-                  "km_mul_dp",
-                  NULL,
-                  choices = pairwise_methods
-                  ,selected = rv[["km_mul_dp"]]
-                )
-              ),
+              uiOutput("ui_km_mul_dp"),
               uiOutput("dm_stats_render")
             )
           }
@@ -1395,41 +1441,94 @@ output$depmap_stats <- renderUI({
   )
 })
 
-# depmap heatmap
-observeEvent(input$km_mul_dp,{
-  req(input$km_mul_dp != "")
-  rv$km_mul_dp <- input$km_mul_dp
-  
-  # retrieve df for survival analysis
-  df <- rv[[paste0("df_",rv$plot_type)]]
-  levl <- length(unique(df$level))
-  
-  # the height of the heatmap
-  if(levl > 3){
-    dp_h <- "218px"
-  }else if(levl == 3){
-    dp_h <- "198px"
-  }else if(levl == 2){
-    dp_h <- "178px"
-  }else if(levl < 2){
-    dp_h <- "158px"
+# ------- 7b. depmap heatmap UI ----------
+output$ui_km_mul_dp <- renderUI({
+  padj_y <- !is.null(rv[["res"]][["p.adj"]])
+  if(padj_y){
+    padj_y_w <- 8
+  }else{
+    padj_y_w <- 12
   }
   
-  # update statistics
-  surv_diff <- pairwise.wilcox.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
-  rv[["res"]][["fit"]] <- surv_diff
-  
-  output$dm_stats_render <- renderUI({
-    div(
-      column(
-        6,
-        renderPrint({print(surv_diff)})
-      ),
-      column(
-        6,
-        plotlyOutput("dp_hm", height=dp_h, width = "100%")
+  div(align="center",
+    column(
+      padj_y_w,
+      selectizeInput(
+        "km_mul_dp",
+        NULL,
+        choices = pairwise_methods
+        ,selected = rv[["km_mul_dp"]]
       )
     )
+    ,if(padj_y){
+      column(
+        4,
+        selectizeInput(
+          "km_mul_dp_padj",
+          NULL,
+          choices = c("Adjusted P-value"="padj", "P-value"="p")
+          ,selected = rv[["km_mul_dp_padj"]]
+        )
+      )
+    }
+  )
+  
+})
+
+# ------ 7c. draw depmap heatmap ------
+observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj),{
+  req(input$km_mul_dp != "")
+  withProgress(value = 1, message = "Updating statistics...",{
+    rv$km_mul_dp <- input$km_mul_dp
+    rv$km_mul_dp_padj <- input$km_mul_dp_padj
+    
+    # retrieve df for survival analysis
+    df <- rv[[paste0("df_",rv$plot_type)]]
+    levl <- length(unique(df$level))
+    
+    # the height of the heatmap
+    if(levl > 3){
+      dp_h <- "218px"
+    }else if(levl == 3){
+      dp_h <- "198px"
+    }else if(levl == 2){
+      dp_h <- "178px"
+    }else if(levl < 2){
+      dp_h <- "158px"
+    }
+    
+    # update statistics
+    surv_diff <- pairwise.wilcox.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
+    rv[["res"]][["fit"]] <- surv_diff
+    
+    # adjust p.adj
+    if(rv$km_mul_dp_padj == "padj"){
+      if(!is.null(rv[["res"]][["p.adj"]])){
+        surv_diff$p.value <- surv_diff$p.value + (rv[["res"]][["p.adj"]] - rv[["res"]][["p"]])
+      }
+      surv_diff$p.value <- ifelse(surv_diff$p.value > 1, 1, surv_diff$p.value)
+    }
+    
+    output$dm_stats_render <- renderUI({
+      div(
+        column(
+          6,
+          renderPrint({print(surv_diff)})
+        ),
+        column(
+          6,
+          plotlyOutput("dp_hm", height=dp_h, width = "100%")
+        )
+      )
+    })
+    
+    output$dp_hm <- renderPlotly({
+      pvals <- surv_diff$p.value
+      req(is.numeric(pvals))
+      dims <- dim(pvals)
+      req(dims[1] * dims[2] >= 1)
+      plot_heatmap(pvals,mul_methods=rv$km_mul_dp)
+    })
   })
 },ignoreInit = F)
 
@@ -1526,7 +1625,7 @@ output$dens_stats_plot <- renderPlotly({
 
 # highlight cells
 observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
-  req(rv$annot_cells_y == "yes")
+  # req(rv$annot_cells_y == "yes")
   updateSelectizeInput(session,"annot_cells",choices = rv[["dens_df"]][["Cell"]],server = T)
 })
 
