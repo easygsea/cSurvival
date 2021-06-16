@@ -908,6 +908,7 @@ output$ui_cutoff <- renderUI({
 # --------- 2b. stats details -------------
 output$ui_stats_details <- renderPrint({
   res <- rv[["res"]][[rv$cox_km]]
+  
   if(length(res[["stats"]]) == 2){
     print(res[["stats"]][[1]]); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
   }else{
@@ -981,7 +982,11 @@ observeEvent(list(input$km_mul,input$km_mul_padj),{
     
     output$ui_stats_details <- renderPrint({
       res <- rv[["res"]][[rv$cox_km]]
-      print(km2); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
+      if(length(res[["stats"]]) == 2){
+        print(km2); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
+      }else{
+        print(res[["stats"]])
+      }
     })
   }
 },ignoreInit = T)
