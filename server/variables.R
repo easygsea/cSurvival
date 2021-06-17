@@ -68,6 +68,8 @@ input_mode_names <- c(
   ,"Gene effect (CERES)" = "crispr"
   ,"Gene effect (DEMETER2)" = "rnai"
   ,"Cell viability" = "drug"
+  ,"Normalized expression" = "g"
+  ,"Normalized expression" = "gs"
 )
 
 # ------- survival analysis methods ---------
@@ -132,6 +134,10 @@ dyn_list <- function(x){
     ,clow_id <- paste0("clow_",x)
     ,cnv_id <- paste0("cnv_par_",x)
     # ,snv_uni_id <- paste0("snv_uni_",x)
+    ,g_ui_norm_id <- paste0("gnorm_",x)
+    ,g_ui_norm_g_id <- paste0("gnorm_g_",x)
+    ,g_ui_norm_gs_db_id <- paste0("gnorm_gs_db_",x)
+    ,g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x)
   )
 }
 # ----- the data that tell what TCGA/TARGET has -----

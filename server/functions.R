@@ -44,6 +44,10 @@ init_rv <- function(x){
   rv[[paste0("cnv_par_",x)]] <- "auto"
   rv[[paste0("snv_uni_",x)]] <- "int"
   rv[[paste0("todefault",x)]] <- 0
+  rv[[paste0("gnorm_",x)]] <- "none"
+  rv[[paste0("gnorm_g_",x)]] <- ""
+  rv[[paste0("gnorm_gs_db_",x)]] <- ""
+  rv[[paste0("gnorm_gs_lib_",x)]] <- ""
 }
 
 # update these into rv when selections change
@@ -242,6 +246,14 @@ input_mode <- function(x){
 
 input_mode_name <- function(x){
   inmode <- input_mode(x)
+  # special mode for normalized counts
+  cat_id <- paste0("cat_",x)
+  db_id <- paste0("db_",x)
+  gs_mode_id <- paste0("gs_mode_",x)
+  g_ui_norm_id <- paste0("gnorm_",x)
+  if((input[[cat_id]] == "g" & input[[db_id]] == "rna")| (input[[cat_id]] == "gs" & input[[gs_mode_id]] == "lib") & input[[g_ui_norm_id]] != "none"){
+    inmode <- input[[g_ui_norm_id]]
+  }
   y <- names(input_mode_names)[input_mode_names == inmode]
   if(inmode == "rna"){
     if(rv$tcga){
@@ -265,10 +277,7 @@ call_datatype_from_rv <- function(x){
 }
 
 # return all GSs when a db is selected
-update_gs_by_db <- function(x, mode="nil"){
-  gs_db_id <- paste0("gs_db_",x)
-  gs_lib_id <- paste0("gs_l_",x)
-  
+update_gs_by_db <- function(x, mode="nil", gs_db_id = paste0("gs_db_",x), gs_lib_id = paste0("gs_l_",x), prefix=""){
   db <- rv[[gs_db_id]] <- isolate(input[[gs_db_id]])
   
   if(db != ""){
@@ -276,10 +285,14 @@ update_gs_by_db <- function(x, mode="nil"){
     gmt <- gmtPathways(gmt_path)
     
     # update variables
-    rv[[paste0("gmts",x)]] <- rv[[paste0("gmts_tmp",x)]] <- gmt
+    rv[[paste0(prefix,"gmts",x)]] <- gmt
+    if(prefix == ""){
+      rv[[paste0(prefix,"gmts_tmp",x)]] <- gmt
+    }
     
     # update placeholder
-    rv[[paste0("gs_placeholder",x)]] <- sprintf('(Total n=%s) Type to search ...',length(gmt))
+    placeholder_id <- paste0(prefix,"gs_placeholder",x)
+    rv[[placeholder_id]] <- sprintf('(Total n=%s) Type to search ...',length(gmt))
     
     if(mode == "nil"){gg=""}else{gg=rv[[gs_lib_id]]}
     # update gene set UI
@@ -288,9 +301,10 @@ update_gs_by_db <- function(x, mode="nil"){
       gs_lib_id
       ,choices = names(gmt)
       ,selected=gg
+      ,server = T
       ,options = list(
         # `live-search` = TRUE,
-        placeholder = rv[[paste0("gs_placeholder",x)]]
+        placeholder = rv[[placeholder_id]]
         ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[gs_db_id]]))
       )
     )

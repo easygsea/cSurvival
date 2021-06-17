@@ -9,12 +9,33 @@ observeEvent(input$confirm,{
 
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
+    error_norm_g <- NULL; error_norm_gs_db <- NULL; error_norm_gs_lib <- NULL
+    error_norm_g_dup <- NULL; error_norm_gs_lib_dup <- NULL
     for(x in 1:rv$variable_n){
       cat_id <- paste0("cat_",x)
       if(input[[cat_id]] == "g"){
         g_ui_id <- paste0("g_",x)
+        db_id <- paste0("db_",x)
+        g_ui_norm_id <- paste0("gnorm_",x)
+        g_ui_norm_g_id <- paste0("gnorm_g_",x)
         if(input[[g_ui_id]] == ""){
           error_g <- c(error_g,x)
+        }else if(input[[db_id]] == "rna"){
+          if(input[[g_ui_norm_id]] == "g"){
+            if(input[[g_ui_norm_g_id]] == ""){
+              error_norm_g <- c(error_norm_g,x)
+            }else if(input[[g_ui_norm_g_id]] == input[[g_ui_id]]){
+              error_norm_g_dup <- c(error_norm_g_dup,x)
+            }
+          }else if(input[[g_ui_norm_id]] == "gs"){
+            g_ui_norm_gs_db_id <- paste0("gnorm_gs_db_",x)
+            g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x)
+            if(input[[g_ui_norm_gs_db_id]] == ""){
+              error_norm_gs_db <- c(error_norm_gs_db,x)
+            }else if(input[[g_ui_norm_gs_lib_id]] == ""){
+              error_norm_gs_lib <- c(error_norm_gs_lib,x)
+            }
+          }
         }
       }else if(input[[cat_id]] == "gs"){
         gs_mode_id <- paste0("gs_mode_",x)
@@ -24,8 +45,26 @@ observeEvent(input$confirm,{
             error_lib <- c(error_lib,x)
           }else{
             gs_lib_id <- paste0("gs_l_",x)
+            g_ui_norm_id <- paste0("gnorm_",x)
+            g_ui_norm_g_id <- paste0("gnorm_g_",x)
+            g_ui_norm_gs_db_id <- paste0("gnorm_gs_db_",x)
+            g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x)
             if(input[[gs_lib_id]] == ""){
               error_gs <- c(error_gs,x)
+            }else if(input[[g_ui_norm_id]] == "g"){
+              if(input[[g_ui_norm_g_id]] == ""){
+                error_norm_g <- c(error_norm_g,x)
+              }
+            }else if(input[[g_ui_norm_id]] == "gs"){
+              if(input[[g_ui_norm_gs_db_id]] == ""){
+                error_norm_gs_db <- c(error_norm_gs_db,x)
+              }else{
+                if(input[[g_ui_norm_gs_lib_id]] == ""){
+                  error_norm_gs_lib <- c(error_norm_gs_lib,x)
+                }else if(input[[g_ui_norm_gs_lib_id]] == input[[gs_lib_id]]){
+                  error_norm_gs_lib_dup <- c(error_norm_gs_lib_dup,x)
+                }
+              }
             }
           }
         }else if(input[[gs_mode_id]] == "manual"){
@@ -54,9 +93,29 @@ observeEvent(input$confirm,{
       txt <- paste0("Analysis #",error_gs," step ",error_gs,".3b") %>% paste0(., collapse = ", ")
       txt <- paste0("Please select a gene set (GS) in ",txt)
       shinyalert(txt)
+    }else if(!is.null(error_norm_g)){
+      txt <- paste0("Analysis #",error_norm_g," step ",error_norm_g,".4b") %>% paste0(., collapse = ", ")
+      txt <- paste0("Please select a normalization gene in ",txt,". Or select None in ",paste0(paste0(error_norm_g,".4a"), collapse = ", ")," to analyze gene expression effects without normalization.")
+      shinyalert(txt)
+    }else if(!is.null(error_norm_gs_db)){
+      txt <- paste0("Analysis #",error_norm_gs_db," step ",error_norm_gs_db,".4b") %>% paste0(., collapse = ", ")
+      txt <- paste0("Please select a database in ",txt,". Or select None in ",paste0(paste0(error_norm_gs_db,".4a"), collapse = ", ")," to analyze gene expression effects without normalization.")
+      shinyalert(txt)
+    }else if(!is.null(error_norm_gs_lib)){
+      txt <- paste0("Analysis #",error_norm_gs_lib," step ",error_norm_gs_lib,".4c") %>% paste0(., collapse = ", ")
+      txt <- paste0("Please select a gene set (GS) in ",txt,". Or select None in ",paste0(paste0(error_norm_gs_lib,".4a"), collapse = ", ")," to analyze gene expression effects without normalization.")
+      shinyalert(txt)
+    }else if(!is.null(error_norm_g_dup)){
+      txt <- paste0("Analysis #",error_norm_g_dup," step ",error_norm_g_dup,".4b") %>% paste0(., collapse = ", ")
+      txt <- paste0("Please select a normalization gene different to your gene of interest in ",txt,". Or select None in ",paste0(paste0(error_norm_g_dup,".4a"), collapse = ", ")," to analyze gene expression effects without normalization.")
+      shinyalert(txt)
+    }else if(!is.null(error_norm_gs_lib_dup)){
+      txt <- paste0("Analysis #",error_norm_gs_lib_dup," step ",error_norm_gs_lib_dup,".4b") %>% paste0(., collapse = ", ")
+      txt <- paste0("Please select a normalization GS different to your GS of interest in ",txt,". Or select None in ",paste0(paste0(error_norm_gs_lib_dup,".4a"), collapse = ", ")," to analyze gene expression effects without normalization.")
+      shinyalert(txt)
     }
 
-    req(is.null(error_g) & is.null(error_lib) & is.null(error_manual) & is.null(error_gs))
+    req(is.null(error_g) & is.null(error_lib) & is.null(error_manual) & is.null(error_gs) & is.null(error_norm_g) & is.null(error_norm_gs_db) & is.null(error_norm_gs_lib) & is.null(error_norm_g_dup) & is.null(error_norm_gs_lib_dup))
 
     if(rv$depmap){
       error_depmap <- 0
@@ -180,16 +239,27 @@ observeEvent(input$confirm,{
         #------ 3A. detect type of input data ------
         if((input[[cat_id]] == "g" & !is.null(input[[db_id]])) | (input[[cat_id]] == "gs" & !is.null(input[[gs_mode_id]]))){
           # clear RVs
-          rv[[paste0("title_",x)]] <- ""
+          title_x <- paste0("title_",x)
+          rv[[title_x]] <- ""
           # mode of extracting gene expression/mutation data in extract_gene_data
           extract_mode <- input_mode(x)
 
           # title for the survival plot
-          rv[[paste0("title_",x)]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
+          rv[[title_x]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
+          # check if normalized
+          g_ui_norm_id <- paste0("gnorm_",x)
+          if(((input[[cat_id]] == "g" & input[[db_id]] == "rna") | (input[[cat_id]] == "gs" & input[[gs_mode_id]] == "lib")) & input[[g_ui_norm_id]] != "none"){
+            if(input[[g_ui_norm_id]] == "g"){
+              rv[[title_x]] <- paste0(rv[[title_x]]," normalized by ", input[[paste0("gnorm_g_",x)]])
+            }else if(input[[g_ui_norm_id]] == "gs"){
+              rv[[title_x]] <- paste0(rv[[title_x]]," normalized by ", input[[paste0("gnorm_gs_lib_",x)]])
+            }
+          }
+          # combine titles
           if(rv[["title_all"]] == ""){
-            rv[["title_all"]] <- rv[[paste0("title_",x)]]
+            rv[["title_all"]] <- rv[[title_x]]
           }else{
-            rv[["title_all"]] <- paste0(c(rv[["title_all"]],rv[[paste0("title_",x)]]),collapse = " vs ")
+            rv[["title_all"]] <- paste0(c(rv[["title_all"]],rv[[title_x]]),collapse = " vs ")
           }
           # extract gene expression/mutation data
           data <- extract_gene_data(x,extract_mode)

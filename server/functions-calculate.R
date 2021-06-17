@@ -25,7 +25,8 @@ extract_gene_data <- function(x, type){
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
-
+  all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+  
   if(type == "rna"){
     # # original file that stores raw FPKM values
     # all_file <- paste0(rv$indir,"df_gene.csv")[[1]]
@@ -40,13 +41,21 @@ extract_gene_data <- function(x, type){
     # # change a_range
     # a_range <- 2:(length(all_genes)+1)
 
-    # selected gene
+    # # selected gene
     genes <- input[[g_ui_id]]
     # if(rv$target){
     #   # extract ENSG info
     #   genes <- strsplit(genes,"\\|")[[1]]
     #   if(length(genes) == 1){genes <- genes}else{genes <- tail(genes,n=1)}
     # }
+    # # selected gene for normalization purpose
+    g_ui_norm_id <- paste0("gnorm_",x); g_ui_norm_g_id <- paste0("gnorm_g_",x); g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x)
+    if(input[[g_ui_norm_id]] == "g"){
+      genes_n <- input[[g_ui_norm_g_id]]
+    }else if(input[[g_ui_norm_id]] == "gs"){
+      genes_n <- toupper(rv[[paste0("gnorm_gs_genes_",x)]])
+      genes_n <- rv[[paste0("genes",x)]][all_genes %in% genes_n]
+    }
   }else if(type == "snv"){
     # selected gene
     genes <- input[[g_ui_id]]
@@ -64,9 +73,16 @@ extract_gene_data <- function(x, type){
     }
 
   }else if(type == "lib"){
-    all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
     genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+    
+    g_ui_norm_id <- paste0("gnorm_",x); g_ui_norm_g_id <- paste0("gnorm_g_",x); g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x)
+    if(input[[g_ui_norm_id]] == "g"){
+      genes_n <- input[[g_ui_norm_g_id]]
+    }else if(input[[g_ui_norm_id]] == "gs"){
+      genes_n <- toupper(rv[[paste0("gnorm_gs_genes_",x)]])
+      genes_n <- rv[[paste0("genes",x)]][all_genes %in% genes_n]
+    }
   }else if(type == "manual"){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
@@ -84,6 +100,14 @@ extract_gene_data <- function(x, type){
   l <- lapply(infiles,function(y){
     fread(y,sep=",",header=T,select = c("patient_id", genes))
   })
+  # # read in normalization genes
+  if(exists("genes_n")){
+    l_n <- lapply(infiles,function(y){
+      fread(y,sep=",",header=T,select = c("patient_id", genes_n))
+    })
+  }else{
+    l_n <- NULL
+  }
   # if(type == "snv" & rv$tcga){
   #   data <- Reduce(
   #     function(x, y) inner_join(x, dplyr::select(y, patient_id, genes), by = "patient_id"),
@@ -94,16 +118,24 @@ extract_gene_data <- function(x, type){
   #   data <- data %>% dplyr::select(patient_id, genes)
   # }else{
     data <- rbindlist(l, use.names = T)
-    ## remove NA data
-    if(!(type == "lib" | type == "manual")){
-      data_s <- unlist(data[,2])
-      # data <- data[!is.na(data_s) & data_s != "",]
+    if(!is.null(l_n)){
+      data_n <- rbindlist(l_n, use.names = T)
+    }else{
+      data_n <- NULL
     }
+    # ## remove NA data
+    # if(!(type == "lib" | type == "manual")){
+    #   data_s <- unlist(data[,2])
+    #   data <- data[!is.na(data_s) & data_s != "",]
+    # }
   # }
 
   # if depmap, filter patient ID
   if(rv$depmap){
     data <- data %>% dplyr::filter(patient_id %in% input$ccle_cells)
+    if(!is.null(data_n)){
+      data_n <- data_n %>% dplyr::filter(patient_id %in% input$ccle_cells)
+    }
   }
   # # # method 2 fread essential columns
   # ofile <- paste0(rv$indir,"tmp.csv")
@@ -114,6 +146,21 @@ extract_gene_data <- function(x, type){
 
   # save original expression or mutation data, if applicable
   if(type == "rna" | type == "mir" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
+    # calculate normalized expression, if applicable
+    if(!is.null(data_n)){
+      if(input[[g_ui_norm_id]]=="gs"){
+        # z score transform expression values
+        n_col_n <- ncol(data_n)
+        exp_scale_n <- apply(data_n[,2:n_col_n], 2, scale)
+        data_n <- cbind(data_n[,1,drop=F],exp_scale_n) %>%
+          mutate(Mean=rowMeans(exp_scale_n,na.rm=T)) %>%
+          dplyr::select(patient_id, Mean)
+        data_n[["Mean"]] <- pnorm(data_n[["Mean"]])
+      }
+      data <- dplyr::left_join(data, data_n, by = "patient_id")
+      data[,2] <- data[,2] / data[,3]
+      data <- data[,1:2]
+    }
     # save original expression data
     rv[[paste0("exprs_",x)]] <- data
   }else if(type == "snv"){
@@ -125,12 +172,28 @@ extract_gene_data <- function(x, type){
     # z score transform expression values
     n_col <- ncol(data)
     exp_scale <- apply(data[,2:n_col], 2, scale)
-    data <- cbind(data[,1,drop=F],exp_scale)
-
-    # save mean scaled FPKM data
-    rv[[paste0("exprs_",x)]] <- data %>%
-      mutate(Mean=rowMeans(data[,-1],na.rm=T)) %>%
+    data <- cbind(data[,1,drop=F],exp_scale) %>%
+      mutate(Mean=rowMeans(exp_scale,na.rm=T)) %>%
       dplyr::select(patient_id, Mean)
+
+    # calculate normalized expression, if applicable
+    if(!is.null(data_n)){
+      if(input[[g_ui_norm_id]]=="gs"){
+        # z score transform expression values
+        n_col_n <- ncol(data_n)
+        exp_scale_n <- apply(data_n[,2:n_col_n], 2, scale)
+        data_n <- cbind(data_n[,1,drop=F],exp_scale_n) %>%
+          mutate(Mean=rowMeans(exp_scale_n,na.rm=T)) %>%
+          dplyr::select(patient_id, Mean)
+        data_n[["Mean"]] <- pnorm(data_n[["Mean"]])
+      }
+      data <- dplyr::left_join(data, data_n, by = "patient_id")
+      data[,2] <- data[,2] / data[,3]
+      data <- data[,1:2]
+    }
+    
+    # save mean scaled FPKM data
+    rv[[paste0("exprs_",x)]] <- data 
   }
 
   return(data)
@@ -206,11 +269,11 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
 
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
-  if(mode == "g"){
+  # if(mode == "g"){
     exp <-data[,2] %>% unlist(.) %>% unname(.)
-  }else if(mode == "gs"){
-    exp <- rowMeans(data[,-1],na.rm=T) %>% unlist(.) %>% unname(.)
-  }
+  # }else if(mode == "gs"){
+  #   exp <- rowMeans(data[,-1],na.rm=T) %>% unlist(.) %>% unname(.)
+  # }
   
   # retrieve survival analysis df_o
   df_o <- original_surv_df(patient_ids)

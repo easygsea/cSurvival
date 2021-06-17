@@ -26,6 +26,7 @@ shinyUI(
         ,sidebar
         ,dashboardBody(
             tags$head(
+                includeHTML(("google-analytics.html")),
                 tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
                 ,tags$link(rel = "shortcut icon", href = "favicon.ico")
                 ,tags$link(rel = "apple-touch-icon", sizes = "180x180", href = "apple-touch-icon.png")

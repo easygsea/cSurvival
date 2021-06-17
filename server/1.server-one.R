@@ -253,6 +253,7 @@ observeEvent(input$variable_n,{
     )
     update_all()
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
+    update_normalization_UI()
   }
 
   if(rv$variable_n_reached==0){
@@ -287,7 +288,7 @@ observeEvent(gmt_input_lst(),{
   namespaces <- paste0("gs_db_",array)
   req(req_diff_rv(namespaces))
   rv$show_ui <- ""
-  withProgress(value = 1, message = "Extracting data from the selected database. Please wait a minute...",{
+  withProgress(value = 1, message = wait_msg("Extracting data from the selected database..."),{
     lapply(array, function(x) {
       gs_db_id <- paste0("gs_db_",x)
       if(rv[[gs_db_id]] != input[[gs_db_id]]){
@@ -568,6 +569,7 @@ observeEvent(manual_lst(),{
               output[[gs_genes_id]] <- renderText({
                 paste0("Input genes (n=",length(genelist),"): ", paste0(genelist, collapse = " "))
               })
+              output[[paste0("gs_manual_uploaded",x)]] <- reactive({T})
             }
           }
         }
@@ -641,6 +643,141 @@ observeEvent(genes_lst(),{
     }
   })
 },ignoreInit = T)
+
+# ---------- [1H-A] update normalization gene ---------
+## update normalization gene selection UI
+normg_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    input[[paste0("gnorm_",x)]]
+  })
+})
+
+observeEvent(normg_lst(),{
+  req(rv$project != "")
+  array <- 1:rv$variable_n
+  namespaces <- paste0("gnorm_",array)
+  req(req_diff_rv(namespaces))
+  lapply(array, function(x){
+    normg_id <- paste0("gnorm_",x)
+    if(rv[[normg_id]] != input[[normg_id]]){
+      rv[[normg_id]] <- input[[normg_id]]
+      g_ui_id <- paste0("gnorm_g_",x)
+      if(rv[[normg_id]] == "g"){
+        updateSelectizeInput(
+          session,
+          g_ui_id,
+          choices = rv[[paste0("genes",x)]]
+          ,selected = rv[[g_ui_id]]
+          ,server = TRUE
+          ,options = list(
+            placeholder = 'Type to search ...'
+          )
+        )
+      }else{
+        updateRV(g_ui_id)
+      }
+    }
+  })
+})
+
+update_normalization_UI <- function(){
+  lapply(1:rv$variable_n, function(x){
+    if(!is.null(rv[[paste0("genes",x)]])){
+      g_ui_id <- paste0("gnorm_g_",x)
+      updateSelectizeInput(
+        session,
+        g_ui_id,
+        choices = rv[[paste0("genes",x)]]
+        ,selected = rv[[g_ui_id]]
+        ,server = TRUE
+        ,options = list(
+          placeholder = 'Type to search ...'
+        )
+      )
+    }
+  })
+}
+
+# ---------- [1H-B] update normalization GS ---------
+normgs_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    db_id <- paste0("gnorm_gs_db_",x)
+    input[[db_id]]
+  })
+})
+
+observeEvent(normgs_lst(),{
+  array <- 1:rv$variable_n #check_array(lst)
+  namespaces <- paste0("gnorm_gs_db_",array)
+  req(req_diff_rv(namespaces))
+  rv$show_ui <- ""
+  withProgress(value = 1, message = wait_msg("Extracting data from the selected database..."),{
+    lapply(array, function(x) {
+      gnorm_gs_db_id <- paste0("gnorm_gs_db_",x)
+      if(rv[[gnorm_gs_db_id]] != input[[gnorm_gs_db_id]]){
+        # extract GS data
+        update_gs_by_db(x,gs_db_id=gnorm_gs_db_id,gs_lib_id = paste0("gnorm_gs_lib_",x), prefix="gnorm_")
+      }
+    })
+  })
+}, ignoreInit = T)
+
+# ------- [1H-C] verbatimText feedback on normalization GMT genes ---------
+gnorm_lib_input_lst <- reactive({
+  lapply(1:rv$variable_n, function(x){
+    db_id <- paste0("gnorm_gs_lib_",x)
+    input[[db_id]]
+  })
+})
+
+observeEvent(gnorm_lib_input_lst(),{
+  array <- 1:rv$variable_n
+  namespaces <- paste0("gnorm_gs_lib_",array)
+  req(req_diff_rv(namespaces))
+  lapply(array, function(x){
+    gs_lib_id <- paste0("gnorm_gs_lib_",x)
+    gs_lib_genes_id <- paste0("gnorm_gs_lib_genes_",x)
+    
+    if(!is.na(input[[gs_lib_id]])){
+      gs <- rv[[gs_lib_id]] <- input[[gs_lib_id]]
+      
+      if(!is.null(gs) & gs != ""){
+        genes <- rv[[paste0("gnorm_gmts",x)]][[gs]]
+        rv[[paste0("gnorm_gs_genes_",x)]] <- genes
+        
+        # verbatimTextOutput feedback
+        output[[gs_lib_genes_id]] <- renderText({
+          paste0("Genes in selected GS (n=",length(genes),"): ", paste0(genes, collapse = " "))
+        })
+
+        # gene list download handler
+        gs_lib_dn_id <- paste0(gs_lib_id,"dn")
+        output[[gs_lib_dn_id]] <- downloadHandler(
+          filename = function(){paste0(gs,".txt")},
+          content = function(file) {
+            fwrite(as.list(paste0(sort(genes),collapse = "\n")),file,quote = F)
+          }
+        )
+
+        # official site link
+        gs_db_id <- paste0("gnorm_gs_db_",x)
+        gs_lib_link_id <- paste0(gs_lib_id,"link"); gs_lib_link_ui_id <- paste0(gs_lib_link_id,"_ui")
+        if(input[[gs_db_id]] %in% names(gmt_links)){
+          gs_lib_link_id_q <- paste0(gs_lib_link_id,"_q")
+          output[[gs_lib_link_ui_id]] <- renderUI({
+            div(id=gs_lib_link_id_q,style="z-index:1000;word-break: break-all;",
+                style = "position: absolute; right: -3.5em; top: -0.2em;",
+                HTML(paste0("<h4>",link_icon(gs_lib_link_id,paste0(gmt_links[[input[[gs_db_id]]]],tail(strsplit(rv[[gs_lib_id]],"%")[[1]],n=1)),color="#CF5C78"),"</h4>"))
+                ,bsTooltip(gs_lib_link_id_q,HTML(paste0("Click to visit official ",rv[[gs_db_id]]," website describing ",rv[[gs_lib_id]],".")),placement = "top")
+            )
+          })
+        }else{
+          output[[gs_lib_link_ui_id]] <- NULL
+        }
+      }
+    }
+  })
+}, ignoreInit = T)
 
 # ----- 1.2. RUN PARAMETERS -------
 observe({
@@ -1094,6 +1231,9 @@ observeEvent(input$depmap_gene,{
 
     rv$df_survival_o <- df_survival_o
     rv$ccle_cells <- input$ccle_cells
+    
+    # update normalization genes' UI
+    update_normalization_UI()
   })
 })
 

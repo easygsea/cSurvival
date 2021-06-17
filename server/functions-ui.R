@@ -99,6 +99,14 @@ plot_ui <- function(n){
     db_id <- paste0("db_",x); db_id_q <- paste0(db_id,"_q")
     # gene to analyze
     g_ui_id <- paste0("g_",x); g_ui_id_q <- paste0(g_ui_id,"_q")
+    # gene normalization options
+    g_ui_norm_id <- paste0("gnorm_",x); g_ui_norm_id_q <- paste0(g_ui_norm_id,"_q")
+    g_ui_norm_g_id <- paste0("gnorm_g_",x); g_ui_norm_g_id_q <- paste0(g_ui_norm_g_id,"_q")
+    g_ui_norm_gs_db_id <- paste0("gnorm_gs_db_",x); g_ui_norm_gs_db_id_q <- paste0(g_ui_norm_gs_db_id,"_q")
+    g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x); g_ui_norm_gs_lib_id_q <- paste0(g_ui_norm_gs_db_id,"_q")
+    g_ui_norm_gs_lib_genes_id <- paste0("gnorm_gs_lib_genes_",x)
+    g_ui_norm_gs_lib_dn_id <- paste0(g_ui_norm_gs_lib_id,"dn"); g_ui_norm_gs_lib_dn_id_q <- paste0(g_ui_norm_gs_lib_dn_id,"_q")
+    g_ui_norm_gs_lib_link_id <- paste0(g_ui_norm_gs_lib_id,"link"); g_ui_norm_gs_lib_link_ui_id <- paste0(g_ui_norm_gs_lib_link_id,"_ui")
     # gene set to analyze
     gs_mode_id <- paste0("gs_mode_",x); gs_mode_id_q <- paste0(gs_mode_id,"_q")
     gs_db_id <- paste0("gs_db_",x); gs_db_id_q <- paste0(gs_db_id,"_q")
@@ -262,7 +270,88 @@ plot_ui <- function(n){
             ,bsButton(gs_manual_btn_id,tags$strong("Submit"),icon=icon("upload"),style = "primary")
           )
         )
-        
+        ,conditionalPanel(
+          sprintf("(input.%s== 'g' & input.%s== 'rna' & input.%s!='') | (input.%s== 'gs' & input.%s=='lib' & input.%s!='') | (input.%s== 'gs' & input.%s=='manual' & output.%s)", cat_id,db_id,g_ui_id, cat_id,gs_mode_id,gs_lib_id, cat_id,gs_mode_id,paste0("gs_manual_uploaded",x)),
+          radioGroupButtons(
+            g_ui_norm_id,
+            HTML(paste0(x,".4a. (Optional) normalize gene expression by:",add_help(g_ui_norm_id_q))),
+            choices = c("None"="none","Gene"="g","Gene set (GS)"="gs"),
+            selected = rv[[g_ui_norm_id]],
+            size = "sm",
+            checkIcon = list(
+              yes = icon("check-square"),
+              no = icon("square-o")
+            ),
+            direction = "horizontal"
+          )
+          ,conditionalPanel(
+            sprintf("input.%s == 'g'", g_ui_norm_id),
+            selectizeInput(
+              g_ui_norm_g_id,
+              HTML(paste0(x,".4b. Select a normalization gene:",add_help(g_ui_norm_g_id_q)))
+              ,choices=c()
+              ,selected=rv[[g_ui_norm_g_id]]
+              ,width = "100%"
+              ,options = list(
+                placeholder = "Type to search ..."
+                ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_norm_g_id]]))
+              )
+            )
+          )
+          ,conditionalPanel(
+            sprintf("input.%s == 'gs'", g_ui_norm_id),
+            fluidRow(
+              column(
+                4,
+                selectizeInput(
+                  g_ui_norm_gs_db_id,
+                  HTML(paste0(x,".4b. Select database:"),add_help(g_ui_norm_gs_db_id_q))
+                  ,choices=gmt_dbs
+                  ,selected=rv[[g_ui_norm_gs_db_id]]
+                  ,options = list(
+                    # `live-search` = TRUE,
+                    placeholder = 'Type to search ...'
+                    ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_norm_gs_db_id]]))
+                  )
+                )
+              )
+              ,conditionalPanel(
+                condition = sprintf("input.%s != ''", g_ui_norm_gs_db_id),
+                column(
+                  8,
+                  selectizeInput(
+                    g_ui_norm_gs_lib_id,
+                    HTML(paste0(x,".4c. Select gene set (GS):"),add_help(g_ui_norm_gs_lib_id_q))
+                    ,choices=names(rv[[paste0("gnorm_gmts",x)]])
+                    ,selected=rv[[g_ui_norm_gs_lib_id]]
+                    ,options = list(
+                      # `live-search` = TRUE,
+                      placeholder = rv[[paste0("gnorm_gs_placeholder",x)]]
+                      ,onInitialize = I(sprintf('function() { this.setValue("%s"); }',rv[[g_ui_norm_gs_lib_id]]))
+                    )
+                  )
+                )
+              )
+              ,conditionalPanel(
+                condition = sprintf("input.%s != ''", g_ui_norm_gs_lib_id),
+                column(
+                  11,
+                  div(id=g_ui_norm_gs_lib_dn_id_q,style="z-index:1000;",
+                      style = "position: absolute; right: -1.5em; top: 0.2em;",
+                      downloadBttn(
+                        g_ui_norm_gs_lib_dn_id,NULL
+                        ,size = "xs", color = "danger", style = "material-circle",
+                      )
+                  )
+                  ,uiOutput(g_ui_norm_gs_lib_link_ui_id)
+                  ,bsTooltip(g_ui_norm_gs_lib_dn_id_q,HTML("Click to download the gene list"),placement = "top")
+                  ,span(verbatimTextOutput(g_ui_norm_gs_lib_genes_id), style = rv$verbTxtStyle1)
+                )
+              )
+            )
+          )
+        )
+
         # tooltip for data category
         ,bsTooltip(cat_id_q, HTML(cat_id_q_txt)
                    ,placement = "right")
@@ -291,6 +380,20 @@ plot_ui <- function(n){
         ,radioTooltip(id = db_id, choice = "crispr", title = HTML("Gene effect measured by CRISPR-Cas9"))
         ,radioTooltip(id = db_id, choice = "rnai", title = HTML("Gene effect measured by RNA interference"))
         ,radioTooltip(id = db_id, choice = "drug", title = HTML("Drug sensitivity assays by PRISM compound repurposing screening"))
+        ,bsTooltip(g_ui_norm_id_q,HTML(
+          paste0("<b>None</b>: No normalization"
+                 ,"<br><b>Gene</b>: Normalize expression by expression of another gene"
+                 ,"<br><b>Gene set (GS)</b>: Normalize expression by expression of another GS"))
+          ,placement = "right")
+        ,radioTooltip(id = g_ui_norm_id, choice = "none", title = HTML("No normalization"))
+        ,radioTooltip(id = g_ui_norm_id, choice = "g", title = HTML("Normalize against a gene"))
+        ,radioTooltip(id = g_ui_norm_id, choice = "gs", title = HTML("Normalize against a GS"))
+        ,bsTooltip(g_ui_norm_g_id_q,HTML("Search and select a gene for normalization purpose")
+                   ,placement = "right")
+        ,bsTooltip(g_ui_norm_gs_db_id_q,HTML("For full list of available gene set databases, visit <b>easyGSEA User Guide</b>.")
+                   ,placement = "right")
+        ,bsTooltip(g_ui_norm_gs_lib_id_q,HTML("Search for keywords (e.g. glycolysis, chemokine, tor signaling) and select the one of interest.")
+                   ,placement = "right")
       )
       
     )
