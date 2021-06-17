@@ -251,7 +251,7 @@ input_mode_name <- function(x){
   db_id <- paste0("db_",x)
   gs_mode_id <- paste0("gs_mode_",x)
   g_ui_norm_id <- paste0("gnorm_",x)
-  if((input[[cat_id]] == "g" & input[[db_id]] == "rna")| (input[[cat_id]] == "gs" & input[[gs_mode_id]] == "lib") & input[[g_ui_norm_id]] != "none"){
+  if(input[[g_ui_norm_id]] != "none" & (input[[cat_id]] == "g" & input[[db_id]] == "rna")| (input[[cat_id]] == "gs" & input[[gs_mode_id]] == "lib")){
     inmode <- input[[g_ui_norm_id]]
   }
   y <- names(input_mode_names)[input_mode_names == inmode]

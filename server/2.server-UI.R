@@ -372,7 +372,7 @@ observeEvent(input$plot_type,{
   if(rv$cox_km == "dens"){if(if_surv(plot_type=input$plot_type)){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}else{rv$cox_km <- rv$cox_kmr}}
   # rv[["res"]] <- NULL
   x <- rv$plot_type <- input$plot_type
-  if(x == "scatter"){x <- 1}
+  if(x == "scatter"){x <- 1}else if(x == "violin" | x == "scatter2"){x <- "all"}
   rv[["title"]] <- rv[[paste0("title_",x)]]
   if(!if_surv()){rv$annot_cells_y <- ""}else{
     rv$annot_cells_y <- "yes"
