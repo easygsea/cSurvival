@@ -621,8 +621,10 @@ genes_lst <- reactive({
 })
 
 observeEvent(genes_lst(),{
-  req(rv$project != "")
   array <- 1:rv$variable_n
+  # update reset buttons
+  lapply(1:array, function(x){rv[[paste0("todefault",x)]] <- 0})
+  req(rv$project != "")
   namespaces <- paste0("db_",array)
   req(req_diff_rv(namespaces))
   lapply(array, function(x){
@@ -854,15 +856,15 @@ observeEvent(todefault_lst(),{
   withProgress(value = 1, message = "Setting to default parameters...",{
     lapply(1:rv$variable_n, function(x){
       todefault_id <- paste0("todefault",x)
-      if(rv[[todefault_id]] < input[[todefault_id]][1]){
+      if(rv[[todefault_id]] != input[[todefault_id]][1]){
         rv[[todefault_id]] <- input[[todefault_id]][1]
         cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
         
-        if(input[[cat_id]] == "gs" | (!rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv" & input[[db_id]] != "cnv") | (rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv")){
+        if((input[[cat_id]] == "gs") | (!rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv" & input[[db_id]] != "cnv") | (rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv")){
           updateRadioGroupButtons(session, paste0("iter_",x), selected = "iter")
-          updateSliderTextInput(session, paste0("lower_",x), selected = .2)
-          updateSliderTextInput(session, paste0("upper_",x), selected = .8)
-          updateSliderTextInput(session, paste0("step_",x), selected = .02)
+          updateSliderInput(session, paste0("lower_",x), value = .2)
+          updateSliderInput(session, paste0("upper_",x), value = .8)
+          updateSliderInput(session, paste0("step_",x), value = .025)
         }else if(input[[cat_id]] == "g" & input[[db_id]] == "snv"){
           updateSelectizeInput(session, paste0("nonsynonymous_",x), selected = variant_types_non)
           updateSelectizeInput(session, paste0("synonymous_",x), selected = variant_types_syn)
