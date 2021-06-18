@@ -47,8 +47,10 @@ output$ui_results <- renderUI({
       # }else if(dtypes_u == "cnv"){
       #   
       # }
-    }else if(any(c("snv","cnv") %in% dtypes)){
-      # l_plot <- list("Violin plot"="violin")
+    }else if("snv" %in% dtypes | (!rv$depmap & ("cnv" %in% dtypes))){
+      if(!rv$depmap & !all(c("snv","cnv") %in% dtypes)){
+        l_plot <- list("Violin plot"="violin")
+      }
     }else{
       l_plot <- as.list("scatter2")
       names(l_plot) <- paste0(paste0(dtypes_names,collapse = "-")," scatter")
@@ -236,7 +238,7 @@ output$ui_results <- renderUI({
           )
         )
       }
-      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "snv_stats" & rv$plot_type != "gsea" & rv$plot_type != "track"){
+      ,if(typeof(rv[[paste0("df_",input$plot_type)]]) != "list" & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "violin" & rv$plot_type != "snv_stats" & rv$plot_type != "gsea" & rv$plot_type != "track"){
         column(
           12, align="center",
           uiOutput("ui_error")
@@ -261,6 +263,8 @@ output$ui_results <- renderUI({
                 plotlyOutput("scatter_plot", height = "585px")
               }else if(rv$plot_type == "snv_stats"){
                 plotlyOutput("snv_stats_plot", height = "585px")
+              }else if(rv$plot_type == "violin"){
+                plotlyOutput("violin_plot", height = "585px")
               }else if(rv$plot_type == "gsea"){
                 uiOutput("ui_gsea")
               }
@@ -528,6 +532,35 @@ output$plot_gear <- renderUI({
         )
       )
     }
+  }else if(rv$plot_type == "violin"){
+    fluidRow(
+      column(
+        12,
+        materialSwitch(
+          inputId = "violin_log_y",
+          label = HTML(paste0("<b>Log2 transform y-axis values?</b>",add_help("violin_log_y_q"))),
+          value = rv$violin_log_y, inline = F, width = "100%",
+          status = "danger"
+        )
+        ,bsTooltip("violin_log_y_q",HTML(paste0("If TRUE, values along the y-axis are log2 transformed. Not applicable for GS expressions."))
+                   ,placement = "top")
+        ,materialSwitch(
+          inputId = "violin_trim",
+          label = HTML(paste0("<b>Trim the tails of the violins?</b>",add_help("violin_trim_q"))),
+          value = rv$violin_trim, inline = F, width = "100%",
+          status = "danger"
+        )
+        ,bsTooltip("violin_trim_q",HTML(paste0("If TRUE, trim the tails of the violins to the range of the data. If FALSE, do not trim the tails."))
+                   ,placement = "top")
+        ,numericInput(
+          "violin_k",
+          HTML(paste0("No. of standard deviation",add_help("violin_k_q"))),
+          min = 0,step = .05,value = rv$violin_k
+        )
+        ,bsTooltip("violin_k_q",HTML("Adjust the number of standard deviation to display on the violins.")
+                   ,placement = "top")
+      )
+    )
   }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2" & !is.null(rv$scatter_gender)){
     fluidRow(
       column(
@@ -672,23 +705,29 @@ output$download_plot <- downloadHandler(
   filename = function(){
     if(if_surv()){
       paste0(toupper(rv$cox_km),"_",rv[["title"]],".pdf")
-    }else if(rv$plot_type == "scatter"){
+    }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
       paste0("Scatter_",rv[["title"]],".html")
     }else if(rv$plot_type == "snv_stats"){
       paste0("Mutation_",rv[["title"]],".html")
+    }else if(rv$plot_type == "violin"){
+      paste0("Violin_",rv[["title"]],".html")
     }
   },
   content = function(file) {
-    if(if_surv()){
-      pdf(file,onefile = TRUE)
-      print(plot_surv(rv[["res"]]),newpage = FALSE)
-      dev.off()
-      # ggsave(file,print(plot_surv(rv[["res"]]),newpage = FALSE), device = "pdf", width = 10, height = 8, dpi = 300, units = "in")
-    }else if(rv$plot_type == "scatter"){
-      saveWidget(as_widget(rv[["scatter_plot"]] ), file, selfcontained = TRUE)
-    }else if(rv$plot_type == "snv_stats"){
-      saveWidget(as_widget(rv[["snv_stats_fig"]] ), file, selfcontained = TRUE)
-    }
+    withProgress(value = 1,message = "Downloading plot...",{
+      if(if_surv()){
+        pdf(file,onefile = TRUE)
+        print(plot_surv(rv[["res"]]),newpage = FALSE)
+        dev.off()
+        # ggsave(file,print(plot_surv(rv[["res"]]),newpage = FALSE), device = "pdf", width = 10, height = 8, dpi = 300, units = "in")
+      }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+        saveWidget(as_widget(rv[["scatter_plot"]]), file, selfcontained = TRUE)
+      }else if(rv$plot_type == "snv_stats"){
+        saveWidget(as_widget(rv[["snv_stats_fig"]]), file, selfcontained = TRUE)
+      }else if(rv$plot_type == "violin"){
+        saveWidget(as_widget(rv[["violin_plot"]]), file, selfcontained = TRUE)
+      }
+    })
   }
 )
 
@@ -769,6 +808,13 @@ output$ui_stats <- renderUI({
     p <- format_p(as.numeric(res$p.value))
     p_title <- "P-value"
     p_w <- 6; p_w_r <- F; p.adj <- NULL
+  }else if(rv$plot_type == "violin"){
+    req(!is.null(rv[["violin_p"]]))
+    stats_title <- "Welch Two Sample t-test"
+    res <- rv[["violin_p"]]
+    p <- format_p(as.numeric(res$p.value))
+    p_title <- "P-value"
+    p_w <- 12; p_w_r <- F; p.adj <- NULL
   }else{
     stats_title <- ""
   }
@@ -879,7 +925,7 @@ output$ui_stats <- renderUI({
               verbatimTextOutput("ui_stats_details")
             )
           )
-        }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+        }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2" | rv$plot_type == "violin"){
           column(
             12,
             renderPrint({print(res)})
@@ -1385,9 +1431,9 @@ output$depmap_stats <- renderUI({
   # stats names
   x_numeric <- suppressWarnings(!is.na(as.numeric(x)))
   if(x_numeric){
-    stats_name <- "Mann-Whitney U test,"
+    stats_name <- "Welch Two Sample t-test,"
   }else{
-    stats_name <- "Kruskal-Wallis rank sum test, overall"
+    stats_name <- "One-way ANOVA, overall"
   }
   
   p <- rv[["res"]][["p"]]
@@ -1705,6 +1751,98 @@ output$quantile_graph <- renderPlotly({
   #          hovermode = "x unified"
   #   )
 
+# --------- 9. violin plot -------------
+output$violin_plot <- renderPlotly({
+  # check data types
+  dtypes <- grep("^data_type_",{names(rv)},value=T)
+  dtypes <- sapply(dtypes,function(x) rv[[x]])
 
+  # mutation statistics
+  mut_x <- names(dtypes)[dtypes == "snv" | (!rv$depmapr & dtypes == "cnv")] %>% gsub("^data_type_","",.)
+  mut_title <- rv[[paste0("title_",mut_x)]]
+  df_muts <- rv[[paste0("mutations_",mut_x)]]
+  
+  # expression levels
+  exp_cal <- dtypes != "snv" & (!rv$depmapr & dtypes != "cnv")
+  exp_name <- dtypes[exp_cal]
+  exp_x <- names(dtypes)[exp_cal] %>% gsub("^data_type_","",.)
+  exp_title <- rv[[paste0("title_",exp_x)]]
+  df_exp <- rv[[paste0("exprs_",exp_x)]]
+  
+  # combine info
+  df <- dplyr::left_join(df_exp,tibble(patient_id=names(df_muts),mut=df_muts),by="patient_id") %>%
+    dplyr::filter(!is.na(mut))
+  
+  # non-synonymous
+  if(any(dtypes == "snv")){
+    df$mut <- ifelse(df$mut=="","WT",df$mut)
+    df$mut <- ifelse(is.na(df$mut),"WT",df$mut)
+    non_id <- paste0("nonsynonymous_",mut_x)
+    nons <- ifelse_rv(non_id) %>% tolower(.)
+    df$mut_cat <- sapply(df$mut, function(x){
+      x <- strsplit(x, "\\|")[[1]]
+      if(any(tolower(x) %in% nons)){
+        "Mutated"
+      }else{
+        "Other"
+      }
+    })
+  }else{
+    df$mut_cat <- df$mut
+  }
 
+  # rename column names
+  colnames(df) <- c("patient_id","exp","mut","mut_cat")
+  
+  # convert to CCLE cell ids if depmap
+  if(rv$depmapr){df$patient_id <- paste0(translate_cells(df$patient_id),"|",df$patient_id)}
 
+  # log2 transform
+  if(rv$violin_log_y & exp_name != "lib" & exp_name != "manual"){
+    df$exp <- log2(df$exp+1); exp_title_y <- paste0("Log2 transformed ",exp_title)
+  }else{
+    exp_title_y <- exp_title
+  }
+  
+  # relevel
+  df$mut_cat <- factor(df$mut_cat)
+  df$mut_cat <- relevel(df$mut_cat, ref = "Other")
+  
+  # calculate statistics
+  if(length(unique(df$mut_cat)) > 1){
+    rv[["violin_p"]] <- t.test(exp ~ mut_cat, data = df)
+  }else{
+    rv[["violin_p"]] <- NULL
+  }
+  
+  
+  # hover labels
+  ID <- paste0(
+    "<b>",df[["patient_id"]],"</b>\n",
+    exp_title," expression: <b>",signif(df[["exp"]],digits=3),"</b>\n",
+    mut_title," status: <b>",df[["mut"]],"</b>"
+  )
+  # the violin plot
+  p <- ggplot(df, aes(x=mut_cat,y=exp,color=mut_cat,label=ID)) +
+    geom_violin(trim=rv$violin_trim) +
+    scale_color_discrete(direction = -1) +
+    stat_summary(fun.data=data_summary,geom="pointrange", color="grey") +
+    geom_jitter(height = 0, width = 0.1) +
+    labs(y=exp_title_y,x=mut_title) +
+    theme_classic() +
+    theme(legend.position="none",
+          plot.title = element_text(size = rel(1.5), hjust = 0.5),
+          axis.title = element_text(size = rel(1.45)),
+          axis.text = element_text(size = rel(1.35))
+    )
+  
+  rv[["violin_plot"]] <- suppressWarnings(ggplotly(p,tooltip="label"))
+})
+
+observeEvent(input$violin_log_y,{rv$violin_log_y <- input$violin_log_y})
+observeEvent(input$violin_trim,{rv$violin_trim <- input$violin_trim})
+observeEvent(input$violin_k,{
+  req(length(input$violin_k) > 0)
+  req(input$violin_k >= 0)
+  rv$violin_k <- input$violin_k
+})

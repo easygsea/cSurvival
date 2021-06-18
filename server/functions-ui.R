@@ -381,9 +381,10 @@ plot_ui <- function(n){
         ,radioTooltip(id = db_id, choice = "rnai", title = HTML("Gene effect measured by RNA interference"))
         ,radioTooltip(id = db_id, choice = "drug", title = HTML("Drug sensitivity assays by PRISM compound repurposing screening"))
         ,bsTooltip(g_ui_norm_id_q,HTML(
-          paste0("<b>None</b>: No normalization"
-                 ,"<br><b>Gene</b>: Normalize expression by expression of another gene"
-                 ,"<br><b>Gene set (GS)</b>: Normalize expression by expression of another GS"))
+          paste0("To study gene ratios.<br>"
+            ,"<b>None</b>: No normalization"
+            ,"<br><b>Gene</b>: Normalize expression by expression of another gene"
+            ,"<br><b>Gene set (GS)</b>: Normalize expression by expression of another GS"))
           ,placement = "right")
         ,radioTooltip(id = g_ui_norm_id, choice = "none", title = HTML("No normalization"))
         ,radioTooltip(id = g_ui_norm_id, choice = "g", title = HTML("Normalize against a gene"))

@@ -64,4 +64,8 @@ rv <- reactiveValues(
   
   # # permutations
   # ,nitem = 100
+  
+  ,violin_k=1.5 # no of s.d. to plot on violin
+  ,violin_log_y=T
+  ,violin_trim=T
 )

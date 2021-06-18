@@ -166,7 +166,7 @@ extract_gene_data <- function(x, type){
   }else if(type == "snv"){
     muts <- data[,2] %>% unlist(.)
     names(muts) <- data$patient_id
-    muts <- muts[!is.na(muts)]
+    # muts <- muts[!is.na(muts)]
     rv[[paste0("mutations_",x)]] <- muts
   }else if(type == "lib" | type == "manual"){
     # z score transform expression values
@@ -204,7 +204,8 @@ original_surv_df <- function(patient_ids){
   df_o <- rv$df_survival
   df_o %>% dplyr::filter(patient_id %in% patient_ids)
   df_o[match(patient_ids,df_o$patient_id),] %>%
-    dplyr::select(-gender)
+    dplyr::select(-gender) %>%
+    dplyr::filter(!is.na(patient_id))
 }
 
 # generate survival df
@@ -267,16 +268,18 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   # initialize the most significant p value and df
   least_p_value <- 1; df_most_significant <- NULL; least_hr <- 0
 
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(data$patient_id)
+  
+  # remove NA patient ids
+  data <- data %>% dplyr::filter(patient_id %in% df_o$patient_id)
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
   # if(mode == "g"){
-    exp <-data[,2] %>% unlist(.) %>% unname(.)
+  exp <-data[,2] %>% unlist(.) %>% unname(.)
   # }else if(mode == "gs"){
   #   exp <- rowMeans(data[,-1],na.rm=T) %>% unlist(.) %>% unname(.)
   # }
-  
-  # retrieve survival analysis df_o
-  df_o <- original_surv_df(patient_ids)
   
   # # execute permutations
   # exps <- permutations(exp, layout = "list", nitem = rv$nitem)
@@ -328,7 +331,7 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
     # }else if(rv$cox_km == "km"){
     if(rv$depmap){
       # surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
-      surv_diff <- wilcox.test(dependency ~ level, data = df)
+      surv_diff <- t.test(dependency ~ level, data = df)
       hr <- NA
       p_diff <- surv_diff$p.value
     }else{
@@ -379,13 +382,15 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
 # generate df if user-defined cutoffs
 get_df_by_cutoff <- function(data, cutoff){
   cutoff <- cutoff/100
+  
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(data$patient_id)
+  # remove NA patient ids
+  data <- data %>% dplyr::filter(patient_id %in% df_o$patient_id)
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
   exp <- data[,2] %>% unlist(.) %>% unname(.)
-
-  # retrieve survival analysis df_o
-  df_o <- original_surv_df(patient_ids)
-
+  
   # the quantile we will use to define the level of gene percentages
   q <- quantile(exp, cutoff)
   df <- generate_surv_df(df_o, patient_ids, exp, q)
@@ -393,6 +398,11 @@ get_df_by_cutoff <- function(data, cutoff){
 
 # generate df if SNV mutation data
 get_df_snv <- function(data, nons, syns){
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(data$patient_id)
+  # remove NA patient ids
+  data <- data %>% dplyr::filter(patient_id %in% df_o$patient_id)
+  
   nons <- tolower(nons)
   syns <- tolower(syns)
   # extract patients' IDs and mutation data
@@ -426,9 +436,6 @@ get_df_snv <- function(data, nons, syns){
   lels <- unique(data$level) %>% sort(.,decreasing = T)
   data$level <- factor(data$level, levels = lels)
 
-  # retrieve survival analysis df_o
-  df_o <- original_surv_df(patient_ids)
-
   df <- df_o %>% inner_join(data, by = "patient_id")
 }
 
@@ -437,12 +444,14 @@ get_info_most_significant_cnv <- function(data, mode){
   # initialize the most significant p value
   least_p_value <- 1
 
+  # retrieve survival analysis df_o
+  df_o <- original_surv_df(data$patient_id)
+  # remove NA patient ids
+  data <- data %>% dplyr::filter(patient_id %in% df_o$patient_id)
+  
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
-
-  # retrieve survival analysis df_o
-  df_o <- original_surv_df(patient_ids)
-
+  
   # copy numer data
   exp <-data[,2] %>% unlist(.) %>% unname(.)
 
@@ -558,12 +567,12 @@ cal_surv_rna <-
     if(rv$depmap){
       # km.stats <- survdiff(Surv(dependency) ~ level, data = df)
       if(n == 1){
-        surv_diff <- wilcox.test(dependency ~ level, data = df)
+        surv_diff <- t.test(dependency ~ level, data = df)
         p_diff <- surv_diff$p.value
       }else if(n == 2){
-        surv_diff <- kruskal.test(dependency ~ level, data = df)
+        surv_diff <- aov(dependency ~ level, data = df)
         p_diff <- surv_diff$p.value
-        surv_diff <- pairwise.wilcox.test(df$dependency, df$level, p.adjust.method = "hommel")
+        surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = "hommel")
       }
       
       if(iter_mode){
@@ -909,4 +918,14 @@ de_dfgene <- function(){
   rownames(df_gene) <- genes
 
   return(df_gene)
+}
+
+#==============================================#
+####            General functions            ####
+#==============================================#
+data_summary <- function(x,k=rv$violin_k) {
+  m <- mean(x)
+  ymin <- m - k * sd(x)
+  ymax <- m + k * sd(x)
+  return(c(y=m,ymin=ymin,ymax=ymax))
 }

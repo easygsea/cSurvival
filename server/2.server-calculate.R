@@ -370,9 +370,12 @@ observeEvent(input$confirm,{
             cnv_mode <- ifelse_rv(paste0("cnv_par_",x))
 
             results <- get_info_most_significant_cnv(data,cnv_mode)
-
+            
             # extract most significant df
             df <- results[["df"]]
+            tmp <- as.character(df$level)
+            names(tmp) <- df$patient_id
+            rv[[paste0("mutations_",x)]] <- tmp
             rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
             if(rv[["cutoff_all"]] == ""){
               rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
