@@ -477,35 +477,38 @@ plot_run_ui <- function(n){
             ),
             conditionalPanel(
               sprintf('input.%s == "iter"',iter_id),
-              sliderTextInput(
+              sliderInput(
                 lower_id,
                 label = HTML(paste0("Start percentile:",add_help(lower_id_q)))
-                ,selected = rv[[lower_id]]
-                ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45, .5)
-                ,grid = TRUE
+                ,value = rv[[lower_id]]
+                # ,choices = c(.05, .1, .15, .2, .25, .3, .35, .4, .45, .5)
+                # ,grid = TRUE
+                ,min=.05,max=.5,step=.01
               )
-              ,sliderTextInput(
+              ,sliderInput(
                 higher_id,
                 label = HTML(paste0("End percentile:",add_help(higher_id_q)))
-                ,selected = rv[[higher_id]]
-                ,choices = c(.5, .55, .6, .65, .7, .75, .8, .85, .9, .95)
-                ,grid = TRUE
+                ,value = rv[[higher_id]]
+                # ,choices = c(.5, .55, .6, .65, .7, .75, .8, .85, .9, .95)
+                # ,grid = TRUE
+                ,min=.5,max=.95,step=.01
               )
-              ,sliderTextInput(
+              ,sliderInput(
                 step_id,
                 label = HTML(paste0("Step size:",add_help(step_id_q)))
-                ,selected = rv[[step_id]]
-                ,choices = c(.01, .02, .03, .05, .1, .15, .2, .25)
-                ,grid = TRUE
+                ,value = rv[[step_id]]
+                # ,choices = c(.01, .02, .03, .05, .1, .15, .2, .25)
+                # ,grid = TRUE
+                ,min=.01,max=.25,step=.005
               )
             )
             ,conditionalPanel(
               sprintf('input.%s == "manual"',iter_id),
               sliderInput(
                 clow_id,
-                HTML(paste0("Cutoff percentile:",add_help(clow_id_q))),
+                HTML(paste0("Cutoff percentile (%):",add_help(clow_id_q))),
                 value = rv[[clow_id]],
-                min = 10,max = 90,step=.5
+                min = 10,max = 90,step=1
               )
             )
             ,bsTooltip(iter_id_q,HTML(paste0("<b>Dynamic iteration</b>: Determine the optimal cutoff by searching for the percentile yielding the lowest P-value"
