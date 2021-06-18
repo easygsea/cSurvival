@@ -954,10 +954,10 @@ output$ui_km_mul <- renderUI({
 # ------------- 3b. pairwise comparison statistics -------
 observeEvent(list(input$km_mul,input$km_mul_padj),{
   req(input$km_mul != "")
-  if(input$km_mul != rv$km_mul | input$km_mul_padj != rv$km_mul_padj){
-    rv$km_mul <- input$km_mul
-    rv$km_mul_padj <- input$km_mul_padj
-    
+  proceed <- 0
+  if(input$km_mul != rv$km_mul){proceed <- 1;rv$km_mul <- input$km_mul}
+  if(length(input$km_mul_padj)>0){if(input$km_mul_padj != rv$km_mul_padj){proceed <- 1;rv$km_mul_padj <- input$km_mul_padj}}
+  if(proceed > 0){
     # retrieve df for survival analysis
     df <- rv[[paste0("df_",rv$plot_type)]]
     
