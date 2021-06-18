@@ -48,7 +48,7 @@ output$ui_results <- renderUI({
       #   
       # }
     }else if("snv" %in% dtypes | (!rv$depmap & ("cnv" %in% dtypes))){
-      if(!rv$depmap & !all(c("snv","cnv") %in% dtypes)){
+      if(rv$depmap | (!rv$depmap & !all(c("snv","cnv") %in% dtypes))){
         l_plot <- list("Violin plot"="violin")
       }
     }else{
@@ -820,7 +820,7 @@ output$ui_stats <- renderUI({
   }
   
   req(stats_title != "")
-  req(!(rv$depmapr & rv$plot_type != "scatter" & rv$plot_type != "scatter2"))
+  req(!(rv$depmapr & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "violin"))
 
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
@@ -1549,7 +1549,7 @@ observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj),{
     }
     
     # update statistics
-    surv_diff <- pairwise.wilcox.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
+    surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
     rv[["res"]][["fit"]] <- surv_diff
     
     # adjust p.adj
@@ -1763,9 +1763,14 @@ output$violin_plot <- renderPlotly({
   df_muts <- rv[[paste0("mutations_",mut_x)]]
   
   # expression levels
-  exp_cal <- dtypes != "snv" & (!rv$depmapr & dtypes != "cnv")
+  if(!rv$depmapr){
+    exp_cal <- !all(c("snv","cnv") %in% dtypes)
+  }else{
+    exp_cal <- dtypes != "snv"
+  }
   exp_name <- dtypes[exp_cal]
   exp_x <- names(dtypes)[exp_cal] %>% gsub("^data_type_","",.)
+  
   exp_title <- rv[[paste0("title_",exp_x)]]
   df_exp <- rv[[paste0("exprs_",exp_x)]]
   

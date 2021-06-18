@@ -571,7 +571,7 @@ cal_surv_rna <-
         p_diff <- surv_diff$p.value
       }else if(n == 2){
         surv_diff <- aov(dependency ~ level, data = df)
-        p_diff <- surv_diff$p.value
+        p_diff <- summary(surv_diff)[[1]][[5]][1]
         surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = "hommel")
       }
       
