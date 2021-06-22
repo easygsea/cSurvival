@@ -17,6 +17,7 @@ extract_gene_data <- function(x, type){
     ,"manual" = "df_gene_scale.csv"
     ,"cnv" = "df_cnv.csv"
     ,"mir" = "df_mir.csv"
+    ,"met" = "df_met.csv"
     ,"pro" = "df_proteomic.csv"
     ,"rrpa" = "df_rrpa.csv"
     ,"crispr" = "DepMap-CRISPR.csv"
@@ -87,7 +88,7 @@ extract_gene_data <- function(x, type){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
     genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
-  }else if(type == "cnv" | type == "mir" | type == "pro" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
+  }else if(type == "cnv" | type == "mir" | type == "met" | type == "pro" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
     # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]
   }
@@ -145,7 +146,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
 
   # save original expression or mutation data, if applicable
-  if(type == "rna" | type == "mir" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
+  if(type == "rna" | type == "mir" | type == "met" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
     # calculate normalized expression, if applicable
     if(!is.null(data_n)){
       if(input[[g_ui_norm_id]]=="gs"){

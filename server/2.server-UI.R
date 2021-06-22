@@ -1764,7 +1764,7 @@ output$violin_plot <- renderPlotly({
   
   # expression levels
   if(!rv$depmapr){
-    exp_cal <- !all(c("snv","cnv") %in% dtypes)
+    exp_cal <- !(dtypes %in% c("snv","cnv"))
   }else{
     exp_cal <- dtypes != "snv"
   }

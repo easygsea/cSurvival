@@ -22,5 +22,6 @@ server <- function(input, output, session) {
   # delete the cSurvival variables we have save for easygeo
   onStop(fun = function(){
     clear_rds()
+    gc()
   })
 }
