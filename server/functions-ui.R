@@ -509,7 +509,7 @@ plot_run_ui <- function(n){
                 clow_id,
                 HTML(paste0("Cutoff percentile (%):",add_help(clow_id_q))),
                 value = rv[[clow_id]],
-                min = 10,max = 90,step=1
+                min = 10,max = 90,step=.5
               )
             )
             ,bsTooltip(iter_id_q,HTML(paste0("<b>Dynamic iteration</b>: Determine the optimal cutoff by searching for the percentile yielding the lowest P-value"
@@ -679,7 +679,7 @@ single_plot <- function(quantile_df, index){
                            ),
                            text = quantile_df$expression,
                            name = '',mode = 'lines+markers', hovertemplate = paste(
-                             "%{y:.4f}<br>",
+                             "P-value: %{y:.4f}<br>",
                              "Quantile (in %): %{x:.0f}<br>",
                              "Expression: %{text:.3f}<br>"
                            )) %>%
