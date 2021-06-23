@@ -998,7 +998,7 @@ output$ui_km_mul <- renderUI({
 })
 
 # ------------- 3b. pairwise comparison statistics -------
-observeEvent(list(input$km_mul,input$km_mul_padj),{
+observeEvent(list(input$km_mul,input$km_mul_padj,rv$surv_plotted),{
   req(input$km_mul != "")
   proceed <- 0
   if(input$km_mul != rv$km_mul){proceed <- 1;rv$km_mul <- input$km_mul}

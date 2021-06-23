@@ -428,16 +428,20 @@ observeEvent(input$confirm,{
         # perform survival analysis
         rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n,0,1,.1,iter_mode=F)
         if(rv$depmap){
+          p_adj_tmp <- rv[["cox_all"]][["p.adj"]]
           for(x in 1:rv$variable_n){
             cox_x <- paste0("cox_",x)
-            if(!is.null(rv[[cox_x]][["p.adj"]])){rv[["cox_all"]][["p.adj"]] <- rv[["cox_all"]][["p"]] + rv[[cox_x]][["p.adj"]]}
+            if(!is.null(rv[[cox_x]][["p.adj"]])){p_adj_tmp <- ifelse(is.null(p_adj_tmp),0,p_adj_tmp) + rv[[cox_x]][["p.adj"]]}
           }
+          rv[["cox_all"]][["p.adj"]] <- p_adj_tmp
         }else{
+          p_adj_tmp_km <- rv[["cox_all"]][["km"]][["p.adj"]]
           for(x in 1:rv$variable_n){
             cox_x <- paste0("cox_",x)
-            if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){rv[["cox_all"]][["km"]][["p.adj"]] <- rv[["cox_all"]][["km"]][["p"]] + rv[[cox_x]][["km"]][["p.adj"]]}
-            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]][x] <- rv[["cox_all"]][["cox"]][["p"]][x] + correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
+            if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){p_adj_tmp_km <- ifelse(is.null(p_adj_tmp_km),0,p_adj_tmp_km) + rv[[cox_x]][["km"]][["p.adj"]]}
+            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]][x] <- ifelse(is.null(rv[["cox_all"]][["cox"]][["p.adj"]][x]),0,rv[["cox_all"]][["cox"]][["p.adj"]][x]) + correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
           }
+          rv[["cox_all"]][["km"]][["p.adj"]] <- p_adj_tmp_km
         }
         # p adj on pairwise heatmap
         if(!rv$depmap & rv$km_mul_padj == "padj"){
