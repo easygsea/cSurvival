@@ -664,6 +664,7 @@ single_plot <- function(quantile_df, index){
                     side = "right", title = "Hazard Ratio")
     P_Axis <- list(side = "left", title = "P Value")
   }
+  subtitle <- paste0(rv[[paste0("title_",index)]]) #"Subplot of ",
   
   fig <- plot_ly(quantile_df, x = quantile_df$quantile)
   fig <- fig %>% add_trace(y = ~quantile_df$p_value,type = 'scatter',#color =~p_value,
@@ -678,35 +679,62 @@ single_plot <- function(quantile_df, index){
                            ),
                            text = quantile_df$expression,
                            name = '',mode = 'lines+markers', hovertemplate = paste(
-                             "%{y:.3f}<br>",
-                             "Quantile(in %) : %{x:.0f}<br>",
-                             "ExpressionS : %{text:.3f}<br>"
+                             "%{y:.4f}<br>",
+                             "Quantile (in %): %{x:.0f}<br>",
+                             "Expression: %{text:.3f}<br>"
                            )) %>%
-    add_trace(y = quantile_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
-              line = list(color = 'rgb(212, 235, 242)', width = 2),
-              marker=list(
-                symbol = 'diamond',
-                color=quantile_df$hr,
-                colorscale='RdBu',
-                cmid = 1,
-                reversescale =FALSE
-              ),
-              yaxis = yaxes[2]
+    add_annotations(
+      text = subtitle,
+      x = 0.5,
+      y = 1,
+      yref = "paper",
+      xref = "paper",
+      xanchor = "middle",
+      yanchor = "top",
+      showarrow = FALSE,
+      font = list(size = 15)
     )
+  #Add a DepMap Check
+  if(!all(is.na(quantile_df$hr))){
+    fig <- fig %>%
+      add_trace(y = quantile_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
+                line = list(color = 'rgb(212, 235, 242)', width = 2),
+                marker=list(
+                  symbol = 'diamond',
+                  color=quantile_df$hr,
+                  colorscale='RdBu',
+                  cmid = 1,
+                  reversescale =FALSE
+                ),
+                yaxis = yaxes[2]
+      )
+  }
+    
   #different layout setting for first graph and second graph
   if(index == 1){
-    fig <- fig %>%
-      layout(title = 'P Values of Different Percentiles',
-             xaxis = list(title = 'Quantile(%)'),
-             yaxis = P_Axis,
-             yaxis2 = HR_Axis,
-             hovermode = "x unified"
-      )
+    #omit second axis if all hr values = null
+    if(all(is.na(quantile_df$hr))){
+      fig <- fig %>%
+        layout(title = 'P Values of Different Percentiles',
+               xaxis = list(title = 'Quantile (%)'),
+               yaxis = P_Axis,
+               hovermode = "x unified"
+        )
+    }
+    else{
+      fig <- fig %>%
+        layout(title = 'P Values of Different Percentiles',
+               xaxis = list(title = 'Quantile (%)'),
+               yaxis = P_Axis,
+               yaxis2 = HR_Axis,
+               hovermode = "x unified"
+        )
+    }
   }
   else{
     fig <- fig %>%
-      layout(title = 'P Values of Different Percentiles',
-             xaxis = list(title = 'Quantile(%)'),
+      layout(title = 'P Values and Harzard Ratios of Different Percentiles',
+             xaxis = list(title = 'Quantile (%)'),
              yaxis2 = P_Axis,
              yaxis3 = HR_Axis,
              hovermode = "x unified"

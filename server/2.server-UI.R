@@ -1684,11 +1684,12 @@ observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
 # --------- 8. P-value tracking -------------
 output$ui_track <- renderUI({
   req(length(rv$quantile_graph)>= 1)
+  plt_h <- 450 * length(rv$variable_nr)
   
   column(
     #width = (12 / rv$variable_nr),
     width = 12,
-    plotlyOutput("quantile_graph")
+    plotlyOutput("quantile_graph", height = paste0(plt_h,"px"))
   )
 })
 
@@ -1704,7 +1705,7 @@ output$quantile_graph <- renderPlotly({
   }
   #2 analysis
   if(length(fig_list) == 2){
-    fig <- subplot(fig_list[[1]], fig_list[[2]])
+    fig <- subplot(fig_list[[1]], fig_list[[2]],nrows = 2, margin = 0.05)
   }
   fig
   

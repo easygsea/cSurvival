@@ -310,7 +310,9 @@ observeEvent(input$confirm,{
               req(enough_error == 0)
               
               #CHANGE THE RESULT FUNCTION AND ADD RV$quantile_graph HERE
-              rv[["quantile_graph"]][[x]] <- results[["p_df"]]
+              if("p_df" %in% names(results)){
+                rv[["quantile_graph"]][[x]] <- results[["p_df"]]
+              }
               # extract most significant df
               df <- results[["df"]]
               rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")

@@ -283,52 +283,198 @@ fig_list <- assemble_percentile_plot(test$quantile)
 subplot(fig_list[[1]], fig_list[[2]])
 
 
+# projectss <- unname(unlist(projects[categories]))
+# projectss
+
+
+economics$uempmed
+p <- subplot(
+  plot_ly(economics, x = ~date, y = ~uempmed) %>% 
+    layout(annotations = list(x = 0.2 , y = 1.05, text = "AA", showarrow = F,
+                              xref='paper', yref='paper'), 
+           showlegend = FALSE),
+  plot_ly(economics, x = date, y = ~unemploy) %>% 
+    layout(annotations = list(x = 0.2 , y = 1.05, text = "AA", showarrow = F, 
+                              xref='paper', yref='paper'), 
+           showlegend = FALSE),showlegend = FALSE)
+
+
+
+#START OF CIRCLIZE----
+
+graph_df <- readRDS("~/Downloads/circle_graph.rds")
+
+df_crispr <- read.csv("~/Downloads/DepMap/DepMap-CRISPR.csv")
+df_drug <- read.csv("~/Downloads/DepMap/DepMap-Drug.csv")
+df_rnai <- read.csv("~/Downloads/DepMap/DepMap-RNAi.csv")
+
+
+graph_df$survival_days <- as.numeric(graph_df$survival_days)
+
+max_days <- max(graph_df$survival_days,na.rm = TRUE)
+graph_df$survival_days[is.na(graph_df$survival_days)]  = max_days
+rm(max_days)
+
+
+
+
+#df_inner----
+df_inner <- data.frame()
+newrow <- c("DepMap","DepMap-CRISPR",nrow(df_crispr))
+df_inner <- rbind(df_inner,newrow)
+newrow <- c("DepMap","DepMap-Drug",nrow(df_drug))
+df_inner <- rbind(df_inner,newrow)
+newrow <- c("DepMap","DepMap-RNAi",nrow(df_rnai))
+df_inner <- rbind(df_inner,newrow)
+rm(newrow)
+
+normalize_survival_days <- function(data,datamax = 100, datamin = 10){
+  result <- c()
+  minimum = min(data)
+  maximum = max(data)
+  unit = (datamax - datamin)/(maximum - minimum)
+  for(index in 1:length(data)){
+    result[index] <- datamin + (data[index] - datamin) * unit
+    if(result[index] > datamax){
+      result[index] = datamax
+    }
+    if(result[index] < datamin){
+      result[index] = datamin
+    }
+  }
+  return(result)
+}
+
+unique_subproject <- unique(graph_df$subproject)
+
+for(ele in unique_subproject){
+  temp <- graph_df[graph_df$subproject == ele,]
+  count <- nrow(temp)
+  bigproject <- unique(temp$bigproject)
+  newrow <- c(bigproject,ele,count)
+  df_inner <- rbind(df_inner,newrow)
+}
+colnames(df_inner) <- c("bigproject","subproject","count")
+df_inner$count <- as.numeric(df_inner$count)
 
 
 
 
 
-#Circular Graph----
-library(circlize)
-#TEST QUICK GUIDE
-set.seed(999)
-n = 1000
-df = data.frame(sectors = sample(letters[1:8], n, replace = TRUE),x = rnorm(n), y = runif(n))
+#nrows are recorded here
+# newrow <- c("DepMap","DepMap",nrow(df_crispr),"DepMap-CRISPR","DepMap")
+# graph_df <- rbind(newrow,graph_df)
+# newrow <- c("DepMap","DepMap",nrow(df_drug),"DepMap-Drug","DepMap")
+# graph_df <- rbind(newrow,graph_df)
+# newrow <- c("DepMap","DepMap",nrow(df_rnai),"DepMap-RNAi","DepMap")
+# graph_df <- rbind(newrow,graph_df)
 
-
-circos.par("track.height" = 0.1)
-circos.initialize(df$sectors, x = df$x)
-
-circos.track(df$sectors, y = df$y,
-             panel.fun = function(x, y) {
-               circos.text(CELL_META$xcenter, 
-                           CELL_META$cell.ylim[2] + mm_y(5), 
-                           CELL_META$sector.index)
-               circos.axis(labels.cex = 0.6)
-             })
-col = rep(c("#FF0000", "#00FF00"), 4)
-circos.trackPoints(df$sectors, df$x, df$y, col = col, pch = 16, cex = 0.5)
-circos.text(-1, 0.5, "text", sector.index = "a", track.index = 1)
-
-bgcol = rep(c("#EFEFEF", "#CCCCCC"), 4)
-circos.trackHist(df$sectors, df$x, bin.size = 0.2, bg.col = bgcol, col = NA)
-circos.clear()
+#Delete for testing purpose
+#graph_df <- graph_df[4:(nrow(graph_df)),]
+# takes in an array and returns an array where the max is mapped to 100 and the samllest is mapped to 10
 
 
 
-sectors = letters[1:3]
-set.seed(999)
-n = 1000
-df = data.frame(sectors = sample(letters[1:3], n, replace = TRUE),x = rnorm(n), y = runif(n))
 
+#inner circle with mapping----
+categories <- c("DepMap","TARGET","TCGA")
+categories_cols = brewer.pal(3, "Set2")
+
+projectss <- unname(unlist(projects[categories]))
+projectss
+
+#Assign mapping index for each category/sub-category
+df_inner <- cbind(df_inner,c(1:3,1:9,1:33))
+df_inner <- cbind(df_inner,rep(1:3, c(3,9,33)))
+colnames(df_inner)[(length(colnames(df_inner)) - 1) : (length(colnames(mapping)) + 1)] <- c("subproject_mapping","bigproject_mapping")
+
+#add a mapping column to graph dataframe
+graph_df <- cbind(graph_df,unlist(lapply(1:length(graph_df$subproject), function(i) return(df_inner[df_inner$subproject == graph_df$subproject[i],"subproject_mapping"]))))
+colnames(graph_df)[length(colnames(graph_df))] <- "subproject_mapping"
+
+
+make_box_data <- function(graph_df,df_inner, bigproject){
+  result <- list()
+  for(index in 1:max(df_inner[df_inner$bigproject == bigproject,"subproject_mapping"])){
+    temp = graph_df$survival_days[graph_df$subproject_mapping == index & graph_df$bigproject == bigproject]
+    result[[index]] = temp 
+  }
+  return(result)
+}
+
+TCGA <- make_box_data(graph_df,df_inner,"TCGA")
+TARGET <- make_box_data(graph_df,df_inner,"TARGET")
+
+#have to manually allocate more space in xlim so that the box plot can be aligned
+xlim_matrix <- matrix(nrow = 3,ncol = 2)
+xlim_matrix[1,] = c(0.5,3.5)
+xlim_matrix[2,] = c(0.5,9.5)
+xlim_matrix[3,] = c(0.5,33.5)
+row.names(xlim_matrix) <- c("DepMap","TARGET","TCGA")
+
+#START OF GRAPH
 circos.par(points.overflow.warning = FALSE)
-circos.initialize(df$sectors, x = df$x)
-circos.trackPlotRegion(df$sectors, y = df$y,
-                       track.height = 0.25, panel.fun = function(x, y) {
-                         circos.text(median(df$x),median(df$y),"ABC", facing = "bending.outside", niceFacing = TRUE,
-                                     cex = 1.2)
-                       })
-circos.update(sector.index = "c", track.index = 1)
-circos.text(CELL_META$xcenter, CELL_META$ycenter, "DepMap", col = "black")
+circos.initialize(df_inner$bigproject, xlim = xlim_matrix)#df_inner$subproject_mapping)
+#circos.trackPoints(df_inner$bigproject, x = df_inner$subproject_mapping, y = df_inner$count, pch = 16, cex = 0.5)
+circos.track(ylim = c(0,11),bg.border = NA, panel.fun = function(x, y) {
+  
+})
+circos.update(sector.index = "DepMap", track.index = 1,bg.border = NA)
+circos.text(x = c(0.75:2.75), y = CELL_META$ycenter, labels = df_inner$subproject[df_inner$bigproject == "DepMap"], cex = 0.35, facing = "clockwise", niceFacing = TRUE)
+circos.update(sector.index = "TARGET", track.index = 1,bg.border = NA)
+circos.text(x = c(0.75:8.75), y = CELL_META$ycenter, labels = df_inner$subproject[df_inner$bigproject == "TARGET"], cex = 0.35, facing = "clockwise", niceFacing = TRUE)
+circos.update(sector.index = "TCGA", track.index = 1,bg.border = NA)
+circos.text(x = c(0.75:32.75), y = CELL_META$ycenter, labels = df_inner$subproject[df_inner$bigproject == "TCGA"], cex = 0.35, facing = "clockwise", niceFacing = TRUE)
+
+circos.track(ylim = c(min(graph_df$survival_days),max(graph_df$survival_days)), panel.fun = function(x, y) {
+})
+circos.update(sector.index = "TCGA", track.index = 2)
+circos.boxplot(TCGA, c(0.75:32.75), box_width = 0.5,cex = 0.5)
+circos.update(sector.index = "DepMap", track.index = 2,bg.col = "#FF8080", bg.border = "blue")
+
+circos.update(sector.index = "TARGET", track.index = 2)
+circos.boxplot(TARGET, c(0.75:8.75),box_width = 0.5, cex = 0.5)
+circos.trackHist(graph_df$bigproject,x = graph_df$subproject_mapping, col = "#999999", border = "#999999", bin.size = 0.5)
+
+circos.track(df_inner$bigproject,ylim = c(0,1), track.height = 0.2, panel.fun = function(x, y){
+  circos.axis(h = 1, major.tick = F, minor.ticks = F,
+              labels.cex = 0.1, col = categories_cols[CELL_META$sector.numeric.index], labels.col="#ffffff")
+  circos.text(CELL_META$xcenter, CELL_META$ycenter, CELL_META$sector.index, 
+              facing = "bending.inside",col = categories_cols[CELL_META$sector.numeric.index])
+}, bg.border = NA)
+
+
 
 circos.clear()
+
+
+
+
+
+#Outer Circle----
+circos.par(points.overflow.warning = FALSE, gap.degree = 5)
+circos.initialize(rownames(xlim_matrix), xlim = xlim_matrix)
+circos.trackHist(df_inner$bigproject, x = df_inner$count, area = TRUE,
+                 col = "#999999", border = "#999999",force.ylim = FALSE)
+circos.track(df_inner$bigproject, ylim = c(0, 1), track.index = 2, track.height = 0.25, panel.fun = function(x, y) {
+  circos.axis(h = 1, major.tick = F, minor.ticks = F,
+              labels.cex = 0.1, col = categories_cols[CELL_META$sector.numeric.index], labels.col="#ffffff")
+  circos.text(CELL_META$xcenter, CELL_META$ycenter, CELL_META$sector.index, 
+              facing = "bending.inside",col = categories_cols[CELL_META$sector.numeric.index])
+}, bg.border = NA)
+
+
+
+circos.clear()
+
+
+circos.initialize(letters[1:4], xlim = c(0, 10))
+circos.track(ylim = c(0, 1), panel.fun = function(x, y) {
+  
+  for(pos in seq(0.5, 4.5, by = 1)) {
+    value = runif(10)
+    circos.boxplot(value, pos)
+  }
+})
+circos.clear()
+
