@@ -1527,7 +1527,7 @@ output$ui_km_mul_dp <- renderUI({
 })
 
 # ------ 7c. draw depmap heatmap ------
-observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj),{
+observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj,rv$surv_plotted),{
   req(input$km_mul_dp != "")
   withProgress(value = 1, message = "Updating statistics...",{
     rv$km_mul_dp <- input$km_mul_dp
@@ -1640,6 +1640,7 @@ output$dens_plot <- renderPlotly({
 # -------- 7c. stats of density plot ---------
 output$dens_stats_plot <- renderPlotly({
   req(rv$project != "")
+  req(rv$surv_plotted == "plotted")
   req(!is.null(rv[["dens_df"]]))
   withProgress(value=1,message = "Generating plots ...",{
     df <- rv[["dens_df"]]

@@ -522,5 +522,7 @@ observeEvent(input$confirm,{
     else if(rv$depmap){rv$plot_sstype <- dependency_names();rv$depmap_gener <- rv$depmap_gene}
     rv$annot_cells_y <- ""
     rv$show_ui <- "yes"
+    rv$surv_plotted <- ""
+    rv$analysis_no <- rv$analysis_no + 1
   }
 })
