@@ -259,15 +259,34 @@ output$ui_results <- renderUI({
                     plotOutput("cox_plot",height = h_plot)
                   )
                 }
-              }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
-                plotlyOutput("scatter_plot", height = "585px")
-              }else if(rv$plot_type == "snv_stats"){
-                plotlyOutput("snv_stats_plot", height = "585px")
-              }else if(rv$plot_type == "violin"){
-                plotlyOutput("violin_plot", height = "585px")
-              }else if(rv$plot_type == "gsea"){
-                uiOutput("ui_gsea")
-              }
+              }else{
+                div(
+                  selectizeInput(
+                    "annot_data_points"
+                    ,HTML(paste0("(Optional) highlight data point(s):",add_help("annot_data_points_q")))
+                    ,choices = c()
+                    ,multiple = T
+                    ,width = "85%"
+                    ,options = list(
+                      `live-search` = TRUE,
+                      placeholder = "Type to search ..."
+                      ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+                    )
+                  )
+                  ,bsTooltip("annot_data_points_q",HTML(paste0(
+                    "Select to annotate data point(s) of interest, if any, in the plot below"
+                  )),placement = "right")
+                  ,if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+                    plotlyOutput("scatter_plot", height = "585px")
+                  }else if(rv$plot_type == "snv_stats"){
+                    plotlyOutput("snv_stats_plot", height = "585px")
+                  }else if(rv$plot_type == "violin"){
+                    plotlyOutput("violin_plot", height = "585px")
+                  }else if(rv$plot_type == "gsea"){
+                    uiOutput("ui_gsea")
+                  }
+                )
+              } 
               ,if((rv$plot_type!="gsea" & !rv$depmapr)|(rv$plot_type=="scatter"|rv$plot_type=="scatter2" & rv$depmapr)){
                 div(
                   align = "left",
@@ -376,9 +395,17 @@ observeEvent(input$plot_type,{
   if(rv$cox_km == "dens"){if(if_surv(plot_type=input$plot_type)){updateRadioGroupButtons(session,inputId = "cox_km",selected = rv$cox_kmr)}else{rv$cox_km <- rv$cox_kmr}}
   # rv[["res"]] <- NULL
   x <- rv$plot_type <- input$plot_type
-  if(x == "scatter"){x <- 1}else if(x == "violin" | x == "scatter2"){x <- "all"}
+  if(x == "scatter"){
+    x <- 1; rv$annot_data_points_y <- "yes"
+  }else if(x == "violin" | x == "scatter2"){
+    x <- "all"; rv$annot_data_points_y <- "yes"
+  }else{
+    rv$annot_data_points_y <- ""
+  }
   rv[["title"]] <- rv[[paste0("title_",x)]]
-  if(!if_surv()){rv$annot_cells_y <- ""}else{
+  if(!if_surv()){
+    rv$annot_cells_y <- ""
+  }else{
     rv$annot_cells_y <- "yes"
   }
 })
@@ -1078,7 +1105,7 @@ output$km_hm <- renderPlotly({
   plot_heatmap(pvals)
 })
 
-# ----------- 4[A]. expression-survival days scatter plot ---------------
+# ----------- 4[A1]. scatter plot ---------------
 output$scatter_plot <- renderPlotly({
   withProgress(value = 1,message = "Updating plot ...",{
     if(rv$plot_type == "scatter"){
@@ -1092,7 +1119,7 @@ output$scatter_plot <- renderPlotly({
           df_survival <- rv[["df_gender"]] %>% dplyr::select(patient_id,survival_days,level.y) %>%
             dplyr::filter(level.y %in% rv$scatter_gender)
         }
-        genders <- df_survival$`level.y`
+        Sex <- df_survival$`level.y`
         df_survival <- df_survival %>%
           dplyr::select(-level.y)
       }else{
@@ -1185,8 +1212,30 @@ output$scatter_plot <- renderPlotly({
         xlab <- paste0("Ranks in ",firstlower(dep_name)); ylab <- paste0("Ranks in ",firstlower(exp_unit))
       }
 
+      # save df to rv
+      rv[["annot_df"]] <- df
+      
       # draw the figure
       if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
+        if(length(input$annot_data_points)>0){
+          if(input$annot_data_points != ""){
+            df$Annotation <- paste0(Sex,",",ifelse(df$patient_id %in% input$annot_data_points, "Highlighted", "Not highlighted"))
+            if(rv$tcgar){
+              cols <- c("MALE,Highlighted" = "#5a696a", "MALE,Not highlighted" = addalpha("#00BFC4")
+                        , "FEMALE,Highlighted" = "#f41e0f", "FEMALE,Not highlighted" = addalpha("#F8766D"))
+            }else{
+              cols <- c("Male,Highlighted" = "#5a696a", "Male,Not highlighted" = addalpha("#00BFC4")
+                        , "Female,Highlighted" = "#f41e0f", "Female,Not highlighted" = addalpha("#F8766D"))
+            }
+          }else{
+            df$Annotation <- Sex
+            cols <- c("#00BFC4", "#F8766D")
+          }
+        }else{
+          df$Annotation <- Sex
+          cols <- c("#00BFC4", "#F8766D")
+        }
+        
         fig <- ggplot(df
                       ,aes(x=df_x, y=df_y
                            ,text=paste0(
@@ -1195,18 +1244,18 @@ output$scatter_plot <- renderPlotly({
                              exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +
-          geom_point(aes(color=genders)) + #, shape=genders
+          geom_point(aes(color=Annotation)) + #, shape=Sex
           theme_classic() +
-          scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
+          scale_color_manual(values=cols) #+ scale_shape_manual(values=c(16, 8))
       }else{
         if(!rv$scatter_gender_y){
-          col <- "#939597"
+          col <- "#939597";cols <- c("Highlighted" = "#CF5C78", "Not highlighted" = addalpha("#939597"))
         }else{
-          g_val <- as.numeric(genders) %>% unique(.)
+          g_val <- as.numeric(Sex) %>% unique(.)
           if(g_val == 1){
-            col <- "#00BFC4"
+            col <- "#00BFC4";cols <- c("Highlighted" = "#5a696a", "Not highlighted" = addalpha("#00BFC4"))
           }else{
-            col <- "#F8766D"
+            col <- "#F8766D";cols <- c("Highlighted" = "#f41e0f", "Not highlighted" = addalpha("#F8766D"))
           }
         }
         fig <- ggplot(df
@@ -1217,8 +1266,21 @@ output$scatter_plot <- renderPlotly({
                              exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )
                       )) +
-          theme_classic() +
-          geom_point(color=col)
+          theme_classic()
+        if(length(input$annot_data_points)>0){
+          if(input$annot_data_points != ""){
+            Annotation <- ifelse(df$patient_id %in% input$annot_data_points, "Highlighted", "Not highlighted") %>% as.factor()
+            Annotation <- relevel(Annotation, ref = "Highlighted")
+            fig <- fig +
+              geom_point(aes(color=Annotation)) + scale_color_manual(values = cols)
+          }else{
+            fig <- fig +
+              geom_point(color=col)
+          }
+        }else{
+          fig <- fig +
+            geom_point(color=col)
+        }
       }
       fig <- fig +
         xlab(xlab) +
@@ -1230,15 +1292,23 @@ output$scatter_plot <- renderPlotly({
       }
 
       rv[["scatter_plot"]] <- suppressWarnings(ggplotly(fig,tooltip = "text"))
+# ----------- 4[A2]. scatter2 plot ---------------
     }else if(rv$plot_type == "scatter2"){
       df <- rv[["exprs_1"]] %>% inner_join(rv[["exprs_2"]], by="patient_id") %>%
         inner_join(dplyr::select(rv$df_survival, patient_id, gender), by="patient_id")
       colnames(df) <- c("patient_id","expa","expb","gender")
-      genders <- df$gender
+      lels_gender <- unique(df$gender) %>% sort(.,decreasing = T)
+      df$gender <- factor(df$gender, levels = lels_gender)
+      Sex <- df$gender
+      gender_cats <- unique(Sex)
       if(is.null(rv$scatter_gender)){
-        rv$scatter_gender <- rv[["genders"]] <- unique(genders)
+        rv$scatter_gender <- rv[["genders"]] <- gender_cats
+      }
+      if(rv$scatter_gender_y & length(rv$scatter_gender) > 2){
+        rv$scatter_gender <- rv$scatter_gender[tolower(rv$scatter_gender) %in% c("male","female")]
       }
       df <- df %>% dplyr::filter(gender %in% rv$scatter_gender)
+      Sex <- df$gender
       # the unit, e.g. expression (fpkm)
       exp_unita <- input_mode_name("1")
       exp_unitb <- input_mode_name("2")
@@ -1283,6 +1353,12 @@ output$scatter_plot <- renderPlotly({
       xlab <- paste0(rv[["title_1"]],": ",xlab)
       ylab <- paste0(rv[["title_2"]],": ",ylab)
 
+      # save df to rv
+      if(rv$depmapr){
+        df[["patient_id"]] <- paste0(translate_cells(df[["patient_id"]]),"|",df[["patient_id"]])
+      }
+      rv[["annot_df"]] <- df
+      
       # figure hovers
       txt <- function(.data){paste0(
         "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
@@ -1292,30 +1368,61 @@ output$scatter_plot <- renderPlotly({
 
       # draw the figure
       if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
+        if(length(input$annot_data_points)>0){
+          if(input$annot_data_points != ""){
+            df$Annotation <- paste0(Sex,",",ifelse(df$patient_id %in% input$annot_data_points, "Highlighted", "Not highlighted"))
+            if(rv$tcgar){
+              cols <- c("MALE,Highlighted" = "#5a696a", "MALE,Not highlighted" = addalpha("#00BFC4")
+                        , "FEMALE,Highlighted" = "#f41e0f", "FEMALE,Not highlighted" = addalpha("#F8766D"))
+            }else{
+              cols <- c("Male,Highlighted" = "#5a696a", "Male,Not highlighted" = addalpha("#00BFC4")
+                        , "Female,Highlighted" = "#f41e0f", "Female,Not highlighted" = addalpha("#F8766D"))
+            }
+          }else{
+            df$Annotation <- Sex
+            cols <- c("#00BFC4", "#F8766D")
+          }
+        }else{
+          df$Annotation <- Sex
+          cols <- c("#00BFC4", "#F8766D")
+        }
         fig <- ggplot(df
                       ,aes(x=df_x, y=df_y
                            ,text=txt(.data)
                       )) +
-          geom_point(aes(color=genders)) + #, shape=genders
+          geom_point(aes(color=Annotation)) + #, shape=Sex
           theme_classic() +
-          scale_color_manual(values=c("#00BFC4", "#F8766D")) #+ scale_shape_manual(values=c(16, 8))
+          scale_color_manual(values=cols) #+ scale_shape_manual(values=c(16, 8))
       }else{
         if(!rv$scatter_gender_y){
-          col <- "#939597"
+          col <- "#939597";cols <- c("Highlighted" = "#CF5C78", "Not highlighted" = addalpha("#939597"))
         }else{
-          g_val <- as.numeric(genders) %>% unique(.)
+          g_val <- as.numeric(Sex) %>% unique(.)
           if(g_val == 1){
-            col <- "#00BFC4"
+            col <- "#00BFC4";cols <- c("Highlighted" = "#5a696a", "Not highlighted" = addalpha("#00BFC4"))
           }else{
-            col <- "#F8766D"
+            col <- "#F8766D";cols <- c("Highlighted" = "#f41e0f", "Not highlighted" = addalpha("#F8766D"))
           }
         }
         fig <- ggplot(df
                       ,aes(x=df_x, y=df_y
                            ,text=txt(.data)
                       )) +
-          theme_classic() +
-          geom_point(color=col)
+          theme_classic()
+        if(length(input$annot_data_points)>0){
+          if(input$annot_data_points != ""){
+            Annotation <- ifelse(df$patient_id %in% input$annot_data_points, "Highlighted", "Not highlighted") %>% as.factor()
+            Annotation <- relevel(Annotation, ref = "Highlighted")
+            fig <- fig +
+              geom_point(aes(color=Annotation)) + scale_color_manual(values = cols)
+          }else{
+            fig <- fig +
+              geom_point(color=col)
+          }
+        }else{
+          fig <- fig +
+            geom_point(color=col)
+        }
       }
 
       # rename x- and y- axis
@@ -1528,7 +1635,9 @@ output$ui_km_mul_dp <- renderUI({
 
 # ------ 7c. draw depmap heatmap ------
 observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj,rv$surv_plotted),{
+  req(rv$depmapr)
   req(input$km_mul_dp != "")
+  req(rv$surv_plotted == "plotted")
   withProgress(value = 1, message = "Updating statistics...",{
     rv$km_mul_dp <- input$km_mul_dp
     rv$km_mul_dp_padj <- input$km_mul_dp_padj
@@ -1828,7 +1937,25 @@ output$violin_plot <- renderPlotly({
     rv[["violin_p"]] <- NULL
   }
   
+  # save df to rv
+  rv[["annot_df"]] <- df
   
+  # highlight data points
+  if(length(input$annot_data_points)>0){
+    if(input$annot_data_points != ""){
+      df$Annotation <- paste0(df$mut_cat,",",ifelse(df$patient_id %in% input$annot_data_points, "Highlighted", "Not highlighted"))
+      cat_name <- levels(df$mut_cat)
+      cat_name <- cat_name[cat_name != "Other"]
+      cols <- c("#00BFC4", "#F8766D", "#5a696a", addalpha("#00BFC4"), "#f41e0f", addalpha("#F8766D"))
+      names(cols) <- c("Other",cat_name,"Other,Highlighted","Other,Not highlighted",paste0(cat_name,",Highlighted"),paste0(cat_name,",Not highlighted"))
+    }else{
+      df$Annotation <- df$mut_cat
+      cols <- c("#00BFC4", "#F8766D")
+    }
+  }else{
+    df$Annotation <- df$mut_cat
+    cols <- c("#00BFC4", "#F8766D")
+  }
   # hover labels
   ID <- paste0(
     "<b>",df[["patient_id"]],"</b>\n",
@@ -1836,14 +1963,15 @@ output$violin_plot <- renderPlotly({
     mut_title," status: <b>",df[["mut"]],"</b>"
   )
   # the violin plot
-  p <- ggplot(df, aes(x=mut_cat,y=exp,color=mut_cat,label=ID)) +
-    geom_violin(trim=rv$violin_trim) +
+  p <- ggplot(df, aes(x=mut_cat,y=exp,label=ID)) +
+    geom_violin(trim=rv$violin_trim,aes(color=mut_cat)) +
     scale_color_discrete(direction = -1) +
     stat_summary(fun.data=data_summary,geom="pointrange", color="grey") +
-    geom_jitter(height = 0, width = 0.1) +
+    geom_jitter(height = 0, width = 0.1, aes(color=Annotation)) +
+    scale_color_manual(name = "Annotation", values = cols) +
     labs(y=exp_title_y,x=mut_title) +
     theme_classic() +
-    theme(legend.position="none",
+    theme(legend.position="right",
           plot.title = element_text(size = rel(1.5), hjust = 0.5),
           axis.title = element_text(size = rel(1.45)),
           axis.text = element_text(size = rel(1.35))
@@ -1858,4 +1986,10 @@ observeEvent(input$violin_k,{
   req(length(input$violin_k) > 0)
   req(input$violin_k >= 0)
   rv$violin_k <- input$violin_k
+})
+
+# ------------ 10. annotate data points --------------
+observeEvent(list(rv$annot_data_points_y,rv[["annot_df"]]),{
+  choicess <- rv[["annot_df"]][["patient_id"]]
+  updateSelectInput(session,"annot_data_points", choices = choicess)
 })

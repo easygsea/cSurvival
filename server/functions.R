@@ -262,6 +262,9 @@ input_mode_name <- function(x){
       y <- gsub("FPKM","TPM",y)
     }
   }
+  if(rv$depmapr){
+    y <- names(input_mode_names)[input_mode_names == rv$project]
+  }
   return(y)
 }
 

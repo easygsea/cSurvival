@@ -126,7 +126,9 @@ observeEvent(input$confirm,{
       req(error_depmap == 0)
     }
     rv$depmapr <- rv$depmap
-
+    rv$tcgar <- rv$tcga
+    rv$targetr <- rv$target
+    
     #------ 2. survival data processing ------
     withProgress(value = 1, message = wait_msg("Performing analysis..."),{
       # update survival df
@@ -470,7 +472,8 @@ observeEvent(input$confirm,{
           dplyr::filter(gender != "Unknown")
 
         # gender types
-        rv$scatter_gender <- rv[["genders"]] <- df_combined %>% dplyr::select(gender) %>% unique(.) %>% unlist(.) %>% unname(.)
+        gender_cats <- df_combined %>% dplyr::select(gender) %>% unique(.) %>% unlist(.) %>% unname(.)
+        rv$scatter_gender <- rv[["genders"]] <- gender_cats[tolower(gender_cats) %in% c("male","female")]
 
         df_combined <- dplyr::rename(df_combined, level.x = level, level.y = gender)
         df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",c("x","y"))),1,paste0,collapse="_")

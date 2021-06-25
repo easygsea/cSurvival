@@ -5,7 +5,7 @@ rv <- reactiveValues(
   flagged = "y",
   
   projectStatus="none", project="", max_project_n=1, try_error=0
-  ,tcga=T,target=T,depmap=F,depmapr=F
+  ,tcga=T,tcgar=T,target=T,targetr=T,depmap=F,depmapr=F
   ,ccle_cancer_types="",ccle_cancer_subtypes="",depmap_gene=""
   ,depmap_path=NULL,depmap_genes=NULL,depmap_ids=NULL,depmap_ccle=NULL,cell_lines=NULL
   ,depmap_gene_appear="no"
@@ -61,6 +61,8 @@ rv <- reactiveValues(
   
   # annotate cells
   ,annot_cells_y="" # yes
+  # annotate data points
+  ,annot_data_points_y=""
   
   # # permutations
   # ,nitem = 100
