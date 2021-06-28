@@ -181,7 +181,7 @@ plot_ui <- function(n){
           )
           ,conditionalPanel(
             condition = sprintf("input.%s=='lib'", gs_mode_id),
-            fluidRow(
+            fluidRow(id=paste0("div_gs_db_",x),
               column(
                 4,
                 selectizeInput(

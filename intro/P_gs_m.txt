@@ -1,0 +1,3 @@
+element	intro
+gs_m_1	Third, input your gene(s) (in HUGO symbol) of interest, delimited by tab, space, or newline.
+add_btn_1	Fourth, click to submit your gene list.

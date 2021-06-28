@@ -1,0 +1,8 @@
+element	intro
+div_depmap_stats	Detailed statistics.
+div_dens_plot	Density plot showing distributions of dependency scores.
+gear_btn_dens	Click to adjust advanced visualization parameters for density plot.
+download_btn_dens	Click to download the density plot.
+div_dens_stats_plot	Box plot showing individual cell lines.
+div_annot_cells	(Optional) search and select cell line(s) to highlight in the box plot.
+download_btn_box	Click to download the box plot.

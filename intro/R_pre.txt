@@ -3,11 +3,4 @@ div_project	To start, select a project from DepMap, TARGET, or TCGA. Multiple se
 div_confirm_project	After selecting your project(s) of interest, you will see a <b>Confirm selection!</b> button. Click to proceed. You may also click <b>Reset selection</b> to change your selection.
 div_censor	If TARGET or TCGA, you will have the option to refine the censoring time to study defined benchmark (e.g. 5-year or 10-year) time intervals.
 div_nos	Increase to 2 to study interactions between genes, loci, pathways/gene sets, and/or drugs.
-div_tcga_stype	If TCGA, you will have the option to adjust and study the clinical outcome endpoint of interest. Warnings will be rendered according to the recommended use of curated clinical and survival outcome data by Liu et al., <i>Cell</i>, 2018.
-ui_parameters	This will be the main Analysis panel(s) to select a gene(s)/locus(i), or pathway(s)/gene set(s) of interest. 
-cat_1	First, select a data category. <b>Gene or locus</b>: To study if the expression level, mutational status, copy number, or methylation, or protein level of a gene or locus correlates with poorer/better survival.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.
-db_1	Second, if category is gene/locus, select the type of molecular data: to study if cancer survival is associated with a gene's expression level, mutational status, copy number variation; a microRNA's expression; protein expression; or the methylation level of a DNA segment.
-div_g	Third, search and select your gene/locus of interest. If a gene or locus is not found, try its alias names. If still not found, it means its expression/alteration is barely detected in the selected cancer project. Or, if proteomics or RRPA, it has not been quantified. Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects.
-div_par_gear	If needed, click to adjust advanced parameters.
-confirm	Click <b>Confirm and analyze!</b> to perform Kaplan-Meier (KM) log rank and Cox proportional-hazards (PH) regression analysis.
 

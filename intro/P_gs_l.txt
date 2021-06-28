@@ -1,0 +1,2 @@
+element	intro
+div_gs_db_1	Third, if using <b><a href='https://tau.cmmt.ubc.ca/eVITTA/' target='_blank'>eVITTA</a></b> libraries, select a database, e.g. KEGG, WikiPathways, Reactome Pathways, MSigDB, DrugBank. Then, search for keyword, and select a GS.

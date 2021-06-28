@@ -1,0 +1,2 @@
+element	intro
+ui_track	Percentile P-value tracking on continuous variables. Hover over each percentile for individual P-values, and if applicable, hazard ratios (HRs).

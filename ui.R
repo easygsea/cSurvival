@@ -18,9 +18,10 @@ shinyUI(
         title="cSurival",
 
         dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<b>cSurvival</b>: a mechanistic cancer survival database"))
-                        ,titleWidth = "86.5%"
+                        ,titleWidth = "80%"
                         ,tags$li(class = "dropdown", actionButton("db_download", NULL,icon("database"),style=db_style))
                         ,tags$li(class = "dropdown", actionButton("db_help", NULL,icon("question"),style=db_style))
+                        ,tags$li(class = "dropdown", actionButton("db_demo", NULL,icon=icon("play"),style=db_style))
         )
         # skin = "black",
         ,sidebar
@@ -51,6 +52,7 @@ shinyUI(
             
             ,bsTooltip("db_download","Download source data")
             ,bsTooltip("db_help","Help")
+            ,bsTooltip("db_demo","Example runs")
             
             # ,tags$footer(HTML("<b>Taubert Lab</b> | BC Children's Hospital Research Institute | Centre for Molecular Medicine and Therapeutics | University of British Columbia. 2019-2020. All Rights Reserved."),
             #             align = "left", style = "

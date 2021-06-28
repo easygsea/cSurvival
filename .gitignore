@@ -176,3 +176,4 @@ www/project_data/TCGA-LUAD/df_cnv_scale_gdc.csv
 www/project_data/TCGA-LUAD/df_gene_977_t.tsv
 www/project_data/TCGA-LUAD/df_gene_gdc.csv
 www/project_data/TCGA-LUAD/df_gene_scale_gdc.csv
+www/project_data/DepMap/DepMap-Drug.csv

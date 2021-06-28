@@ -1,4 +1,5 @@
 rv <- reactiveValues(
+  demo="", # yes for example run
   variables_for_geo = list(), # the list to save the names and filenames of csurvival variables
   easygeo_status = FALSE, # the value to control is easyGEO is shown in our app
   analysis_no = 0, show_ui = "", # "yes" upon a successful run

@@ -1184,7 +1184,7 @@ output$ui_ccle_gene <- renderUI({
 observeEvent(list(rv$depmap_gene_appear,input$ccle_cells),{
   req(rv$depmap_gene_appear == "yes")
   updateSelectizeInput(
-    session,"depmap_gene",choices = rv$depmap_genes, server = T, selected = ""
+    session,"depmap_gene",choices = rv$depmap_genes, server = T, selected = rv$depmap_gene
   )
 })
 
@@ -1256,3 +1256,17 @@ output$ui_parameters_confirm <- renderUI({
     )
   )
 })
+
+# ----- NN. DEMO -------
+output$ui_demo_header <- renderUI({
+  req(rv$demo == "yes")
+  column(
+    12,align="center",
+    wellPanel(
+      style = sprintf("background:%s;color:%s;",addalpha(yellow2021,alpha=.5),"black"),
+     HTML(paste0("<p><b>You are in demo mode. It will take ~ 10-20 seconds to load example data and complete demo analysis. Then, explore the sample results as the real output.</b></p>"))
+     ,HTML(paste0("<u><b><a style='color:",red2021,";font-size:120%;' href='https://tau.cmmt.ubc.ca/cSurvival/'><i class='fas fa-sign-out-alt'></i> Exit Demo Mode</a></b></u>"))
+    )
+  )
+})
+

@@ -1,0 +1,4 @@
+element	intro
+ui_parameters	This will be the main Analysis panel(s) to select a gene(s)/locus(i), or pathway(s)/gene set(s) of interest.
+cat_1	First, select a data category. <b>Gene or locus</b>: To study if the expression level, mutational status, copy number, or methylation, or protein level of a gene or locus correlates with poorer/better survival.<br><b>Gene set</b>: To study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes.
+

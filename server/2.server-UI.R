@@ -148,7 +148,7 @@ output$ui_results <- renderUI({
           align="left",
           fluidRow(
             column(
-              12,
+              12,id="div_depmap_stats",
               column(
                 12,
                 title_div
@@ -165,7 +165,7 @@ output$ui_results <- renderUI({
                 6,
               ),
               column(
-                6,align="center",
+                6,align="center",id="div_annot_cells",
                 selectizeInput(
                   "annot_cells"
                   ,HTML(paste0("(Optional) highlight cell lines in box plot:",add_help("annot_cells_q")))
@@ -188,7 +188,7 @@ output$ui_results <- renderUI({
             column(
               12,
               column(
-                6,
+                6,id="div_dens_plot",
                 plotlyOutput("dens_plot",height = "500px", width = "100%")
                 ,div(
                   align = "left",
@@ -218,7 +218,7 @@ output$ui_results <- renderUI({
                 )
               ),
               column(
-                6,
+                6,id="div_dens_stats_plot",
                 plotlyOutput("dens_stats_plot",height = "500px", width = "100%")
                 ,div(
                   align = "left",
@@ -260,22 +260,25 @@ output$ui_results <- renderUI({
                   )
                 }
               }else{
-                div(
-                  selectizeInput(
-                    "annot_data_points"
-                    ,HTML(paste0("(Optional) highlight data point(s):",add_help("annot_data_points_q")))
-                    ,choices = c()
-                    ,multiple = T
-                    ,width = "85%"
-                    ,options = list(
-                      `live-search` = TRUE,
-                      placeholder = "Type to search ..."
-                      ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+                div(id="div_plot",
+                  div(
+                    id="div_annot_data_points",
+                    selectizeInput(
+                      "annot_data_points"
+                      ,HTML(paste0("(Optional) highlight data point(s):",add_help("annot_data_points_q")))
+                      ,choices = c()
+                      ,multiple = T
+                      ,width = "85%"
+                      ,options = list(
+                        `live-search` = TRUE,
+                        placeholder = "Type to search ..."
+                        ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+                      )
                     )
+                    ,bsTooltip("annot_data_points_q",HTML(paste0(
+                      "Select to annotate data point(s) of interest, if any, in the plot below"
+                    )),placement = "right")
                   )
-                  ,bsTooltip("annot_data_points_q",HTML(paste0(
-                    "Select to annotate data point(s) of interest, if any, in the plot below"
-                  )),placement = "right")
                   ,if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
                     plotlyOutput("scatter_plot", height = "585px")
                   }else if(rv$plot_type == "snv_stats"){
@@ -287,7 +290,7 @@ output$ui_results <- renderUI({
                   }
                 )
               } 
-              ,if((rv$plot_type!="gsea" & !rv$depmapr)|(rv$plot_type=="scatter"|rv$plot_type=="scatter2" & rv$depmapr)){
+              ,if((rv$plot_type!="gsea" & !rv$depmapr)|(rv$plot_type=="scatter"|rv$plot_type=="scatter2"|rv$plot_type=="violin" & rv$depmapr)){
                 div(
                   align = "left",
                   style = "position: absolute; right: 2.5em; top: 1.5em;",
@@ -853,15 +856,18 @@ output$ui_stats <- renderUI({
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     h3(stats_title),
     if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
-      selectizeInput(
-        "cor_method",
-        NULL,
-        choices = list(
-          "Pearson's product-moment correlation" = "pearson"
-          ,"Kendall's rank correlation tau" = "kendall"
-          ,"Spearman's rank correlation rho" = "spearman"
+      div(
+        id="div_cor_method",
+        selectizeInput(
+          "cor_method",
+          NULL,
+          choices = list(
+            "Pearson's product-moment correlation" = "pearson"
+            ,"Kendall's rank correlation tau" = "kendall"
+            ,"Spearman's rank correlation rho" = "spearman"
+          )
+          ,selected = rv[["cor_method"]]
         )
-        ,selected = rv[["cor_method"]]
       )
     }
     ,boxPad(

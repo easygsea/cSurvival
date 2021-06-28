@@ -1,7 +1,0 @@
-element	intro
-plot_type	Select visualization options.
-cox_km	Select the method for analyzing and summarizing survival data. KM describe the survival according to one factor under investigation; Cox regression model assesses the effect of several risk factors simultaneously; additional density and box plots are provided for DepMap data analysis and visualization.
-div_surv	Visualization on the fitted survival curves.
-div_plot_gear	Click to adjust advanced visualization parameters.
-download_btn	Click to download the plot.
-div_ui_stats	Detailed analysis statistics.

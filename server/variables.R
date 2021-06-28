@@ -2,13 +2,14 @@
 surv_dir <- paste0(dirname(dirname(getwd())), "/variables/")
 
 # ------ available GMT gene sets -----
-# gmt_dir <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/hsa/")
 gmt_dir <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/hsa/"
-# gmt_dir <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/hsa/" # tau path
-# # collection in a df
-# in_gmt_lst <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/gmts_list.csv") # code test locally
 in_gmt_lst <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/gmts_list.csv"
+# gmt_dir <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/hsa/" # tau path
 # in_gmt_lst <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/gmts_list.csv" # tau path
+# gmt_dir <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/hsa/")
+# in_gmt_lst <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/gmts_list.csv") # code test locally
+
+# # collection in a df
 gmt_collection_df <- read_csv(in_gmt_lst,col_names = F) %>% dplyr::filter(X1 == "hsa")
 # available databases
 gmt_dbs <- str_split(gmt_collection_df$X3,";") %>% lapply(function(x) gsub("_"," ",gsub("?[.]gmt$","",x)))
@@ -252,3 +253,5 @@ col_scale_hr <- append(col_scale_temp, col_scale_hr)
 #                list(0.66666666666, "rgb(215,48,39)"), # 0.01 = log10(0.01) / 3
 #                list(1, "rgb(165,0,38)") # 0.001 = log10(0.001) / 3
 # )
+
+red2021 <- "#CF5C78"; yellow2021 <- "#F5DF4D"; gray2021 <- "#939597"; blue2021 <- "#00589B"; white2021 <- "#F0EEE9"

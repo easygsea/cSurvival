@@ -25,6 +25,7 @@ bodyOne <- tabItem(tabName = "one",
     fluidRow(
         box(
             width = 12, status = "danger",
+            uiOutput("ui_demo_header"),
             column(
               12,
               fluidRow(
