@@ -648,10 +648,25 @@ plot_run_ui <- function(n){
 ####           function to deynamically plot the percentile graphs     ####
 #======================================================================#
 
+#helper function for vertical line
+vline <- function(x = 0, color = "pink") {
+  list(
+    type = "line", 
+    y0 = 0, 
+    y1 = 1,
+    yref = "paper",
+    x0 = x, 
+    x1 = x, 
+    line = list(color = color, dash="dashdot")
+  )
+}
+
+
 single_plot <- function(quantile_df, index){
   #Due to bug in Plotly, I am using the solution mentioned in this website:
   #https://stackoverflow.com/questions/55251470/missing-data-when-supplying-a-dual-axis-multiple-traces-to-subplot
   #If index == 1, this is first graph and we need to pass in normal y axis
+  cutoff <- quantile_df$quantile[which.min(quantile_df$p_value)]
   if(index == 1){
     yaxes = c("y","y2")
     HR_Axis <- list(overlaying = yaxes[1],
@@ -692,8 +707,21 @@ single_plot <- function(quantile_df, index){
       xanchor = "middle",
       yanchor = "top",
       showarrow = FALSE,
-      font = list(size = 15)
-    )
+      font = list(size = 20))
+    # )%>%
+    # add_annotations(
+    #   text = "minimum p value cut off",
+    #   x = quantile_df$quantile[which.min(quantile_df$p_value)],
+    #   y = 0.1,
+    #   yref = "paper",
+    #   xanchor = "middle",
+    #   yanchor = "top",
+    #   showarrow = FALSE,
+    #   font = list(size = 15)
+    # )
+  
+  #%>%
+    #add_segments(x = quantile_df$quantile[which.min(quantile_df$p_value)], xend = quantile_df$quantile[which.min(quantile_df$p_value)], y = 0, yend = 1)
   #Add a DepMap Check
   if(!all(is.na(quantile_df$hr))){
     fig <- fig %>%
@@ -715,29 +743,45 @@ single_plot <- function(quantile_df, index){
     #omit second axis if all hr values = null
     if(all(is.na(quantile_df$hr))){
       fig <- fig %>%
+        add_trace(y = c(0,1), x = c(cutoff, cutoff),type = 'scatter', mode = 'lines',#color =~p_value,
+                  line = list(color = 'pink', dash="dashdot"),
+                  yaxis = yaxes[1],
+                  name = 'Minimum P-value cutoff') %>%
         layout(title = 'P Values of Different Percentiles',
                xaxis = list(title = 'Quantile (%)'),
                yaxis = P_Axis,
-               hovermode = "x unified"
+               hovermode = "x unified"#,
+               #shapes = list(vline(quantile_df$quantile[which.min(quantile_df$p_value)]))
         )
     }
     else{
       fig <- fig %>%
+        add_trace(y = c(0,1), x = c(cutoff, cutoff),type = 'scatter', mode = 'lines',#color =~p_value,
+                  line = list(color = 'pink', dash="dashdot"),
+                  yaxis = yaxes[1],
+                  name = 'Minimum P-value cutoff') %>%
         layout(title = 'P Values of Different Percentiles',
                xaxis = list(title = 'Quantile (%)'),
                yaxis = P_Axis,
                yaxis2 = HR_Axis,
-               hovermode = "x unified"
+               hovermode = "x unified"#,
+               #shapes = list(vline(quantile_df$quantile[which.min(quantile_df$p_value)]))
         )
     }
   }
   else{
     fig <- fig %>%
+      add_trace(y = c(0,1), x = c(cutoff, cutoff),type = 'scatter', mode = 'lines',#color =~p_value,
+                line = list(color = 'pink', dash="dashdot"),
+                yaxis = yaxes[1],
+                name = 'Minimum P-value cutoff',
+                showlegend = FALSE) %>%
       layout(title = 'P Values and Harzard Ratios of Different Percentiles',
              xaxis = list(title = 'Quantile (%)'),
              yaxis2 = P_Axis,
              yaxis3 = HR_Axis,
-             hovermode = "x unified"
+             hovermode = "x unified"#,
+             #shapes = list(vline(quantile_df$quantile[which.min(quantile_df$p_value)]))
       )
   }
   
