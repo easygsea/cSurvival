@@ -193,6 +193,7 @@ observeEvent(input$reset_project,{
   rv$project <- ""; rv$tcga <- T; rv$depmap <- F; rv$target <- F; rv$show_ui <- ""
   rv$depmap_path<-NULL; rv$depmap_genes<-NULL; rv$depmap_ids<-NULL; rv$depmap_ccle<-NULL; rv$cell_lines<-NULL
   rv$ccle_cancer_types<-"";rv$ccle_cancer_subtypes="";rv$depmap_gene=""
+  rv$annot_cells_y <- "";rv$annot_data_points_y <- ""
   
   rv[["cox_1"]] <- NULL
   clear_rds()

@@ -792,7 +792,9 @@ single_plot <- function(quantile_df, index){
 assemble_percentile_plot <- function(quantile_df_list){
   fig_list <- c()
   for(index in 1:length(quantile_df_list)){
-    fig_list[[index]] <- single_plot(quantile_df_list[[index]], index = index)
+    if(!is.null(rv[["quantile_graph"]][[index]])){
+      fig_list[[index]] <- single_plot(quantile_df_list[[index]], index = index)
+    }
   }
   
   return(fig_list)

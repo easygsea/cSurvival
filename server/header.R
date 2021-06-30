@@ -3,17 +3,17 @@ db_dir <- "https://tau.cmmt.ubc.ca/cSurvival/project_data/"
 observeEvent(input$db_download,{
   showModal(
     modalDialog(
-      title = h3(HTML("cSurvival source data")),
+      title = h3(HTML("cSurvival Data Repository")),
       fluidRow(style = "font-size:110%;",
         column(
           12,
-          p(paste0("cSurvival aims to provide reliable and integrated resources for both experimental and clinical biologists to scrutinize potential prognostic biomarkers and their interactions, evaluate candidate cell line models for mechanistic studies, and study genetic regulations of drug resistance in cancers."))
+          p(paste0("cSurvival aims to provide reliable and integrated resources for both experimental and clinical researchers to scrutinize potential prognostic biomarkers and their interactions, evaluate candidate cell line models for mechanistic studies, and study genetic regulation of drug resistance in cancers."))
           ,p(paste0("For each dataset, we controlled for quality by flagging problematic samples (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC)",
-                    ", extracted primary tumor data (Sample Type Code 03 or 09 for TCGA-LAML, TARGET-ALL and TARGET-AML; 01 or 06 for TCGA-SKCM; 01 for others) to suit the purpose of survival analysis, and transformed the data into a standardized format for customizable and reproducible studies."
+                    ", extracted primary tumor data (Sample Type Code 03 or 09 for TCGA-LAML, TARGET-ALL and TARGET-AML; 01 or 06 for TCGA-SKCM; 01 for others) to suit the purpose of outcomes analysis, and transformed the data into a standardized format for customizable and reproducible studies."
                     ," Uniquely, cSurvival offers:"
                     ))
           ,tags$li(HTML("Bivariate outcomes analysis to identify biomarker and/or pathway interactions and to screen for synthetical lethality or compensatory targets for non-targetable drivers;"))
-          ,tags$li(HTML("Pathway-level outcomes analysis with comprehensive libraries of up-to-date GSs from <a href='https://tau.cmmt.ubc.ca/eVITTA/' target='_blank'>eVITTA</a>, a webserver we recently developed for transcriptome analysis;"))
+          ,tags$li(HTML("Pathway-level outcomes analysis with comprehensive libraries of up-to-date GSs from <a href='https://tau.cmmt.ubc.ca/eVITTA/' target='_blank'>eVITTA</a> (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8218201/' target='_blank'><i>Nucleic Acids Research</i>, 2021</a>), a webserver we recently developed for transcriptome analysis;"))
           ,tags$li(HTML("A refined and adjustable analytical pipeline."))
           ,br()
           ,p("Scroll down to download cSurvival's curated datasets.")
@@ -112,7 +112,7 @@ observeEvent(input$db_download,{
             ,tags$li(HTML("Tsherniak, A., Vazquez, F., Montgomery, P.G., Weir, B.A., Kryukov, G., Cowley, G.S., Gill, S., Harrington, W.F., Pantel, S., Krill-Burger, J.M. and Meyers, R.M., 2017. Defining a cancer dependency map. Cell, 170(3), pp.564-576."))
             ,br(),default_hr(),br()
             # ------------- 3. curated DepMap data --------------
-            ,red_title("cSurvival reformated data:")
+            ,red_title("cSurvival reformatted data:")
             ,div(
               grey_h4("Gene perturbation effect")
               ,tags$li(HTML(paste0("<b>CRISPR-Cas9 gene knockout effect</b>: ",dlink(paste0(db_dir,"DepMap/DepMap-CRISPR.csv"),paste0("DepMap-CRISPR.csv")))))
