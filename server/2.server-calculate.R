@@ -441,7 +441,9 @@ observeEvent(input$confirm,{
           for(x in 1:rv$variable_n){
             cox_x <- paste0("cox_",x)
             if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){p_adj_tmp_km <- ifelse(is.null(p_adj_tmp_km),0,p_adj_tmp_km) + rv[[cox_x]][["km"]][["p.adj"]]}
-            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]][x] <- ifelse(is.null(rv[["cox_all"]][["cox"]][["p.adj"]][x]),0,rv[["cox_all"]][["cox"]][["p.adj"]][x]) + correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
+            tmp <- rv[["cox_all"]][["cox"]][["p.adj"]][x]
+            if(is.null(tmp)){tmp <- 0};if(is.na(tmp)){tmp <- 0}
+            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]][x] <- tmp + rv[[cox_x]][["cox"]][["p.adj"]]} # correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
           }
           rv[["cox_all"]][["km"]][["p.adj"]] <- p_adj_tmp_km
         }
@@ -492,12 +494,12 @@ observeEvent(input$confirm,{
           # perform survival analysis
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2,0,1,.1,iter_mode=F)
           if(rv$depmap){
-            if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- rv[["cox_gender"]][["p"]] + rv[["cox_1"]][["p.adj"]]}
+            if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["p.adj"]]),0,rv[["cox_gender"]][["p.adj"]]) + rv[["cox_1"]][["p.adj"]]}
           }else{
-            if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- rv[["cox_gender"]][["km"]][["p"]] + rv[["cox_1"]][["km"]][["p.adj"]]}
+            if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["km"]][["p.adj"]]),0,rv[["cox_gender"]][["km"]][["p.adj"]]) + rv[["cox_1"]][["km"]][["p.adj"]]}
             if(!is.null(rv[["cox_1"]][["cox"]][["p.adj"]])){
-              rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_gender"]][["cox"]][["p"]][1] + correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
-              rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p"]][2]
+              rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_1"]][["cox"]][["p.adj"]]#correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
+              # rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p.adj"]][2]
               # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
             }
           }

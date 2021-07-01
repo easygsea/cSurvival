@@ -642,7 +642,7 @@ cal_surv_rna <-
       if(iter_mode){
         p.km.adj <- correct_p(p.km,min,max,step)
         p.cox.adj <- sapply(cox.stats$coefficients[,5], function(x){
-          x <- correct_p(as.numeric(x),min,max,step)
+          correct_p(as.numeric(x),min,max,step)
         })
       }else{
         p.km.adj <- NULL

@@ -2,7 +2,7 @@ library(survival) # to do the survival analysis
 library(survminer) # to plot the survival analysis nicer
 library(mets) # Analysis of Multivariate Event Times
 
-setwd("/Users/jeancheng/Documents/cSurvival/")
+setwd("/Users/jeancheng/Documents/cSurvival_dev/")
 
 # ------- 1. basic cox and km fit ---------
 cox_fit <- readRDS("basic_scripts/surv_test/cox_fit")
