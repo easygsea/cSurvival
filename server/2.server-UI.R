@@ -1642,13 +1642,14 @@ output$ui_km_mul_dp <- renderUI({
 })
 
 # ------ 7c. draw depmap heatmap ------
-observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj,rv$surv_plotted),{
+observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj,rv$surv_plotted,rv$plot_type),{
+  req(rv$plot_type == "gender" | rv$plot_type == "all")
   req(rv$depmapr)
   req(input$km_mul_dp != "")
   req(rv$surv_plotted == "plotted")
   withProgress(value = 1, message = "Updating statistics...",{
     rv$km_mul_dp <- input$km_mul_dp
-    rv$km_mul_dp_padj <- input$km_mul_dp_padj
+    if(length(input$km_mul_dp_padj)>0){rv$km_mul_dp_padj <- input$km_mul_dp_padj}
     
     # retrieve df for survival analysis
     df <- rv[[paste0("df_",rv$plot_type)]]
@@ -1671,7 +1672,7 @@ observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj,rv$surv_plotted),{
     
     # adjust p.adj
     if(rv$km_mul_dp_padj == "padj"){
-      if(!is.null(rv[["res"]][["p.adj"]])){
+      if(length(rv[["res"]][["p.adj"]])>0){
         surv_diff$p.value <- surv_diff$p.value + (rv[["res"]][["p.adj"]] - rv[["res"]][["p"]])
       }
       surv_diff$p.value <- ifelse(surv_diff$p.value > 1, 1, surv_diff$p.value)
