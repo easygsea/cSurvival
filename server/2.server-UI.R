@@ -168,7 +168,7 @@ output$ui_results <- renderUI({
                 6,align="center",id="div_annot_cells",
                 selectizeInput(
                   "annot_cells"
-                  ,HTML(paste0("(Optional) highlight cell lines in box plot:",add_help("annot_cells_q")))
+                  ,HTML(paste0("(Optional) highlight cell line(s) in box plot:",add_help("annot_cells_q")))
                   ,choices = c()
                   ,multiple = T
                   ,width = "85%"
@@ -1796,7 +1796,7 @@ output$dens_stats_plot <- renderPlotly({
 # highlight cells
 observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
   # req(rv$annot_cells_y == "yes")
-  updateSelectizeInput(session,"annot_cells",choices = rv[["dens_df"]][["Cell"]],server = T)
+  shinyjs::delay(2000,updateSelectizeInput(session,"annot_cells",choices = rv[["dens_df"]][["Cell"]],server = T))
 })
 
 # --------- 8. P-value tracking -------------
