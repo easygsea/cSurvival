@@ -320,13 +320,15 @@ output$ui_results <- renderUI({
                 )
               }
             )
-            ,conditionalPanel(
-              'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
-              column(
-                5, align="left",id="div_ui_stats",
-                uiOutput("ui_stats")
+            ,if(!(rv$depmapr & if_surv())){
+              conditionalPanel(
+                'input.plot_type != "snv_stats" & input.plot_type != "gsea"',
+                column(
+                  5, align="left",id="div_ui_stats",
+                  uiOutput("ui_stats")
+                )
               )
-            )
+            }
           )
       }
       ,conditionalPanel(
