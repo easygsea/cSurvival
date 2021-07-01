@@ -1820,7 +1820,9 @@ output$quantile_graph <- renderPlotly({
   req(length(rv$quantile_graph)>= 1)
   #NEW ONE
   fig_list <- assemble_percentile_plot(rv$quantile_graph)
-  fig_list <- fig_list[-which(sapply(fig_list, is.null))]
+  if(length(fig_list) > 1){
+    fig_list <- fig_list[-which(sapply(fig_list, is.null))]
+  }
   
   #just 1 analysis
   if(length(fig_list) == 1){
