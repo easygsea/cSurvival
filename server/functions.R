@@ -244,7 +244,7 @@ input_mode <- function(x){
   ifelse(input[[cat_id]] == "g", input[[db_id]], input[[gs_mode_id]])
 }
 
-input_mode_name <- function(x){
+input_mode_name <- function(x, if_crispr=F){
   inmode <- input_mode(x)
   # special mode for normalized counts
   cat_id <- paste0("cat_",x)
@@ -262,8 +262,10 @@ input_mode_name <- function(x){
       y <- gsub("FPKM","TPM",y)
     }
   }
-  if(rv$depmapr){
-    y <- names(input_mode_names)[input_mode_names == rv$project]
+  if(if_crispr){
+    if(rv$depmapr){
+      y <- names(input_mode_names)[input_mode_names == rv$project]
+    }
   }
   return(y)
 }

@@ -143,7 +143,7 @@ output$ui_results <- renderUI({
           ,bsTooltip("cox_km_q",HTML(cox_km_txt)
           ,placement = "right")
         )
-      }else if(surv_yn & rv$depmapr){
+      }else if(surv_yn & rv$depmapr & typeof(rv[[paste0("df_",input$plot_type)]]) == "list"){
         div(
           align="left",
           fluidRow(
@@ -247,7 +247,7 @@ output$ui_results <- renderUI({
         uiOutput("ui_track")
       }else{
           div(
-            column(id="div_surv",
+            column(id="div_surv",style="word-break: break-word;",
               area_w, align = "left",
               if(!rv$depmapr & rv$plot_type != "gsea"){
                 title_div
@@ -1141,7 +1141,8 @@ output$scatter_plot <- renderPlotly({
       df <- rv[["exprs_1"]]
 
       # the unit, e.g. expression (fpkm)
-      exp_unit <- input_mode_name("1")
+      if_crispr_y <- rv[["catr_1"]] == "g" & (rv[["dbr_1"]] == "crispr" | rv[["dbr_1"]] == "rnai" | rv[["dbr_1"]] == "drug")
+      exp_unit <- input_mode_name("1",if_crispr=if_crispr_y)
 
       df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
       if(ncol(df) == 3){

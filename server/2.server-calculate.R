@@ -13,9 +13,14 @@ observeEvent(input$confirm,{
     error_norm_g_dup <- NULL; error_norm_gs_lib_dup <- NULL
     for(x in 1:rv$variable_n){
       cat_id <- paste0("cat_",x)
+      # save data categories
+      rv[[paste0("catr_",x)]] <- input[[cat_id]]
+      rv[[paste0("dbr_",x)]] <- ""
+      # check if errors in user's input
       if(input[[cat_id]] == "g"){
         g_ui_id <- paste0("g_",x)
         db_id <- paste0("db_",x)
+        rv[[paste0("dbr_",x)]] <- input[[db_id]]
         g_ui_norm_id <- paste0("gnorm_",x)
         g_ui_norm_g_id <- paste0("gnorm_g_",x)
         if(input[[g_ui_id]] == ""){
