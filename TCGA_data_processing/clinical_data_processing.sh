@@ -1,6 +1,6 @@
 ############################################
 ## TCGA clinical outcomes data processing ##
-## original dataset: Liu et al. Cell 2021 ##
+## original dataset: Liu et al. Cell 2018 ##
 ## https://gdc.cancer.gov/about-data/publications/PanCan-Clinical-2018 ##
 ############################################
 
