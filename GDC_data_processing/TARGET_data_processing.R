@@ -180,7 +180,7 @@ for(w in seq_along(project_id)){
              data.category = "Transcriptome Profiling",
              experimental.strategy = "RNA-Seq",
              data.type = "Gene Expression Quantification",
-             workflow.type = "HTSeq - FPKM",
+             workflow.type = "HTSeq - FPKM-UQ",
              access = "open")
   )
   if(!inherits(query_gene_counts, "try-error")){
@@ -770,7 +770,7 @@ generate_gene_dfs <- function(project_id, shorten_position = 22L){
                data.category = "Transcriptome Profiling",
                experimental.strategy = "RNA-Seq",
                data.type = "Gene Expression Quantification",
-               workflow.type = "HTSeq - FPKM",
+               workflow.type = "HTSeq - FPKM-UQ",
                access = "open")
     )
     if(!inherits(query_gene_counts, "try-error")){
@@ -814,7 +814,7 @@ generate_gene_dfs <- function(project_id, shorten_position = 22L){
     } else {next}
     
     # Create the table for id conversion --------------------------------------
-    if(i==1){
+    if(k==1){
       # create individual tables using org.Hs
       egENS <- toTable(org.Hs.egENSEMBL)
       egSYMBOL <- toTable(org.Hs.egSYMBOL)
