@@ -58,7 +58,7 @@ library(RColorBrewer)
 
 
 #START OF THE CODES FOR GRAPH----
-setwd("/Applications/Codes/cSurvival/basic_scripts")
+setwd("/Applications/Codes/cSurvival/circos_plot")
 
 #load RDS
 
@@ -105,20 +105,34 @@ box_ylim <- calculate_ylim(DepMap = DepMap,TARGET = TARGET, TCGA = TCGA)
 text_coefficient <- 0.9
 
 
+
+
+subproject_calculate_y <- function(subproject = df_inner$subproject, bigproject){
+  y = c()
+  subproject_length <- nchar(df_inner$subproject[df_inner$bigproject == bigproject])
+  ylim_max <- max(subproject_length)
+  for(index in 1: length(subproject[df_inner$bigproject == bigproject])){
+    y[index] <- 1/2 *subproject_length[index]
+    
+  }
+  return(y)
+}
+
+
 #START OF GRAPH
 circos.par(points.overflow.warning = FALSE)
 circos.initialize(df_inner$bigproject, xlim = xlim_matrix)#df_inner$subproject_mapping)
 #circos.trackPoints(df_inner$bigproject, x = df_inner$subproject_mapping, y = df_inner$count, pch = 16, cex = 0.5)
-circos.track(ylim = c(0,11),bg.border = NA, panel.fun = function(x, y) {
+circos.track(ylim = c(0,max(nchar(df_inner$subproject))),bg.border = NA, panel.fun = function(x, y) {
   
 })
 
 circos.update(sector.index = "DepMap", track.index = 1,bg.border = NA)
-circos.text(x = c(1,1.75:2.75), y = CELL_META$ycenter, labels = df_inner$subproject[df_inner$bigproject == "DepMap"], cex = 0.5, facing = "clockwise", niceFacing = TRUE)
+circos.text(x = c(1,1.75:2.75), y = subproject_calculate_y(bigproject = "DepMap"), labels = df_inner$subproject[df_inner$bigproject == "DepMap"], cex = 0.5, facing = "clockwise", niceFacing = TRUE)
 circos.update(sector.index = "TARGET", track.index = 1,bg.border = NA)
-circos.text(x = c(1,1.75:8.75), y = CELL_META$ycenter, labels = df_inner$subproject[df_inner$bigproject == "TARGET"], cex = 0.5, facing = "clockwise", niceFacing = TRUE)
+circos.text(x = c(1,1.75:8.75), y = subproject_calculate_y(bigproject = "TARGET"), labels = df_inner$subproject[df_inner$bigproject == "TARGET"], cex = 0.5, facing = "clockwise", niceFacing = TRUE)
 circos.update(sector.index = "TCGA", track.index = 1,bg.border = NA)
-circos.text(x = c(1,1.75:32.75), y = CELL_META$ycenter, labels = df_inner$subproject[df_inner$bigproject == "TCGA"], cex = 0.5, facing = "clockwise", niceFacing = TRUE)
+circos.text(x = c(1,1.75:32.75), y = subproject_calculate_y(bigproject = "TCGA"), labels = df_inner$subproject[df_inner$bigproject == "TCGA"], cex = 0.5, facing = "clockwise", niceFacing = TRUE)
 
 circos.track(ylim = box_ylim * 2, panel.fun = function(x, y) {
 })
@@ -139,10 +153,10 @@ circos.text(x = c(0.75,1.75:8.75), y = CELL_META$cell.ylim[2] * text_coefficient
 circos.boxplot(TARGET, c(1,1.75:8.75),box_width = 0.5, cex = 0.25)
 
 # This is for the layer of histogram and count, the reason I multiply 1.1 here is because I want to create extra room so that the count text can be written above of the histogram
-circos.trackHist(ylim = c(min(df_inner$count),max(df_inner$count)*1.1),graph_df$bigproject,x = graph_df$subproject_mapping, col = "#999999", border = "#999999", bin.size = 0.5)
-circos.text(x = c(1,1.75:32.75), y = CELL_META$cell.ylim[2] * text_coefficient, labels = as.character(df_inner$count[df_inner$bigproject == "TCGA"]), cex = 0.4, facing = "bending.outside", niceFacing = TRUE, sector.index	= "TCGA", track.index = 3)
-circos.text(x = c(0.75,1.75:8.75), y = CELL_META$cell.ylim[2] * text_coefficient, labels = as.character(df_inner$count[df_inner$bigproject == "TARGET"]), cex = 0.4, facing = "bending.outside", niceFacing = TRUE, sector.index	= "TARGET", track.index = 3)
-circos.text(x = c(1,1.75:2.75), y = CELL_META$cell.ylim[2] * text_coefficient, labels = as.character(df_inner$count[df_inner$bigproject == "DepMap"]), cex = 0.4, facing = "bending.outside", niceFacing = TRUE, sector.index	= "DepMap", track.index = 3)
+circos.trackHist(ylim = c(min(df_inner$count),max(df_inner$count)*1.5),graph_df$bigproject,x = graph_df$subproject_mapping, col = "#999999", border = "#999999", bin.size = 0.5)
+circos.text(x = c(1,1.75:32.75), y = CELL_META$cell.ylim[2] * text_coefficient * 0.9, labels = as.character(df_inner$count[df_inner$bigproject == "TCGA"]), cex = 0.4, facing = "clockwise", niceFacing = TRUE, sector.index	= "TCGA", track.index = 3)
+circos.text(x = c(0.75,1.75:8.75), y = CELL_META$cell.ylim[2] * text_coefficient * 0.9, labels = as.character(df_inner$count[df_inner$bigproject == "TARGET"]), cex = 0.4, facing = "clockwise", niceFacing = TRUE, sector.index	= "TARGET", track.index = 3)
+circos.text(x = c(1,1.75:2.75), y = CELL_META$cell.ylim[2] * text_coefficient * 0.9, labels = as.character(df_inner$count[df_inner$bigproject == "DepMap"]), cex = 0.4, facing = "clockwise", niceFacing = TRUE, sector.index	= "DepMap", track.index = 3)
 
 #This is for the most inner track
 circos.track(df_inner$bigproject,ylim = c(0,1), track.height = 0.2, panel.fun = function(x, y){
