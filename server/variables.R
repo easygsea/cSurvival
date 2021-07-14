@@ -57,7 +57,7 @@ gmt_links <- list(
 flagged_cases <- fread(paste0(pro_dir,"/977/flagged_cases.tsv"),sep="\t") %>% .[["patient_id"]]
 # ------- names for input modes ----------
 input_mode_names <- c(
-  "Expression (FPKM)" = "rna"
+  "Expression (UQ-FPKM)" = "rna"
   ,"Mutation" = "snv"
   ,"Copy number" = "cnv"
   ,"Expression (RPM)" = "mir"

@@ -3,7 +3,7 @@ rv <- reactiveValues(
   variables_for_geo = list(), # the list to save the names and filenames of csurvival variables
   easygeo_status = FALSE, # the value to control is easyGEO is shown in our app
   analysis_no = 0, show_ui = "", # "yes" upon a successful run
-  flagged = "y",
+  flagged = "y", min_p_kc = "km",
   
   projectStatus="none", project="", max_project_n=1, try_error=0
   ,tcga=T,tcgar=T,target=T,targetr=T,depmap=F,depmapr=F

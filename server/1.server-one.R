@@ -795,20 +795,45 @@ output$par_gear <- renderUI({
         12,align="center",
         wellPanel(
           style="background-color:#F0EEE9; border: .5px solid #fff;",
-          radioGroupButtons(
-            inputId = "flagged",
-            label = HTML(paste0("<h4>If TCGA, exclude flagged cases from analysis? ",add_help("flagged_q"),"</h4>")),
-            choices = c("Yes"="y","No"="n"),
-            selected = rv$flagged,
-            status = "danger", #size = "sm",
-            checkIcon = list(
-              yes = icon("check-square"),
-              no = icon("square-o")
+          fluidRow(
+            column(
+              6,
+              radioGroupButtons(
+                inputId = "flagged",
+                label = HTML(paste0("<h4>If TCGA, exclude flagged cases from analysis? ",add_help("flagged_q"),"</h4>")),
+                choices = c("Yes"="y","No"="n"),
+                selected = rv$flagged,
+                status = "danger", #size = "sm",
+                checkIcon = list(
+                  yes = icon("check-square"),
+                  no = icon("square-o")
+                )
+              )
+            )
+            ,column(
+              6,
+              radioGroupButtons(
+                "min_p_kc",
+                HTML(paste0("<h4>Method to determine <i>P</i><sub>min</sub>",add_help("min_p_kc_q"),"</h4>")),
+                choices = c("KM log-rank"="km","Cox PH model"="cox"),
+                selected = rv$min_p_kc,
+                status = "danger", #size = "sm",
+                checkIcon = list(
+                  yes = icon("check-square"),
+                  no = icon("square-o")
+                )
+              )
             )
           )
-          ,bsTooltip("flagged_q",HTML(flagged_exp),placement = "right")
+          ,bsTooltip("flagged_q",HTML(flagged_exp),placement = "top")
           ,radioTooltip(id = "flagged", choice = "y", title = HTML("Remove flagged cases"))
           ,radioTooltip(id = "flagged", choice = "n", title = HTML("Keep all cases"))
+          ,bsTooltip("min_p_kc_q",HTML(paste0(
+            "Select the test to determine the optimal cutoff point using the minimum <i>P</i>-value method. "
+            ,"Only applicable for continuous variables (e.g. mRNA gene expression, DNA methylation)"))
+            ,placement = "top")
+          ,radioTooltip(id = "min_p_kc", choice = "km", title = HTML("Kaplan-Meier (KM) log-rank test"))
+          ,radioTooltip(id = "min_p_kc", choice = "cox", title = HTML("Cox proportional-hazard (PH) model"))
         )
       )
     },
@@ -817,6 +842,7 @@ output$par_gear <- renderUI({
 })
 
 observeEvent(input$flagged,{rv$flagged <- input$flagged})
+observeEvent(input$min_p_kc,{rv$min_p_kc <- input$min_p_kc})
 
 # ------- 1.2a update all run parameters according to analysis #1 --------
 observeEvent(input$toall,{

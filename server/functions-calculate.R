@@ -338,7 +338,11 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
     }else{
       surv_diff <- surv_cox(df)
       hr <- coef(summary(surv_diff))[,2]
-      p_diff <- summary(surv_diff)$sctest[3]
+      if(rv$min_p_kc == "km"){
+        p_diff <- summary(surv_diff)$sctest[3]
+      }else if(rv$min_p_kc == "cox"){
+        p_diff <- summary(surv_diff)$coefficients[,5]
+      }
       # surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
       # p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     }
