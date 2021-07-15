@@ -85,9 +85,9 @@ extract_gene_data <- function(x, type){
       genes_n <- rv[[paste0("genes",x)]][all_genes %in% genes_n]
     }
   }else if(type == "manual"){
-    all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
     genes <- toupper(rv[[paste0("gs_m_",x)]])
     genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+    rv[[paste0("gs_m_len",x)]] <- length(genes)
   }else if(type == "cnv" | type == "mir" | type == "met" | type == "pro" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
     # all_genes <- rv[[paste0("genes",x)]]
     genes <- input[[g_ui_id]]

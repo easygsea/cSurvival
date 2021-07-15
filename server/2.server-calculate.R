@@ -281,7 +281,7 @@ observeEvent(input$confirm,{
               shinyalert(paste0("None of the entered genes in Analysis #",x," 1.3 are found in the expression dataset of the selected cancer project. Please revise your gene list entry in Analysis #",x,". Thank you."))
             }else{
               rv[[paste0("title_",x)]] <- paste0("Manual collection of genes (input n=",length(rv[[paste0("gs_m_",x)]])
-                                                 ,", detected n=",n_col,")"
+                                                 ,", detected n=",rv[[paste0("gs_m_len",x)]],")"
                                                  )
             }
           }
