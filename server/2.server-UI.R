@@ -1146,12 +1146,12 @@ output$scatter_plot <- renderPlotly({
 
       df_o <- df <- df_survival %>% inner_join(df, by="patient_id")
       if(ncol(df) == 3){
-        gene_name <- colnames(df)[3]
+        gene_name <- rv[["title_1"]]#colnames(df)[3]
         colnames(df) <- c("patient_id","survival_days","exp")
         exprs <- df$exp
         rv[["gs_no"]] = T; exp_type = exp_unit
         if(rv$scatter_log_y){
-          if(input$db_1 == "crispr" | input$db_1 == "rnai" | input$db_1 == "drug"){
+          if(rv$dbr_1 == "crispr" | rv$dbr_1 == "rnai" | rv$dbr_1 == "drug"){
             df_y <- df$exp
             ylab <- exp_unit
           }else{
@@ -1270,7 +1270,7 @@ output$scatter_plot <- renderPlotly({
         fig <- ggplot(df
                       ,aes(x=df_x, y=df_y
                            ,text=paste0(
-                             "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
+                             pid,": <b>",.data[["patient_id"]],"</b>\n",
                              dep_name,": <b>",.data[["survival_days"]],"</b>\n",
                              exp_type,": <b>",signif(exprs,digits=3),"</b>"
                            )

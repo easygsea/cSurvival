@@ -251,15 +251,15 @@ input_mode_name <- function(x, if_crispr=F){
   db_id <- paste0("db_",x)
   gs_mode_id <- paste0("gs_mode_",x)
   g_ui_norm_id <- paste0("gnorm_",x)
-  if(input[[g_ui_norm_id]] != "none" & (input[[cat_id]] == "g" & input[[db_id]] == "rna")| (input[[cat_id]] == "gs" & input[[gs_mode_id]] == "lib")){
+  if(input[[g_ui_norm_id]] != "none" & ((input[[cat_id]] == "g" & input[[db_id]] == "rna")| (input[[cat_id]] == "gs" & input[[gs_mode_id]] == "lib"))){
     inmode <- input[[g_ui_norm_id]]
   }
   y <- names(input_mode_names)[input_mode_names == inmode]
   if(inmode == "rna"){
     if(rv$tcga){
-      y <- gsub("FPKM","upper quartile normalized RSEM",y)
+      y <- gsub("UQ-FPKM","upper quartile normalized RSEM",y)
     }else if(rv$depmap){
-      y <- gsub("FPKM","TPM",y)
+      y <- gsub("UQ-FPKM","TPM",y)
     }
   }
   if(if_crispr){

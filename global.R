@@ -29,6 +29,8 @@ library(colorspace)
 library(ggsci)
 library(plyr)
 library(plotly)
+library(parallel)
+library(lme4)
 # library(arrangements) # permutations
 options(repos = BiocManager::repositories())
 
