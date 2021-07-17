@@ -135,7 +135,7 @@ plot_ui <- function(n){
           choices = c("Gene or locus" = "g", "Gene set (GS)" = "gs")
           ,selected = rv[[cat_id]]
           ,status = "default"
-          ,icon = icon("check")
+          ,icon = icon("check", style="color:#EA5455;")
           ,shape = "curve"
           # ,plain = T
           # ,outline = T
