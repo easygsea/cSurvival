@@ -1,11 +1,12 @@
 # the panel to confirm project(s) selection
 confirm_panel <- conditionalPanel(
   'input.project != "" & !output.projectStatus',
-  actionBttn(
-    "confirm_project",
-    tags$b("Confirm selection!")
-    ,block = T,style = "simple",color = "warning",size="sm"
-  )
+  # actionBttn(
+  #   "confirm_project",
+  #   tags$b("Confirm selection!")
+  #   ,block = T,style = "simple",color = "warning",size="sm"
+  # )
+  bsButton("confirm_project",tags$b("Confirm selection!"),style = "danger",width = "100%")
   ,tags$style(type='text/css', "#confirm_project { margin-top: 43.5px; height: 33.5px;}"),
 )
 

@@ -134,7 +134,7 @@ plot_ui <- function(n){
           label = HTML(paste0(x,".1. Select data category:",add_help(cat_id_q))),
           choices = c("Gene or locus" = "g", "Gene set (GS)" = "gs")
           ,selected = rv[[cat_id]]
-          ,status = "danger"
+          ,status = "default"
           ,icon = icon("check")
           ,shape = "curve"
           # ,plain = T

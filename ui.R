@@ -9,7 +9,7 @@ sidebar <- dashboardSidebar(
 loadMsg = "cSurival"
 
 # home buttons style
-db_style <- "color: #fff; background-color: transparent; border-color: #00589b; margin-top:8px; margin-right:8px; border-radius:2rem; border:0.125rem solid #00589b"
+db_style <- "color: #fff; background-color: transparent; border-color: #fff; margin-top:8px; margin-right:8px; border-radius:2rem; border:0.125rem solid #fff;"
 
 # assemble the UI
 shinyUI(
@@ -17,7 +17,7 @@ shinyUI(
         
         title="cSurival",
 
-        dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<b>cSurvival</b>: a mechanistic cancer survival database"))
+        dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<span style='color:#F5FBEF;'><b>cSurvival</b>: a mechanistic cancer survival database</span>"))
                         ,titleWidth = "80%"
                         ,tags$li(class = "dropdown", actionButton("db_download", NULL,icon("database"),style=db_style))
                         ,tags$li(class = "dropdown", actionButton("db_help", NULL,icon("question"),style=db_style))
@@ -38,7 +38,7 @@ shinyUI(
             ),
             # theme = shinytheme("flatly"),
             use_waiter(), # dependencies
-            waiter_show_on_load(tagList(spin_orbiter(),h4(loadMsg)), color = "#00589b"), # shows before anything else
+            waiter_show_on_load(tagList(spin_orbiter(),h4(loadMsg)), color = "#2D4059"), # shows before anything else
             disconnectMessage(text = "Your session has timed out. Please refresh page and start again. For bug report, email us at jcheng@cmmt.ubc.ca. Thank you for your support."),
 
             useShinyalert(),  # Set up shinyalert

@@ -1,4 +1,4 @@
-bcols = c("#f0eee9","#e9ebf0") # colors for parameter wellpanels
+bcols = c("#f4f4f4","#f5f0ed") # colors for parameter wellpanels EFF5FA EAEDF3
 
 # ------ available projects -----
 pro_dir <- paste0(getwd(),"/www/project_data/")

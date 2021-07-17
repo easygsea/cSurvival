@@ -794,7 +794,7 @@ output$par_gear <- renderUI({
       column(
         12,align="center",
         wellPanel(
-          style="background-color:#F0EEE9; border: .5px solid #fff;",
+          style=sprintf("background-color:%s; border: .5px solid #fff;",bcols[1]),
           fluidRow(
             column(
               6,

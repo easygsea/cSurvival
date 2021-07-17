@@ -63,7 +63,7 @@ observeEvent(input$db_demo,{
       div(
         align="center",
         h3(strong("Select an example run:")),
-        actionBttn("tcga_demo","TCGA|TARGET",color = "primary",style = "simple",size = "lg")
+        actionBttn("tcga_demo","TCGA|TARGET",color = "danger",style = "simple",size = "lg")
         ,actionBttn("depmap_demo","DepMap",color = "warning",style = "simple",size = "lg")
       )
       ,br()
