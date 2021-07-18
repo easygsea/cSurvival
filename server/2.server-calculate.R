@@ -179,7 +179,8 @@ observeEvent(input$confirm,{
             rv[["df_survival"]][["survival_days"]]
           )
           # mark down as time censored
-          rv$censor_time_p <- sprintf(" %s-%s survival",c_time, gsub("s$","",tolower(vector_names(input$censor_time_ymd,ymd_names))))
+          ttt <- gsub("s$","",tolower(vector_names(input$censor_time_ymd,ymd_names)))
+          rv$censor_time_p <- sprintf(" censored at %s %ss (%s-%s survival)",c_time, ttt,c_time, ttt)
         }else{
           rv$censor_time_p <- ""
         }
