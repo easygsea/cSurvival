@@ -358,7 +358,7 @@ observeEvent(lib_input_lst(),{
           output[[gs_lib_link_ui_id]] <- renderUI({
             div(id=gs_lib_link_id_q,style="z-index:1000;word-break: break-all;",
                 style = "position: absolute; right: -3.5em; top: -0.2em;",
-                HTML(paste0("<h4>",link_icon(gs_lib_link_id,paste0(gmt_links[[input[[gs_db_id]]]],tail(strsplit(rv[[gs_lib_id]],"%")[[1]],n=1)),color="#CF5C78"),"</h4>"))
+                HTML(paste0("<h4>",link_icon(gs_lib_link_id,paste0(gmt_links[[input[[gs_db_id]]]],tail(strsplit(rv[[gs_lib_id]],"%")[[1]],n=1)),color=d_red),"</h4>"))
                 ,bsTooltip(gs_lib_link_id_q,HTML(paste0("Click to visit official ",rv[[gs_db_id]]," website describing ",rv[[gs_lib_id]],".")),placement = "top")
             )
           })

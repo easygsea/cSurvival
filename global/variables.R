@@ -1,3 +1,4 @@
+d_red = "#EA5455"
 bcols = c("#f4f4f4","#f5f0ed") # colors for parameter wellpanels EFF5FA EAEDF3
 
 # ------ available projects -----

@@ -7,7 +7,7 @@ Main grey: #E5E5E5
 /*------------------------------------------------------ F5FBEF f7f7ff EFF5FA*/
 /* body */
 .content-wrapper, .right-side {
-    background: linear-gradient(to bottom, #EFF5FA 0%, #fff 100%);
+    background: linear-gradient(to bottom, #BDD5EA 0%, #fff 100%);
     color: #2D4059;
 }
 
@@ -95,6 +95,7 @@ Main grey: #E5E5E5
 
 .btn-primary {
   background: #2D4059 !important;
+  border-color: #2D4059 !important;
 }
 
 .btn-primary:hover {
