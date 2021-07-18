@@ -17,7 +17,7 @@ shinyUI(
         
         title="cSurival",
 
-        dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<span style='color:#F5FBEF;'><b>cSurvival</b>: a mechanistic cancer survival database</span>"))
+        dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<span style='color:#F5FBEF;'><b>cSurvival</b></span>: a mechanistic cancer survival database"))
                         ,titleWidth = "80%"
                         ,tags$li(class = "dropdown", actionButton("db_download", NULL,icon("database"),style=db_style))
                         ,tags$li(class = "dropdown", actionButton("db_help", NULL,icon("question"),style=db_style))

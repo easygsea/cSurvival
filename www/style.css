@@ -7,8 +7,8 @@ Main grey: #E5E5E5
 /*------------------------------------------------------ F5FBEF f7f7ff EFF5FA*/
 /* body */
 .content-wrapper, .right-side {
-  background-color: #EFF5FA;
-  color: #2D4059;
+    background: linear-gradient(to bottom, #FFFFFF 0%, #EFF5FA 100%);
+    color: #2D4059;
 }
 
 /* logo */
