@@ -305,7 +305,7 @@ observeEvent(input$confirm,{
               assign(min_value, min);assign(max_value, max);assign(step_value, step)
 
               enough_error <- 0
-              results <- get_info_most_significant_rna(data, min, max, step, mode=input[[cat_id]])
+              results <- get_info_most_significant_rna(data, min, max, step)
               if(is.null(results)){
                 enough_error <- 1
                 txt <- "The selected project does not have enough data for the selected gene/locus/gene set"
