@@ -55,10 +55,8 @@ library(RColorBrewer)
 # saveRDS(graph_df,file = "graph_df.rds")
 
 
-
-
 #START OF THE CODES FOR GRAPH----
-setwd("/Applications/Codes/cSurvival/basic_scripts")
+setwd("/Applications/Codes/cSurvival_dev/basic_scripts")
 
 #load RDS
 
@@ -149,3 +147,14 @@ circos.track(df_inner$bigproject,ylim = c(0,1), track.height = 0.2, panel.fun = 
 }, bg.border = NA)
 
 circos.clear()
+
+
+
+#Calculate sum of tcga and target----
+sum( df$columnA )
+
+#sum of TCGA and TARGET, so big project does not equal to DepMap
+sum(df_inner[df_inner$bigproject != "DepMap",]$count)
+
+sum(df_inner[df_inner$bigproject == "TARGET",]$count)
+sum(df_inner[df_inner$bigproject == "TCGA",]$count)

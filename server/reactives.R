@@ -5,7 +5,7 @@ data_types <- reactive({
              "CNV"="cnv",
              "miRNA"="mir",
              "Methylation"="met",
-             "RPPA"="rrpa"
+             "Protein"="rrpa"
   )
   if(!rv$tcga & !rv$target & !rv$depmap){
     dtype

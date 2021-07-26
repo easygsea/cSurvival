@@ -257,14 +257,11 @@ surv_km <- function(df, mode=1){
     }
   # }
 }
-get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
+get_info_most_significant_rna <- function(data, min, max, step, num=1, min2=NULL, max2=NULL){
+  depmap_T <- rv$depmap
+  p_kc <- rv$min_p_kc
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
-  
-  #initialize p value dataframe
-  p_df <- data.frame(integer(),
-                     character(),
-                     stringsAsFactors=FALSE)
 
   # initialize the most significant p value and df
   least_p_value <- 1; df_most_significant <- NULL; least_hr <- 0
@@ -276,61 +273,17 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
   data <- data %>% dplyr::filter(patient_id %in% df_o$patient_id)
   # extract patients' IDs and expression values
   patient_ids <- data$patient_id
-  # if(mode == "g"){
   exp <-data[,2] %>% unlist(.) %>% unname(.)
-  # }else if(mode == "gs"){
-  #   exp <- rowMeans(data[,-1],na.rm=T) %>% unlist(.) %>% unname(.)
-  # }
   
-  # # execute permutations
-  # exps <- permutations(exp, layout = "list", nitem = rv$nitem)
-  # perm_results <- lapply(seq_along(exps), function(perm_i){
-  #   exp_i <- exps[[perm_i]]
-  #   
-  #   # the highest stats score
-  #   highest_chisq <- 0
-  #   
-  #   # the quantiles we will use to define the level of gene percentages
-  #   quantiles <- quantile(exp_i, quantile_s, na.rm = T)
-  #   
-  #   for(i in seq_along(quantiles)){
-  #     q <- quantiles[i]
-  #     df <- generate_surv_df(df_o, patient_ids, exp, q)
-  # 
-  #     # # test if there is significant difference between high and low level genes
-  #     hr <- coef(summary(surv_cox(df)))[,2]
-  #     if(rv$depmap){
-  #       surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
-  #     }else{
-  #       surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-  #     }
-  #     chisq_diff <- surv_diff$chisq
-  # 
-  #     if(!is.na(chisq_diff)){
-  #       if(chisq_diff > highest_chisq){
-  #         highest_chisq <- chisq_diff
-  #       }
-  #     }
-  #   }
-  #   
-  #   return(highest_chisq)
-  # })
-  # print(str(perm_results))
-  # # # calculate stats for the original expression-like data
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s, na.rm = T)
 
-  for(i in seq_along(quantiles)){
+  rrr <- mclapply(seq_along(quantiles),mc.cores = detectCores(),function(i){
     q <- quantiles[i]
     df <- generate_surv_df(df_o, patient_ids, exp, q)
     
-
     # # test if there is significant difference between high and low level genes
-    # if(rv$cox_km == "cox"){
-      # surv_diff <- surv_cox(df)
-      # p_diff <- coef(summary(surv_diff))[,5]
-    # }else if(rv$cox_km == "km"){
-    if(rv$depmap){
+    if(depmap_T){
       # surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
       surv_diff <- t.test(dependency ~ level, data = df)
       hr <- NA
@@ -338,36 +291,46 @@ get_info_most_significant_rna <- function(data, min, max, step, mode="g"){
     }else{
       surv_diff <- surv_cox(df)
       hr <- coef(summary(surv_diff))[,2]
-      if(rv$min_p_kc == "km"){
+      if(p_kc == "km"){
         p_diff <- summary(surv_diff)$sctest[3]
-      }else if(rv$min_p_kc == "cox"){
-        p_diff <- summary(surv_diff)$coefficients[,5]
+      }else if(p_kc == "cox"){
+        p_diff <- summary(surv_diff)$waldtest[3] #coefficients[,5]
       }
-      # surv_diff <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
-      # p_diff <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     }
-      
-      #append current p value to the p value df
-      new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
-      p_df <- rbind(p_df,new_row)
-    # }
+
     if(!is.na(p_diff)){
-      q_value <- as.numeric(sub("%", "", names(q)))
-      if((q_value <= 50 & p_diff <= least_p_value)|(q_value > 50 & p_diff < least_p_value)){
-        least_p_value <- p_diff
-        df_most_significant <- df
-        least_hr <- hr
-        cutoff_most_significant <- names(quantiles[i])
-      }
+      # #append current p value to the p value df
+      new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
+      # p_df <- rbind(p_df,new_row)
+      # q_value <- as.numeric(sub("%", "", names(q)))
+      # if((q_value <= 50 & p_diff <= least_p_value)|(q_value > 50 & p_diff < least_p_value)){
+      #   least_p_value <- p_diff
+      #   df_most_significant <- df
+      #   least_hr <- hr
+      #   cutoff_most_significant <- names(quantiles[i])
+      # }
+      results <- list(new_row,p_diff,df,hr,names(quantiles[i]))
+      names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+      return(results)
     }
-  }
-  
+  })
+
   #Transform the p_df a little bit to make it work with the ggplot
+  p_df <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
+  p_df <- rbindlist(p_df)
   colnames(p_df) = c('p_value','quantile','expression','hr')
   p_df$p_value = as.numeric(p_df$p_value)
   p_df$quantile = as.numeric(p_df$quantile)
   p_df$expression = as.numeric(p_df$expression)
   p_df$hr = as.numeric(p_df$hr)
+  
+  #Find the minimum P-value
+  pvals <- sapply(rrr, function(x) x[[2]])
+  pvals_i <- which.min(pvals)[[1]]
+  res <- rrr[[pvals_i]]
+  df_most_significant <- res[["df_most_significant"]]
+  cutoff_most_significant <- res[["cutoff_most_significant"]]
+  least_hr <- res[["least_hr"]]
 
   # proceed only if enough data
   if(is.null(df_most_significant)){
