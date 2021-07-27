@@ -889,9 +889,9 @@ observeEvent(todefault_lst(),{
         
         if((input[[cat_id]] == "gs") | (!rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv" & input[[db_id]] != "cnv") | (rv$depmap & input[[cat_id]] == "g" & input[[db_id]] != "snv")){
           updateRadioGroupButtons(session, paste0("iter_",x), selected = "iter")
-          updateSliderInput(session, paste0("lower_",x), value = .2)
-          updateSliderInput(session, paste0("upper_",x), value = .8)
-          updateSliderInput(session, paste0("step_",x), value = .025)
+          updateSliderInput(session, paste0("lower_",x), value = dmin)
+          updateSliderInput(session, paste0("upper_",x), value = dmax)
+          updateSliderInput(session, paste0("step_",x), value = dstep)
         }else if(input[[cat_id]] == "g" & input[[db_id]] == "snv"){
           updateSelectizeInput(session, paste0("nonsynonymous_",x), selected = variant_types_non)
           updateSelectizeInput(session, paste0("synonymous_",x), selected = variant_types_syn)
