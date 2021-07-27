@@ -238,7 +238,7 @@ surv_cox <- function(df, mode=1){
     if(mode == 1){
       coxph(Surv(survival_days, censoring_status) ~ level, data = df)
     }else if(mode == 2){
-      coxph(Surv(survival_days, censoring_status) ~ level.x + level.y, data = df)
+      coxph(Surv(survival_days, censoring_status) ~ level.x * level.y, data = df)
     }
   # }
 }

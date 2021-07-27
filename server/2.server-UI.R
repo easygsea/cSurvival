@@ -1033,10 +1033,15 @@ output$ui_km_mul <- renderUI({
 })
 
 # ------------- 3b. pairwise comparison statistics -------
-observeEvent(list(input$km_mul,input$km_mul_padj,rv$surv_plotted),{
+observeEvent(list(input$km_mul,input$km_mul_padj,rv$surv_plotted,rv$analysis_no),{
   req(input$km_mul != "")
   proceed <- 0
   if(input$km_mul != rv$km_mul){proceed <- 1;rv$km_mul <- input$km_mul}
+  if(rv$analysis_no > rv$analysis_no_hm){
+    if(rv$analysis_no > 1){
+      proceed <- 1;rv$analysis_no_hm <- rv$analysis_no
+    }
+  }
   if(length(input$km_mul_padj)>0){if(input$km_mul_padj != rv$km_mul_padj){proceed <- 1;rv$km_mul_padj <- input$km_mul_padj}}
   if(proceed > 0){
     # retrieve df for survival analysis
