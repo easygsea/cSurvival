@@ -156,7 +156,7 @@ extract_gene_data <- function(x, type){
         data_n <- cbind(data_n[,1,drop=F],exp_scale_n) %>%
           mutate(Mean=rowMeans(exp_scale_n,na.rm=T)) %>%
           dplyr::select(patient_id, Mean)
-        data_n[["Mean"]] <- pnorm(data_n[["Mean"]])
+        # data_n[["Mean"]] <- pnorm(data_n[["Mean"]])
       }
       data <- dplyr::left_join(data, data_n, by = "patient_id")
       data[,2] <- data[,2] / data[,3]
@@ -186,7 +186,7 @@ extract_gene_data <- function(x, type){
         data_n <- cbind(data_n[,1,drop=F],exp_scale_n) %>%
           mutate(Mean=rowMeans(exp_scale_n,na.rm=T)) %>%
           dplyr::select(patient_id, Mean)
-        data_n[["Mean"]] <- pnorm(data_n[["Mean"]])
+        # data_n[["Mean"]] <- pnorm(data_n[["Mean"]])
       }
       data <- dplyr::left_join(data, data_n, by = "patient_id")
       data[,2] <- data[,2] / data[,3]
