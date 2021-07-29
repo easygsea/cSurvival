@@ -1768,27 +1768,56 @@ output$dens_stats_plot <- renderPlotly({
     pos <- position_jitter(0.1, seed = 2)
     lels_len <- length(levels(df$Level))
     cols <- lel_colors(lels_len)
-    p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
-      scale_color_manual(values=cols) +
-      geom_jitter(shape=16, position=pos) +
-      theme_classic() +
-      labs(title="Cell line distribution",x="", y = dep_name)
+    
     
     if(length(input$annot_cells) > 0){
       if(input[["annot_cells"]][1] != ""){
-        p <- p + 
-          # geom_jitter(position=pos, aes(color = paste0(df$Level,", ",ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted")))) +
-          # scale_color_manual(values = c(cols,c(rbind(cols,rep("red",lels_len)))))
-          geom_jitter(position=pos, aes(shape = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"), size = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"))) + #data = subset(df, Cell %in% input$annot_cells)
-          scale_shape_manual(values=c(8,16)) + scale_size_manual(values=c(3,1)) +
-          labs(color = "", shape = "", size = "")
+        df$Annotation <- paste0(df$Level,",",ifelse(df$Cell %in% input$annot_cells, "Highlighted","Not highlighted"))
+        df$Highlighted <- ifelse(df$Cell %in% input$annot_cells, "Highlighted","Not highlighted")
+        cols <- c(cols,addalpha(cols),darken(cols, 0.4))
+        names(cols) <- c(levels(df$Level), paste0(levels(df$Level), ",Not highlighted"), paste0(levels(df$Level), ",Highlighted"))
+        
+        
           #   geom_text(
         #   data = subset(df, Cell %in% input$annot_cells),
         #   aes(label = Cell),
         #   size = 3
         # )
       }
+      else{
+        df$Annotation <- df$Level
+        df$Highlighted <- "Not highlighted"
+      }
     }
+    else{
+      df$Annotation <- df$Level
+      df$Highlighted <- "Not highlighted"
+    }
+    #Set up shapes, here we used solid circle and solid triangle
+    shapes <- c(16,17)
+    names(shapes) <- c("Not highlighted", "Highlighted")
+    
+    #Plot here:
+    p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
+      scale_color_manual(values=cols) +
+      #geom_jitter(shape=16, position=pos) +
+      theme_classic() +
+      labs(title="Cell line distribution",x="", y = dep_name) +
+      #Highlight Part
+      geom_jitter(height = 0, width = 0.1, aes(color=Annotation, shape = Highlighted)) +
+      scale_shape_manual(values=shapes)+
+      
+      scale_color_manual(name = "Annotation", values = cols)
+    View(df)
+    print(cols)
+    # p <- p + 
+    #   # geom_jitter(position=pos, aes(color = paste0(df$Level,", ",ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted")))) +
+    #   # scale_color_manual(values = c(cols,c(rbind(cols,rep("red",lels_len)))))
+    #   geom_jitter(position=pos, aes(shape = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"), size = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"))) + #data = subset(df, Cell %in% input$annot_cells)
+    #   scale_shape_manual(values=c(8,16)) + scale_size_manual(values=c(3,1)) +
+    #   labs(color = "", shape = "", size = "")
+    
+    
     rv[["ggbox"]] <- p
     ggplotly(p,tooltip = c("Line","x","y"))
   })
