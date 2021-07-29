@@ -30,6 +30,7 @@ library(ggsci)
 library(plyr)
 library(plotly)
 library(parallel)
+library(stats)
 # library(arrangements) # permutations
 options(repos = BiocManager::repositories())
 

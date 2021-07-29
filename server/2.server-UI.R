@@ -838,7 +838,7 @@ output$ui_stats <- renderUI({
     p_w <- 6; p_w_r <- F; p.adj <- NULL
   }else if(rv$plot_type == "violin"){
     req(!is.null(rv[["violin_p"]]))
-    stats_title <- "Welch Two Sample t-test"
+    stats_title <- "Wilcoxon rank sum exact test"
     res <- rv[["violin_p"]]
     p <- format_p(as.numeric(res$p.value))
     p_title <- "P-value"
@@ -1551,9 +1551,9 @@ output$depmap_stats <- renderUI({
   # stats names
   x_numeric <- suppressWarnings(!is.na(as.numeric(x)))
   if(x_numeric){
-    stats_name <- "Welch Two Sample t-test,"
+    stats_name <- "Wilcoxon rank sum exact test,"
   }else{
-    stats_name <- "One-way ANOVA, overall"
+    stats_name <- "Kruskal-Wallis rank sum test, overall"
   }
   
   p <- rv[["res"]][["p"]]
@@ -1947,7 +1947,7 @@ output$violin_plot <- renderPlotly({
   
   # calculate statistics
   if(length(unique(df$mut_cat)) > 1){
-    rv[["violin_p"]] <- t.test(exp ~ mut_cat, data = df)
+    rv[["violin_p"]] <- wilcox.test(exp ~ mut_cat, data = df)
   }else{
     rv[["violin_p"]] <- NULL
   }
