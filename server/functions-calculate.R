@@ -2,6 +2,10 @@
 if_surv <- function(plot_type=rv$plot_type){
   plot_type == "all" | suppressWarnings(!is.na(as.numeric(plot_type))) | plot_type == "gender"
 }
+# determine if to plot forest plot
+if_forest <- function(){
+  rv$cox_km == "cox" & (rv$plot_type != "all" & rv$plot_type != "gender")
+}
 
 #==============================================#
 ####        Survival analysis functions     ####
@@ -294,7 +298,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, min2=NULL
       if(p_kc == "km"){
         p_diff <- summary(surv_diff)$sctest[3]
       }else if(p_kc == "cox"){
-        p_diff <- summary(surv_diff)$waldtest[3] #coefficients[,5]
+        p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
       }
     }
 
@@ -540,7 +544,7 @@ cal_surv_rna <-
       }else if(n == 2){
         surv_diff <- aov(dependency ~ level, data = df)
         p_diff <- summary(surv_diff)[[1]][[5]][1]
-        surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = "hommel")
+        # surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = "hommel")
       }
       
       if(iter_mode){
@@ -572,23 +576,23 @@ cal_surv_rna <-
         # summary statistics
         cox.stats <- summary(cox_fit)
       }else if(n == 2){
-        # if(rv$depmap){
-        #   km2 <- try(pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = p.adjust.method))
-        # }else{
-          km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+        # # if(rv$depmap){
+        # #   km2 <- try(pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = p.adjust.method))
+        # # }else{
+        #   km2 <- try(pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = p.adjust.method))
+        # # }
+        # if(inherits(km2, "try-error")) {
+        #   rv$try_error <- rv$try_error + 1
+        #   shinyalert(paste0("The selected two genes/loci have exactly the same data."
+        #                     ," If CNV, you might have selected genes from the same cytoband."
+        #                     ," Please contrast genes from different cytobands."))
         # }
-        if(inherits(km2, "try-error")) {
-          rv$try_error <- rv$try_error + 1
-          shinyalert(paste0("The selected two genes/loci have exactly the same data."
-                            ," If CNV, you might have selected genes from the same cytoband."
-                            ," Please contrast genes from different cytobands."))
-        }
-        req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
-        
-        # if(iter_mode){
-        #   km2$p.value <- paste0(res.km$p.value," (",correct_p(km2$p.value,min,max,step),")")
-        # }
-        km.stats <- list(km2,km.stats)
+        # req(!inherits(km2, "try-error")) #require to be no error to proceed the following codes
+        # 
+        # # if(iter_mode){
+        # #   km2$p.value <- paste0(res.km$p.value," (",correct_p(km2$p.value,min,max,step),")")
+        # # }
+        # km.stats <- list(km2,km.stats)
         
         # run Cox regression
         cox_fit1 <- surv_cox(df, mode=2)
@@ -601,16 +605,18 @@ cal_surv_rna <-
       hr.cox <- sapply(cox.stats$coefficients[,2], function(x){
         round(as.numeric(x), 2)
       }) %>% paste0(.,collapse = ", ")
-      p.cox <- sapply(cox.stats$coefficients[,5], function(x){
-        as.numeric(x)
-      })
+      p.cox <- as.numeric(cox.stats$logtest[3])
+      #   sapply(cox.stats$coefficients[,5], function(x){
+      #   as.numeric(x)
+      # })
       
       # multiple p correction
       if(iter_mode){
         p.km.adj <- correct_p(p.km,min,max,step)
-        p.cox.adj <- sapply(cox.stats$coefficients[,5], function(x){
-          correct_p(as.numeric(x),min,max,step)
-        })
+        p.cox.adj <- correct_p(cox.stats$logtest[3],min,max,step)
+        #   sapply(cox.stats$coefficients[,5], function(x){
+        #   correct_p(as.numeric(x),min,max,step)
+        # })
       }else{
         p.km.adj <- NULL
         p.cox.adj <- NULL

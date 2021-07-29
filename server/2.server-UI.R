@@ -801,7 +801,7 @@ output$ui_stats <- renderUI({
     p <- res[["p"]]
     p.adj <- res[["p.adj"]]
 
-    if(rv$cox_km == "cox"){
+    if(if_forest()){
       if(!is.null(p.adj)){p_w <- hr_w <- 4;p_w_r <- T}else{p_w <- hr_w <- 6;p_w_r <- F}
       hf_plot <- ifelse(rv$plot_type == "all","235px","155px")
     }else{
@@ -817,16 +817,12 @@ output$ui_stats <- renderUI({
     p <- sapply(p, function(x) format_p(x)) %>% paste0(.,collapse = ", ")
     
     if(rv$cox_km == "cox" & (rv$plot_type == "all" | rv$plot_type == "gender")){
-      hr_title <- "HR (hazard ratios)"
-      p_title <- "P-values"
-      p_adj_title <- "adjusted P-values"
       lel1 <- gsub("_"," and/or ",lel1)
       lel2 <- gsub("_"," and/or ",lel2)
-    }else{
-      hr_title <- "HR (hazard ratio)"
-      p_title <- "P-value"
-      p_adj_title <- "adjusted P-value"
     }
+    hr_title <- "HR (hazard ratio)"
+    p_title <- "P-value"
+    p_adj_title <- "adjusted P-value"
 
     hr_q <- paste0("Only applicable to regression analysis by Cox PH model. HR > 1 indicates that the ",lel1," group have higher risk of death than the ",lel2," group. <i>Vice versa</i>,"
                    ," HR < 1 indicates a lower risk of death for the ",lel1," as compared to the ",lel2)
@@ -875,7 +871,7 @@ output$ui_stats <- renderUI({
     ,boxPad(
       color = "light-blue",
       fluidRow(
-        if(surv_yn & rv$cox_km == "cox"){
+        if(surv_yn & if_forest()){
           column(
             hr_w,
             descriptionBlock(
@@ -940,20 +936,23 @@ output$ui_stats <- renderUI({
         ,if(surv_yn){
           column(
             12,
-            conditionalPanel(
-              '(input.plot_type == "all" | input.plot_type == "gender") & input.cox_km == "km"',
-              uiOutput("ui_km_mul")
-              ,div(
-                align="center",
-                if(typeof(rv[["res"]][["km"]][["df"]]) == "list"){
-                  plotlyOutput("km_hm", height="180px", width = "99.5%")
-                }
-              )
-              ,br()
-            ),
+            # conditionalPanel(
+            #   '(input.plot_type == "all" | input.plot_type == "gender") & input.cox_km == "km"',
+            #   uiOutput("ui_km_mul")
+            #   ,div(
+            #     align="center",
+            #     if(typeof(rv[["res"]][["km"]][["df"]]) == "list"){
+            #       plotlyOutput("km_hm", height="180px", width = "99.5%")
+            #     }
+            #   )
+            #   ,br()
+            # ),
             conditionalPanel(
               'input.cox_km == "cox"',
-              plotOutput("forest_plot",height = hf_plot)
+              # forest plot for single variable only
+              if(if_forest()){
+                plotOutput("forest_plot",height = hf_plot)
+              }
             ),
             div(
               align="left",
@@ -997,126 +996,126 @@ output$ui_stats_details <- renderPrint({
   }
 })
 
-# ------------- 3a. pairwise comparison UI ---------------
-output$ui_km_mul <- renderUI({
-  req(rv$surv_plotted == "plotted")
-  p.adj <- rv[["res"]][["km"]][["p.adj"]]
-  padj_y <- any(!is.null(p.adj))
-  if(padj_y){
-    km_mul_w <- 8
-  }else{
-    km_mul_w <- 12
-  }
-  
-  fluidRow(
-    column(
-      km_mul_w,
-      selectizeInput(
-        "km_mul",
-        NULL,
-        choices = pairwise_methods
-        ,selected = rv[["km_mul"]]
-      )
-    )
-    ,if(padj_y){
-      column(
-        4,
-        selectizeInput(
-          "km_mul_padj",
-          NULL,
-          choices = c("Adjusted P-value"="padj","P-value"="p")
-          ,selected = rv[["km_mul_padj"]]
-        )
-      )
-    }
-  )
-})
-
-# ------------- 3b. pairwise comparison statistics -------
-observeEvent(list(input$km_mul,input$km_mul_padj,rv$surv_plotted,rv$analysis_no),{
-  req(input$km_mul != "")
-  proceed <- 0
-  if(input$km_mul != rv$km_mul){proceed <- 1;rv$km_mul <- input$km_mul}
-  if(rv$analysis_no > rv$analysis_no_hm){
-    if(rv$analysis_no > 1){
-      proceed <- 1;rv$analysis_no_hm <- rv$analysis_no
-    }
-  }
-  if(length(input$km_mul_padj)>0){if(input$km_mul_padj != rv$km_mul_padj){proceed <- 1;rv$km_mul_padj <- input$km_mul_padj}}
-  if(proceed > 0){
-    # retrieve df for survival analysis
-    df <- rv[[paste0("df_",rv$plot_type)]]
-    
-    # # update statistics
-    # if(rv$depmapr){
-    #   km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
-    # }else{
-    km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
-    if(rv$km_mul_padj == "padj"){
-      if(!is.null(rv[["res"]][["km"]][["p.adj"]])){
-        km2$p.value <- km2$p.value + rv[["res"]][["km"]][["p.adj"]]
-      }
-      km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
-    }
-    
-    # }
-    rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
-    
-    output$km_hm <- renderPlotly({
-      plot_heatmap(km2$p.value)
-    })
-    
-    output$ui_stats_details <- renderPrint({
-      res <- rv[["res"]][[rv$cox_km]]
-      if(length(res[["stats"]]) == 2){
-        print(km2); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
-      }else{
-        print(res[["stats"]])
-      }
-    })
-  }
-},ignoreInit = T)
-
-# ----------- 3c. pairwise heatmap ----------
-plot_heatmap <- function(pvals,mul_methods=rv$km_mul){
-  counts <- -log10(pvals)
-  counts[is.na(counts)] <- 0
-  dat <- expand.grid(y = rownames(counts), x = colnames(counts))
-  dat$z <- unlist(as.data.frame(counts),recursive = T)
-  pvals <- unlist(as.data.frame(pvals), recursive = T) %>% sapply(., function(x) if(!is.na(x)){format_p(x)}else{"NA"})
-  req(length(dat$z)>0)
-  
-  fig <- plot_ly() %>%
-    add_trace(data = dat, x = ~x, y = ~y, z = ~z, type = "heatmap",
-              colorscale  = col_scale,zmax = 3,zmin=0,
-              colorbar = list(
-                title = list(text="-log10(P)", side = "right")
-                ,len = 1.2),
-              text = pvals,
-              hovertemplate = paste('<b>%{x}</b> vs <b>%{y}</b><br>',
-                                    'P-value: <b>%{text}</b>'
-              )
-    ) %>% layout(
-      # title = "Pariwise comparisons",
-      xaxis = list(title = paste0("Pariwise comparisons adjusted by ",mul_methods), showticklabels = T),
-      yaxis = list(title = "", showticklabels = T)
-      # ,margin = list(l=200)
-    ) %>%
-    add_annotations(x = dat$x, y = dat$y,
-                    text = as.character(pvals),
-                    showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
-                    ,ax = 20, ay = -20
-    )
-  
-  fig
-}
-
-output$km_hm <- renderPlotly({
-  req(length(rv[["res"]][[rv$cox_km]][["stats"]]) == 2)
-  pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
-  req(is.numeric(pvals))
-  plot_heatmap(pvals)
-})
+# # ------------- 3a. pairwise comparison UI ---------------
+# output$ui_km_mul <- renderUI({
+#   req(rv$surv_plotted == "plotted")
+#   p.adj <- rv[["res"]][["km"]][["p.adj"]]
+#   padj_y <- any(!is.null(p.adj))
+#   if(padj_y){
+#     km_mul_w <- 8
+#   }else{
+#     km_mul_w <- 12
+#   }
+#   
+#   fluidRow(
+#     column(
+#       km_mul_w,
+#       selectizeInput(
+#         "km_mul",
+#         NULL,
+#         choices = pairwise_methods
+#         ,selected = rv[["km_mul"]]
+#       )
+#     )
+#     ,if(padj_y){
+#       column(
+#         4,
+#         selectizeInput(
+#           "km_mul_padj",
+#           NULL,
+#           choices = c("Adjusted P-value"="padj","P-value"="p")
+#           ,selected = rv[["km_mul_padj"]]
+#         )
+#       )
+#     }
+#   )
+# })
+# 
+# # ------------- 3b. pairwise comparison statistics -------
+# observeEvent(list(input$km_mul,input$km_mul_padj,rv$surv_plotted,rv$analysis_no),{
+#   req(input$km_mul != "")
+#   proceed <- 0
+#   if(input$km_mul != rv$km_mul){proceed <- 1;rv$km_mul <- input$km_mul}
+#   if(rv$analysis_no > rv$analysis_no_hm){
+#     if(rv$analysis_no > 1){
+#       proceed <- 1;rv$analysis_no_hm <- rv$analysis_no
+#     }
+#   }
+#   if(length(input$km_mul_padj)>0){if(input$km_mul_padj != rv$km_mul_padj){proceed <- 1;rv$km_mul_padj <- input$km_mul_padj}}
+#   if(proceed > 0){
+#     # retrieve df for survival analysis
+#     df <- rv[[paste0("df_",rv$plot_type)]]
+#     
+#     # # update statistics
+#     # if(rv$depmapr){
+#     #   km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
+#     # }else{
+#     km2 <- pairwise_survdiff(Surv(survival_days, censoring_status) ~ level, data = df, p.adjust.method = rv$km_mul)
+#     if(rv$km_mul_padj == "padj"){
+#       if(!is.null(rv[["res"]][["km"]][["p.adj"]])){
+#         km2$p.value <- km2$p.value + rv[["res"]][["km"]][["p.adj"]]
+#       }
+#       km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
+#     }
+#     
+#     # }
+#     rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
+#     
+#     output$km_hm <- renderPlotly({
+#       plot_heatmap(km2$p.value)
+#     })
+#     
+#     output$ui_stats_details <- renderPrint({
+#       res <- rv[["res"]][[rv$cox_km]]
+#       if(length(res[["stats"]]) == 2){
+#         print(km2); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
+#       }else{
+#         print(res[["stats"]])
+#       }
+#     })
+#   }
+# },ignoreInit = T)
+# 
+# # ----------- 3c. pairwise heatmap ----------
+# plot_heatmap <- function(pvals,mul_methods=rv$km_mul){
+#   counts <- -log10(pvals)
+#   counts[is.na(counts)] <- 0
+#   dat <- expand.grid(y = rownames(counts), x = colnames(counts))
+#   dat$z <- unlist(as.data.frame(counts),recursive = T)
+#   pvals <- unlist(as.data.frame(pvals), recursive = T) %>% sapply(., function(x) if(!is.na(x)){format_p(x)}else{"NA"})
+#   req(length(dat$z)>0)
+#   
+#   fig <- plot_ly() %>%
+#     add_trace(data = dat, x = ~x, y = ~y, z = ~z, type = "heatmap",
+#               colorscale  = col_scale,zmax = 3,zmin=0,
+#               colorbar = list(
+#                 title = list(text="-log10(P)", side = "right")
+#                 ,len = 1.2),
+#               text = pvals,
+#               hovertemplate = paste('<b>%{x}</b> vs <b>%{y}</b><br>',
+#                                     'P-value: <b>%{text}</b>'
+#               )
+#     ) %>% layout(
+#       # title = "Pariwise comparisons",
+#       xaxis = list(title = paste0("Pariwise comparisons adjusted by ",mul_methods), showticklabels = T),
+#       yaxis = list(title = "", showticklabels = T)
+#       # ,margin = list(l=200)
+#     ) %>%
+#     add_annotations(x = dat$x, y = dat$y,
+#                     text = as.character(pvals),
+#                     showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
+#                     ,ax = 20, ay = -20
+#     )
+#   
+#   fig
+# }
+# 
+# output$km_hm <- renderPlotly({
+#   req(length(rv[["res"]][[rv$cox_km]][["stats"]]) == 2)
+#   pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
+#   req(is.numeric(pvals))
+#   plot_heatmap(pvals)
+# })
 
 # ----------- 4[A1]. scatter plot ---------------
 output$scatter_plot <- renderPlotly({
@@ -1532,11 +1531,11 @@ output$ui_error <- renderUI({
 
 # ------ 6. forest plot -------
 output$forest_plot <- renderPlot({
-  if(rv$plot_type == "all" | rv$plot_type == "gender"){
-    maint <- "Hazard ratios"
-  }else{
+  # if(rv$plot_type == "all" | rv$plot_type == "gender"){
+  #   maint <- "Hazard ratios"
+  # }else{
     maint <- "Hazard ratio"
-  }
+  # }
   res <- rv[["res"]]
   req(!is.null(res[["cox"]][["cox_fit"]]))
   ggforest(res[["cox"]][["cox_fit"]], main = maint, data = res[["cox"]][["cox_df"]], fontsize = 0.7)
@@ -1601,12 +1600,12 @@ output$depmap_stats <- renderUI({
               )
             })
           )
-          ,if(!x_numeric){
-            div(
-              uiOutput("ui_km_mul_dp"),
-              uiOutput("dm_stats_render")
-            )
-          }
+          # ,if(!x_numeric){
+          #   div(
+          #     uiOutput("ui_km_mul_dp"),
+          #     uiOutput("dm_stats_render")
+          #   )
+          # }
         )
       )
     )
@@ -1647,73 +1646,73 @@ output$ui_km_mul_dp <- renderUI({
   
 })
 
-# ------ 7c. draw depmap heatmap ------
-observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj,rv$surv_plotted,rv$plot_type),{
-  req(rv$plot_type == "gender" | rv$plot_type == "all")
-  req(rv$depmapr)
-  req(input$km_mul_dp != "")
-  req(rv$surv_plotted == "plotted")
-  withProgress(value = 1, message = "Updating statistics...",{
-    rv$km_mul_dp <- input$km_mul_dp
-    if(length(input$km_mul_dp_padj)>0){rv$km_mul_dp_padj <- input$km_mul_dp_padj}
-    
-    # retrieve df for survival analysis
-    df <- rv[[paste0("df_",rv$plot_type)]]
-    levl <- length(unique(df$level))
-    
-    # the height of the heatmap
-    if(levl > 3){
-      dp_h <- "218px"
-    }else if(levl == 3){
-      dp_h <- "198px"
-    }else if(levl == 2){
-      dp_h <- "178px"
-    }else if(levl < 2){
-      dp_h <- "158px"
-    }
-    
-    # update statistics
-    surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
-    rv[["res"]][["fit"]] <- surv_diff
-    
-    # adjust p.adj
-    if(rv$km_mul_dp_padj == "padj"){
-      if(length(rv[["res"]][["p.adj"]])>0){
-        surv_diff$p.value <- surv_diff$p.value + (rv[["res"]][["p.adj"]] - rv[["res"]][["p"]])
-      }
-      surv_diff$p.value <- ifelse(surv_diff$p.value > 1, 1, surv_diff$p.value)
-    }
-    
-    output$dm_stats_render <- renderUI({
-      div(
-        column(
-          6,
-          renderPrint({print(surv_diff)})
-        ),
-        column(
-          6,
-          plotlyOutput("dp_hm", height=dp_h, width = "100%")
-        )
-      )
-    })
-    
-    output$dp_hm <- renderPlotly({
-      pvals <- surv_diff$p.value
-      req(is.numeric(pvals))
-      dims <- dim(pvals)
-      req(dims[1] * dims[2] >= 1)
-      plot_heatmap(pvals,mul_methods=rv$km_mul_dp)
-    })
-  })
-},ignoreInit = F)
-
-output$dp_hm <- renderPlotly({
-  pvals <- rv[["res"]][["fit"]]$p.value
-  req(is.numeric(pvals))
-  dims <- dim(pvals)
-  req(dims[1] * dims[2] >= 1)
-  plot_heatmap(pvals,mul_methods=rv$km_mul_dp)
-})
+# # ------ 7c. draw depmap heatmap ------
+# observeEvent(list(input$km_mul_dp,input$km_mul_dp_padj,rv$surv_plotted,rv$plot_type),{
+#   req(rv$plot_type == "gender" | rv$plot_type == "all")
+#   req(rv$depmapr)
+#   req(input$km_mul_dp != "")
+#   req(rv$surv_plotted == "plotted")
+#   withProgress(value = 1, message = "Updating statistics...",{
+#     rv$km_mul_dp <- input$km_mul_dp
+#     if(length(input$km_mul_dp_padj)>0){rv$km_mul_dp_padj <- input$km_mul_dp_padj}
+#     
+#     # retrieve df for survival analysis
+#     df <- rv[[paste0("df_",rv$plot_type)]]
+#     levl <- length(unique(df$level))
+#     
+#     # the height of the heatmap
+#     if(levl > 3){
+#       dp_h <- "218px"
+#     }else if(levl == 3){
+#       dp_h <- "198px"
+#     }else if(levl == 2){
+#       dp_h <- "178px"
+#     }else if(levl < 2){
+#       dp_h <- "158px"
+#     }
+#     
+#     # update statistics
+#     surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
+#     rv[["res"]][["fit"]] <- surv_diff
+#     
+#     # adjust p.adj
+#     if(rv$km_mul_dp_padj == "padj"){
+#       if(length(rv[["res"]][["p.adj"]])>0){
+#         surv_diff$p.value <- surv_diff$p.value + (rv[["res"]][["p.adj"]] - rv[["res"]][["p"]])
+#       }
+#       surv_diff$p.value <- ifelse(surv_diff$p.value > 1, 1, surv_diff$p.value)
+#     }
+#     
+#     output$dm_stats_render <- renderUI({
+#       div(
+#         column(
+#           6,
+#           renderPrint({print(surv_diff)})
+#         ),
+#         column(
+#           6,
+#           plotlyOutput("dp_hm", height=dp_h, width = "100%")
+#         )
+#       )
+#     })
+#     
+#     output$dp_hm <- renderPlotly({
+#       pvals <- surv_diff$p.value
+#       req(is.numeric(pvals))
+#       dims <- dim(pvals)
+#       req(dims[1] * dims[2] >= 1)
+#       plot_heatmap(pvals,mul_methods=rv$km_mul_dp)
+#     })
+#   })
+# },ignoreInit = F)
+# 
+# output$dp_hm <- renderPlotly({
+#   pvals <- rv[["res"]][["fit"]]$p.value
+#   req(is.numeric(pvals))
+#   dims <- dim(pvals)
+#   req(dims[1] * dims[2] >= 1)
+#   plot_heatmap(pvals,mul_methods=rv$km_mul_dp)
+# })
 
 # ------ 7b. density plot, if dependency ---------
 lel_colors <- function(n_lel){
