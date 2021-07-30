@@ -1812,8 +1812,8 @@ output$dens_stats_plot <- renderPlotly({
       scale_shape_manual(values=shapes)+
       
       scale_color_manual(name = "Annotation", values = cols)
-    View(df)
-    print(cols)
+    
+    
     # p <- p + 
     #   # geom_jitter(position=pos, aes(color = paste0(df$Level,", ",ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted")))) +
     #   # scale_color_manual(values = c(cols,c(rbind(cols,rep("red",lels_len)))))
