@@ -237,6 +237,7 @@ observeEvent(input$confirm,{
       perc_min <- ifelse_rv("min_gp_size")
       update_min_gp_size <- function(){updateNumericInput(session,"min_gp_size",value = rv$min_gp_size)}
       if(!is.na(perc_min)){if(perc_min != rv$min_gp_size & perc_min >= 1 & perc_min <= 90){rv$min_gp_size <- perc_min}else{update_min_gp_size()}}else{update_min_gp_size()}
+      dtypes_tmp <- data_types()
       for(x in 1:rv$variable_n){
         cal_exp <- T; mut_exp_yyy <- F
         iter_mode_value <- paste0("iter_mode_",x)
@@ -259,6 +260,7 @@ observeEvent(input$confirm,{
 
           # title for the survival plot
           rv[[title_x]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
+          if(input[[cat_id]] == "g"){rv[[title_x]] <- paste0(rv[[title_x]]," ",tolower(names(dtypes_tmp)[dtypes_tmp == extract_mode]))}
           # check if normalized
           g_ui_norm_id <- paste0("gnorm_",x)
           if(((input[[cat_id]] == "g" & input[[db_id]] == "rna") | (input[[cat_id]] == "gs" & input[[gs_mode_id]] == "lib")) & input[[g_ui_norm_id]] != "none"){
