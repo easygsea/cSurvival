@@ -670,14 +670,14 @@ single_plot <- function(quantile_df, index){
   if(index == 1){
     yaxes = c("y","y2")
     HR_Axis <- list(overlaying = yaxes[1],
-                    side = "right", title = "Hazard Ratio")
-    P_Axis <- list(side = "left", title = "P Value")
+                    side = "right", title = "Hazard ratio")
+    P_Axis <- list(side = "left", title = "P-value")
   }
   else{
     yaxes = c("y2","y3")
     HR_Axis <- list(overlaying = yaxes[2],
-                    side = "right", title = "Hazard Ratio")
-    P_Axis <- list(side = "left", title = "P Value")
+                    side = "right", title = "Hazard ratio")
+    P_Axis <- list(side = "left", title = "P-value")
   }
   subtitle <- paste0(rv[[paste0("title_",index)]]) #"Subplot of ",
   
@@ -685,7 +685,7 @@ single_plot <- function(quantile_df, index){
   fig <- fig %>% add_trace(y = ~quantile_df$p_value,type = 'scatter',#color =~p_value,
                            line = list(color = 'rgb(173,173,173)', width = 2),
                            yaxis = yaxes[1],
-                           name = 'P Value',
+                           name = 'P-value',
                            marker=list(
                              color=~p_value,
                              colorscale=col_scale,
@@ -725,7 +725,7 @@ single_plot <- function(quantile_df, index){
   #Add a DepMap Check
   if(!all(is.na(quantile_df$hr))){
     fig <- fig %>%
-      add_trace(y = quantile_df$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
+      add_trace(y = quantile_df$hr, name = 'Hazard ratio',mode = 'lines+markers',type = 'scatter',
                 line = list(color = 'rgb(212, 235, 242)', width = 2),
                 marker=list(
                   symbol = 'diamond',
@@ -747,20 +747,19 @@ single_plot <- function(quantile_df, index){
                   line = list(color = 'pink', dash="dashdot"),
                   yaxis = yaxes[1],
                   name = 'Minimum P-value cutoff') %>%
-        layout(title = 'P Values of Different Percentiles',
+        layout(title = 'P-Values of Different Percentiles',
                xaxis = list(title = 'Quantile (%)'),
                yaxis = P_Axis,
                hovermode = "x unified"#,
                #shapes = list(vline(quantile_df$quantile[which.min(quantile_df$p_value)]))
         )
-    }
-    else{
+    }else{
       fig <- fig %>%
         add_trace(y = c(0,1), x = c(cutoff, cutoff),type = 'scatter', mode = 'lines',#color =~p_value,
                   line = list(color = 'pink', dash="dashdot"),
                   yaxis = yaxes[1],
                   name = 'Minimum P-value cutoff') %>%
-        layout(title = 'P Values of Different Percentiles',
+        layout(title = 'P-Values and Harzard Ratios of Different Percentiles',
                xaxis = list(title = 'Quantile (%)'),
                yaxis = P_Axis,
                yaxis2 = HR_Axis,
@@ -768,15 +767,14 @@ single_plot <- function(quantile_df, index){
                #shapes = list(vline(quantile_df$quantile[which.min(quantile_df$p_value)]))
         )
     }
-  }
-  else{
+  }else{
     fig <- fig %>%
       add_trace(y = c(0,1), x = c(cutoff, cutoff),type = 'scatter', mode = 'lines',#color =~p_value,
                 line = list(color = 'pink', dash="dashdot"),
                 yaxis = yaxes[1],
                 name = 'Minimum P-value cutoff',
                 showlegend = FALSE) %>%
-      layout(title = 'P Values and Harzard Ratios of Different Percentiles',
+      layout(title = 'P-Values and Harzard Ratios of Different Percentiles',
              xaxis = list(title = 'Quantile (%)'),
              yaxis2 = P_Axis,
              yaxis3 = HR_Axis,
