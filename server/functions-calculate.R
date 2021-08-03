@@ -487,15 +487,12 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
           hr <- NA
           p_diff <- surv_diff$p.value
         }else{
-          if(cat==""){
-            surv_diff <- surv_cox(df)
-            hr <- coef(summary(surv_diff))[,2]
-          }else if(cat=="All"){
-            surv_diff <- surv_cox(df)
-            hr <- NA
-          }else{
+          if(cat=="All"){
             surv_diff <- surv_cox(df,mode=2)
             hr <- NA
+          }else{
+            surv_diff <- surv_cox(df)
+            hr <- coef(summary(surv_diff))[,2]
           }
           if(p_kc == "km"){
             p_diff <- summary(surv_diff)$sctest[3]

@@ -218,7 +218,7 @@ output$ui_results <- renderUI({
                 )
               ),
               column(
-                6,id="div_dens_stats_plot",
+                6,id="div_dens_stats_plot",style="z-index:1000",
                 plotlyOutput("dens_stats_plot",height = "500px", width = "100%")
                 ,div(
                   align = "left",
