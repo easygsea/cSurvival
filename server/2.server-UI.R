@@ -165,7 +165,7 @@ output$ui_results <- renderUI({
                 6,
               ),
               column(
-                6,align="center",id="div_annot_cells",
+                6,align="center",id="div_annot_cells",style="z-index:1000",
                 selectizeInput(
                   "annot_cells"
                   ,HTML(paste0("(Optional) highlight cell line(s) in box plot:",add_help("annot_cells_q")))
@@ -218,7 +218,7 @@ output$ui_results <- renderUI({
                 )
               ),
               column(
-                6,id="div_dens_stats_plot",style="z-index:1000",
+                6,id="div_dens_stats_plot",style="z-index:500",
                 plotlyOutput("dens_stats_plot",height = "500px", width = "100%")
                 ,div(
                   align = "left",
