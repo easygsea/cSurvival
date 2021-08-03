@@ -28,12 +28,12 @@ output$ui_results <- renderUI({
       }
     }
   }else{
-    indi <- as.list(1:x)
-    names(indi) <- paste0("Survival plot #",1:x)
+    # indi <- as.list(1:x)
+    # names(indi) <- paste0("Survival plot #",1:x)
     types <- list(
       "Interaction survival plot" = "all"
       ,"Percentile tracking" = "track"
-    ) %>% c(.,indi)
+    ) # %>% c(.,indi)
 
     # check data types
     dtypes <- grep("^data_type_",{names(rv)},value=T)
@@ -45,7 +45,7 @@ output$ui_results <- renderUI({
     if(length(dtypes_u) == 1 & (dtypes_u == "snv" | dtypes_u == "cnv")){
       # # l_plot <- list("Mutation statistics"="snv_stats")
       # }else if(dtypes_u == "cnv"){
-      #   
+      #
       # }
     }else if("snv" %in% dtypes | (!rv$depmap & ("cnv" %in% dtypes))){
       if(rv$depmap | (!rv$depmap & !all(c("snv","cnv") %in% dtypes))){
@@ -289,7 +289,7 @@ output$ui_results <- renderUI({
                     uiOutput("ui_gsea")
                   }
                 )
-              } 
+              }
               ,if((rv$plot_type!="gsea" & !rv$depmapr)|(rv$plot_type=="scatter"|rv$plot_type=="scatter2"|rv$plot_type=="violin" & rv$depmapr)){
                 div(
                   align = "left",
@@ -422,11 +422,11 @@ observeEvent(list(rv[["title_1"]],rv[["title_all"]]),{
 extract_plot_data <- function(x){
   # no of cases in each group
   rv[["lels"]] <- rv[[paste0("lels_",x)]]
-  
+
   # the cutoff percentile
   rv[["cutoff"]] <- rv[[paste0("cutoff_",x)]]
-  
-  
+
+
   # extract statistics
   rv[["res"]] <- rv[[paste0("cox_",x)]]
   rv$surv_plotted <- "plotted"
@@ -803,19 +803,19 @@ output$ui_stats <- renderUI({
 
     if(if_forest()){
       if(!is.null(p.adj)){p_w <- hr_w <- 4;p_w_r <- T}else{p_w <- hr_w <- 6;p_w_r <- F}
-      hf_plot <- ifelse(rv$plot_type == "all","235px","155px")
+      hf_plot <- "155px" #ifelse(rv$plot_type == "all","235px","155px")
     }else{
       if(!is.null(p.adj)){p_w <- 6;p_w_r <- T}else{p_w <- 12;p_w_r <- F}
       hf_plot <- "155px"
     }
-    
+
     if(!is.null(p.adj)){
       p.adj <- p+ifelse(is.na(p.adj), 0, p.adj)
       p.adj <- ifelse(p.adj > 1, 1, p.adj)
       p.adj <- sapply(p.adj, format_p) %>% paste0(.,collapse = ", ")
     }
     p <- sapply(p, function(x) format_p(x)) %>% paste0(.,collapse = ", ")
-    
+
     if(rv$cox_km == "cox" & (rv$plot_type == "all" | rv$plot_type == "gender")){
       lel1 <- gsub("_"," and/or ",lel1)
       lel2 <- gsub("_"," and/or ",lel2)
@@ -846,7 +846,7 @@ output$ui_stats <- renderUI({
   }else{
     stats_title <- ""
   }
-  
+
   req(stats_title != "")
   req(!(rv$depmapr & rv$plot_type != "scatter" & rv$plot_type != "scatter2" & rv$plot_type != "violin"))
 
@@ -988,7 +988,7 @@ output$ui_cutoff <- renderUI({
 # --------- 2b. stats details -------------
 output$ui_stats_details <- renderPrint({
   res <- rv[["res"]][[rv$cox_km]]
-  
+
   if(length(res[["stats"]]) == 2){
     print(res[["stats"]][[1]]); cat(paste("\n",sep="\n")); print(res[["stats"]][[2]])
   }else{
@@ -1006,7 +1006,7 @@ output$ui_stats_details <- renderPrint({
 #   }else{
 #     km_mul_w <- 12
 #   }
-#   
+#
 #   fluidRow(
 #     column(
 #       km_mul_w,
@@ -1030,7 +1030,7 @@ output$ui_stats_details <- renderPrint({
 #     }
 #   )
 # })
-# 
+#
 # # ------------- 3b. pairwise comparison statistics -------
 # observeEvent(list(input$km_mul,input$km_mul_padj,rv$surv_plotted,rv$analysis_no),{
 #   req(input$km_mul != "")
@@ -1045,7 +1045,7 @@ output$ui_stats_details <- renderPrint({
 #   if(proceed > 0){
 #     # retrieve df for survival analysis
 #     df <- rv[[paste0("df_",rv$plot_type)]]
-#     
+#
 #     # # update statistics
 #     # if(rv$depmapr){
 #     #   km2 <- pairwise_survdiff(Surv(dependency) ~ level, data = df, p.adjust.method = rv$km_mul)
@@ -1057,14 +1057,14 @@ output$ui_stats_details <- renderPrint({
 #       }
 #       km2$p.value <- ifelse(km2$p.value > 1, 1, km2$p.value)
 #     }
-#     
+#
 #     # }
 #     rv[["res"]][[rv$cox_km]][["stats"]][[1]] <- km2
-#     
+#
 #     output$km_hm <- renderPlotly({
 #       plot_heatmap(km2$p.value)
 #     })
-#     
+#
 #     output$ui_stats_details <- renderPrint({
 #       res <- rv[["res"]][[rv$cox_km]]
 #       if(length(res[["stats"]]) == 2){
@@ -1075,7 +1075,7 @@ output$ui_stats_details <- renderPrint({
 #     })
 #   }
 # },ignoreInit = T)
-# 
+#
 # # ----------- 3c. pairwise heatmap ----------
 # plot_heatmap <- function(pvals,mul_methods=rv$km_mul){
 #   counts <- -log10(pvals)
@@ -1084,7 +1084,7 @@ output$ui_stats_details <- renderPrint({
 #   dat$z <- unlist(as.data.frame(counts),recursive = T)
 #   pvals <- unlist(as.data.frame(pvals), recursive = T) %>% sapply(., function(x) if(!is.na(x)){format_p(x)}else{"NA"})
 #   req(length(dat$z)>0)
-#   
+#
 #   fig <- plot_ly() %>%
 #     add_trace(data = dat, x = ~x, y = ~y, z = ~z, type = "heatmap",
 #               colorscale  = col_scale,zmax = 3,zmin=0,
@@ -1106,10 +1106,10 @@ output$ui_stats_details <- renderPrint({
 #                     showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
 #                     ,ax = 20, ay = -20
 #     )
-#   
+#
 #   fig
 # }
-# 
+#
 # output$km_hm <- renderPlotly({
 #   req(length(rv[["res"]][[rv$cox_km]][["stats"]]) == 2)
 #   pvals <- rv[["res"]][[rv$cox_km]][["stats"]][[1]]$p.value
@@ -1208,7 +1208,7 @@ output$scatter_plot <- renderPlotly({
           xlab <- ltitle
         }
       }
-      
+
       # if DepMap, add gene names on to axises
       if(rv$depmapr){
         ylab <- paste0(gene_name,": ",ylab)
@@ -1227,7 +1227,7 @@ output$scatter_plot <- renderPlotly({
 
       # save df to rv
       rv[["annot_df"]] <- df
-      
+
       # draw the figure
       if(rv$scatter_gender_y & length(rv$scatter_gender)>1){
         if(length(input$annot_data_points)>0){
@@ -1248,7 +1248,7 @@ output$scatter_plot <- renderPlotly({
           df$Annotation <- Sex
           cols <- c("#00BFC4", "#F8766D")
         }
-        
+
         fig <- ggplot(df
                       ,aes(x=df_x, y=df_y
                            ,text=paste0(
@@ -1371,7 +1371,7 @@ output$scatter_plot <- renderPlotly({
         df[["patient_id"]] <- paste0(translate_cells(df[["patient_id"]]),"|",df[["patient_id"]])
       }
       rv[["annot_df"]] <- df
-      
+
       # figure hovers
       txt <- function(.data){paste0(
         "Patient ID: <b>",.data[["patient_id"]],"</b>\n",
@@ -1538,7 +1538,7 @@ output$forest_plot <- renderPlot({
   # }
   res <- rv[["res"]]
   req(!is.null(res[["cox"]][["cox_fit"]]))
-  ggforest(res[["cox"]][["cox_fit"]], main = maint, data = res[["cox"]][["cox_df"]], fontsize = 0.7)
+  ggforest(res[["cox"]][["cox_fit"]], main = maint, data = res[["cox"]][["cox_df"]], fontsize = 0.7, cpositions = c(0, 0.1, 0.4))
 })
 
 # ------ 7a. stats & heatmap, if dependency ---------
@@ -1555,7 +1555,7 @@ output$depmap_stats <- renderUI({
   }else{
     stats_name <- "Kruskal-Wallis rank sum test, overall"
   }
-  
+
   p <- rv[["res"]][["p"]]
   p.adj <- rv[["res"]][["p.adj"]]
   if(!is.null(p.adj)){
@@ -1566,9 +1566,9 @@ output$depmap_stats <- renderUI({
   p <- format_p(p)
   p_title <- paste0(stats_name," P-value = ",p)
   if(!is.null(p.adj)){p_title <- paste0(p_title,", adjusted P-value",add_help("padj_dp_q")," = ",p.adj)}
-  
+
   col_w <- 12 / length(rv[["lels"]])
-  
+
   column(
     12,style="display: inline-block;vertical-align:top; width: 100%;word-break: break-word;",
     boxPad(
@@ -1620,7 +1620,7 @@ output$ui_km_mul_dp <- renderUI({
   }else{
     padj_y_w <- 12
   }
-  
+
   div(align="center",
     column(
       padj_y_w,
@@ -1643,7 +1643,7 @@ output$ui_km_mul_dp <- renderUI({
       )
     }
   )
-  
+
 })
 
 # # ------ 7c. draw depmap heatmap ------
@@ -1655,11 +1655,11 @@ output$ui_km_mul_dp <- renderUI({
 #   withProgress(value = 1, message = "Updating statistics...",{
 #     rv$km_mul_dp <- input$km_mul_dp
 #     if(length(input$km_mul_dp_padj)>0){rv$km_mul_dp_padj <- input$km_mul_dp_padj}
-#     
+#
 #     # retrieve df for survival analysis
 #     df <- rv[[paste0("df_",rv$plot_type)]]
 #     levl <- length(unique(df$level))
-#     
+#
 #     # the height of the heatmap
 #     if(levl > 3){
 #       dp_h <- "218px"
@@ -1670,11 +1670,11 @@ output$ui_km_mul_dp <- renderUI({
 #     }else if(levl < 2){
 #       dp_h <- "158px"
 #     }
-#     
+#
 #     # update statistics
 #     surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = rv$km_mul_dp)
 #     rv[["res"]][["fit"]] <- surv_diff
-#     
+#
 #     # adjust p.adj
 #     if(rv$km_mul_dp_padj == "padj"){
 #       if(length(rv[["res"]][["p.adj"]])>0){
@@ -1682,7 +1682,7 @@ output$ui_km_mul_dp <- renderUI({
 #       }
 #       surv_diff$p.value <- ifelse(surv_diff$p.value > 1, 1, surv_diff$p.value)
 #     }
-#     
+#
 #     output$dm_stats_render <- renderUI({
 #       div(
 #         column(
@@ -1695,7 +1695,7 @@ output$ui_km_mul_dp <- renderUI({
 #         )
 #       )
 #     })
-#     
+#
 #     output$dp_hm <- renderPlotly({
 #       pvals <- surv_diff$p.value
 #       req(is.numeric(pvals))
@@ -1705,7 +1705,7 @@ output$ui_km_mul_dp <- renderUI({
 #     })
 #   })
 # },ignoreInit = F)
-# 
+#
 # output$dp_hm <- renderPlotly({
 #   pvals <- rv[["res"]][["fit"]]$p.value
 #   req(is.numeric(pvals))
@@ -1737,7 +1737,7 @@ output$dens_plot <- renderPlotly({
   dep_name <- dependency_names()
   n_lel <- length(levels(df$Level))
   c_values <- lel_colors(n_lel)
-  
+
   if(rv$dens_fill){
     p <- ggplot(df, aes(x=.data[[dep_name]], fill=Level)) + geom_density(alpha=0.4) + #, ..scaled..
       scale_fill_manual(values=c_values)
@@ -1745,7 +1745,7 @@ output$dens_plot <- renderPlotly({
     p <- ggplot(df, aes(x=.data[[dep_name]], color=Level)) + geom_density() +
       scale_color_manual(values=c_values)
   }
-  
+
   if(rv$dens_mean){
     mu <- df %>% dplyr::group_by(Level) %>% dplyr::summarise(grp.mean = mean(.data[[dep_name]], na.rm=T))
     p <- p +
@@ -1768,20 +1768,20 @@ output$dens_stats_plot <- renderPlotly({
   withProgress(value=1,message = "Generating plots ...",{
     df <- rv[["dens_df"]]
     dep_name <- dependency_names()
-    
+
     pos <- position_jitter(0.1, seed = 2)
     lels_len <- length(levels(df$Level))
     cols <- lel_colors(lels_len)
-    
-    
+
+
     if(length(input$annot_cells) > 0){
       if(input[["annot_cells"]][1] != ""){
         df$Annotation <- paste0(df$Level,",",ifelse(df$Cell %in% input$annot_cells, "Highlighted","Not highlighted"))
         df$Highlighted <- ifelse(df$Cell %in% input$annot_cells, "Highlighted","Not highlighted")
         cols <- c(cols,addalpha(cols),darken(cols, 0.4))
         names(cols) <- c(levels(df$Level), paste0(levels(df$Level), ",Not highlighted"), paste0(levels(df$Level), ",Highlighted"))
-        
-        
+
+
           #   geom_text(
         #   data = subset(df, Cell %in% input$annot_cells),
         #   aes(label = Cell),
@@ -1800,7 +1800,7 @@ output$dens_stats_plot <- renderPlotly({
     #Set up shapes, here we used solid circle and solid triangle
     shapes <- c(16,17)
     names(shapes) <- c("Not highlighted", "Highlighted")
-    
+
     #Plot here:
     p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
       scale_color_manual(values=cols) +
@@ -1810,18 +1810,18 @@ output$dens_stats_plot <- renderPlotly({
       #Highlight Part
       geom_jitter(height = 0, width = 0.1, aes(color=Annotation, shape = Highlighted)) +
       scale_shape_manual(values=shapes)+
-      
+
       scale_color_manual(name = "Annotation", values = cols)
-    
-    
-    # p <- p + 
+
+
+    # p <- p +
     #   # geom_jitter(position=pos, aes(color = paste0(df$Level,", ",ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted")))) +
     #   # scale_color_manual(values = c(cols,c(rbind(cols,rep("red",lels_len)))))
     #   geom_jitter(position=pos, aes(shape = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"), size = ifelse(Cell %in% input$annot_cells, "Highlighted", "Not highlighted"))) + #data = subset(df, Cell %in% input$annot_cells)
     #   scale_shape_manual(values=c(8,16)) + scale_size_manual(values=c(3,1)) +
     #   labs(color = "", shape = "", size = "")
-    
-    
+
+
     rv[["ggbox"]] <- p
     ggplotly(p,tooltip = c("Line","x","y"))
   })
@@ -1837,7 +1837,7 @@ observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
 output$ui_track <- renderUI({
   if(length(rv$quantile_graph)>= 1){
     plt_h <- 450 * length(rv$variable_nr)
-    
+
     column(
       #width = (12 / rv$variable_nr),
       width = 12,
@@ -1867,15 +1867,15 @@ output$quantile_graph <- renderPlotly({
     fig <- subplot(fig_list[[1]], fig_list[[2]],nrows = 2, margin = 0.05)
   }
   fig
-  
+
 })
-  
-  
-  
+
+
+
   # fig <- plot_ly(rv$quantile_graph, x = rv$quantile_graph$quantile)
   # fig <- fig %>% add_trace(y = ~rv$quantile_graph$p_value,type = 'scatter',#color =~p_value,
   #                          line = list(color = 'rgb(173,173,173)', width = 2),
-  #                          
+  #
   #                          name = 'P Value',
   #                          marker=list(
   #                            color=~p_value,
@@ -1922,7 +1922,7 @@ output$violin_plot <- renderPlotly({
   mut_x <- names(dtypes)[dtypes == "snv" | (!rv$depmapr & dtypes == "cnv")] %>% gsub("^data_type_","",.)
   mut_title <- rv[[paste0("title_",mut_x)]]
   df_muts <- rv[[paste0("mutations_",mut_x)]]
-  
+
   # expression levels
   if(!rv$depmapr){
     exp_cal <- !(dtypes %in% c("snv","cnv"))
@@ -1931,14 +1931,14 @@ output$violin_plot <- renderPlotly({
   }
   exp_name <- dtypes[exp_cal]
   exp_x <- names(dtypes)[exp_cal] %>% gsub("^data_type_","",.)
-  
+
   exp_title <- rv[[paste0("title_",exp_x)]]
   df_exp <- rv[[paste0("exprs_",exp_x)]]
-  
+
   # combine info
   df <- dplyr::left_join(df_exp,tibble(patient_id=names(df_muts),mut=df_muts),by="patient_id") %>%
     dplyr::filter(!is.na(mut))
-  
+
   # non-synonymous
   if(any(dtypes == "snv")){
     df$mut <- ifelse(df$mut=="","WT",df$mut)
@@ -1959,7 +1959,7 @@ output$violin_plot <- renderPlotly({
 
   # rename column names
   colnames(df) <- c("patient_id","exp","mut","mut_cat")
-  
+
   # convert to CCLE cell ids if depmap
   if(rv$depmapr){df$patient_id <- paste0(translate_cells(df$patient_id),"|",df$patient_id)}
 
@@ -1969,21 +1969,21 @@ output$violin_plot <- renderPlotly({
   }else{
     exp_title_y <- exp_title
   }
-  
+
   # relevel
   df$mut_cat <- factor(df$mut_cat)
   df$mut_cat <- relevel(df$mut_cat, ref = "Other")
-  
+
   # calculate statistics
   if(length(unique(df$mut_cat)) > 1){
     rv[["violin_p"]] <- wilcox.test(exp ~ mut_cat, data = df)
   }else{
     rv[["violin_p"]] <- NULL
   }
-  
+
   # save df to rv
   rv[["annot_df"]] <- df
-  
+
   # highlight data points
   if(length(input$annot_data_points)>0){
     if(input$annot_data_points != ""){
@@ -2020,7 +2020,7 @@ output$violin_plot <- renderPlotly({
           axis.title = element_text(size = rel(1.45)),
           axis.text = element_text(size = rel(1.35))
     )
-  
+
   rv[["violin_plot"]] <- suppressWarnings(ggplotly(p,tooltip="label"))
 })
 

@@ -45,7 +45,7 @@ data_types <- reactive({
       "CNV"="cnv",
       # "miRNA"="mir",
       # "Methylation"="met",
-      "Proteomics"="pro"
+      "Protein"="pro"
       ,"CRISPR-Cas9"="crispr"
       ,"RNAi"="rnai"
       ,"Drug"="drug"

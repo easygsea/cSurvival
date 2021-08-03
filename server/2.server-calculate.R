@@ -233,7 +233,12 @@ observeEvent(input$confirm,{
       rv[["title_all"]] = ""
       rv[["cutoff_all"]] = ""
       #------ 3. Loop from 1 to rv$variable_n ------
+      gp_r <- ifelse_rv("risk_gp"); rv$risk_gpr <- gp_r
+      perc_min <- ifelse_rv("min_gp_size")
+      update_min_gp_size <- function(){updateNumericInput(session,"min_gp_size",value = rv$min_gp_size)}
+      if(!is.na(perc_min)){if(perc_min != rv$min_gp_size & perc_min >= 1 & perc_min <= 90){rv$min_gp_size <- perc_min}else{update_min_gp_size()}}else{update_min_gp_size()}
       for(x in 1:rv$variable_n){
+        cal_exp <- T; mut_exp_yyy <- F
         iter_mode_value <- paste0("iter_mode_",x)
         assign(iter_mode_value,F)
         # clear previous RVs
@@ -292,42 +297,119 @@ observeEvent(input$confirm,{
           # ---------- 3B. perform Surv if expression-like data --------
           min_value <- paste0("min_",x); max_value <- paste0("max_",x); step_value <- paste0("step_",x)
           assign(min_value, 0);assign(max_value, 1);assign(step_value, .1)
-          if(extract_mode != "snv" & ((!rv$depmap & extract_mode != "cnv") | rv$depmap)){
+          if(exp_yyy(extract_mode)){
             iter_id <- paste0("iter_",x)
             yn <- ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
             assign(iter_mode_value,yn)
+            rv[[paste0("iter_mode_value",x)]] <- iter_mode_value
             if(yn){
               lower_id <- paste0("lower_",x); higher_id <- paste0("upper_",x); step_id <- paste0("step_",x)
-              min <- ifelse(is.null(input[[lower_id]]), rv[[lower_id]], input[[lower_id]])
-              max <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
-              step <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
+              min <- rv[[paste0("minF",x)]] <- ifelse(is.null(input[[lower_id]]), rv[[lower_id]], input[[lower_id]])
+              max <- rv[[paste0("maxF",x)]] <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
+              step <- rv[[paste0("stepF",x)]] <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
+              rv[[paste0("dataF",x)]] <- data
               
               assign(min_value, min);assign(max_value, max);assign(step_value, step)
 
               enough_error <- 0
-              results <- get_info_most_significant_rna(data, min, max, step)
-              if(is.null(results)){
-                enough_error <- 1
-                txt <- "The selected project does not have enough data for the selected gene/locus/gene set"
-                if(input$censor_time_ymd != "none"){
-                  txt <- paste0(txt,", at censoring time ",input$censor_time," ",vector_names(input$censor_time_ymd,ymd_names))
+              # check if bivariate
+              if(rv$variable_n > 1){
+                # ANOVA if bivariate expression-like
+                if(x == 1){
+                  cal_exp <- F
+                }else if(x == 2 & exp_yyy(input_mode(1))){
+                  results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], num=x, data2=data, min2=min, max2=max, step2=step, gp=gp_r)
+                }else if(x == 2 & !exp_yyy(input_mode(1))){
+                  results <- get_info_most_significant_rna(data, min, max, step, data2=rv[["dataF1"]], cat=gp_r)
                 }
-                shinyalert(paste0(txt,"."))
+              }else if(rv$variable_n == 1){
+                results <- get_info_most_significant_rna(data, min, max, step)
               }
-
-              req(enough_error == 0)
               
-              #CHANGE THE RESULT FUNCTION AND ADD RV$quantile_graph HERE
-              if("p_df" %in% names(results)){
-                rv[["quantile_graph"]][[x]] <- results[["p_df"]]
-              }
-              # extract most significant df
-              df <- results[["df"]]
-              rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
-              if(rv[["cutoff_all"]] == ""){
-                rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
-              }else{
-                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
+              if(cal_exp){
+                if(is.null(results)){
+                  enough_error <- 1
+                  txt <- "The selected project does not have enough data for the selected gene/locus/gene set"
+                  if(rv$variable_n > 0 & if_any_exp()){
+                    txt <- paste0(txt," at the defined threshold of at least ",rv$min_gp_size,"% cases in each risk subgroup")
+                  }
+                  if(input$censor_time_ymd != "none"){
+                    txt <- paste0(txt,", at censoring time ",input$censor_time," ",vector_names(input$censor_time_ymd,ymd_names))
+                  }
+                  rv$try_error <- 1
+                  shinyalert(paste0(txt,"."))
+                }
+                
+                req(enough_error == 0)
+                # print(str(results))
+                
+                #CHANGE THE RESULT FUNCTION AND ADD RV$quantile_graph HERE
+                if("p_df" %in% names(results)){
+                  if(x > 1 & exp_yyy(input_mode(1))){
+                    rv[["quantile_graph"]][[1]] <- results[["p_df"]][[1]]
+                    rv[["quantile_graph"]][[x]] <- results[["p_df"]][[x]]
+                  }else{
+                    rv[["quantile_graph"]][[x]] <- results[["p_df"]]
+                  }
+                }
+                # extract most significant df
+                df <- results[["df"]]
+                cutoff_n <- paste0("cutoff_",x)
+                if(rv$variable_n > 1){
+                  rv[[cutoff_n]] <- paste0("<b>",results[["cutoff"]][2],"</b>")
+                  if(x==2 & exp_yyy(input_mode(1))){
+                    rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]][1],"</b>")
+                    rv[["cutoff_all"]] <- paste0("#1: ",rv[["cutoff_1"]],", #",x,": ",rv[[cutoff_n]])
+                  }else{
+                    rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[cutoff_n]])
+                  }
+                  if(gp_r == "All"){
+                    df_lels <- as.character(df[["level"]])
+                    df_lels1 <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][1])
+                    df_lels2 <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][2])
+                    df[["level.x"]] <- factor(df_lels1); df[["level.x"]] <- relevel(df[["level.x"]], ref = sort(levels(df[["level.x"]]))[2])
+                    df[["level.y"]] <- factor(df_lels2); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(levels(df[["level.y"]]))[2])
+                  }
+                  # save df
+                  if(rv$depmap){
+                    df_1 <- df %>% dplyr::select(patient_id,dependency,level.x)
+                    df_2 <- df %>% dplyr::select(patient_id,dependency,level.y)
+                    colnames(df_1) <- c("patient_id","dependency","level")
+                    colnames(df_2) <- c("patient_id","dependency","level")
+                  }else{
+                    df_1 <- df %>% dplyr::select(patient_id,survival_days,censoring_status,level.x)
+                    df_2 <- df %>% dplyr::select(patient_id,survival_days,censoring_status,level.y)
+                    colnames(df_1) <- c("patient_id","survival_days","censoring_status","level")
+                    colnames(df_2) <- c("patient_id","survival_days","censoring_status","level")
+                  }
+                  df_list[[1]] <- df_1; df_list[[2]] <- df_2
+                  rv[["df_1"]] <- df_1
+                  rv[["df_2"]] <- df_2
+                  
+                  # no of cases in each group
+                  lels1 <- levels(df_1$level); lels2 <- levels(df_2$level)
+                  rv[["lels_1"]] <- lapply(lels1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
+                  rv[["lels_2"]] <- lapply(lels2, function(x) table(df_2$level == x)["TRUE"] %>% unname(.))
+                  names(rv[["lels_1"]]) <- lels1; names(rv[["lels_2"]]) <- lels2
+                  
+                  # perform survival analysis
+                  if(x==2 & exp_yyy(input_mode(1))){
+                    rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]],rv[["maxF1"]],rv[["stepF1"]])
+                    rv[["cox_2"]] <- cal_surv_rna(df_2,1,rv[["minF1"]],rv[["maxF1"]],rv[["stepF1"]])
+                  }else{
+                    rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF2"]],rv[["maxF2"]],rv[["stepF2"]])
+                    rv[["cox_2"]] <- cal_surv_rna(df_2,1,rv[["minF2"]],rv[["maxF2"]],rv[["stepF2"]])
+                  }
+                  # switch to FALSE to prevent errors
+                  cal_exp <- F
+                }else{
+                  rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
+                  if(rv[["cutoff_all"]] == ""){
+                    rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
+                  }else{
+                    rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
+                  }
+                }
               }
             }else{
               clow_id <- paste0("clow_",x)
@@ -373,12 +455,44 @@ observeEvent(input$confirm,{
               rv$try_error <- 1
             }
             req(error_snv == 0)
-            rv[[paste0("cutoff_",x)]] <- ""
+            cutoff_x <- paste0("cutoff_",x)
+            rv[[cutoff_x]] <- ""
+            rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
 
+            if(x == 2 & exp_yyy(input_mode(1))){
+              cal_exp <- T; mut_exp_yyy <- T
+              results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+              # extract most significant df
+              df <- results[["df"]]
+              df_1 <- df
+              df_lels <- as.character(df[["level"]])
+              if(gp_r == "All"){
+                df_1[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][2])
+                df[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][1])
+                # assign levels
+                df_1[["level"]] <- factor(df_1[["level"]]); df[["level"]] <- factor(df[["level"]])
+                df_1[["level"]] <- relevel(df_1[["level"]], ref = "Low")
+                df[["level"]] <- relevel(df[["level"]], ref = "Other")
+              }else{
+                df_1[["level"]] <- df[["level.x"]]
+                df[["level"]] <- df[["level.y"]]
+              }
+              
+              df_list[[1]] <- df_1; rv[["df_1"]] <- df_1
+              rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
+              rv[["cutoff_all"]] <- paste0("#",x,": ",rv[["cutoff_1"]])
+              # no of cases in each group
+              lels_1 <- levels(df_1$level)
+              rv[["lels_1"]] <- lapply(lels_1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
+              names(rv[["lels_1"]]) <- lels_1
+              # perform survival analysis
+              rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]],iter_mode=get(rv[["iter_mode_value1"]]))
+            }
           # ---------- 3D. survival analysis on CNVs ---------
           }else if(!rv$depmap & extract_mode == "cnv"){
             cnv_mode <- ifelse_rv(paste0("cnv_par_",x))
-
+            rv[[paste0("dataF",x)]] <- data
+            
             results <- get_info_most_significant_cnv(data,cnv_mode)
             
             # extract most significant df
@@ -386,32 +500,58 @@ observeEvent(input$confirm,{
             tmp <- as.character(df$level)
             names(tmp) <- df$patient_id
             rv[[paste0("mutations_",x)]] <- tmp
-            rv[[paste0("cutoff_",x)]] <- paste0("<b>",results[["cutoff"]],"</b>")
-            if(rv[["cutoff_all"]] == ""){
-              rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
-            }else{
-              rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
+            cutoff_x <- paste0("cutoff_",x)
+            rv[[cutoff_x]] <- ""
+            rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
+            
+            if(x == 2 & exp_yyy(input_mode(1))){
+              cal_exp <- T; mut_exp_yyy <- T
+              results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+              # extract most significant df
+              df <- results[["df"]]
+              df_1 <- df
+              df_lels <- as.character(df[["level"]])
+              if(gp_r == "All"){
+                df_1[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][2])
+                df[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][1])
+                # assign levels
+                df_1[["level"]] <- factor(df_1[["level"]]); df[["level"]] <- factor(df[["level"]])
+                df_1[["level"]] <- relevel(df_1[["level"]], ref = "Low")
+                df[["level"]] <- relevel(df[["level"]], ref = "Other")
+              }else{
+                df_1[["level"]] <- df[["level.x"]]
+                df[["level"]] <- df[["level.y"]]
+              }
+              
+              df_list[[1]] <- df_1; rv[["df_1"]] <- df_1
+              rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
+              rv[["cutoff_all"]] <- paste0("#",x,": ",rv[["cutoff_1"]])
+              # no of cases in each group
+              lels_1 <- levels(df_1$level)
+              rv[["lels_1"]] <- lapply(lels_1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
+              names(rv[["lels_1"]]) <- lels_1
+              # perform survival analysis
+              rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]],iter_mode=get(rv[["iter_mode_value1"]]))
             }
 
           }
 
-          # save df
-          df_list[[x]] <- df
-          rv[[paste0("df_",x)]] <- df
-
-          # no of cases in each group
-          lels <- levels(df$level)
-          rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
-          names(rv[[paste0("lels_",x)]]) <- lels
-
-          # perform survival analysis
-          cox_id <- paste0("cox_",x)
-          rv[[cox_id]] <- cal_surv_rna(df,1,get(min_value),get(max_value),get(step_value),iter_mode=get(iter_mode_value))
-          # saveRDS(rv[[cox_id]], "cox_dm")
-
+          if(cal_exp){
+            # save df
+            df_list[[x]] <- df
+            rv[[paste0("df_",x)]] <- df
+            # no of cases in each group
+            lels <- levels(df$level)
+            rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
+            names(rv[[paste0("lels_",x)]]) <- lels
+            
+            # perform survival analysis
+            cox_id <- paste0("cox_",x)
+            rv[[cox_id]] <- cal_surv_rna(df,1,get(min_value),get(max_value),get(step_value),iter_mode=get(iter_mode_value))
+            # saveRDS(rv[[cox_id]], "cox_dm")
+          }
           # save data type to rv
           rv[[paste0("data_type_",x)]] <- extract_mode
-
         }
       }
 
@@ -425,16 +565,38 @@ observeEvent(input$confirm,{
 
         x_y <- c("x","y")[1:length(df_list)]
         df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
+        # combine subgroups if indicated
+        error_gp <- 0
+        if(gp_r != "All"){
+          all_lels <- unique(df_combined[["level"]])
+          if(!gp_r %in% all_lels){
+            if(length(all_lels) < 4){
+              gp_rr <- strsplit(gp_r,"_")[[1]]
+              if(!(any(grepl(gp_rr[1],all_lels)) & any(grepl(gp_rr[2],all_lels)))){
+                error_gp <- 1
+              }
+            }
+          }
+          if(error_gp == 0){
+            df_combined <- assign_gp(df_combined,gp_r)
+            lels <- levels(df_combined$level)
+          }
+        }else{
+          lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
+          df_combined$level <- factor(df_combined$level, levels = lels)
+        }
+        if(error_gp > 0){
+          shinyalert("The selected subgroup does not have enough samples for analysis")
+        }
+        req(error_gp == 0)
         rv[["df_all"]] <- df_combined
 
         # no of cases in each group
-        lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
-        df_combined$level <- factor(df_combined$level, levels = lels)
         rv[["lels_all"]] <- lapply(lels, function(x) table(df_combined$level == x)["TRUE"] %>% unname(.))
         names(rv[["lels_all"]]) <- lels
 
         # perform survival analysis
-        rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n,0,1,.1,iter_mode=F)
+        rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n,0,1,.1,iter_mode=F,gp=gp_r)
         if(rv$depmap){
           p_adj_tmp <- rv[["cox_all"]][["p.adj"]]
           for(x in 1:rv$variable_n){

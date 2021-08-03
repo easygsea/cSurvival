@@ -77,6 +77,21 @@ input_mode_names <- c(
   ,"Normalized expression" = "gs"
 )
 
+# ------- names for risk subgroups ----------
+risk_hl <- c("High","Low")
+risk_gp <- list(
+  "gs" = risk_hl,
+  "rna" = risk_hl,
+  "snv" = c("Mutated","Other"),
+  "mir" = risk_hl,
+  "met" = risk_hl,
+  "rrpa" = risk_hl,
+  "pro" = risk_hl,
+  "crispr" = risk_hl,
+  "rnai" = risk_hl,
+  "drug" = risk_hl
+)
+
 # ------- survival analysis methods ---------
 surv_methods <- c("Kaplan-Meier (KM) log rank"="km","Cox proportional-hazards (PH) model"="cox")
 

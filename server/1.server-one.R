@@ -789,51 +789,108 @@ observe({
 
 # parameters for KM analysis
 output$par_gear <- renderUI({
+  if(rv$variable_n > 1){
+    db_types <- lapply(1:rv$variable_n, function(x){
+      cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
+      cat_name <- ifelse_rv(cat_id)
+      x <- ifelse(cat_name=="gs","gs",input[[db_id]])
+      if(x == "cnv"){
+        if(rv$depmap){
+          risk_hl
+        }else{
+          c("Gain/Loss","Other")
+        }
+      }else{
+        risk_gp[[x]]
+      }
+    })
+    gps <- apply(expand.grid(db_types[[1]], db_types[[2]]), 1, paste, collapse="_")
+    rv$risk_gps <- c("All",gps)
+  }
+  if_exp <- if_any_exp()
+  if(if_exp){c_w <- 6}else{c_w <- 12}
+  if(rv$tcga){c_w_kc <- 6}else{c_w_kc <- 12}
   div(
-    if(rv$tcga){
+    if(rv$tcga | if_exp){
       column(
         12,align="center",
         wellPanel(
           style=sprintf("background-color:%s; border: .5px solid #fff;",bcols[1]),
           fluidRow(
-            column(
-              6,
-              radioGroupButtons(
-                inputId = "flagged",
-                label = HTML(paste0("<h4>If TCGA, exclude flagged cases from analysis? ",add_help("flagged_q"),"</h4>")),
-                choices = c("Yes"="y","No"="n"),
-                selected = rv$flagged,
-                status = "danger", #size = "sm",
-                checkIcon = list(
-                  yes = icon("check-square"),
-                  no = icon("square-o")
+            if(rv$variable_n > 1){
+              div(
+                # '(input.cat_1 == "g" & input.db_1 != "snv") | (input.cat_2 == "g" & input.db_2 != "snv")',
+                column(
+                  12,
+                  radioGroupButtons(
+                    "risk_gp",
+                    HTML(paste0("<h4>Risk subgroup(s) of interest:",add_help("risk_gp_q"),"</h4>")),
+                    choices = rv$risk_gps,
+                    selected = rv$risk_gp,
+                    status = "danger", #size = "sm",
+                    checkIcon = list(
+                      yes = icon("check-square"),
+                      no = icon("square-o")
+                    )
+                  )
+                )
+                ,if(if_exp){
+                  column(
+                    12,
+                    numericInput(
+                      "min_gp_size",
+                      HTML(paste0("<h4>Min %:",add_help("min_gp_size_q"),"</h4>")),
+                      value = rv$min_gp_size,
+                      min = 1, max = 90, step = 1, width = "100px"
+                    )
+                  )}
+              )
+            },
+            if(rv$tcga){
+              column(
+                c_w,
+                radioGroupButtons(
+                  inputId = "flagged",
+                  label = HTML(paste0("<h4>If TCGA, exclude flagged cases from analysis? ",add_help("flagged_q"),"</h4>")),
+                  choices = c("Yes"="y","No"="n"),
+                  selected = rv$flagged,
+                  status = "danger", #size = "sm",
+                  checkIcon = list(
+                    yes = icon("check-square"),
+                    no = icon("square-o")
+                  )
                 )
               )
-            )
-            ,column(
-              6,
-              radioGroupButtons(
-                "min_p_kc",
-                HTML(paste0("<h4>Method to determine <i>P</i><sub>min</sub>",add_help("min_p_kc_q"),"</h4>")),
-                choices = c("KM log-rank"="km","Cox PH model"="cox"),
-                selected = rv$min_p_kc,
-                status = "danger", #size = "sm",
-                checkIcon = list(
-                  yes = icon("check-square"),
-                  no = icon("square-o")
+            }
+            ,if(if_exp){
+              column(
+                c_w_kc,
+                radioGroupButtons(
+                  "min_p_kc",
+                  HTML(paste0("<h4>Method to determine <i>P</i><sub>min</sub>:",add_help("min_p_kc_q"),"</h4>")),
+                  choices = c("KM log-rank"="km","Cox PH model"="cox"),
+                  selected = rv$min_p_kc,
+                  status = "danger", #size = "sm",
+                  checkIcon = list(
+                    yes = icon("check-square"),
+                    no = icon("square-o")
+                  )
                 )
               )
-            )
+            }
           )
+          ,bsTooltip("risk_gp_q",HTML("In bivariate outcomes analysis, select the risk group (subgroup) of interest. If <b>All</b> is selected, an ANOVA-like test is done to test if there is significant difference between any of the four subgroups. If a specific subgroup is selected, it is compared against the other subgroups as a whole."),placement = "top")
+          ,radioTooltip(id = "risk_gp", choice = "All", title = HTML("ANOVA-like test on all subgroups"))
+          ,bsTooltip("min_gp_size_q",HTML("In bivariate outcomes analysis, select the minimum number of cases (default, 10% of the population) to define a subgroup. Only applicable for continuous variables (e.g. mRNA gene expression, DNA methylation)."),placement = "top")
           ,bsTooltip("flagged_q",HTML(flagged_exp),placement = "top")
           ,radioTooltip(id = "flagged", choice = "y", title = HTML("Remove flagged cases"))
           ,radioTooltip(id = "flagged", choice = "n", title = HTML("Keep all cases"))
           ,bsTooltip("min_p_kc_q",HTML(paste0(
             "Select the test to determine the optimal cutoff point using the minimum <i>P</i>-value method. "
-            ,"Only applicable for continuous variables (e.g. mRNA gene expression, DNA methylation)"))
+            ,"Only applicable for continuous variables (e.g. mRNA gene expression, DNA methylation)."))
             ,placement = "top")
           ,radioTooltip(id = "min_p_kc", choice = "km", title = HTML("Kaplan-Meier (KM) log-rank test"))
-          ,radioTooltip(id = "min_p_kc", choice = "cox", title = HTML("Cox proportional-hazard (PH) model"))
+          ,radioTooltip(id = "min_p_kc", choice = "cox", title = HTML("Cox proportional-hazard (PH) model likelihood ratio test"))
         )
       )
     },
