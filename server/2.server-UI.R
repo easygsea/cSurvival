@@ -1802,16 +1802,27 @@ output$dens_stats_plot <- renderPlotly({
     names(shapes) <- c("Not highlighted", "Highlighted")
 
     #Plot here:
-    p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot() + coord_flip() +
+    p <- ggplot(df, aes(x=Level, y=.data[[dep_name]], color=Level, Line=Cell)) + geom_boxplot(outlier.shape = NA) + coord_flip() +
       scale_color_manual(values=cols) +
       #geom_jitter(shape=16, position=pos) +
       theme_classic() +
       labs(title="Cell line distribution",x="", y = dep_name) +
-      #Highlight Part
-      geom_jitter(height = 0, width = 0.1, aes(color=Annotation, shape = Highlighted)) +
-      scale_shape_manual(values=shapes)+
-
+      
+      #Start of Highlight Part
       scale_color_manual(name = "Annotation", values = cols)
+      #Add a boolean here to fix annotation bug
+      if((length(input$annot_cells) > 0)&&(input[["annot_cells"]][1] != "")){
+          p <- p + 
+            geom_jitter(height = 0, width = 0.1, aes(color=Annotation, shape = Highlighted)) +
+            scale_shape_manual(values=shapes)
+        }
+        else{
+          p <- p + geom_jitter(height = 0, width = 0.1, aes(color=Annotation)) #, shape = Highlighted
+        }
+      #geom_jitter(height = 0, width = 0.1, aes(color=Annotation)) #, shape = Highlighted
+      #scale_shape_manual(values=shapes)+
+
+      
 
 
     # p <- p +
