@@ -459,6 +459,8 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
 
       if(cat != ""){
         if(cat == "All"){
+          df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
+          df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Other")
           df$level <- paste0(data[["mut"]],"_",df$level)
         }else if(cat_si == 1){
           df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")

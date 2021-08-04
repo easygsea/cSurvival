@@ -464,6 +464,9 @@ observeEvent(input$confirm,{
             if(x == 2 & exp_yyy(input_mode(1))){
               cal_exp <- T; mut_exp_yyy <- T
               results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+              if("p_df" %in% names(results)){
+                rv[["quantile_graph"]][[x]] <- results[["p_df"]]
+              }
               # extract most significant df
               df <- results[["df"]]
               df_1 <- df
@@ -509,6 +512,9 @@ observeEvent(input$confirm,{
             if(x == 2 & exp_yyy(input_mode(1))){
               cal_exp <- T; mut_exp_yyy <- T
               results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+              if("p_df" %in% names(results)){
+                rv[["quantile_graph"]][[x]] <- results[["p_df"]]
+              }
               # extract most significant df
               df <- results[["df"]]
               df_1 <- df
