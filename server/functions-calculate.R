@@ -345,7 +345,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     patient_ids2 <- data2$patient_id
     exp2 <-data2[,2] %>% unlist(.) %>% unname(.)
     quantiles2 <- quantile(exp2, quantile_s2, na.rm = T)
-    
+
     n_min_r <- perc_min * nrow(data2)
 
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
@@ -427,9 +427,9 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
           least_p_value0 <- res[["least_p_value"]]
           df_most_significant0 <- res[["df_most_significant"]]
           cutoff_most_significant0 <- res[["cutoff_most_significant"]]
-          
+
           new_row1 = c(least_p_value0,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],NA)
-          
+
           # Proceed only if enough data
           if(is.null(df_most_significant0)){
             return(NULL)
@@ -456,7 +456,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
-      
+
       if(cat != ""){
         if(cat == "All"){
           df$level <- paste0(data[["mut"]],"_",df$level)
@@ -472,7 +472,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
           df <- assign_gp(df,cat)
         }
       }
-      
+
       if(is.null(df)){
         return(NULL)
       }else{
@@ -500,7 +500,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
             p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
           }
         }
-        
+
         if(!is.na(p_diff)){
           # #append current p value to the p value df
           new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
@@ -537,7 +537,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     }
     cutoff_most_significant <- res[["cutoff_most_significant"]]
     least_hr <- res[["least_hr"]]
-    
+
     #Transform the p_df a little bit to make it work with the ggplot
     if(num > 1){
       p_df1 <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
@@ -548,7 +548,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
       p_df <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
       p_df <- transform_p_df(p_df)
     }
-    
+
     # proceed only if enough data
     if(is.null(df_most_significant)){
       return(NULL)
@@ -558,7 +558,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
         cutoff = cutoff_most_significant
         ,hr = least_hr
         ,p_df = p_df
-        
+
       )
       return(results)
     }

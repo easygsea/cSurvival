@@ -1807,12 +1807,12 @@ output$dens_stats_plot <- renderPlotly({
       #geom_jitter(shape=16, position=pos) +
       theme_classic() +
       labs(title="Cell line distribution",x="", y = dep_name) +
-      
+
       #Start of Highlight Part
       scale_color_manual(name = "Annotation", values = cols)
       #Add a boolean here to fix annotation bug
       if((length(input$annot_cells) > 0)&&(input[["annot_cells"]][1] != "")){
-          p <- p + 
+          p <- p +
             geom_jitter(height = 0, width = 0.1, aes(color=Annotation, shape = Highlighted)) +
             scale_shape_manual(values=shapes)
         }
@@ -1822,7 +1822,7 @@ output$dens_stats_plot <- renderPlotly({
       #geom_jitter(height = 0, width = 0.1, aes(color=Annotation)) #, shape = Highlighted
       #scale_shape_manual(values=shapes)+
 
-      
+
 
 
     # p <- p +
