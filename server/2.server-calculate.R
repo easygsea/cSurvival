@@ -225,7 +225,7 @@ observeEvent(input$confirm,{
       rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
         rv$plot_type <- "1"; if(rv$cor_method=="pearson" & !rv$depmap){rv$cor_method <- "kendall"}
-        if(rv$depmap){rv$cor_method<-"pearson";rv$scatter_log_x<-F}
+        if(rv$depmap){rv$cor_method<-"spearman";rv$scatter_log_x<-F}
       }else{
         rv$plot_type <- "all"; if(rv$cor_method!="pearson"){rv$cor_method <- "pearson"}
       }
@@ -320,7 +320,11 @@ observeEvent(input$confirm,{
                 if(x == 1){
                   cal_exp <- F
                 }else if(x == 2 & exp_yyy(input_mode(1))){
-                  results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], num=x, data2=data, min2=min, max2=max, step2=step, gp=gp_r)
+                  if(exp_iter_yyy(1)){
+                    results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], num=x, data2=data, min2=min, max2=max, step2=step, gp=gp_r)
+                  }else{
+                    results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=data, gp=gp_r)
+                  }
                 }else if(x == 2 & !exp_yyy(input_mode(1))){
                   results <- get_info_most_significant_rna(data, min, max, step, data2=rv[["dataF1"]], cat=gp_r)
                 }
@@ -418,6 +422,7 @@ observeEvent(input$confirm,{
               cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
               df <- get_df_by_cutoff(data, cutoff)
               rv[[paste0("cutoff_",x)]] <- paste0(input[[clow_id]],"%")
+              rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
             }
 
           # ---------- 3C. survival analysis on SNVs ---------
@@ -461,7 +466,7 @@ observeEvent(input$confirm,{
             rv[[cutoff_x]] <- ""
             rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
 
-            if(x == 2 & exp_yyy(input_mode(1))){
+            if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
               cal_exp <- T; mut_exp_yyy <- T
               results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
               if("p_df" %in% names(results)){
@@ -509,7 +514,7 @@ observeEvent(input$confirm,{
             rv[[cutoff_x]] <- ""
             rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
 
-            if(x == 2 & exp_yyy(input_mode(1))){
+            if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
               cal_exp <- T; mut_exp_yyy <- T
               results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
               if("p_df" %in% names(results)){

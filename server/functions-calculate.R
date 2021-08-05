@@ -158,7 +158,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
 
   # save original expression or mutation data, if applicable
-  if(type == "rna" | type == "mir" | type == "met" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
+  if(type == "rna" | type == "mir" | type == "met" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug" | (type == "cnv" & rv$depmap)){
     # calculate normalized expression, if applicable
     if(!is.null(data_n)){
       if(input[[g_ui_norm_id]]=="gs"){
@@ -271,6 +271,11 @@ transform_p_df <- function(p_df){
 # function to check if expression-like
 exp_yyy <- function(extract_mode){
   extract_mode != "snv" & ((!rv$depmap & extract_mode != "cnv") | rv$depmap)
+}
+# function to check if minimum P-value searching
+exp_iter_yyy <- function(x){
+  iter_id <- paste0("iter_",x)
+  ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
 }
 
 # function to re-assign groups based on user's selection of a risk subgroup

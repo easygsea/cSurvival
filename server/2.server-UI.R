@@ -16,7 +16,7 @@ output$ui_results <- renderUI({
     )
 
     dtype1 <- rv[["data_type_1"]]
-    if(dtype1 != "cnv"){
+    if(!(!rv$depmapr & dtype1 != "cnv")){
       dtype1_name <- call_datatype_from_rv(dtype1)
       dtype1_scatter <- as.list("scatter")
       names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
@@ -165,7 +165,7 @@ output$ui_results <- renderUI({
                 6,
               ),
               column(
-                6,align="center",id="div_annot_cells",style="z-index:1000",
+                6,align="center",id="div_annot_cells",#style="z-index:1000",
                 selectizeInput(
                   "annot_cells"
                   ,HTML(paste0("(Optional) highlight cell line(s) in box plot:",add_help("annot_cells_q")))
@@ -218,7 +218,7 @@ output$ui_results <- renderUI({
                 )
               ),
               column(
-                6,id="div_dens_stats_plot",style="z-index:500",
+                6,id="div_dens_stats_plot",#style="z-index:500",
                 plotlyOutput("dens_stats_plot",height = "500px", width = "100%")
                 ,div(
                   align = "left",
