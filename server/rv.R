@@ -61,6 +61,7 @@ rv <- reactiveValues(
   
   # hr & p value VS quantile graph
   ,quantile_graph=NULL
+  ,heatmap_df=NULL
   
   # annotate cells
   ,annot_cells_y="" # yes

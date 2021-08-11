@@ -1845,22 +1845,35 @@ observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
 })
 
 # --------- 8. P-value tracking -------------
+#Percentile graph---
 output$ui_track <- renderUI({
-  if(length(rv$quantile_graph)>= 1){
-    plt_h <- 450 * length(rv$variable_nr)
+  
+  if((rv$variable_nr > 1)&&(all(sapply(1:rv$variable_nr,function(x) exp_yyy(input_mode(x)))))){
+    column(width = 12,
+           plotlyOutput("tracking_heatmap")
+           )
 
-    column(
-      #width = (12 / rv$variable_nr),
-      width = 12,
-      plotlyOutput("quantile_graph", height = paste0(plt_h,"px"))
-    )
-  }else{
-    column(
-      12,
-      p(style = "color:gray;", "Percentile tracking available for continuous variables only.")
-    )
   }
+  else{
+    if(length(rv$quantile_graph)>= 1){
+      plt_h <- 450 * length(rv$variable_nr)
+      
+      column(
+        #width = (12 / rv$variable_nr),
+        width = 12,
+        plotlyOutput("quantile_graph", height = paste0(plt_h,"px"))
+      )
+    }else{
+      column(
+        12,
+        p(style = "color:gray;", "Percentile tracking available for continuous variables only.")
+      )
+    }
+  }
+  
+
 })
+
 
 #Quantile Plot Output
 output$quantile_graph <- renderPlotly({
@@ -1879,6 +1892,14 @@ output$quantile_graph <- renderPlotly({
   }
   fig
 
+})
+
+#Tracking boxplot graph---
+
+output$tracking_heatmap <- renderPlotly({
+  #View(rv$heatmap_df)
+  fig <- pvalue_heatmap(rv$heatmap_df)
+  fig
 })
 
 

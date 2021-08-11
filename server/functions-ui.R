@@ -663,7 +663,7 @@ vline <- function(x = 0, color = "pink") {
 
 
 single_plot <- function(quantile_df, index){
-  #Due to bug in Plotly, I am using the solution mentioned in this website:
+  #Due to a bug in Plotly, I am using the solution mentioned in this website:
   #https://stackoverflow.com/questions/55251470/missing-data-when-supplying-a-dual-axis-multiple-traces-to-subplot
   #If index == 1, this is first graph and we need to pass in normal y axis
   cutoff <- quantile_df$quantile[which.min(quantile_df$p_value)]
@@ -798,4 +798,39 @@ assemble_percentile_plot <- function(quantile_df_list){
   }
   
   return(fig_list)
+}
+
+#heatmap----
+pvalue_heatmap <- function(heatmap_df){
+  dat = heatmap_df
+  dat$p_value = round(dat$p_value,4)
+  dat$log_p_value <- -log10(dat$p_value)
+  dat$log_p_value[is.na(dat$log_p_value)] <- 0
+  
+  req(length(dat$log_p_value)>0)
+  
+  fig <- plot_ly() %>%
+    add_trace(data = dat, x = ~Q1, y = ~Q2, z = ~log_p_value, type = "heatmap",
+              colorscale  = col_scale,zmax = 2,zmin=0, #max(dat$log_p_value)
+              colorbar = list(
+                title = list(text="-log10(P)", side = "right")
+                ,len = 1.2
+              ),
+              text = ~p_value,
+              hovertemplate = paste('%{yaxis.title.text} quantile: <b>%{x}%</b> and %{yaxis.title.text} quantile: <b>%{y}%</b><br>',
+                                    'Corresponding P-value: <b>%{text}</b>'
+              )
+    )%>%
+    add_annotations(x = dat$Q1, y = dat$Q2,
+                    text = as.character(round(dat$p_value,2)),
+                    showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
+                    ,ax = 20, ay = -20
+    )%>%
+    layout(
+      title = "Quantile P value Heatmap",
+      xaxis = list(title = str_remove(rv[["title_1"]], fixed(" expression")), showticklabels = T),
+      yaxis = list(title = str_remove(rv[["title_2"]], fixed(" expression")), showticklabels = T)
+      # ,margin = list(l=200)
+    )
+  fig
 }

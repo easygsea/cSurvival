@@ -6,6 +6,7 @@ observeEvent(input$confirm,{
     clear_rds()
     rv$show_ui <- ""
     rv$quantile_graph <- c()
+    rv$heatmap_df <- c()
 
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
@@ -327,6 +328,7 @@ observeEvent(input$confirm,{
               }else if(rv$variable_n == 1){
                 results <- get_info_most_significant_rna(data, min, max, step)
               }
+              #extract heatmap_df needed for heatmap
               
               if(cal_exp){
                 if(is.null(results)){
@@ -354,6 +356,9 @@ observeEvent(input$confirm,{
                     rv[["quantile_graph"]][[x]] <- results[["p_df"]]
                   }
                 }
+                rv$heatmap_df <- results[["heatmap_df"]]
+                # saveRDS(results[["heatmap_df"]], "heatmap_df.rds")
+                # View(rv$heatmap_df)
                 # extract most significant df
                 df <- results[["df"]]
                 cutoff_n <- paste0("cutoff_",x)
