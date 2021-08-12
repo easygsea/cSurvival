@@ -245,7 +245,8 @@ output$ui_results <- renderUI({
         )
       }else if(rv$plot_type == "track"){
         uiOutput("ui_track")
-      }else{
+      }
+      else{
           div(
             column(id="div_surv",style="word-break: break-word;",
               area_w, align = "left",
@@ -1851,8 +1852,22 @@ output$ui_track <- renderUI({
   if((rv$variable_nr > 1)&&(all(sapply(1:rv$variable_nr,function(x) exp_yyy(input_mode(x)))))){
     column(width = 12,
            plotlyOutput("tracking_heatmap")
+           ,div(
+             align = "left",
+             style = "position: absolute; right: 7em; top: -3em;",
+             div(
+               id = "gear_btn_heatmap",
+               style="display: inline-block;vertical-align:top;",
+                 dropdown(
+                   uiOutput("tracking_heatmap_plot_gear"),
+                   circle = TRUE, status = "danger", style = "material-circle",
+                   size="sm", right = T,
+                   icon = icon("gear"), width = "300px",
+                   tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                 )
+             )
            )
-
+           )
   }
   else{
     if(length(rv$quantile_graph)>= 1){
@@ -1902,7 +1917,53 @@ output$tracking_heatmap <- renderPlotly({
   fig
 })
 
-
+# --------- 8a. tracking plot gear -------------
+output$tracking_heatmap_plot_gear <- renderUI({
+      fluidRow(
+        column(
+          12,
+          #select color
+          selectInput(
+            inputId = "tracking_heatmap_color",
+            label = HTML(paste0("Select color scheme: ",add_help("tracking_heatmap_color_help"))),
+            choices = c("Default" = "default",
+                        "Yellow Green Blue" = "YlGnBu",
+                        "Reds" = "Reds",
+                        "Red Purple" = "RdPu",
+                        "Purple" = "Purples",
+                        "Oranges" = "Oranges",
+                        "Blues" = "Blues",
+                        "Greys" = "Grays"
+                        ),
+            selected = rv$tracking_heatmap_color
+          )
+          ,bsTooltip("tracking_heatmap_color_help",paste0("Select the color scheme for the tracking heatmap"),placement = "top")
+          # show annotation
+          ,materialSwitch(
+            inputId = "tracking_heatmap_annotation",
+            label = HTML(paste0("Show heatmap annotation?",add_help("tracking_heatmap_annotation_help"))),
+            value = rv$tracking_heatmap_annotation, inline = F, width = "100%",
+            status = "danger"
+          ),
+          bsTooltip("tracking_heatmap_annotation_help",paste0("Switch on to show p-value texts on top of the heatmap. Switch off to hide them"),placement = "top")
+          ,conditionalPanel(
+          'input.tracking_heatmap_annotation',
+          column(
+            12,
+            sliderInput("tracking_heatmap_text_size", label = HTML(paste0("the font size of the annotation texts:", add_help("tracking_heatmap_text_size_help"))),
+                        min = 1, max = 30, value = rv$tracking_heatmap_text_size
+            )
+            ,bsTooltip("tracking_heatmap_text_size_help",HTML(paste0("Increase or decrease the font size of the tracking heatmap plot."))
+            ,placement = "top"),
+          )
+        )
+        )
+      )
+  })
+#Observe Events to update rvs based on inputs
+observeEvent(input$tracking_heatmap_annotation,{rv$tracking_heatmap_annotation <- input$tracking_heatmap_annotation})
+observeEvent(input$tracking_heatmap_text_size,{rv$tracking_heatmap_text_size <- input$tracking_heatmap_text_size})
+observeEvent(input$tracking_heatmap_color,{req(!is.null(input$tracking_heatmap_color));req(input$tracking_heatmap_color != "");rv$tracking_heatmap_color <- input$tracking_heatmap_color})
 
   # fig <- plot_ly(rv$quantile_graph, x = rv$quantile_graph$quantile)
   # fig <- fig %>% add_trace(y = ~rv$quantile_graph$p_value,type = 'scatter',#color =~p_value,

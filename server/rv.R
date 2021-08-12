@@ -62,6 +62,9 @@ rv <- reactiveValues(
   # hr & p value VS quantile graph
   ,quantile_graph=NULL
   ,heatmap_df=NULL
+  ,tracking_heatmap_text_size = 14
+  ,tracking_heatmap_annotation = TRUE
+  ,tracking_heatmap_color = "default"
   
   # annotate cells
   ,annot_cells_y="" # yes

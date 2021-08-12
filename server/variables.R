@@ -254,7 +254,7 @@ col_scale <- sapply(1:ncol(col_scale), function(x) {x <- col_scale[,x]; paste0("
 col_scale <- c("rgb(255, 255, 255)", col_scale)
 col_scale <- lapply(1:length(col_scale), function(i) list(col_scale_no[i], col_scale[i]))
 
-#TODO: ADD COLORSCALE FOR HR PLOT
+
 #Blue and Red Orange Yellow colorscale for Hazard Ratio graph
 col_scale_no <- c(0, 0.20068666377, 0.33333333333, 0.43367666522, 0.66666666666, 2)
 col_scale_temp <- sequential_hcl(5, palette = "blues3") %>% col2rgb()

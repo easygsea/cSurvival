@@ -808,10 +808,18 @@ pvalue_heatmap <- function(heatmap_df){
   dat$log_p_value[is.na(dat$log_p_value)] <- 0
   
   req(length(dat$log_p_value)>0)
+  selected_color = col_scale
   
+  if(rv$tracking_heatmap_color != "default"){
+    selected_color_no <- c(0, 0.16666666, 0.33333333333, 0.5, 0.66666666, 1)
+    selected_color <- sequential_hcl(5, palette = rv$tracking_heatmap_color) %>% rev(.) %>% col2rgb()
+    selected_color <- sapply(1:ncol(selected_color), function(x) {x <- selected_color[,x]; paste0("rgb(",paste0(x, collapse = ", "),")")})
+    selected_color <- c("rgb(255, 255, 255)", selected_color)
+    selected_color <- lapply(1:length(selected_color), function(i) list(selected_color_no[i], selected_color[i]))
+  }
   fig <- plot_ly() %>%
     add_trace(data = dat, x = ~Q1, y = ~Q2, z = ~log_p_value, type = "heatmap",
-              colorscale  = col_scale,zmax = 2,zmin=0, #max(dat$log_p_value)
+              colorscale  = selected_color,zmax = 2,zmin=0, #max(dat$log_p_value)
               colorbar = list(
                 title = list(text="-log10(P)", side = "right")
                 ,len = 1.2
@@ -821,16 +829,19 @@ pvalue_heatmap <- function(heatmap_df){
                                     'Corresponding P-value: <b>%{text}</b>'
               )
     )%>%
-    add_annotations(x = dat$Q1, y = dat$Q2,
-                    text = as.character(round(dat$p_value,2)),
-                    showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black')
-                    ,ax = 20, ay = -20
-    )%>%
     layout(
       title = "Quantile P value Heatmap",
       xaxis = list(title = str_remove(rv[["title_1"]], fixed(" expression")), showticklabels = T),
       yaxis = list(title = str_remove(rv[["title_2"]], fixed(" expression")), showticklabels = T)
       # ,margin = list(l=200)
     )
+  if(rv$tracking_heatmap_annotation){
+    fig <- fig %>%
+      add_annotations(x = dat$Q1, y = dat$Q2,
+                      text = as.character(round(dat$p_value,2)),
+                      showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black', size = rv$tracking_heatmap_text_size)
+                      ,ax = 20, ay = -20
+      )
+  }
   fig
 }

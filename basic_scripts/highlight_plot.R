@@ -136,7 +136,7 @@ pvalue_heatmap <- function(heatmap_df){
                     text = as.character(round(dat$p_value,2)),
                     showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black', size = 10)
                     ,ax = 20, ay = -20)
-    #TODO: Add y axis and x axis label
+    
     # %>% 
     # layout(
     #   # title = "Pariwise comparisons",
