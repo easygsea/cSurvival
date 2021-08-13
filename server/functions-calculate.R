@@ -228,8 +228,7 @@ original_surv_df <- function(patient_ids){
 # generate survival df
 generate_surv_df <- function(df, patient_ids, exp, q){
   # generate the data from for model first
-  gene_quantiles <- exp %>%
-    sapply(function(x) ifelse(x > q, "High", "Low"))
+  gene_quantiles <- ifelse(exp > q, "High", "Low")
   names(gene_quantiles) <- patient_ids
 
   # # generate survival analysis df
