@@ -300,7 +300,7 @@ assign_gp <- function(df,gp){
   }
   return(df)
 }
-#Help function to populate a dataframe made from quantiles with p value column default set to 1
+#Helper function to populate a dataframe made from quantiles with p value column default set to 1
 populate_quantile_df <- function(quantile_s, min, max, step, substitue_value = 1){
   temp <- lapply(quantile_s, function(i){
     rep(i, length(quantile_s))
@@ -315,6 +315,13 @@ populate_quantile_df <- function(quantile_s, min, max, step, substitue_value = 1
   result$Q2 = result$Q2 * 100
   return(result)
 }
+#Helper function to update a heatmap dataframe's p_value column based on a index mapping df
+update_p_values <- function(target_df,index_df){
+  result <- target_df
+  result$p_value[index_df$index] <- as.numeric(index_df$p_value)
+  return(result)
+}
+
 
 get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NULL, min2=NULL, max2=NULL, step2=NULL, gp=rv$risk_gp,cat=""){
   nCores <- detectCores() - 1
@@ -366,13 +373,13 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     
     n_min_r <- perc_min * nrow(data2)
   #TODO:CHANGE BACK TO mclapply
-    #rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
-    rrr <- lapply(seq_along(quantiles),function(i){
+    rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+    #rrr <- lapply(seq_along(quantiles),function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
 
-      #rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
-      rrr2 <- lapply(seq_along(quantiles2),function(j){
+      rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
+      #rrr2 <- lapply(seq_along(quantiles2),function(j){
         q2 <- quantiles2[j]
         # system(sprintf('echo "\n%s"', q2))
         df2 <- generate_surv_df(df_o2, patient_ids2, exp2, q2)
@@ -422,13 +429,15 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
             quantile_2  = unlist(strsplit(names(quantiles2[j]),split = '%',fixed=T))
             
             new_row = c(p_diff,quantile_2,quantiles2[j],NA)
-            results <- list(new_row,p_diff,df_combined,hr,names(quantiles2[j]))
-            names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
-            
-            #for heatmp
-            #new_heatmap_row <- c(as.numeric(quantile_1), as.numeric(quantile_2), as.numeric(p_diff))
+            #start of heatmp section:
             heatmap_df_index = which((heatmap_df$Q1 == as.numeric(quantile_1))&(heatmap_df$Q2 == as.numeric(quantile_2)))
-            heatmap_df$p_value[heatmap_df_index] <<- as.numeric(p_diff)
+            heatmap_new_row = c(round(heatmap_df_index,0),p_diff)
+            names(heatmap_new_row) <- c("index","p_value")
+            #heatmap_df$p_value[heatmap_df_index] <<- as.numeric(p_diff)
+            #end of heatmap
+            
+            results <- list(new_row,p_diff,df_combined,hr,names(quantiles2[j]),heatmap_new_row)
+            names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant","heatmap_new_row")
           }else{
             results <- NULL
           }
@@ -459,9 +468,12 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
           least_p_value0 <- res[["least_p_value"]]
           df_most_significant0 <- res[["df_most_significant"]]
           cutoff_most_significant0 <- res[["cutoff_most_significant"]]
-          
-          
+          heatmap_new_rows <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["heatmap_new_row"]])))})
+          heatmap_new_rows <- do.call("rbind", heatmap_new_rows)
           new_row1 = c(least_p_value0,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],NA)
+          
+          # Feel free to run this command to see what is inside of heatmap_new_rows variable
+          # View(heatmap_new_rows)
           
           # Proceed only if enough data
           if(is.null(df_most_significant0)){
@@ -474,6 +486,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
               least_hr = NA,
               cutoff_most_significant = c(names(quantiles[i]),cutoff_most_significant0)
               ,p_df = p_df2
+              ,heatmap_new_rows = heatmap_new_rows
             )
             return(results)
           }
@@ -560,6 +573,9 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     #Find the minimum P-value
     pvals <- sapply(rrr, function(x) x[["least_p_value"]])
     pvals_i <- which.min(pvals)[[1]]
+    #prepared index mapping df for heatmapdf
+    heatmap_mapping_df <- lapply(rrr, function(x) {data.frame(x[["heatmap_new_rows"]])})
+    heatmap_mapping_df <- rbindlist(heatmap_mapping_df)
     res <- rrr[[pvals_i]]
     df_most_significant <- res[["df_most_significant"]]
     # assign levels in order
@@ -588,6 +604,8 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     if(is.null(df_most_significant)){
       return(NULL)
     }else{
+      
+      heatmap_df <- update_p_values(target_df = heatmap_df,index_df = heatmap_mapping_df)
       results <- list(
         df = df_most_significant,
         cutoff = cutoff_most_significant
