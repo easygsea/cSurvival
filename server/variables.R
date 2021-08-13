@@ -221,7 +221,8 @@ cox_km_txt <- paste0("Select the method for analyzing and summarizing survival d
                      ,"Cox regression model assesses the effect of several risk factors simultaneously; "
                      ,"additional density and box plots are provided for DepMap data analysis and visualization."
 )
-padj_q_txt <- paste0("Improved Bonferroni-inequality-based adjustment for multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method (Lausen and Schumacher, 1993)")
+# padj_q_txt <- paste0("Improved Bonferroni-inequality-based adjustment for multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method (Lausen and Schumacher, 1993)")
+padj_q_txt <- paste0("Permutation-based adjustment for multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method. Number of permutations is adjustable as an advanced run parameter.")
 
 # ----- Miscellaneous ----
 # correction methods for pairwise comparisons

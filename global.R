@@ -31,6 +31,7 @@ library(plyr)
 library(plotly)
 library(parallel)
 library(stats)
+library(profvis)
 # library(arrangements) # permutations
 options(repos = BiocManager::repositories())
 

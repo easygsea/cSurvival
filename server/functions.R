@@ -68,6 +68,13 @@ updateRV <- function(id_list){
   }
 }
 
+# update RV only when acceptable numeric range
+updateRV_numeric <- function(id, min, max){
+  id_value <- ifelse_rv(id)
+  update_id_value <- function(){updateNumericInput(session,id,value = rv[[id]])}
+  if(!is.na(id_value)){if(id_value != rv[[id]] & id_value >= min & id_value <= max){rv[[id]] <- id_value}else{update_id_value()}}else{update_id_value()}
+}
+
 # req for every element in a list to be both non-null & non-""
 req_lst <- function(lst){
   lapply(lst, function(x){

@@ -234,9 +234,8 @@ observeEvent(input$confirm,{
       rv[["cutoff_all"]] = ""
       #------ 3. Loop from 1 to rv$variable_n ------
       gp_r <- ifelse_rv("risk_gp"); rv$risk_gpr <- gp_r
-      perc_min <- ifelse_rv("min_gp_size")
-      update_min_gp_size <- function(){updateNumericInput(session,"min_gp_size",value = rv$min_gp_size)}
-      if(!is.na(perc_min)){if(perc_min != rv$min_gp_size & perc_min >= 1 & perc_min <= 90){rv$min_gp_size <- perc_min}else{update_min_gp_size()}}else{update_min_gp_size()}
+      updateRV_numeric("min_gp_size",1,90)
+      updateRV_numeric("n_perm",10,1000)
       dtypes_tmp <- data_types()
       for(x in 1:rv$variable_n){
         cal_exp <- T; mut_exp_yyy <- F
@@ -360,6 +359,7 @@ observeEvent(input$confirm,{
                 }
                 # extract most significant df
                 df <- results[["df"]]
+                rv[["padj_perm"]] <- results[["p.adj"]]
                 cutoff_n <- paste0("cutoff_",x)
                 if(rv$variable_n > 1){
                   rv[[cutoff_n]] <- paste0("<b>",results[["cutoff"]][2],"</b>")
@@ -474,6 +474,7 @@ observeEvent(input$confirm,{
               }
               # extract most significant df
               df <- results[["df"]]
+              rv[["padj_perm"]] <- results[["p.adj"]]
               df_1 <- df
               df_lels <- as.character(df[["level"]])
               if(gp_r == "All"){
@@ -522,6 +523,7 @@ observeEvent(input$confirm,{
               }
               # extract most significant df
               df <- results[["df"]]
+              rv[["padj_perm"]] <- results[["p.adj"]]
               df_1 <- df
               df_lels <- as.character(df[["level"]])
               if(gp_r == "All"){
@@ -610,24 +612,24 @@ observeEvent(input$confirm,{
 
         # perform survival analysis
         rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n,0,1,.1,iter_mode=F,gp=gp_r)
-        if(rv$depmap){
-          p_adj_tmp <- rv[["cox_all"]][["p.adj"]]
-          for(x in 1:rv$variable_n){
-            cox_x <- paste0("cox_",x)
-            if(!is.null(rv[[cox_x]][["p.adj"]])){p_adj_tmp <- ifelse(is.null(p_adj_tmp),0,p_adj_tmp) + rv[[cox_x]][["p.adj"]]}
-          }
-          rv[["cox_all"]][["p.adj"]] <- p_adj_tmp
-        }else{
-          p_adj_tmp_km <- rv[["cox_all"]][["km"]][["p.adj"]]
-          for(x in 1:rv$variable_n){
-            cox_x <- paste0("cox_",x)
-            if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){p_adj_tmp_km <- ifelse(is.null(p_adj_tmp_km),0,p_adj_tmp_km) + rv[[cox_x]][["km"]][["p.adj"]]}
-            tmp <- rv[["cox_all"]][["cox"]][["p.adj"]]#[x]
-            if(is.null(tmp)){tmp <- 0};if(is.na(tmp)){tmp <- 0}
-            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]] <- tmp + rv[[cox_x]][["cox"]][["p.adj"]]} #[x] correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
-          }
-          rv[["cox_all"]][["km"]][["p.adj"]] <- p_adj_tmp_km
-        }
+        # if(rv$depmap){
+        #   p_adj_tmp <- rv[["cox_all"]][["p.adj"]]
+        #   for(x in 1:rv$variable_n){
+        #     cox_x <- paste0("cox_",x)
+        #     if(!is.null(rv[[cox_x]][["p.adj"]])){p_adj_tmp <- ifelse(is.null(p_adj_tmp),0,p_adj_tmp) + rv[[cox_x]][["p.adj"]]}
+        #   }
+        #   rv[["cox_all"]][["p.adj"]] <- p_adj_tmp
+        # }else{
+        #   p_adj_tmp_km <- rv[["cox_all"]][["km"]][["p.adj"]]
+        #   for(x in 1:rv$variable_n){
+        #     cox_x <- paste0("cox_",x)
+        #     if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){p_adj_tmp_km <- ifelse(is.null(p_adj_tmp_km),0,p_adj_tmp_km) + rv[[cox_x]][["km"]][["p.adj"]]}
+        #     tmp <- rv[["cox_all"]][["cox"]][["p.adj"]]#[x]
+        #     if(is.null(tmp)){tmp <- 0};if(is.na(tmp)){tmp <- 0}
+        #     if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]] <- tmp + rv[[cox_x]][["cox"]][["p.adj"]]} #[x] correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
+        #   }
+        #   rv[["cox_all"]][["km"]][["p.adj"]] <- p_adj_tmp_km
+        # }
         # # p adj on pairwise heatmap
         # if(!rv$depmap & rv$km_mul_padj == "padj"){
         #   if(!is.null(rv[["cox_all"]][["km"]][["p.adj"]])){
@@ -674,16 +676,16 @@ observeEvent(input$confirm,{
           names(rv[["lels_gender"]]) <- lels
           # perform survival analysis
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2,0,1,.1,iter_mode=F)
-          if(rv$depmap){
-            if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["p.adj"]]),0,rv[["cox_gender"]][["p.adj"]]) + rv[["cox_1"]][["p.adj"]]}
-          }else{
-            if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["km"]][["p.adj"]]),0,rv[["cox_gender"]][["km"]][["p.adj"]]) + rv[["cox_1"]][["km"]][["p.adj"]]}
-            if(!is.null(rv[["cox_1"]][["cox"]][["p.adj"]])){
-              rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_1"]][["cox"]][["p.adj"]]#correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
-              # rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p.adj"]][2]
-              # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
-            }
-          }
+          # if(rv$depmap){
+          #   if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["p.adj"]]),0,rv[["cox_gender"]][["p.adj"]]) + rv[["cox_1"]][["p.adj"]]}
+          # }else{
+          #   if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["km"]][["p.adj"]]),0,rv[["cox_gender"]][["km"]][["p.adj"]]) + rv[["cox_1"]][["km"]][["p.adj"]]}
+          #   if(!is.null(rv[["cox_1"]][["cox"]][["p.adj"]])){
+          #     rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_1"]][["cox"]][["p.adj"]]#correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
+          #     # rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p.adj"]][2]
+          #     # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
+          #   }
+          # }
           # # p adj on pairwise heatmap
           # if(!rv$depmap & rv$km_mul_padj == "padj"){
           #   if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){
