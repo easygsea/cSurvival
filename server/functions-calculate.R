@@ -158,7 +158,7 @@ extract_gene_data <- function(x, type){
   # data <- fread(ofile,sep=",",header=T)
 
   # save original expression or mutation data, if applicable
-  if(type == "rna" | type == "mir" | type == "met" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
+  if(type == "rna" | type == "mir" | type == "met" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug" | (type == "cnv" & rv$depmap)){
     # calculate normalized expression, if applicable
     if(!is.null(data_n)){
       if(input[[g_ui_norm_id]]=="gs"){
@@ -272,6 +272,11 @@ transform_p_df <- function(p_df){
 exp_yyy <- function(extract_mode){
   extract_mode != "snv" & ((!rv$depmap & extract_mode != "cnv") | rv$depmap)
 }
+# function to check if minimum P-value searching
+exp_iter_yyy <- function(x){
+  iter_id <- paste0("iter_",x)
+  ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
+}
 
 # function to re-assign groups based on user's selection of a risk subgroup
 assign_gp <- function(df,gp){
@@ -370,7 +375,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     patient_ids2 <- data2$patient_id
     exp2 <-data2[,2] %>% unlist(.) %>% unname(.)
     quantiles2 <- quantile(exp2, quantile_s2, na.rm = T)
-    
+
     n_min_r <- perc_min * nrow(data2)
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       q <- quantiles[i]
@@ -500,23 +505,25 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
-      
+
       if(cat != ""){
         if(cat == "All"){
+          df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
+          df[["level.y"]] <- factor(data[["mut"]]); lels <- levels(df[["level.y"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(lels,decreasing = T)[1])
           df$level <- paste0(data[["mut"]],"_",df$level)
         }else if(cat_si == 1){
           df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
-          df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Other")
+          df[["level.y"]] <- factor(data[["mut"]]); lels <- levels(df[["level.y"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(lels,decreasing = T)[1])
           df$level <- paste0(df$level,"_",data[["mut"]])
           df <- assign_gp(df,cat)
         }else if(cat_si == 2){
-          df[["level.x"]] <- factor(data[["mut"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Other")
+          df[["level.x"]] <- factor(data[["mut"]]); lels <- levels(df[["level.x"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = sort(lels,decreasing = T)[1])
           df[["level.y"]] <- factor(df[["level"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Low")
           df$level <- paste0(data[["mut"]],"_",df$level)
           df <- assign_gp(df,cat)
         }
       }
-      
+
       if(is.null(df)){
         return(NULL)
       }else{
@@ -544,7 +551,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
             p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
           }
         }
-        
+
         if(!is.na(p_diff)){
           # #append current p value to the p value df
           new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
@@ -581,11 +588,12 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     if(cat == "All"){
       lel_name <- lels[grepl("Low",lels)]
       lel_name <- lel_name[grepl("Other",lel_name)]
+      if (identical(lel_name,character(0))) lel_name <- "Low_Low"
       df_most_significant$level <- relevel(df_most_significant$level, ref = lel_name)
     }
     cutoff_most_significant <- res[["cutoff_most_significant"]]
     least_hr <- res[["least_hr"]]
-    
+
     #Transform the p_df a little bit to make it work with the ggplot
     if(num > 1){
       p_df1 <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
@@ -596,7 +604,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
       p_df <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
       p_df <- transform_p_df(p_df)
     }
-    
+
     # proceed only if enough data
     if(is.null(df_most_significant)){
       return(NULL)
@@ -615,6 +623,40 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
   }else{
     return(NULL)
   }
+}
+
+# perform interaction survival analysis on continuous-categorical combinations
+cal_conti_cat_interaction <- function(x,gp_r,df_list){
+  results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+  if("p_df" %in% names(results)){
+    rv[["quantile_graph"]][[1]] <- results[["p_df"]]
+  }
+  # extract most significant df
+  df <- results[["df"]]
+  df_1 <- df
+  df_lels <- as.character(df[["level"]])
+  if(gp_r == "All"){
+    df_1[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][2])
+    df[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][1])
+    # assign levels
+    df_1[["level"]] <- factor(df_1[["level"]]); df[["level"]] <- factor(df[["level"]])
+    df_1[["level"]] <- relevel(df_1[["level"]], ref = "Low")
+    df[["level"]] <- relevel(df[["level"]], ref = sort(levels(df[["level"]]),decreasing = T)[1])
+  }else{
+    df_1[["level"]] <- df[["level.x"]]
+    df[["level"]] <- df[["level.y"]]
+  }
+  
+  df_list[[1]] <- df_1; rv[["df_1"]] <- df_1
+  rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
+  rv[["cutoff_all"]] <- paste0("#",x,": ",rv[["cutoff_1"]])
+  # no of cases in each group
+  lels_1 <- levels(df_1$level)
+  rv[["lels_1"]] <- lapply(lels_1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
+  names(rv[["lels_1"]]) <- lels_1
+  # perform survival analysis
+  rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]],iter_mode=rv[["iter_mode_value1"]])
+  return(list(df,df_list,results))
 }
 
 # generate df if user-defined cutoffs

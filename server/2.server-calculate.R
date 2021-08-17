@@ -134,7 +134,7 @@ observeEvent(input$confirm,{
     rv$depmapr <- rv$depmap
     rv$tcgar <- rv$tcga
     rv$targetr <- rv$target
-    
+
     #------ 2. survival data processing ------
     withProgress(value = 1, message = wait_msg("Performing analysis..."),{
       # update survival df
@@ -209,7 +209,7 @@ observeEvent(input$confirm,{
           value = rv$censor_time
         )
         req(error_censor == 0)
-        
+
         # automatic adjustment of time units
         d_max <- max(rv[["df_survival"]][["survival_days"]])
         if(d_max < 1800){rv$ymd_int_m<-5;rv$ymd_int_d<-200}
@@ -226,7 +226,7 @@ observeEvent(input$confirm,{
       rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
         rv$plot_type <- "1"; if(rv$cor_method=="pearson" & !rv$depmap){rv$cor_method <- "kendall"}
-        if(rv$depmap){rv$cor_method<-"pearson";rv$scatter_log_x<-F}
+        if(rv$depmap){rv$cor_method<-"spearman";rv$scatter_log_x<-F}
       }else{
         rv$plot_type <- "all"; if(rv$cor_method!="pearson"){rv$cor_method <- "pearson"}
       }
@@ -243,6 +243,7 @@ observeEvent(input$confirm,{
         cal_exp <- T; mut_exp_yyy <- F
         iter_mode_value <- paste0("iter_mode_",x)
         assign(iter_mode_value,F)
+        rv[[paste0("iter_mode_value",x)]] <- F
         # clear previous RVs
         rv[[paste0("mutations_",x)]] <- NULL
         # perform analysis according to input type
@@ -304,14 +305,14 @@ observeEvent(input$confirm,{
             iter_id <- paste0("iter_",x)
             yn <- ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
             assign(iter_mode_value,yn)
-            rv[[paste0("iter_mode_value",x)]] <- iter_mode_value
+            rv[[paste0("iter_mode_value",x)]] <- yn
             if(yn){
               lower_id <- paste0("lower_",x); higher_id <- paste0("upper_",x); step_id <- paste0("step_",x)
               min <- rv[[paste0("minF",x)]] <- ifelse(is.null(input[[lower_id]]), rv[[lower_id]], input[[lower_id]])
               max <- rv[[paste0("maxF",x)]] <- ifelse(is.null(input[[higher_id]]), rv[[higher_id]], input[[higher_id]])
               step <- rv[[paste0("stepF",x)]] <- ifelse(is.null(input[[step_id]]), rv[[step_id]], input[[step_id]])
               rv[[paste0("dataF",x)]] <- data
-              
+
               assign(min_value, min);assign(max_value, max);assign(step_value, step)
 
               enough_error <- 0
@@ -321,7 +322,11 @@ observeEvent(input$confirm,{
                 if(x == 1){
                   cal_exp <- F
                 }else if(x == 2 & exp_yyy(input_mode(1))){
-                  results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], num=x, data2=data, min2=min, max2=max, step2=step, gp=gp_r)
+                  if(exp_iter_yyy(1)){
+                    results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], num=x, data2=data, min2=min, max2=max, step2=step, gp=gp_r)
+                  }else{
+                    results <- get_info_most_significant_rna(data, min, max, step, data2=rv[["dataF1"]], cat=gp_r)
+                  }
                 }else if(x == 2 & !exp_yyy(input_mode(1))){
                   results <- get_info_most_significant_rna(data, min, max, step, data2=rv[["dataF1"]], cat=gp_r)
                 }
@@ -343,13 +348,13 @@ observeEvent(input$confirm,{
                   rv$try_error <- 1
                   shinyalert(paste0(txt,"."))
                 }
-                
+
                 req(enough_error == 0)
                 # print(str(results))
-                
+
                 #CHANGE THE RESULT FUNCTION AND ADD RV$quantile_graph HERE
                 if("p_df" %in% names(results)){
-                  if(x > 1 & exp_yyy(input_mode(1))){
+                  if(x > 1 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
                     rv[["quantile_graph"]][[1]] <- results[["p_df"]][[1]]
                     rv[["quantile_graph"]][[x]] <- results[["p_df"]][[x]]
                   }else{
@@ -363,9 +368,13 @@ observeEvent(input$confirm,{
                 df <- results[["df"]]
                 cutoff_n <- paste0("cutoff_",x)
                 if(rv$variable_n > 1){
-                  rv[[cutoff_n]] <- paste0("<b>",results[["cutoff"]][2],"</b>")
+                  cutoff_tmp <- results[["cutoff"]]
+                  cutoff_tmp <- ifelse(length(cutoff_tmp)>1, cutoff_tmp[2], cutoff_tmp)
+                  rv[[cutoff_n]] <- paste0("<b>",cutoff_tmp,"</b>")
                   if(x==2 & exp_yyy(input_mode(1))){
-                    rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]][1],"</b>")
+                    if(exp_iter_yyy(1)){
+                      rv[["cutoff_1"]] <- paste0("<b>",cutoff_tmp[1],"</b>")
+                    }
                     rv[["cutoff_all"]] <- paste0("#1: ",rv[["cutoff_1"]],", #",x,": ",rv[[cutoff_n]])
                   }else{
                     rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[cutoff_n]])
@@ -392,21 +401,21 @@ observeEvent(input$confirm,{
                   df_list[[1]] <- df_1; df_list[[2]] <- df_2
                   rv[["df_1"]] <- df_1
                   rv[["df_2"]] <- df_2
-                  
+
                   # no of cases in each group
                   lels1 <- levels(df_1$level); lels2 <- levels(df_2$level)
                   rv[["lels_1"]] <- lapply(lels1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
                   rv[["lels_2"]] <- lapply(lels2, function(x) table(df_2$level == x)["TRUE"] %>% unname(.))
                   names(rv[["lels_1"]]) <- lels1; names(rv[["lels_2"]]) <- lels2
-                  
+
                   # perform survival analysis
                   if(x==2 & exp_yyy(input_mode(1))){
-                    rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]],rv[["maxF1"]],rv[["stepF1"]])
-                    rv[["cox_2"]] <- cal_surv_rna(df_2,1,rv[["minF1"]],rv[["maxF1"]],rv[["stepF1"]])
-                  }else{
-                    rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF2"]],rv[["maxF2"]],rv[["stepF2"]])
-                    rv[["cox_2"]] <- cal_surv_rna(df_2,1,rv[["minF2"]],rv[["maxF2"]],rv[["stepF2"]])
+                    if(exp_iter_yyy(1)){
+                      rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]],rv[["maxF1"]],rv[["stepF1"]])
+                    }
                   }
+                  rv[["cox_2"]] <- cal_surv_rna(df_2,1,rv[["minF2"]],rv[["maxF2"]],rv[["stepF2"]])
+                  
                   # switch to FALSE to prevent errors
                   cal_exp <- F
                 }else{
@@ -422,7 +431,21 @@ observeEvent(input$confirm,{
               clow_id <- paste0("clow_",x)
               cutoff <- ifelse(is.null(input[[clow_id]]), 49, input[[clow_id]])
               df <- get_df_by_cutoff(data, cutoff)
-              rv[[paste0("cutoff_",x)]] <- paste0(input[[clow_id]],"%")
+              rv[[paste0("cutoff_",x)]] <- paste0("<b>",input[[clow_id]],"%</b>")
+              if(rv[["cutoff_all"]] == ""){
+                rv[["cutoff_all"]] <- paste0("#",x,": ",rv[[paste0("cutoff_",x)]])
+              }else{
+                rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
+              }
+              rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
+              
+              if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
+                cal_exp <- T; mut_exp_yyy <- T
+                df_list <- cal_conti_cat_interaction(x,gp_r,df_list)
+                df <- df_list[[1]]; results <- df_list[[3]]; df_list <- df_list[[2]]
+                rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
+                rv[["cutoff_all"]] <- paste0("#1: ",rv[["cutoff_1"]],", #2: ",rv[["cutoff_2"]])
+              }
             }
 
           # ---------- 3C. survival analysis on SNVs ---------
@@ -466,42 +489,18 @@ observeEvent(input$confirm,{
             rv[[cutoff_x]] <- ""
             rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
 
-            if(x == 2 & exp_yyy(input_mode(1))){
+            if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
               cal_exp <- T; mut_exp_yyy <- T
-              results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
-              # extract most significant df
-              df <- results[["df"]]
-              df_1 <- df
-              df_lels <- as.character(df[["level"]])
-              if(gp_r == "All"){
-                df_1[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][2])
-                df[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][1])
-                # assign levels
-                df_1[["level"]] <- factor(df_1[["level"]]); df[["level"]] <- factor(df[["level"]])
-                df_1[["level"]] <- relevel(df_1[["level"]], ref = "Low")
-                df[["level"]] <- relevel(df[["level"]], ref = "Other")
-              }else{
-                df_1[["level"]] <- df[["level.x"]]
-                df[["level"]] <- df[["level.y"]]
-              }
-              
-              df_list[[1]] <- df_1; rv[["df_1"]] <- df_1
-              rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
-              rv[["cutoff_all"]] <- paste0("#",x,": ",rv[["cutoff_1"]])
-              # no of cases in each group
-              lels_1 <- levels(df_1$level)
-              rv[["lels_1"]] <- lapply(lels_1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
-              names(rv[["lels_1"]]) <- lels_1
-              # perform survival analysis
-              rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]],iter_mode=get(rv[["iter_mode_value1"]]))
+              df_list <- cal_conti_cat_interaction(x,gp_r,df_list)
+              df <- df_list[[1]]; df_list <- df_list[[2]]
             }
           # ---------- 3D. survival analysis on CNVs ---------
           }else if(!rv$depmap & extract_mode == "cnv"){
             cnv_mode <- ifelse_rv(paste0("cnv_par_",x))
             rv[[paste0("dataF",x)]] <- data
-            
+
             results <- get_info_most_significant_cnv(data,cnv_mode)
-            
+
             # extract most significant df
             df <- results[["df"]]
             tmp <- as.character(df$level)
@@ -510,37 +509,12 @@ observeEvent(input$confirm,{
             cutoff_x <- paste0("cutoff_",x)
             rv[[cutoff_x]] <- ""
             rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
-            
-            if(x == 2 & exp_yyy(input_mode(1))){
-              cal_exp <- T; mut_exp_yyy <- T
-              results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
-              # extract most significant df
-              df <- results[["df"]]
-              df_1 <- df
-              df_lels <- as.character(df[["level"]])
-              if(gp_r == "All"){
-                df_1[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][2])
-                df[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][1])
-                # assign levels
-                df_1[["level"]] <- factor(df_1[["level"]]); df[["level"]] <- factor(df[["level"]])
-                df_1[["level"]] <- relevel(df_1[["level"]], ref = "Low")
-                df[["level"]] <- relevel(df[["level"]], ref = "Other")
-              }else{
-                df_1[["level"]] <- df[["level.x"]]
-                df[["level"]] <- df[["level.y"]]
-              }
-              
-              df_list[[1]] <- df_1; rv[["df_1"]] <- df_1
-              rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
-              rv[["cutoff_all"]] <- paste0("#",x,": ",rv[["cutoff_1"]])
-              # no of cases in each group
-              lels_1 <- levels(df_1$level)
-              rv[["lels_1"]] <- lapply(lels_1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
-              names(rv[["lels_1"]]) <- lels_1
-              # perform survival analysis
-              rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]],iter_mode=get(rv[["iter_mode_value1"]]))
-            }
 
+            if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
+              cal_exp <- T; mut_exp_yyy <- T
+              df_list <- cal_conti_cat_interaction(x,gp_r,df_list)
+              df <- df_list[[1]]; df_list <- df_list[[2]]
+            }
           }
 
           if(cal_exp){
@@ -551,7 +525,7 @@ observeEvent(input$confirm,{
             lels <- levels(df$level)
             rv[[paste0("lels_",x)]] <- lapply(lels, function(x) table(df$level == x)["TRUE"] %>% unname(.))
             names(rv[[paste0("lels_",x)]]) <- lels
-            
+
             # perform survival analysis
             cox_id <- paste0("cox_",x)
             rv[[cox_id]] <- cal_surv_rna(df,1,get(min_value),get(max_value),get(step_value),iter_mode=get(iter_mode_value))
