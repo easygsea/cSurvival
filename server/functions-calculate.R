@@ -564,23 +564,6 @@ get_info_most_significant_rna <-
       df <- assign_df_levels(df, cat, cat_si)
       one_gene_cox(df,cat,quantiles,i,depmap_T,p_kc)
     })
-
-    # ONE GENE permutation ----
-    rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
-      df_o_new <- df_o[idx.mat[,ii],]
-      df_o_new$patient_id <- patient_ids
-
-      ppp <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
-        q <- quantiles[i]
-        df <- generate_surv_df(df_o_new, patient_ids, exp, q)
-        df <- assign_df_levels(df, cat, cat_si)
-        results <- one_gene_cox(df,cat,quantiles,i,depmap_T,p_kc,new_row_T=F)
-        return(results[["least_p_value"]])
-      })
-
-      ppp <- Filter(Negate(is.null), ppp)
-      return(min(unlist(ppp)))
-    })
   }
 
   rrr <- Filter(Negate(is.null), rrr)
@@ -614,15 +597,40 @@ get_info_most_significant_rna <-
       p_df <- transform_p_df(p_df)
     }
 
-    # permutation adjusted P value
-    rrr_perm <- Filter(Negate(is.null), rrr_perm)
-    if(length(rrr_perm)>0){
-      #Find all the P-value
-      pvals_perm <- unlist(rrr_perm)
-      p_adj <- sum(pvals_perm <= least_p) / n_perm
+    if(least_p < 0.05){
+      
+      # ONE GENE permutation ----
+      rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+        df_o_new <- df_o[idx.mat[,ii],]
+        df_o_new$patient_id <- patient_ids
+        
+        ppp <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+          q <- quantiles[i]
+          df <- generate_surv_df(df_o_new, patient_ids, exp, q)
+          df <- assign_df_levels(df, cat, cat_si)
+          results <- one_gene_cox(df,cat,quantiles,i,depmap_T,p_kc,new_row_T=F)
+          return(results[["least_p_value"]])
+        })
+        
+        ppp <- Filter(Negate(is.null), ppp)
+        return(min(unlist(ppp)))
+      })
+      
+      # permutation adjusted P value
+      rrr_perm <- Filter(Negate(is.null), rrr_perm)
+      if(length(rrr_perm)>0){
+        #Find all the P-value
+        pvals_perm <- unlist(rrr_perm)
+        p_adj <- sum(pvals_perm <= least_p) / n_perm
+        least_error <- 1/n_perm
+        if(p_adj < least_error) p_adj <- paste0("<",least_error)
+      }else{
+        p_adj <- NULL
+      }
     }else{
       p_adj <- NULL
     }
+    
 
     # proceed only if enough data
     if(is.null(df_most_significant)){

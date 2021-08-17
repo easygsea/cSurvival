@@ -222,7 +222,7 @@ cox_km_txt <- paste0("Select the method for analyzing and summarizing survival d
                      ,"additional density and box plots are provided for DepMap data analysis and visualization."
 )
 # padj_q_txt <- paste0("Improved Bonferroni-inequality-based adjustment for multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method (Lausen and Schumacher, 1993)")
-padj_q_txt <- paste0("Permutation-based adjustment for multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method. Number of permutations is adjustable as an advanced run parameter.")
+padj_q_txt <- reactive({paste0("Adjustment based on ",rv$n_perm," permutations. Adjust # of permutations in advanced run parameters. More permutations increase statistical precision but need more run time.")})
 
 # ----- Miscellaneous ----
 # correction methods for pairwise comparisons

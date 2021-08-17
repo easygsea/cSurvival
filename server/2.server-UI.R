@@ -907,7 +907,7 @@ output$ui_stats <- renderUI({
               text = HTML(paste0(p_adj_title,add_help("padj_q")))
               ,rightBorder = F
             )
-            ,bsTooltip("padj_q",HTML(padj_q_txt),placement = "top")
+            ,bsTooltip("padj_q",HTML(padj_q_txt()),placement = "top")
           )
         }
       )
@@ -1577,7 +1577,7 @@ output$depmap_stats <- renderUI({
         column(
           12,align="center",
           HTML(paste0("<h4>",p_title,"</h4>"))
-          ,bsTooltip("padj_dp_q",HTML(padj_q_txt),placement = "bottom")
+          ,bsTooltip("padj_dp_q",HTML(padj_q_txt()),placement = "bottom")
         )
       )
     )
