@@ -465,15 +465,15 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
       if(cat != ""){
         if(cat == "All"){
           df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
-          df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Other")
+          df[["level.y"]] <- factor(data[["mut"]]); lels <- levels(df[["level.y"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(lels,decreasing = T)[1])
           df$level <- paste0(data[["mut"]],"_",df$level)
         }else if(cat_si == 1){
           df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
-          df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Other")
+          df[["level.y"]] <- factor(data[["mut"]]); lels <- levels(df[["level.y"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(lels,decreasing = T)[1])
           df$level <- paste0(df$level,"_",data[["mut"]])
           df <- assign_gp(df,cat)
         }else if(cat_si == 2){
-          df[["level.x"]] <- factor(data[["mut"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Other")
+          df[["level.x"]] <- factor(data[["mut"]]); lels <- levels(df[["level.x"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = sort(lels,decreasing = T)[1])
           df[["level.y"]] <- factor(df[["level"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Low")
           df$level <- paste0(data[["mut"]],"_",df$level)
           df <- assign_gp(df,cat)
@@ -540,6 +540,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     if(cat == "All"){
       lel_name <- lels[grepl("Low",lels)]
       lel_name <- lel_name[grepl("Other",lel_name)]
+      if (identical(lel_name,character(0))) lel_name <- "Low_Low"
       df_most_significant$level <- relevel(df_most_significant$level, ref = lel_name)
     }
     cutoff_most_significant <- res[["cutoff_most_significant"]]
@@ -572,6 +573,40 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
   }else{
     return(NULL)
   }
+}
+
+# perform interaction survival analysis on continuous-categorical combinations
+cal_conti_cat_interaction <- function(x,gp_r,df_list){
+  results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+  if("p_df" %in% names(results)){
+    rv[["quantile_graph"]][[1]] <- results[["p_df"]]
+  }
+  # extract most significant df
+  df <- results[["df"]]
+  df_1 <- df
+  df_lels <- as.character(df[["level"]])
+  if(gp_r == "All"){
+    df_1[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][2])
+    df[["level"]] <- sapply(df_lels, function(x) strsplit(x,"_")[[1]][1])
+    # assign levels
+    df_1[["level"]] <- factor(df_1[["level"]]); df[["level"]] <- factor(df[["level"]])
+    df_1[["level"]] <- relevel(df_1[["level"]], ref = "Low")
+    df[["level"]] <- relevel(df[["level"]], ref = sort(levels(df[["level"]]),decreasing = T)[1])
+  }else{
+    df_1[["level"]] <- df[["level.x"]]
+    df[["level"]] <- df[["level.y"]]
+  }
+  
+  df_list[[1]] <- df_1; rv[["df_1"]] <- df_1
+  rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
+  rv[["cutoff_all"]] <- paste0("#",x,": ",rv[["cutoff_1"]])
+  # no of cases in each group
+  lels_1 <- levels(df_1$level)
+  rv[["lels_1"]] <- lapply(lels_1, function(x) table(df_1$level == x)["TRUE"] %>% unname(.))
+  names(rv[["lels_1"]]) <- lels_1
+  # perform survival analysis
+  rv[["cox_1"]] <- cal_surv_rna(df_1,1,rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]],iter_mode=rv[["iter_mode_value1"]])
+  return(list(df,df_list,results))
 }
 
 # generate df if user-defined cutoffs
