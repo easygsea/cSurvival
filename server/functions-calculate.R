@@ -313,7 +313,7 @@ assign_gp <- function(df,gp){
 }
 
 # the function to assign groups in ONE-GENE-like when a risk group is selected in 2-gene analysis
-assign_df_levels <- function(df, cat, cat_si){
+assign_df_levels <- function(df, data, cat, cat_si){
   if(cat != ""){
     if(cat == "All"){
       df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
@@ -561,7 +561,7 @@ get_info_most_significant_rna <-
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
-      df <- assign_df_levels(df, cat, cat_si)
+      df <- assign_df_levels(df, data, cat, cat_si)
       one_gene_cox(df,cat,quantiles,i,depmap_T,p_kc)
     })
   }
@@ -607,7 +607,7 @@ get_info_most_significant_rna <-
         ppp <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
           q <- quantiles[i]
           df <- generate_surv_df(df_o_new, patient_ids, exp, q)
-          df <- assign_df_levels(df, cat, cat_si)
+          df <- assign_df_levels(df, data, cat, cat_si)
           results <- one_gene_cox(df,cat,quantiles,i,depmap_T,p_kc,new_row_T=F)
           return(results[["least_p_value"]])
         })
