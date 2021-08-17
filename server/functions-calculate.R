@@ -707,7 +707,7 @@ get_info_most_significant_rna <-
     }
 
     # ---- PERMUTATION ----
-    if(least_p < 0.05){
+    if(least_p < 0.1){
       if(num == 1){
         rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
           df_o_new <- df_o[idx.mat[,ii],]
