@@ -893,7 +893,7 @@ output$par_gear <- renderUI({
           )
           ,bsTooltip("risk_gp_q",HTML("In bivariate outcomes analysis, select the risk group (subgroup) of interest. If <b>All</b> is selected, an ANOVA-like test is done to test if there is significant difference between any of the four subgroups. If a specific subgroup is selected, it is compared against the other subgroups as a whole."),placement = "top")
           ,radioTooltip(id = "risk_gp", choice = "All", title = HTML("ANOVA-like test on all subgroups"))
-          ,bsTooltip("min_gp_size_q",HTML("In bivariate outcomes analysis, select the minimum number of cases (default, 10% of the population) to define a subgroup. Only applicable for continuous variables (e.g. mRNA gene expression, DNA methylation)."),placement = "top")
+          ,bsTooltip("min_gp_size_q",HTML("In bivariate outcomes analysis, select the minimum number of cases (default, 10% of the population) to define a subgroup. Only applicable for dynamic iteration on continuous variables (e.g. mRNA gene expression, DNA methylation)."),placement = "top")
           ,bsTooltip("flagged_q",HTML(flagged_exp),placement = "top")
           ,radioTooltip(id = "flagged", choice = "y", title = HTML("Remove flagged cases"))
           ,radioTooltip(id = "flagged", choice = "n", title = HTML("Keep all cases"))
@@ -903,7 +903,7 @@ output$par_gear <- renderUI({
             ,placement = "top")
           ,radioTooltip(id = "min_p_kc", choice = "km", title = HTML("Kaplan-Meier (KM) log-rank test"))
           ,radioTooltip(id = "min_p_kc", choice = "cox", title = HTML("Cox proportional-hazard (PH) model likelihood ratio test"))
-          ,bsTooltip("n_perm_q",HTML("Number of permutations to perform for adjustment on multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method"),placement = "top")
+          ,bsTooltip("n_perm_q",HTML("Number of permutations to perform for adjustment on multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method in dynamic iteration."),placement = "top")
         )
       )
     },

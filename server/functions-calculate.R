@@ -282,7 +282,8 @@ exp_iter_yyy <- function(x){
 }
 # function to determine if any iteration to perform
 if_any_iter <- function(n=rv$variable_n){
-  all(sapply(1:n,function(x) exp_yyy(input_mode(x)) & exp_iter_yyy(x)))
+  T
+  # all(sapply(1:n,function(x) exp_yyy(input_mode(x)) & exp_iter_yyy(x)))
 }
 # function to re-assign groups based on user's selection of a risk subgroup
 assign_gp <- function(df,gp){
@@ -317,15 +318,15 @@ assign_df_levels <- function(df, data, cat, cat_si){
   if(cat != ""){
     if(cat == "All"){
       df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
-      df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Other")
+      df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(levels(df[["level.y"]]),decreasing = T)[1])
       df$level <- paste0(data[["mut"]],"_",df$level)
     }else if(cat_si == 1){
       df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
-      df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Other")
+      df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(levels(df[["level.y"]]),decreasing = T)[1])
       df$level <- paste0(df$level,"_",data[["mut"]])
       df <- assign_gp(df,cat)
     }else if(cat_si == 2){
-      df[["level.x"]] <- factor(data[["mut"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Other")
+      df[["level.x"]] <- factor(data[["mut"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = sort(levels(df[["level.x"]]),decreasing = T)[1])
       df[["level.y"]] <- factor(df[["level"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Low")
       df$level <- paste0(data[["mut"]],"_",df$level)
       df <- assign_gp(df,cat)
@@ -653,6 +654,7 @@ get_info_most_significant_rna <-
 # perform interaction survival analysis on continuous-categorical combinations
 cal_conti_cat_interaction <- function(x,gp_r,df_list){
   results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+  rv[["padj_perm"]] <- results[["p.adj"]]
   if("p_df" %in% names(results)){
     rv[["quantile_graph"]][[1]] <- results[["p_df"]]
   }
