@@ -877,6 +877,10 @@ output$par_gear <- renderUI({
                   value = rv$n_perm,
                   min = 10, max = 1000, step = 1, width = "180px"
                 )
+                ,conditionalPanel(
+                  'input.n_perm > 100',
+                  p(style="color:red;","Increased permutations improves statistical precision. However, longer run time may be expected.")
+                )
               )
             },
             if(if_exp & rv$variable_n > 1){
