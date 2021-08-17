@@ -80,7 +80,6 @@ addalpha <- function(colors, alpha=0.35) {
     
     
     
-    
 # #Experiment HEATMAP
 # min = 0.1
 # max = 0.9

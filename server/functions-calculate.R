@@ -372,14 +372,11 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     quantiles2 <- quantile(exp2, quantile_s2, na.rm = T)
     
     n_min_r <- perc_min * nrow(data2)
-  #TODO:CHANGE BACK TO mclapply
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
-    #rrr <- lapply(seq_along(quantiles),function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
 
       rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
-      #rrr2 <- lapply(seq_along(quantiles2),function(j){
         q2 <- quantiles2[j]
         # system(sprintf('echo "\n%s"', q2))
         df2 <- generate_surv_df(df_o2, patient_ids2, exp2, q2)
