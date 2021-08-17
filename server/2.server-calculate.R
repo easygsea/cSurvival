@@ -368,7 +368,7 @@ observeEvent(input$confirm,{
                   rv[[cutoff_n]] <- paste0("<b>",cutoff_tmp,"</b>")
                   if(x==2 & exp_yyy(input_mode(1))){
                     if(exp_iter_yyy(1)){
-                      rv[["cutoff_1"]] <- paste0("<b>",cutoff_tmp[1],"</b>")
+                      rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]][1],"</b>")
                     }
                     rv[["cutoff_all"]] <- paste0("#1: ",rv[["cutoff_1"]],", #",x,": ",rv[[cutoff_n]])
                   }else{
