@@ -135,7 +135,7 @@ observeEvent(input$confirm,{
     rv$targetr <- rv$target
 
     #------ 2. survival data processing ------
-    withProgress(value = 1, message = wait_msg("Performing analysis..."),{
+    # withProgress(value = 1, message = wait_msg("Performing analysis..."),{
       # update survival df
       # filter OS, DFS, or PFS
       rv$df_survival <- rv$df_survival_o
@@ -220,6 +220,9 @@ observeEvent(input$confirm,{
       }
 
       # ------- begin analysis after error checking -----
+      show_modal_spinner(
+        color = "#BDD5EA", spin = "half-circle",
+        text = HTML("<span style='size:180%; font-family: sans-serif;'><br>Analysis in progress...<br><br>This might take a while when permutation is being performed.<br><br>Please wait a minute. Thank you.</span>"))
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
@@ -668,7 +671,7 @@ observeEvent(input$confirm,{
           rv[["df_gender"]] <- unique(df_combined[["level.y"]])
         }
       }
-    })
+    # })
 
     # update parameters
     rv$cox_km <- "km"
@@ -680,5 +683,6 @@ observeEvent(input$confirm,{
     rv$show_ui <- "yes"
     rv$surv_plotted <- ""
     rv$analysis_no <- rv$analysis_no + 1
+    remove_modal_spinner()
   }
 })
