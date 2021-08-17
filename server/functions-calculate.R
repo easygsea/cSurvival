@@ -383,7 +383,7 @@ one_gene_cox <- function(df,cat,q,depmap_T,p_kc,new_row_T=T){
       # }
       if(new_row_T){
         # #append current p value to the p value df
-        new_row = c(p_diff,gsub("%$","",q),q,hr)
+        new_row = c(p_diff,gsub("%$","",names(q)),q,hr)
         results <- list(new_row,p_diff,df,hr,names(q))
         names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
       }else{
