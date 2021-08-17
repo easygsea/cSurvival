@@ -335,7 +335,7 @@ assign_df_levels <- function(df, cat, cat_si){
 }
 
 # function to fit survival curves onto ONE GENE
-one_gene_cox <- function(df,cat,quantiles,i,depmap_T,p_kc){
+one_gene_cox <- function(df,cat,quantiles,i,depmap_T,p_kc,new_row_T=T){
   if(is.null(df)){
     return(NULL)
   }else{
@@ -365,8 +365,6 @@ one_gene_cox <- function(df,cat,quantiles,i,depmap_T,p_kc){
     }
 
     if(!is.na(p_diff)){
-      # #append current p value to the p value df
-      new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
       # p_df <- rbind(p_df,new_row)
       # q_value <- as.numeric(sub("%", "", names(q)))
       # if((q_value <= 50 & p_diff <= least_p_value)|(q_value > 50 & p_diff < least_p_value)){
@@ -375,8 +373,15 @@ one_gene_cox <- function(df,cat,quantiles,i,depmap_T,p_kc){
       #   least_hr <- hr
       #   cutoff_most_significant <- names(quantiles[i])
       # }
-      results <- list(new_row,p_diff,df,hr,names(quantiles[i]))
-      names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+      if(new_row_T){
+        # #append current p value to the p value df
+        new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
+        results <- list(new_row,p_diff,df,hr,names(quantiles[i]))
+        names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+      }else{
+        results <- list(p_diff,df,hr,names(quantiles[i]))
+        names(results) <- c("least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+      }
       return(results)
     }
   }
@@ -569,7 +574,7 @@ get_info_most_significant_rna <-
         q <- quantiles[i]
         df <- generate_surv_df(df_o_new, patient_ids, exp, q)
         df <- assign_df_levels(df, cat, cat_si)
-        results <- one_gene_cox(df,cat,quantiles,i,depmap_T,p_kc)
+        results <- one_gene_cox(df,cat,quantiles,i,depmap_T,p_kc,new_row_T=F)
         return(results[["least_p_value"]])
       })
 
