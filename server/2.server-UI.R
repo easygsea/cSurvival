@@ -1849,7 +1849,7 @@ observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
 #Percentile graph---
 output$ui_track <- renderUI({
   
-  if((rv$variable_nr > 1)&&(all(sapply(1:rv$variable_nr,function(x) exp_yyy(input_mode(x)))))){
+  if((rv$variable_nr > 1) && (all(sapply(1:rv$variable_nr,function(x) exp_yyy(input_mode(x))))) && rv$exp_iter_yyy){
     column(width = 12,
            plotlyOutput("tracking_heatmap")
            ,div(
@@ -1913,7 +1913,7 @@ output$quantile_graph <- renderPlotly({
 
 output$tracking_heatmap <- renderPlotly({
   #View(rv$heatmap_df)
-  fig <- pvalue_heatmap(rv$heatmap_df)
+  fig <- pvalue_heatmap(rv$heatmap_df, rv$heatmap_annotation_df)
   fig
 })
 
@@ -1930,7 +1930,7 @@ output$tracking_heatmap_plot_gear <- renderUI({
                         "Yellow Green Blue" = "YlGnBu",
                         "Reds" = "Reds",
                         "Red Purple" = "RdPu",
-                        "Purple" = "Purples",
+                        "Purples" = "Purples",
                         "Oranges" = "Oranges",
                         "Blues" = "Blues",
                         "Greys" = "Grays"
@@ -1941,21 +1941,18 @@ output$tracking_heatmap_plot_gear <- renderUI({
           # show annotation
           ,materialSwitch(
             inputId = "tracking_heatmap_annotation",
-            label = HTML(paste0("Show heatmap annotation?",add_help("tracking_heatmap_annotation_help"))),
+            label = HTML(paste0("<b>","Show heatmap annotation?","</b>",add_help("tracking_heatmap_annotation_help"))),
             value = rv$tracking_heatmap_annotation, inline = F, width = "100%",
             status = "danger"
           ),
           bsTooltip("tracking_heatmap_annotation_help",paste0("Switch on to show p-value texts on top of the heatmap. Switch off to hide them"),placement = "top")
           ,conditionalPanel(
           'input.tracking_heatmap_annotation',
-          column(
-            12,
-            sliderInput("tracking_heatmap_text_size", label = HTML(paste0("the font size of the annotation texts:", add_help("tracking_heatmap_text_size_help"))),
+            sliderInput("tracking_heatmap_text_size", label = HTML(paste0("Font size of the annotation texts:", add_help("tracking_heatmap_text_size_help"))),
                         min = 1, max = 30, value = rv$tracking_heatmap_text_size
             )
             ,bsTooltip("tracking_heatmap_text_size_help",HTML(paste0("Increase or decrease the font size of the tracking heatmap plot."))
             ,placement = "top"),
-          )
         )
         )
       )

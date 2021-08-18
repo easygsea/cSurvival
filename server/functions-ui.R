@@ -801,7 +801,7 @@ assemble_percentile_plot <- function(quantile_df_list){
 }
 
 #heatmap----
-pvalue_heatmap <- function(heatmap_df){
+pvalue_heatmap <- function(heatmap_df, heatmap_annotation_df){
   dat = heatmap_df
   dat$p_value = round(dat$p_value,4)
   dat$log_p_value <- -log10(dat$p_value)

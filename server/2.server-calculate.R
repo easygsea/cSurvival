@@ -7,6 +7,7 @@ observeEvent(input$confirm,{
     rv$show_ui <- ""
     rv$quantile_graph <- c()
     rv$heatmap_df <- c()
+    rv$heatmap_annotation_df <- c()
 
     #------ 1. check if any errors by user ------
     error_g <- NULL; error_lib <- NULL; error_manual <- NULL; error_gs <- NULL
@@ -362,6 +363,7 @@ observeEvent(input$confirm,{
                   }
                 }
                 rv$heatmap_df <- results[["heatmap_df"]]
+                rv$heatmap_annotation_df <-results[["heatmap_annotation_df"]]
                 # saveRDS(results[["heatmap_df"]], "heatmap_df.rds")
                 # View(rv$heatmap_df)
                 # extract most significant df
@@ -676,6 +678,7 @@ observeEvent(input$confirm,{
     })
 
     # update parameters
+    rv$exp_iter_yyy <- all(sapply(1:rv$variable_nr,function(x) exp_iter_yyy(x)))
     rv$cox_km <- "km"
     if(rv$tcga){rv$plot_sstype <- rv$plot_stype}
     else if(rv$target){rv$plot_sstype <- "Overall survival (OS)"}

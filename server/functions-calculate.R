@@ -339,6 +339,8 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
   #initiate heatmap dataframe according to quantile_s
   heatmap_df = populate_quantile_df(quantile_s,min, max, step, 1)
   heatmap_df <- data.frame(sapply(heatmap_df, function(x) as.numeric(as.character(x))))
+  heatmap_annotation_df <- populate_quantile_df(quantile_s,min, max, step, NA)
+  heatmap_annotation_df$hr <- NA
   
   # retrieve survival analysis df_o
   df_o <- original_surv_df(data$patient_id)
@@ -435,7 +437,6 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
             heatmap_df_index = which((heatmap_df$Q1 == as.numeric(quantile_1))&(heatmap_df$Q2 == as.numeric(quantile_2)))
             heatmap_new_row = c(round(heatmap_df_index,0),p_diff)
             names(heatmap_new_row) <- c("index","p_value")
-            #heatmap_df$p_value[heatmap_df_index] <<- as.numeric(p_diff)
             #end of heatmap
             
             results <- list(new_row,p_diff,df_combined,hr,names(quantiles2[j]),heatmap_new_row)
@@ -611,12 +612,16 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     }else{
       
       heatmap_df <- update_p_values(target_df = heatmap_df,index_df = heatmap_mapping_df)
+      heatmap_annotation_df <- update_p_values(target_df = heatmap_annotation_df,index_df = heatmap_mapping_df)
+      View(heatmap_annotation_df)
       results <- list(
         df = df_most_significant,
         cutoff = cutoff_most_significant
         ,hr = least_hr
         ,p_df = p_df
         ,heatmap_df = heatmap_df
+        ,heatmap_annotation_df = heatmap_annotation_df
+        
       )
       return(results)
     }

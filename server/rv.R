@@ -60,8 +60,10 @@ rv <- reactiveValues(
   ,project_tcga="TCGA-ACC"
   
   # hr & p value VS quantile graph
+  ,exp_iter_yyy=FALSE #Used to decide whether show heatmap
   ,quantile_graph=NULL
   ,heatmap_df=NULL
+  ,heatmap_annotation_df=NULL
   ,tracking_heatmap_text_size = 14
   ,tracking_heatmap_annotation = TRUE
   ,tracking_heatmap_color = "default"
