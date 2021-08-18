@@ -594,7 +594,7 @@ get_info_most_significant_rna <-
     data, min, max, step,
     num=1, data2=NULL, min2=NULL, max2=NULL, step2=NULL,
     gp=rv$risk_gp,cat="",
-    search_mode="heuristic", n_perm=rv$n_perm #exhaustive
+    search_mode=rv$search_mode, n_perm=rv$n_perm
   ){
   nCores <- detectCores() - 2
   # convert RVs into static variables

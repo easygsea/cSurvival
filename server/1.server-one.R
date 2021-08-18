@@ -808,7 +808,7 @@ output$par_gear <- renderUI({
     rv$risk_gps <- c("All",gps)
   }
   if_exp <- if_any_exp(); if_iter <- if_any_iter()
-  if(if_exp){c_w <- 6;if(if_iter & rv$variable_n > 1){min_per_w <- 6}else{min_per_w <- 12}}else{c_w <- 12}
+  if(if_exp){c_w <- 6;if(if_iter & rv$variable_n > 1){min_per_w <- 4}else{min_per_w <- 12}}else{c_w <- 12}
   if(rv$tcga){c_w_kc <- 6}else{c_w_kc <- 12}
   div(
     if(rv$tcga | if_exp){
@@ -884,13 +884,31 @@ output$par_gear <- renderUI({
               )
             },
             if(if_exp & rv$variable_n > 1){
-              column(
-                min_per_w,
-                numericInput(
-                  "min_gp_size",
-                  HTML(paste0("<h4>Min %:",add_help("min_gp_size_q"),"</h4>")),
-                  value = rv$min_gp_size,
-                  min = 1, max = 90, step = 1, width = "180px"
+              div(
+                column(
+                  min_per_w,
+                  numericInput(
+                    "min_gp_size",
+                    HTML(paste0("<h4>Min %:",add_help("min_gp_size_q"),"</h4>")),
+                    value = rv$min_gp_size,
+                    min = 1, max = 90, step = 1, width = "180px"
+                  )
+                )
+                ,column(
+                  min_per_w,
+                  selectInput(
+                    "search_mode",
+                    HTML(paste0("<h4>Search mode:",add_help("search_mode_q"),"</h4>")),
+                    choices = c(
+                      "Median-anchored greedy" = "heuristic",
+                      "Exhaustive" = "exhaustive"
+                    ),
+                    selected = rv$search_mode
+                  )
+                  ,conditionalPanel(
+                    'input.search_mode == "exhaustive"',
+                    p(style="color:red;",HTML("<b>Exhaustive search</b> may need more run time and inflate type II (false negative) errors."))
+                  )
                 )
               )
             }
@@ -908,6 +926,11 @@ output$par_gear <- renderUI({
           ,radioTooltip(id = "min_p_kc", choice = "km", title = HTML("Kaplan-Meier (KM) log-rank test"))
           ,radioTooltip(id = "min_p_kc", choice = "cox", title = HTML("Cox proportional-hazard (PH) model likelihood ratio test"))
           ,bsTooltip("n_perm_q",HTML("Number of permutations to perform for adjustment on multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method in dynamic iteration."),placement = "top")
+          ,bsTooltip("search_mode_q",
+                     HTML(paste0(
+                       "<b>Median-anchored greedy search</b> (heuristic) determines the minimum <i>P</i>-value by finding the percentile in variable 2 that gives the minimum <i>P</i>-value on the median percentile in variable 1, then looking for percentile combinations that give lower <i>P</i>-values via greedy search."
+                       ,"<br><br><b>Exhaustive search</b> determines the minimum <i>P</i>-value by testing all percentile combinations."
+                       )),placement = "top")
         )
       )
     },
@@ -917,6 +940,7 @@ output$par_gear <- renderUI({
 
 observeEvent(input$flagged,{rv$flagged <- input$flagged})
 observeEvent(input$min_p_kc,{rv$min_p_kc <- input$min_p_kc})
+observeEvent(input$search_mode,{req(!is.null(input$search_mode));req(nchar(input$search_mode)>1);rv$search_mode <- input$search_mode})
 
 # ------- 1.2a update all run parameters according to analysis #1 --------
 observeEvent(input$toall,{
