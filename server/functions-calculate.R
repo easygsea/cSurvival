@@ -596,7 +596,7 @@ get_info_most_significant_rna <-
     gp=rv$risk_gp,cat="",
     search_mode="heuristic", n_perm=rv$n_perm #exhaustive
   ){
-  nCores <- detectCores() - 1
+  nCores <- detectCores() - 2
   # convert RVs into static variables
   depmap_T <- rv$depmap; p_kc <- rv$min_p_kc; gps <- rv$risk_gps
   print(gp)

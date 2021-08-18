@@ -3,8 +3,8 @@ surv_dir <- paste0(dirname(dirname(getwd())), "/variables/")
 # default iteration parameters
 dmin <- .1; dmax <- .9; dstep <- .05
 # ------ available GMT gene sets -----
-gmt_dir <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/hsa/"
-in_gmt_lst <- "http://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/gmts_list.csv"
+gmt_dir <- "https://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/hsa/"
+in_gmt_lst <- "https://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/gmts_list.csv"
 # gmt_dir <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/hsa/" # tau path
 # in_gmt_lst <- "/home/eVITTA/ShinyApps/easyGSEA/www/gmts/gmts_list.csv" # tau path
 # gmt_dir <- paste0(dirname(getwd()),"/eVITTA_dev/easyGSEA/www/gmts/hsa/")
