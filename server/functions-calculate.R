@@ -444,7 +444,7 @@ two_gene_cox_inner <- function(
     if(!is.na(p_diff)){
       # # #append current p value to the p value df
       new_row = c(p_diff,gsub("%$","",names(q2)),q2,NA)
-      results <- list(new_row,p_diff,df_combined,hr,q2)
+      results <- list(new_row,p_diff,df_combined,hr,names(q2))
       names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
     }else{
       results <- NULL
@@ -529,10 +529,12 @@ two_gene_heuristic <- function(
   df_tracking[i,] <- 1
   
   # loop quantiles2 using q
-  rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T, nCores, new_row_T=F)
+  rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T, nCores)
   
   # anchor the optimized start point of heuristic searching
-  q2 <- rrr2[["cutoff_most_significant"]][2]; j <- which(quantiles2 == q2); q2 <- quantiles2[j]
+  q2 <- rrr2[["cutoff_most_significant"]][2]; j <- which(names(quantiles2) == q2)
+  names(j) <- q2; q2 <- quantiles2[j]
+  rrr2[["cutoff_most_significant"]][1] <- names(q)
   init_min_p <- rrr2[["least_p_value"]]
   
   # start surrounding searching
@@ -581,7 +583,8 @@ two_gene_heuristic <- function(
   }
   # assign to rrr
   if(final_min_p >= init_min_p){
-    rrr <- list(rrr2)
+    rrr <- list()
+    rrr[[1]] <- rrr2
   }
   return(rrr)
 }
