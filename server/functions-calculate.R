@@ -436,6 +436,7 @@ two_gene_cox_inner <- function(
           surv_diff <- surv_cox(df_combined,mode = 2)
         }else{
           surv_diff <- surv_cox(df_combined,mode = 1)
+          hr <- coef(summary(surv_diff))[,2]
         }
         p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
       }
