@@ -222,7 +222,7 @@ observeEvent(input$confirm,{
       # ------- begin analysis after error checking -----
       show_modal_spinner(
         color = "#BDD5EA", spin = "half-circle",
-        text = HTML("<span style='font-size:125%; font-family: sans-serif;'><br>Analysis in progress ...<br><br>This might take a while when permutation is being performed.<br><br>Please wait a minute. Thank you.</span>"))
+        text = HTML("<span style='font-size:125%; font-family: sans-serif;'><br>Analysis in progress ...<br><br>This might take a while when permutation is applied.<br><br>Please wait a minute. Thank you.</span>"))
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""; rv[["padj_perm"]] <- NULL
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL

@@ -397,7 +397,7 @@ one_gene_cox <- function(df,cat,q,depmap_T,p_kc,new_row_T=T){
 
 # function to loop quantiles2 based on q in quantiles
 two_gene_cox_inner <- function(
-  q, q2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T
+  q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T
 ){
   # system(sprintf('echo "\n%s"', q2))
   df2 <- generate_surv_df(df_o2, patient_ids2, exp2, q2)
@@ -411,7 +411,6 @@ two_gene_cox_inner <- function(
   df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
   # combine subgroups if indicated
   if(gp != "All"){
-    other_gp <- paste0(gps[!gps %in% c(gp,"All")],collapse = ", ")
     df_combined[["level"]] <- ifelse(df_combined[["level"]] == gp,gp,other_gp)
     df_combined[["level"]] <- factor(df_combined[["level"]],levels = c(other_gp,gp))
   }
@@ -455,11 +454,11 @@ two_gene_cox_inner <- function(
 }
 
 two_gene_cox <- function(
-  q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T, nCores, new_row_T=T
+  q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, new_row_T=T
 ){
   rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
     q2 <- quantiles2[j]
-    two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T)
+    two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T)
   })
   
   rrr2 <- Filter(Negate(is.null), rrr2)
@@ -491,7 +490,7 @@ two_gene_cox <- function(
             least_p_value = least_p_value0,
             df_most_significant = df_most_significant0,
             least_hr = NA,
-            cutoff_most_significant = c(q,cutoff_most_significant0)
+            cutoff_most_significant = c(names(q),cutoff_most_significant0)
             ,p_df = p_df2
           )
         }else{
@@ -514,7 +513,7 @@ two_gene_heuristic <- function(
   quantiles, quantiles2,
   df_o, patient_ids, exp,
   df_o2, patient_ids2, exp2
-  ,gp, gps, n_min_r, p_kc, depmap_T, nCores
+  ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores
 ){
   # create a tracking dataframe
   i_len <- length(quantiles); j_len <- length(quantiles2)
@@ -530,7 +529,7 @@ two_gene_heuristic <- function(
   df_tracking[i,] <- 1
   
   # loop quantiles2 using q
-  rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T, nCores)
+  rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
   
   # anchor the optimized start point of heuristic searching
   q2 <- rrr2[["cutoff_most_significant"]][2]; j <- which(names(quantiles2) == q2)
@@ -540,7 +539,7 @@ two_gene_heuristic <- function(
   
   # start surrounding searching
   final_min_p <- init_min_p
-  while(i > 0 & i < i_len & j > 0 & j < j_len){
+  while(i > 1 & i < i_len & j > 1 & j < j_len){
     a <- c(i-1,j); b <- c(i,j-1); c <- c(i+1,j); d <- c(i,j+1)
     comb <- list(a,b,c,d)
     # fix regression models via parallel processing
@@ -553,9 +552,9 @@ two_gene_heuristic <- function(
         # fit cox regression
         q <- quantiles[i_k]; q2 <- quantiles2[j_k]
         df <- generate_surv_df(df_o, patient_ids, exp, q)
-        results <- two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T)
+        results <- two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T)
         if(!is.null(results)){
-          results[["cutoff_most_significant"]] <- names(ij_k)
+          results[["cutoff_most_significant"]] <- names(c(q,q2))
           ij_k <- list(ij_k); names(ij_k) <- "ij"
           results <- append(results,ij_k)
         }
@@ -570,7 +569,7 @@ two_gene_heuristic <- function(
     if(length(rrr_sr)>0){
       res <- find_minP_res(rrr_sr)
       p_min <- res[["least_p_value"]]
-      ij <- res[["cutoff_most_significant"]]; i <- ij[1]; j <- ij[2]
+      ij <- res[["ij"]]; i <- ij[1]; j <- ij[2]
       # mark new min P
       if(p_min < final_min_p){
         final_min_p <- p_min
@@ -600,6 +599,11 @@ get_info_most_significant_rna <-
   nCores <- detectCores() - 2
   # convert RVs into static variables
   depmap_T <- rv$depmap; p_kc <- rv$min_p_kc; gps <- rv$risk_gps
+  if(gp != "All"){
+    other_gp <- paste0(gps[!gps %in% c(gp,"All")],collapse = ", ")
+  }else{
+    other_gp <- NULL
+  }
   print(gp)
   perc_min <- rv$min_gp_size / 100
   # initiate quantiles according to margin and step values
@@ -655,14 +659,14 @@ get_info_most_significant_rna <-
         q <- quantiles[i]
         df <- generate_surv_df(df_o, patient_ids, exp, q)
 
-        two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, n_min_r, p_kc, depmap_T, nCores)
+        two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
       })
     # ---- TWO GENES heuristic ----
     }else if(search_mode == "heuristic"){
       rrr <- two_gene_heuristic(quantiles, quantiles2,
                          df_o, patient_ids, exp,
                          df_o2, patient_ids2, exp2
-                         ,gp, gps, n_min_r, p_kc, depmap_T, nCores)
+                         ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
     }
   # ---- ONE GENE ----
   }else{
@@ -729,16 +733,33 @@ get_info_most_significant_rna <-
           return(min(unlist(ppp)))
         })
       }else if(num > 1){
-        rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
-          df_o_new <- df_o[idx.mat[,ii],]
-          df_o_new$patient_id <- patient_ids
-          
-          rrr <- two_gene_heuristic(quantiles, quantiles2,
-                                    df_o_new, patient_ids, exp,
-                                    df_o_new, patient_ids2, exp2
-                                    ,gp, gps, n_min_r, p_kc, depmap_T, nCores)
-          find_minP_res(rrr)[["least_p_value"]]
-        })
+        if(search_mode == "heuristic"){
+          rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+            df_o_new <- df_o[idx.mat[,ii],]
+            df_o_new$patient_id <- patient_ids
+            
+            rrr <- two_gene_heuristic(quantiles, quantiles2,
+                                      df_o_new, patient_ids, exp,
+                                      df_o_new, patient_ids2, exp2
+                                      ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+            res <- find_minP_res(rrr)
+            res[["least_p_value"]]
+          })
+        }else if(search_mode == "exhaustive"){
+          rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+            df_o_new <- df_o[idx.mat[,ii],]
+            df_o_new$patient_id <- patient_ids
+            
+            rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+              q <- quantiles[i]
+              df <- generate_surv_df(df_o_new, patient_ids, exp, q)
+              
+              two_gene_cox(q, quantiles2, df_o_new, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+            })
+            res <- find_minP_res(rrr)
+            res[["least_p_value"]]
+          })
+        }
       }
 
       # permutation adjusted P value
