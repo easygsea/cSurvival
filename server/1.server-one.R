@@ -940,7 +940,6 @@ output$par_gear <- renderUI({
 
 observeEvent(input$flagged,{rv$flagged <- input$flagged})
 observeEvent(input$min_p_kc,{rv$min_p_kc <- input$min_p_kc})
-observeEvent(input$search_mode,{req(!is.null(input$search_mode));req(nchar(input$search_mode)>1);rv$search_mode <- input$search_mode})
 
 # ------- 1.2a update all run parameters according to analysis #1 --------
 observeEvent(input$toall,{

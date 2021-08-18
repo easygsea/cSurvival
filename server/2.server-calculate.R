@@ -224,6 +224,7 @@ observeEvent(input$confirm,{
         color = "#BDD5EA", spin = "half-circle",
         text = HTML("<span style='font-size:125%; font-family: sans-serif;'><br>Analysis in progress ...<br><br>This might take a while when permutation is applied.<br><br>Please wait a minute. Thank you.</span>"))
       rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""; rv[["padj_perm"]] <- NULL
+      if(!is.null(input$search_mode)){if(nchar(input$search_mode)>1){rv$search_mode <- input$search_mode}}
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
