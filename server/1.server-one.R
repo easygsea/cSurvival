@@ -907,7 +907,7 @@ output$par_gear <- renderUI({
                   )
                   ,conditionalPanel(
                     'input.search_mode == "exhaustive"',
-                    p(style="color:red;",HTML("<b>Exhaustive search</b> need more run time and may inflate type II (false negative) errors in multiple comparisons."))
+                    p(style="color:red;",HTML("<b>Exhaustive search</b> needs more run time. It may reduce statistical power (i.e. increase adjusted <i>P</i>-value) since it requires heavier penalty on multiple testing adjustment."))
                   )
                 )
               )
@@ -928,8 +928,9 @@ output$par_gear <- renderUI({
           ,bsTooltip("n_perm_q",HTML("Number of permutations to perform for adjustment on multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method in dynamic iteration."),placement = "top")
           ,bsTooltip("search_mode_q",
                      HTML(paste0(
+                       "Method to determine the minimum <i>P</i>-value:<br>",
                        "<b>Median-anchored greedy search</b> (heuristic) determines the minimum <i>P</i>-value by finding the percentile in variable 2 that gives the minimum <i>P</i>-value on the median percentile in variable 1, then looking for percentile combinations that give lower <i>P</i>-values via greedy search."
-                       ,"<br><br><b>Exhaustive search</b> determines the minimum <i>P</i>-value by testing all percentile combinations."
+                       ,"<br><b>Exhaustive search</b> determines the minimum <i>P</i>-value by testing all percentile combinations."
                        )),placement = "top")
         )
       )

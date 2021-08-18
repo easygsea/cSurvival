@@ -327,9 +327,9 @@ update_gs_by_db <- function(x, mode="nil", gs_db_id = paste0("gs_db_",x), gs_lib
 retrieve_genes <- function(x){
   db_id <- paste0("db_",x)
   snv_id <- paste0("snv_method_",x)
-  if(is.null(input[[snv_id]])){
-    method <- "mutect"
-  }else{method <- input[[snv_id]]}
+  # if(is.null(input[[snv_id]])){
+  #   method <- "mutect"
+  # }else{method <- input[[snv_id]]}
   dbt <- rv[[db_id]]
   if(is.null(dbt)){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
