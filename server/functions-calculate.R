@@ -462,7 +462,7 @@ two_gene_cox <- function(
   })
   
   rrr2 <- Filter(Negate(is.null), rrr2)
-  if(is.null(rrr2)){
+  if(length(rrr2)<1){
     return(NULL)
   }else{
     # P tracking record on variable 2 j
@@ -596,7 +596,7 @@ get_info_most_significant_rna <-
     gp=rv$risk_gp,cat="",
     search_mode=rv$search_mode, n_perm=rv$n_perm
   ){
-  nCores <- detectCores() - 2
+  nCores <- detectCores() - 2; if(nCores > 12) nCores <- 12
   # convert RVs into static variables
   depmap_T <- rv$depmap; p_kc <- rv$min_p_kc; gps <- rv$risk_gps
   if(gp != "All"){
@@ -742,6 +742,7 @@ get_info_most_significant_rna <-
                                       df_o_new, patient_ids, exp,
                                       df_o_new, patient_ids2, exp2
                                       ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+            rrr <- Filter(Negate(is.null), rrr)
             res <- find_minP_res(rrr)
             res[["least_p_value"]]
           })
@@ -756,6 +757,7 @@ get_info_most_significant_rna <-
               
               two_gene_cox(q, quantiles2, df_o_new, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
             })
+            rrr <- Filter(Negate(is.null), rrr)
             res <- find_minP_res(rrr)
             res[["least_p_value"]]
           })

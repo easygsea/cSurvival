@@ -907,7 +907,7 @@ output$par_gear <- renderUI({
                   )
                   ,conditionalPanel(
                     'input.search_mode == "exhaustive"',
-                    p(style="color:red;",HTML("<b>Exhaustive search</b> may need more run time and inflate type II (false negative) errors."))
+                    p(style="color:red;",HTML("<b>Exhaustive search</b> need more run time and may inflate type II (false negative) errors in multiple comparisons."))
                   )
                 )
               )
