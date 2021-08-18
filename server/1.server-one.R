@@ -793,7 +793,7 @@ output$par_gear <- renderUI({
     db_types <- lapply(1:rv$variable_n, function(x){
       cat_id <- paste0("cat_",x); db_id <- paste0("db_",x)
       cat_name <- ifelse_rv(cat_id)
-      x <- ifelse(cat_name=="gs","gs",input[[db_id]])
+      x <- ifelse(cat_name=="gs","gs",ifelse_rv(db_id))
       if(x == "cnv"){
         if(rv$depmap){
           risk_hl
@@ -807,8 +807,8 @@ output$par_gear <- renderUI({
     gps <- apply(expand.grid(db_types[[1]], db_types[[2]]), 1, paste, collapse="_")
     rv$risk_gps <- c("All",gps)
   }
-  if_exp <- if_any_exp()
-  if(if_exp){c_w <- 6}else{c_w <- 12}
+  if_exp <- if_any_exp(); if_iter <- if_any_iter()
+  if(if_exp){c_w <- 6;if(if_iter & rv$variable_n > 1){min_per_w <- 4}else{min_per_w <- 12}}else{c_w <- 12}
   if(rv$tcga){c_w_kc <- 6}else{c_w_kc <- 12}
   div(
     if(rv$tcga | if_exp){
@@ -817,35 +817,6 @@ output$par_gear <- renderUI({
         wellPanel(
           style=sprintf("background-color:%s; border: .5px solid #fff;",bcols[1]),
           fluidRow(
-            if(rv$variable_n > 1){
-              div(
-                # '(input.cat_1 == "g" & input.db_1 != "snv") | (input.cat_2 == "g" & input.db_2 != "snv")',
-                column(
-                  12,
-                  radioGroupButtons(
-                    "risk_gp",
-                    HTML(paste0("<h4>Risk subgroup(s) of interest:",add_help("risk_gp_q"),"</h4>")),
-                    choices = rv$risk_gps,
-                    selected = rv$risk_gp,
-                    status = "danger", #size = "sm",
-                    checkIcon = list(
-                      yes = icon("check-square"),
-                      no = icon("square-o")
-                    )
-                  )
-                )
-                ,if(if_exp){
-                  column(
-                    12,
-                    numericInput(
-                      "min_gp_size",
-                      HTML(paste0("<h4>Min %:",add_help("min_gp_size_q"),"</h4>")),
-                      value = rv$min_gp_size,
-                      min = 1, max = 90, step = 1, width = "100px"
-                    )
-                  )}
-              )
-            },
             if(rv$tcga){
               column(
                 c_w,
@@ -877,11 +848,74 @@ output$par_gear <- renderUI({
                   )
                 )
               )
+            },
+            if(rv$variable_n > 1){
+              div(
+                # '(input.cat_1 == "g" & input.db_1 != "snv") | (input.cat_2 == "g" & input.db_2 != "snv")',
+                column(
+                  12,
+                  radioGroupButtons(
+                    "risk_gp",
+                    HTML(paste0("<h4>Risk subgroup(s) of interest:",add_help("risk_gp_q"),"</h4>")),
+                    choices = rv$risk_gps,
+                    selected = rv$risk_gp,
+                    status = "danger", #size = "sm",
+                    checkIcon = list(
+                      yes = icon("check-square"),
+                      no = icon("square-o")
+                    )
+                  )
+                )
+              )
+            },
+            if(if_exp & if_iter){
+              column(
+                min_per_w,
+                numericInput(
+                  "n_perm",
+                  HTML(paste0("<h4># of permutations:",add_help("n_perm_q"),"</h4>")),
+                  value = rv$n_perm,
+                  min = 10, max = 1000, step = 1, width = "180px"
+                )
+                ,conditionalPanel(
+                  'input.n_perm > 100',
+                  p(style="color:red;","Increased permutations improves statistical precision. However, longer run time may be expected.")
+                )
+              )
+            },
+            if(if_exp & rv$variable_n > 1){
+              div(
+                column(
+                  min_per_w,
+                  numericInput(
+                    "min_gp_size",
+                    HTML(paste0("<h4>Min %:",add_help("min_gp_size_q"),"</h4>")),
+                    value = rv$min_gp_size,
+                    min = 1, max = 90, step = 1, width = "180px"
+                  )
+                )
+                ,column(
+                  min_per_w,
+                  selectInput(
+                    "search_mode",
+                    HTML(paste0("<h4>Search mode:",add_help("search_mode_q"),"</h4>")),
+                    choices = c(
+                      "Median-anchored greedy" = "heuristic",
+                      "Exhaustive" = "exhaustive"
+                    ),
+                    selected = rv$search_mode
+                  )
+                  ,conditionalPanel(
+                    'input.search_mode == "exhaustive"',
+                    p(style="color:red;",HTML("<b>Exhaustive search</b> needs more run time. It may reduce statistical power (i.e. increase adjusted <i>P</i>-value) since it requires heavier penalty on multiple testing adjustment."))
+                  )
+                )
+              )
             }
           )
           ,bsTooltip("risk_gp_q",HTML("In bivariate outcomes analysis, select the risk group (subgroup) of interest. If <b>All</b> is selected, an ANOVA-like test is done to test if there is significant difference between any of the four subgroups. If a specific subgroup is selected, it is compared against the other subgroups as a whole."),placement = "top")
           ,radioTooltip(id = "risk_gp", choice = "All", title = HTML("ANOVA-like test on all subgroups"))
-          ,bsTooltip("min_gp_size_q",HTML("In bivariate outcomes analysis, select the minimum number of cases (default, 10% of the population) to define a subgroup. Only applicable for continuous variables (e.g. mRNA gene expression, DNA methylation)."),placement = "top")
+          ,bsTooltip("min_gp_size_q",HTML("In bivariate outcomes analysis, select the minimum number of cases (default, 10% of the population) to define a subgroup. Only applicable for dynamic iteration on continuous variables (e.g. mRNA gene expression, DNA methylation)."),placement = "top")
           ,bsTooltip("flagged_q",HTML(flagged_exp),placement = "top")
           ,radioTooltip(id = "flagged", choice = "y", title = HTML("Remove flagged cases"))
           ,radioTooltip(id = "flagged", choice = "n", title = HTML("Keep all cases"))
@@ -891,6 +925,13 @@ output$par_gear <- renderUI({
             ,placement = "top")
           ,radioTooltip(id = "min_p_kc", choice = "km", title = HTML("Kaplan-Meier (KM) log-rank test"))
           ,radioTooltip(id = "min_p_kc", choice = "cox", title = HTML("Cox proportional-hazard (PH) model likelihood ratio test"))
+          ,bsTooltip("n_perm_q",HTML("Number of permutations to perform for adjustment on multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method in dynamic iteration."),placement = "top")
+          ,bsTooltip("search_mode_q",
+                     HTML(paste0(
+                       "Method to determine the minimum <i>P</i>-value:<br>",
+                       "<b>Median-anchored greedy search</b> (heuristic) determines the minimum <i>P</i>-value by finding the percentile in variable 2 that gives the minimum <i>P</i>-value on the median percentile in variable 1, then looking for percentile combinations that give lower <i>P</i>-values via greedy search."
+                       ,"<br><b>Exhaustive search</b> determines the minimum <i>P</i>-value by testing all percentile combinations."
+                       )),placement = "top")
         )
       )
     },

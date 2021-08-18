@@ -137,7 +137,7 @@ observeEvent(input$confirm,{
     rv$targetr <- rv$target
 
     #------ 2. survival data processing ------
-    withProgress(value = 1, message = wait_msg("Performing analysis..."),{
+    # withProgress(value = 1, message = wait_msg("Performing analysis..."),{
       # update survival df
       # filter OS, DFS, or PFS
       rv$df_survival <- rv$df_survival_o
@@ -222,7 +222,11 @@ observeEvent(input$confirm,{
       }
 
       # ------- begin analysis after error checking -----
-      rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""
+      show_modal_spinner(
+        color = "#BDD5EA", spin = "half-circle",
+        text = HTML("<span style='font-size:125%; font-family: sans-serif;'><br>Analysis in progress ...<br><br>This might take a while when permutation is applied.<br><br>Please wait a minute. Thank you.</span>"))
+      rv$try_error <- 0; rv$surv_plotted <- ""; rv$gsea_done <- ""; rv[["padj_perm"]] <- NULL
+      if(!is.null(input$search_mode)){if(nchar(input$search_mode)>1){rv$search_mode <- input$search_mode}}
       rv$variable_nr <- rv$variable_n
       rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
@@ -236,9 +240,8 @@ observeEvent(input$confirm,{
       rv[["cutoff_all"]] = ""
       #------ 3. Loop from 1 to rv$variable_n ------
       gp_r <- ifelse_rv("risk_gp"); rv$risk_gpr <- gp_r
-      perc_min <- ifelse_rv("min_gp_size")
-      update_min_gp_size <- function(){updateNumericInput(session,"min_gp_size",value = rv$min_gp_size)}
-      if(!is.na(perc_min)){if(perc_min != rv$min_gp_size & perc_min >= 1 & perc_min <= 90){rv$min_gp_size <- perc_min}else{update_min_gp_size()}}else{update_min_gp_size()}
+      updateRV_numeric("min_gp_size",1,90)
+      updateRV_numeric("n_perm",10,1000)
       dtypes_tmp <- data_types()
       for(x in 1:rv$variable_n){
         cal_exp <- T; mut_exp_yyy <- F
@@ -368,6 +371,7 @@ observeEvent(input$confirm,{
                 # View(rv$heatmap_df)
                 # extract most significant df
                 df <- results[["df"]]
+                rv[["padj_perm"]] <- results[["p.adj"]]
                 cutoff_n <- paste0("cutoff_",x)
                 if(rv$variable_n > 1){
                   cutoff_tmp <- results[["cutoff"]]
@@ -375,7 +379,7 @@ observeEvent(input$confirm,{
                   rv[[cutoff_n]] <- paste0("<b>",cutoff_tmp,"</b>")
                   if(x==2 & exp_yyy(input_mode(1))){
                     if(exp_iter_yyy(1)){
-                      rv[["cutoff_1"]] <- paste0("<b>",cutoff_tmp[1],"</b>")
+                      rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]][1],"</b>")
                     }
                     rv[["cutoff_all"]] <- paste0("#1: ",rv[["cutoff_1"]],", #",x,": ",rv[[cutoff_n]])
                   }else{
@@ -417,7 +421,7 @@ observeEvent(input$confirm,{
                     }
                   }
                   rv[["cox_2"]] <- cal_surv_rna(df_2,1,rv[["minF2"]],rv[["maxF2"]],rv[["stepF2"]])
-                  
+
                   # switch to FALSE to prevent errors
                   cal_exp <- F
                 }else{
@@ -440,7 +444,7 @@ observeEvent(input$confirm,{
                 rv[["cutoff_all"]] <- paste0(rv[["cutoff_all"]],", #",x,": ",rv[[paste0("cutoff_",x)]])
               }
               rv[[paste0("dataF",x)]] <- df %>% dplyr::select(patient_id,level)
-              
+
               if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
                 cal_exp <- T; mut_exp_yyy <- T
                 df_list <- cal_conti_cat_interaction(x,gp_r,df_list)
@@ -580,24 +584,24 @@ observeEvent(input$confirm,{
 
         # perform survival analysis
         rv[["cox_all"]] <- cal_surv_rna(df_combined,rv$variable_n,0,1,.1,iter_mode=F,gp=gp_r)
-        if(rv$depmap){
-          p_adj_tmp <- rv[["cox_all"]][["p.adj"]]
-          for(x in 1:rv$variable_n){
-            cox_x <- paste0("cox_",x)
-            if(!is.null(rv[[cox_x]][["p.adj"]])){p_adj_tmp <- ifelse(is.null(p_adj_tmp),0,p_adj_tmp) + rv[[cox_x]][["p.adj"]]}
-          }
-          rv[["cox_all"]][["p.adj"]] <- p_adj_tmp
-        }else{
-          p_adj_tmp_km <- rv[["cox_all"]][["km"]][["p.adj"]]
-          for(x in 1:rv$variable_n){
-            cox_x <- paste0("cox_",x)
-            if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){p_adj_tmp_km <- ifelse(is.null(p_adj_tmp_km),0,p_adj_tmp_km) + rv[[cox_x]][["km"]][["p.adj"]]}
-            tmp <- rv[["cox_all"]][["cox"]][["p.adj"]]#[x]
-            if(is.null(tmp)){tmp <- 0};if(is.na(tmp)){tmp <- 0}
-            if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]] <- tmp + rv[[cox_x]][["cox"]][["p.adj"]]} #[x] correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
-          }
-          rv[["cox_all"]][["km"]][["p.adj"]] <- p_adj_tmp_km
-        }
+        # if(rv$depmap){
+        #   p_adj_tmp <- rv[["cox_all"]][["p.adj"]]
+        #   for(x in 1:rv$variable_n){
+        #     cox_x <- paste0("cox_",x)
+        #     if(!is.null(rv[[cox_x]][["p.adj"]])){p_adj_tmp <- ifelse(is.null(p_adj_tmp),0,p_adj_tmp) + rv[[cox_x]][["p.adj"]]}
+        #   }
+        #   rv[["cox_all"]][["p.adj"]] <- p_adj_tmp
+        # }else{
+        #   p_adj_tmp_km <- rv[["cox_all"]][["km"]][["p.adj"]]
+        #   for(x in 1:rv$variable_n){
+        #     cox_x <- paste0("cox_",x)
+        #     if(!is.null(rv[[cox_x]][["km"]][["p.adj"]])){p_adj_tmp_km <- ifelse(is.null(p_adj_tmp_km),0,p_adj_tmp_km) + rv[[cox_x]][["km"]][["p.adj"]]}
+        #     tmp <- rv[["cox_all"]][["cox"]][["p.adj"]]#[x]
+        #     if(is.null(tmp)){tmp <- 0};if(is.na(tmp)){tmp <- 0}
+        #     if(!is.null(rv[[cox_x]][["cox"]][["p.adj"]])){rv[["cox_all"]][["cox"]][["p.adj"]] <- tmp + rv[[cox_x]][["cox"]][["p.adj"]]} #[x] correct_p(rv[["cox_all"]][["cox"]][["p"]][x],get(paste0("min_",x)),get(paste0("max_",x)),get(paste0("step_",x)))}
+        #   }
+        #   rv[["cox_all"]][["km"]][["p.adj"]] <- p_adj_tmp_km
+        # }
         # # p adj on pairwise heatmap
         # if(!rv$depmap & rv$km_mul_padj == "padj"){
         #   if(!is.null(rv[["cox_all"]][["km"]][["p.adj"]])){
@@ -644,16 +648,16 @@ observeEvent(input$confirm,{
           names(rv[["lels_gender"]]) <- lels
           # perform survival analysis
           rv[["cox_gender"]] <- cal_surv_rna(df_combined,2,0,1,.1,iter_mode=F)
-          if(rv$depmap){
-            if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["p.adj"]]),0,rv[["cox_gender"]][["p.adj"]]) + rv[["cox_1"]][["p.adj"]]}
-          }else{
-            if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["km"]][["p.adj"]]),0,rv[["cox_gender"]][["km"]][["p.adj"]]) + rv[["cox_1"]][["km"]][["p.adj"]]}
-            if(!is.null(rv[["cox_1"]][["cox"]][["p.adj"]])){
-              rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_1"]][["cox"]][["p.adj"]]#correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
-              # rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p.adj"]][2]
-              # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
-            }
-          }
+          # if(rv$depmap){
+          #   if(!is.null(rv[["cox_1"]][["p.adj"]])){rv[["cox_gender"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["p.adj"]]),0,rv[["cox_gender"]][["p.adj"]]) + rv[["cox_1"]][["p.adj"]]}
+          # }else{
+          #   if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){rv[["cox_gender"]][["km"]][["p.adj"]] <- ifelse(is.null(rv[["cox_gender"]][["km"]][["p.adj"]]),0,rv[["cox_gender"]][["km"]][["p.adj"]]) + rv[["cox_1"]][["km"]][["p.adj"]]}
+          #   if(!is.null(rv[["cox_1"]][["cox"]][["p.adj"]])){
+          #     rv[["cox_gender"]][["cox"]][["p.adj"]][1] <- rv[["cox_1"]][["cox"]][["p.adj"]]#correct_p(rv[["cox_gender"]][["cox"]][["p"]][1],get("min_1"),get("max_1"),get("step_1"))
+          #     # rv[["cox_gender"]][["cox"]][["p.adj"]][2] <- rv[["cox_gender"]][["cox"]][["p.adj"]][2]
+          #     # rv[["cox_gender"]][["cox"]][["p.adj"]] <- ifelse(rv[["cox_gender"]][["cox"]][["p.adj"]] > 1, 1, rv[["cox_gender"]][["cox"]][["p.adj"]])
+          #   }
+          # }
           # # p adj on pairwise heatmap
           # if(!rv$depmap & rv$km_mul_padj == "padj"){
           #   if(!is.null(rv[["cox_1"]][["km"]][["p.adj"]])){
@@ -675,7 +679,7 @@ observeEvent(input$confirm,{
           rv[["df_gender"]] <- unique(df_combined[["level.y"]])
         }
       }
-    })
+    # })
 
     # update parameters
     rv$exp_iter_yyy <- all(sapply(1:rv$variable_nr,function(x) exp_iter_yyy(x)))
@@ -688,5 +692,6 @@ observeEvent(input$confirm,{
     rv$show_ui <- "yes"
     rv$surv_plotted <- ""
     rv$analysis_no <- rv$analysis_no + 1
+    remove_modal_spinner()
   }
 })

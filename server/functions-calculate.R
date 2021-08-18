@@ -26,7 +26,7 @@ extract_gene_data <- function(x, type){
   df_file <- list(
     "rna" = "df_gene.csv"
     ,"lib" = "df_gene.csv"
-    ,"manual" = "df_gene_scale.csv"
+    ,"manual" = "df_gene.csv"
     ,"cnv" = "df_cnv.csv"
     ,"mir" = "df_mir.csv"
     ,"met" = "df_met.csv"
@@ -131,11 +131,14 @@ extract_gene_data <- function(x, type){
   #   data <- data %>% dplyr::select(patient_id, genes)
   # }else{
     data <- rbindlist(l, use.names = T)
+    data <- dplyr::arrange(data, patient_id)
     if(!is.null(l_n)){
       data_n <- rbindlist(l_n, use.names = T)
+      data_n <- dplyr::arrange(data_n, patient_id)
     }else{
       data_n <- NULL
     }
+
     # ## remove NA data
     # if(!(type == "lib" | type == "manual")){
     #   data_s <- unlist(data[,2])
@@ -216,17 +219,17 @@ extract_gene_data <- function(x, type){
 original_surv_df <- function(patient_ids){
   df_o <- rv$df_survival
   df_o %>% dplyr::filter(patient_id %in% patient_ids)
-  df_o[match(patient_ids,df_o$patient_id),] %>%
+  df_o <- df_o[match(patient_ids,df_o$patient_id),] %>%
     dplyr::select(-gender) %>%
     dplyr::filter(!is.na(patient_id))
+  arrange(df_o, patient_id)
 }
 
 # generate survival df
 generate_surv_df <- function(df, patient_ids, exp, q){
   # generate the data from for model first
-  gene_quantiles <- exp %>%
-    sapply(function(x) ifelse(x > q, "High", "Low"))
-  names(gene_quantiles) <- patient_ids
+  gene_quantiles <- ifelse(exp > q, "High", "Low")
+  # names(gene_quantiles) <- patient_ids
 
   # # generate survival analysis df
   # df$level <- gene_quantiles[match(df$patient_id,names(gene_quantiles))]
@@ -234,7 +237,7 @@ generate_surv_df <- function(df, patient_ids, exp, q){
   lels <- unique(df$level) %>% sort(.,decreasing = T)
   df$level <- factor(df$level, levels = lels)
 
-  df <- df %>% dplyr::filter(!is.na(patient_id))
+  # df <- df %>% dplyr::filter(!is.na(patient_id))
   return(df)
 }
 
@@ -277,7 +280,11 @@ exp_iter_yyy <- function(x){
   iter_id <- paste0("iter_",x)
   ifelse(is.null(input[[iter_id]]), T, input[[iter_id]] == "iter")
 }
-
+# function to determine if any iteration to perform
+if_any_iter <- function(n=rv$variable_n){
+  T
+  # all(sapply(1:n,function(x) exp_yyy(input_mode(x)) & exp_iter_yyy(x)))
+}
 # function to re-assign groups based on user's selection of a risk subgroup
 assign_gp <- function(df,gp){
   lels_tmp <- unique(df$level)
@@ -328,10 +335,297 @@ update_p_values <- function(target_df,index_df){
 }
 
 
-get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NULL, min2=NULL, max2=NULL, step2=NULL, gp=rv$risk_gp,cat=""){
-  nCores <- detectCores() - 1
+# the function to assign groups in ONE-GENE-like when a risk group is selected in 2-gene analysis
+assign_df_levels <- function(df, data, cat, cat_si){
+  if(cat != ""){
+    if(cat == "All"){
+      df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
+      df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(levels(df[["level.y"]]),decreasing = T)[1])
+      df$level <- paste0(data[["mut"]],"_",df$level)
+    }else if(cat_si == 1){
+      df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
+      df[["level.y"]] <- factor(data[["mut"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(levels(df[["level.y"]]),decreasing = T)[1])
+      df$level <- paste0(df$level,"_",data[["mut"]])
+      df <- assign_gp(df,cat)
+    }else if(cat_si == 2){
+      df[["level.x"]] <- factor(data[["mut"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = sort(levels(df[["level.x"]]),decreasing = T)[1])
+      df[["level.y"]] <- factor(df[["level"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Low")
+      df$level <- paste0(data[["mut"]],"_",df$level)
+      df <- assign_gp(df,cat)
+    }
+  }
+  return(df)
+}
+
+# function to find the minimum P value in a list
+find_minP_res <- function(rrr2){
+  pvals <- sapply(rrr2, function(x) x[["least_p_value"]])
+  pvals_i <- which.min(pvals)[[1]]
+  rrr2[[pvals_i]]
+}
+
+# function to fit survival curves onto ONE GENE
+one_gene_cox <- function(df,cat,q,depmap_T,p_kc,new_row_T=T){
+  if(is.null(df)){
+    return(NULL)
+  }else{
+    # # test if there is significant difference between high and low level genes
+    if(depmap_T){
+      # surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
+      if(cat == "All"){
+        surv_diff <- kruskal.test(dependency ~ level, data = df)
+      }else{
+        surv_diff <- wilcox.test(dependency ~ level, data = df)
+      }
+      hr <- NA
+      p_diff <- surv_diff$p.value
+    }else{
+      if(cat=="All"){
+        surv_diff <- surv_cox(df,mode=2)
+        hr <- NA
+      }else{
+        surv_diff <- surv_cox(df)
+        hr <- coef(summary(surv_diff))[,2]
+      }
+      if(p_kc == "km"){
+        p_diff <- summary(surv_diff)$sctest[3]
+      }else if(p_kc == "cox"){
+        p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
+      }
+    }
+
+    if(!is.na(p_diff)){
+      # p_df <- rbind(p_df,new_row)
+      # q_value <- as.numeric(sub("%", "", names(q)))
+      # if((q_value <= 50 & p_diff <= least_p_value)|(q_value > 50 & p_diff < least_p_value)){
+      #   least_p_value <- p_diff
+      #   df_most_significant <- df
+      #   least_hr <- hr
+      #   cutoff_most_significant <- names(quantiles[i])
+      # }
+      if(new_row_T){
+        # #append current p value to the p value df
+        new_row = c(p_diff,gsub("%$","",names(q)),q,hr)
+        results <- list(new_row,p_diff,df,hr,names(q))
+        names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+      }else{
+        results <- list(p_diff,df,hr,names(q))
+        names(results) <- c("least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+      }
+      return(results)
+    }
+  }
+}
+
+# function to loop quantiles2 based on q in quantiles
+two_gene_cox_inner <- function(
+  q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T
+){
+  # system(sprintf('echo "\n%s"', q2))
+  df2 <- generate_surv_df(df_o2, patient_ids2, exp2, q2)
+  df_list <- list(df,df2)
+  # generate interaction df
+  df_combined <- Reduce(
+    function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
+    df_list
+  )
+  x_y <- c("x","y")[1:length(df_list)]
+  df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
+  # combine subgroups if indicated
+  if(gp != "All"){
+    df_combined[["level"]] <- ifelse(df_combined[["level"]] == gp,gp,other_gp)
+    df_combined[["level"]] <- factor(df_combined[["level"]],levels = c(other_gp,gp))
+  }
+  
+  # determine if meet min % samples requirement
+  n_min <- min(table(df_combined[["level"]]))
+  if(n_min < n_min_r){
+    results <- NULL
+  }else{
+    # # test if there is significant difference between high and low level genes
+    if(depmap_T){
+      surv_diff <- kruskal.test(dependency ~ level, data = df)
+      hr <- NA
+      p_diff <- surv_diff$p.value #summary(surv_diff)[[1]][[5]][1]
+    }else{
+      if(p_kc == "km"){
+        # surv_diff <- surv_km(df_combined)
+        km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined)
+        p_diff <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
+      }else if(p_kc == "cox"){
+        if(gp == "All"){
+          surv_diff <- surv_cox(df_combined,mode = 2)
+        }else{
+          surv_diff <- surv_cox(df_combined,mode = 1)
+          hr <- coef(summary(surv_diff))[,2]
+        }
+        p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
+      }
+    }
+    
+    if(!is.na(p_diff)){
+      # # #append current p value to the p value df
+      new_row = c(p_diff,gsub("%$","",names(q2)),q2,NA)
+      results <- list(new_row,p_diff,df_combined,hr,names(q2))
+      names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+    }else{
+      results <- NULL
+    }
+  }
+  return(results)
+}
+
+two_gene_cox <- function(
+  q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, new_row_T=T
+){
+  rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
+    q2 <- quantiles2[j]
+    two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T)
+  })
+  
+  rrr2 <- Filter(Negate(is.null), rrr2)
+  if(length(rrr2)<1){
+    return(NULL)
+  }else{
+    # P tracking record on variable 2 j
+    p_df2 <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["new_row"]])))})
+    p_df2 <- try(transform_p_df(p_df2))
+    # system(sprintf('echo "p_df2: %s hihi\n"', head(p_df2)))
+    if(inherits(p_df2, "try-error")){
+      return(NULL)
+    }else{
+      ## Determine the min-P point at percentile i in variable 1
+      # Find the minimum P-value
+      res <- find_minP_res(rrr2)
+      least_p_value0 <- res[["least_p_value"]]
+      df_most_significant0 <- res[["df_most_significant"]]
+      cutoff_most_significant0 <- res[["cutoff_most_significant"]]
+
+      # Proceed only if enough data
+      if(is.null(df_most_significant0)){
+        return(NULL)
+      }else{
+        if(new_row_T){
+          new_row1 = c(least_p_value0,gsub("%$","",names(q)),q,NA)
+          results <- list(
+            new_row = new_row1,
+            least_p_value = least_p_value0,
+            df_most_significant = df_most_significant0,
+            least_hr = NA,
+            cutoff_most_significant = c(names(q),cutoff_most_significant0)
+            ,p_df = p_df2
+          )
+        }else{
+          results <- list(
+            least_p_value = least_p_value0,
+            df_most_significant = df_most_significant0,
+            least_hr = NA,
+            cutoff_most_significant = c(names(q),cutoff_most_significant0)
+            ,p_df = p_df2
+          )
+        }
+        return(results)
+      }
+    }
+  }
+}
+
+# heuristic search with two genes
+two_gene_heuristic <- function(
+  quantiles, quantiles2,
+  df_o, patient_ids, exp,
+  df_o2, patient_ids2, exp2
+  ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores
+){
+  # create a tracking dataframe
+  i_len <- length(quantiles); j_len <- length(quantiles2)
+  df_tracking <- matrix(0, i_len, j_len)
+  rownames(df_tracking) <- 1:i_len#names(quantiles2)
+  colnames(df_tracking) <- 1:j_len#names(quantiles)
+  
+  # start from the median quantile
+  q <- median(quantiles); i <- which(quantiles == q); q <- quantiles[i]
+  df <- generate_surv_df(df_o, patient_ids, exp, q)
+  
+  # mark initial iterated points
+  df_tracking[i,] <- 1
+  
+  # loop quantiles2 using q
+  rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+  
+  # anchor the optimized start point of heuristic searching
+  q2 <- rrr2[["cutoff_most_significant"]][2]; j <- which(names(quantiles2) == q2)
+  names(j) <- q2; q2 <- quantiles2[j]
+  rrr2[["cutoff_most_significant"]][1] <- names(q)
+  init_min_p <- rrr2[["least_p_value"]]
+  
+  # start surrounding searching
+  final_min_p <- init_min_p
+  while(i > 1 & i < i_len & j > 1 & j < j_len){
+    a <- c(i-1,j); b <- c(i,j-1); c <- c(i+1,j); d <- c(i,j+1)
+    comb <- list(a,b,c,d)
+    # fix regression models via parallel processing
+    rrr_sr <- mclapply(1:4,mc.cores = nCores,function(k){
+      ij_k <- comb[[k]]; i_k <- ij_k[1]; j_k <- ij_k[2]
+      # skip if tracked
+      if(df_tracking[i_k,j_k] == 1){
+        return(NULL)
+      }else{
+        # fit cox regression
+        q <- quantiles[i_k]; q2 <- quantiles2[j_k]
+        df <- generate_surv_df(df_o, patient_ids, exp, q)
+        results <- two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T)
+        if(!is.null(results)){
+          results[["cutoff_most_significant"]] <- names(c(q,q2))
+          ij_k <- list(ij_k); names(ij_k) <- "ij"
+          results <- append(results,ij_k)
+        }
+        return(results)
+      }
+    })
+    # assign 1 to tracked quantile combination
+    ijs <- unlist(comb)
+    df_tracking[ijs[1:4],ijs[5:8]] <- 1
+    # the new P, if any
+    rrr_sr <- Filter(Negate(is.null), rrr_sr)
+    if(length(rrr_sr)>0){
+      res <- find_minP_res(rrr_sr)
+      p_min <- res[["least_p_value"]]
+      ij <- res[["ij"]]; i <- ij[1]; j <- ij[2]
+      # mark new min P
+      if(p_min < final_min_p){
+        final_min_p <- p_min
+        rrr <- rrr_sr
+      }else{
+        break
+      }
+    }else{
+      break
+    }
+  }
+  # assign to rrr
+  if(final_min_p >= init_min_p){
+    rrr <- list()
+    rrr[[1]] <- rrr2
+  }
+  return(rrr)
+}
+
+get_info_most_significant_rna <-
+  function(
+    data, min, max, step,
+    num=1, data2=NULL, min2=NULL, max2=NULL, step2=NULL,
+    gp=rv$risk_gp,cat="",
+    search_mode=rv$search_mode, n_perm=rv$n_perm
+  ){
+  nCores <- detectCores() - 2; if(nCores > 12) nCores <- 12
   # convert RVs into static variables
   depmap_T <- rv$depmap; p_kc <- rv$min_p_kc; gps <- rv$risk_gps
+  if(gp != "All"){
+    other_gp <- paste0(gps[!gps %in% c(gp,"All")],collapse = ", ")
+  }else{
+    other_gp <- NULL
+  }
   print(gp)
   perc_min <- rv$min_gp_size / 100
   # initiate quantiles according to margin and step values
@@ -371,7 +665,13 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
   exp <-data[,2] %>% unlist(.) %>% unname(.)
   # the quantiles we will use to define the level of gene percentages
   quantiles <- quantile(exp, quantile_s, na.rm = T)
+  # permutation matrix
+  set.seed(0)
+  n_samples <- nrow(df_o)
+  idx.mat <- matrix(NA, n_samples, n_perm)
+  for(ii in 1:n_perm) idx.mat[,ii] <- sample(1:n_samples)
 
+  # ---- TWO GENES ----
   if(num > 1){
     quantile_s2 = seq(min2, max2, by = step2)
     patient_ids2 <- data2$patient_id
@@ -497,6 +797,23 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
       }
     })
     
+
+    # ---- TWO GENES exhaustive ----
+    if(search_mode == "exhaustive"){
+      rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+        q <- quantiles[i]
+        df <- generate_surv_df(df_o, patient_ids, exp, q)
+
+        two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+      })
+    # ---- TWO GENES heuristic ----
+    }else if(search_mode == "heuristic"){
+      rrr <- two_gene_heuristic(quantiles, quantiles2,
+                         df_o, patient_ids, exp,
+                         df_o2, patient_ids2, exp2
+                         ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+    }
+  # ---- ONE GENE ----
   }else{
     if(cat != ""){
       cat_s <- strsplit(cat,"_")[[1]]
@@ -506,69 +823,8 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
-
-      if(cat != ""){
-        if(cat == "All"){
-          df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
-          df[["level.y"]] <- factor(data[["mut"]]); lels <- levels(df[["level.y"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(lels,decreasing = T)[1])
-          df$level <- paste0(data[["mut"]],"_",df$level)
-        }else if(cat_si == 1){
-          df[["level.x"]] <- factor(df[["level"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = "Low")
-          df[["level.y"]] <- factor(data[["mut"]]); lels <- levels(df[["level.y"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = sort(lels,decreasing = T)[1])
-          df$level <- paste0(df$level,"_",data[["mut"]])
-          df <- assign_gp(df,cat)
-        }else if(cat_si == 2){
-          df[["level.x"]] <- factor(data[["mut"]]); lels <- levels(df[["level.x"]]); df[["level.x"]] <- relevel(df[["level.x"]], ref = sort(lels,decreasing = T)[1])
-          df[["level.y"]] <- factor(df[["level"]]); df[["level.y"]] <- relevel(df[["level.y"]], ref = "Low")
-          df$level <- paste0(data[["mut"]],"_",df$level)
-          df <- assign_gp(df,cat)
-        }
-      }
-
-      if(is.null(df)){
-        return(NULL)
-      }else{
-        # # test if there is significant difference between high and low level genes
-        if(depmap_T){
-          # surv_diff <- survdiff(Surv(dependency) ~ level, data = df)
-          if(cat == "All"){
-            surv_diff <- kruskal.test(dependency ~ level, data = df)
-          }else{
-            surv_diff <- wilcox.test(dependency ~ level, data = df)
-          }
-          hr <- NA
-          p_diff <- surv_diff$p.value
-        }else{
-          if(cat=="All"){
-            surv_diff <- surv_cox(df,mode=2)
-            hr <- NA
-          }else{
-            surv_diff <- surv_cox(df)
-            hr <- coef(summary(surv_diff))[,2]
-          }
-          if(p_kc == "km"){
-            p_diff <- summary(surv_diff)$sctest[3]
-          }else if(p_kc == "cox"){
-            p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
-          }
-        }
-
-        if(!is.na(p_diff)){
-          # #append current p value to the p value df
-          new_row = c(p_diff,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],hr)
-          # p_df <- rbind(p_df,new_row)
-          # q_value <- as.numeric(sub("%", "", names(q)))
-          # if((q_value <= 50 & p_diff <= least_p_value)|(q_value > 50 & p_diff < least_p_value)){
-          #   least_p_value <- p_diff
-          #   df_most_significant <- df
-          #   least_hr <- hr
-          #   cutoff_most_significant <- names(quantiles[i])
-          # }
-          results <- list(new_row,p_diff,df,hr,names(quantiles[i]))
-          names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
-          return(results)
-        }
-      }
+      df <- assign_df_levels(df, data, cat, cat_si)
+      one_gene_cox(df,cat,q,depmap_T,p_kc)
     })
   }
 
@@ -594,6 +850,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
     }
     cutoff_most_significant <- res[["cutoff_most_significant"]]
     least_hr <- res[["least_hr"]]
+    least_p <- res[["least_p_value"]]
 
     #Transform the p_df a little bit to make it work with the ggplot
     if(num > 1){
@@ -605,6 +862,72 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
       p_df <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
       p_df <- transform_p_df(p_df)
     }
+
+    # ---- PERMUTATION ----
+    if(least_p < 0.1){
+      if(num == 1){
+        rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+          df_o_new <- df_o[idx.mat[,ii],]
+          df_o_new$patient_id <- patient_ids
+          
+          ppp <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+            q <- quantiles[i]
+            df <- generate_surv_df(df_o_new, patient_ids, exp, q)
+            df <- assign_df_levels(df, data, cat, cat_si)
+            results <- one_gene_cox(df,cat,q,depmap_T,p_kc,new_row_T=F)
+            return(results[["least_p_value"]])
+          })
+          
+          ppp <- Filter(Negate(is.null), ppp)
+          return(min(unlist(ppp)))
+        })
+      }else if(num > 1){
+        if(search_mode == "heuristic"){
+          rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+            df_o_new <- df_o[idx.mat[,ii],]
+            df_o_new$patient_id <- patient_ids
+            
+            rrr <- two_gene_heuristic(quantiles, quantiles2,
+                                      df_o_new, patient_ids, exp,
+                                      df_o_new, patient_ids2, exp2
+                                      ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+            rrr <- Filter(Negate(is.null), rrr)
+            res <- find_minP_res(rrr)
+            res[["least_p_value"]]
+          })
+        }else if(search_mode == "exhaustive"){
+          rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+            df_o_new <- df_o[idx.mat[,ii],]
+            df_o_new$patient_id <- patient_ids
+            
+            rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+              q <- quantiles[i]
+              df <- generate_surv_df(df_o_new, patient_ids, exp, q)
+              
+              two_gene_cox(q, quantiles2, df_o_new, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+            })
+            rrr <- Filter(Negate(is.null), rrr)
+            res <- find_minP_res(rrr)
+            res[["least_p_value"]]
+          })
+        }
+      }
+
+      # permutation adjusted P value
+      rrr_perm <- Filter(Negate(is.null), rrr_perm)
+      if(length(rrr_perm)>0){
+        #Find all the P-value
+        pvals_perm <- unlist(rrr_perm)
+        p_adj <- sum(pvals_perm <= least_p) / n_perm
+        least_error <- 1/n_perm
+        if(p_adj < least_error) p_adj <- paste0("< ",least_error)
+      }else{
+        p_adj <- NULL
+      }
+    }else{
+      p_adj <- NULL
+    }
+    
 
     # proceed only if enough data
     if(is.null(df_most_significant)){
@@ -621,7 +944,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
         ,p_df = p_df
         ,heatmap_df = heatmap_df
         ,heatmap_annotation_df = heatmap_annotation_df
-        
+        ,p.adj = p_adj
       )
       return(results)
     }
@@ -633,6 +956,7 @@ get_info_most_significant_rna <- function(data, min, max, step, num=1, data2=NUL
 # perform interaction survival analysis on continuous-categorical combinations
 cal_conti_cat_interaction <- function(x,gp_r,df_list){
   results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+  rv[["padj_perm"]] <- results[["p.adj"]]
   if("p_df" %in% names(results)){
     rv[["quantile_graph"]][[1]] <- results[["p_df"]]
   }
@@ -651,7 +975,7 @@ cal_conti_cat_interaction <- function(x,gp_r,df_list){
     df_1[["level"]] <- df[["level.x"]]
     df[["level"]] <- df[["level.y"]]
   }
-  
+
   df_list[[1]] <- df_1; rv[["df_1"]] <- df_1
   rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
   rv[["cutoff_all"]] <- paste0("#",x,": ",rv[["cutoff_1"]])
@@ -865,11 +1189,11 @@ cal_surv_rna <-
         # surv_diff <- pairwise.t.test(df$dependency, df$level, p.adjust.method = "hommel")
       }
 
-      if(iter_mode){
-        p_diff_adj <- correct_p(p_diff,min,max,step)
-      }else{
-        p_diff_adj <- NULL
-      }
+      # if(iter_mode){
+      #   p_diff_adj <- correct_p(p_diff,min,max,step)
+      # }else{
+      #   p_diff_adj <- NULL
+      # }
 
       results = list(
         df = df
@@ -878,7 +1202,7 @@ cal_surv_rna <-
         ,lels = lels
         # ,hr = "NA"
         ,p = p_diff
-        ,p.adj = p_diff_adj
+        ,p.adj = rv[["padj_perm"]]
       )
     }else{
       km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df)
@@ -932,17 +1256,17 @@ cal_surv_rna <-
       #   as.numeric(x)
       # })
 
-      # multiple p correction
-      if(iter_mode){
-        p.km.adj <- correct_p(p.km,min,max,step)
-        p.cox.adj <- correct_p(cox.stats$logtest[3],min,max,step)
-        #   sapply(cox.stats$coefficients[,5], function(x){
-        #   correct_p(as.numeric(x),min,max,step)
-        # })
-      }else{
-        p.km.adj <- NULL
-        p.cox.adj <- NULL
-      }
+      # # multiple p correction
+      # if(iter_mode){
+      #   p.km.adj <- correct_p(p.km,min,max,step)
+      #   p.cox.adj <- correct_p(cox.stats$logtest[3],min,max,step)
+      #   #   sapply(cox.stats$coefficients[,5], function(x){
+      #   #   correct_p(as.numeric(x),min,max,step)
+      #   # })
+      # }else{
+      #   p.km.adj <- NULL
+      #   p.cox.adj <- NULL
+      # }
 
 
       # # run Cox survival analysis
@@ -963,7 +1287,7 @@ cal_surv_rna <-
           ,lels = lels
           ,hr = "NA"
           ,p = p.km
-          ,p.adj = p.km.adj
+          ,p.adj = rv[["padj_perm"]]
         )
         ,cox = list(
           df = new_df,
@@ -972,7 +1296,7 @@ cal_surv_rna <-
           ,lels = lels
           ,hr = hr.cox
           ,p = p.cox
-          ,p.adj = p.cox.adj
+          ,p.adj = rv[["padj_perm"]]
           ,cox_fit = cox_fit1
           ,cox_df = df
         )
@@ -1112,7 +1436,8 @@ plot_surv <-
 #==============================================#
 translate_cells <- function(patient_ids){
   df <- rv$depmap_ccle
-  cells <- tibble(patient_id = patient_ids) %>% dplyr::inner_join(df, by = "patient_id") %>% .[["CCLE_Name"]]
+  cells <- tibble(patient_id = patient_ids) %>% dplyr::inner_join(df, by = "patient_id")
+  cells <- paste0(cells[["CCLE_Name"]],"|",cells[["gender"]])
 }
 
 retrieve_dens_df <- function(){
