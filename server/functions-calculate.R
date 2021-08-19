@@ -544,7 +544,7 @@ two_gene_heuristic <- function(
   colnames(df_tracking) <- 1:j_len#names(quantiles)
   
   # start from the median quantile
-  q <- median(quantiles); i <- which(quantiles == q); q <- quantiles[i]
+  i <- floor(i_len/2); q <- quantiles[i]
   df <- generate_surv_df(df_o, patient_ids, exp, q)
   
   # mark initial iterated points
