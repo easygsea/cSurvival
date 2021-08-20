@@ -1913,7 +1913,7 @@ output$quantile_graph <- renderPlotly({
 
 output$tracking_heatmap <- renderPlotly({
   #View(rv$heatmap_df)
-  fig <- pvalue_heatmap(rv$heatmap_df, rv$heatmap_annotation_df)
+  fig <- pvalue_heatmap(rv$heatmap_df)
   fig
 })
 

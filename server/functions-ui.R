@@ -801,8 +801,10 @@ assemble_percentile_plot <- function(quantile_df_list){
 }
 
 #heatmap----
-pvalue_heatmap <- function(heatmap_df, heatmap_annotation_df){
+pvalue_heatmap <- function(heatmap_df){
   dat = heatmap_df
+  dat$annotation = as.character(round(dat$annotation,2))
+  dat$annotation[is.na(dat$annotation)] <- "NA"
   dat$p_value = round(dat$p_value,4)
   dat$log_p_value <- -log10(dat$p_value)
   dat$log_p_value[is.na(dat$log_p_value)] <- 0
@@ -824,9 +826,9 @@ pvalue_heatmap <- function(heatmap_df, heatmap_annotation_df){
                 title = list(text="-log10(P)", side = "right")
                 ,len = 1.2
               ),
-              text = ~p_value,
+              text = ~annotation,
               hovertemplate = paste('%{yaxis.title.text} quantile: <b>%{x}%</b> and %{yaxis.title.text} quantile: <b>%{y}%</b><br>',
-                                    'Corresponding P-value: <b>%{text}</b>'
+                                    'Corresponding P-value: <b>%{text}</b>','<extra></extra>'
               )
     )%>%
     layout(
@@ -838,7 +840,7 @@ pvalue_heatmap <- function(heatmap_df, heatmap_annotation_df){
   if(rv$tracking_heatmap_annotation){
     fig <- fig %>%
       add_annotations(x = dat$Q1, y = dat$Q2,
-                      text = as.character(round(dat$p_value,2)),
+                      text = dat$annotation,
                       showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black', size = rv$tracking_heatmap_text_size)
                       ,ax = 20, ay = -20
       )

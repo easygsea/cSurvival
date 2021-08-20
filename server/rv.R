@@ -6,7 +6,8 @@ rv <- reactiveValues(
   analysis_no_hm = 0, # count of analysis for controllingheatmap plot
   flagged = "y", min_p_kc = "km",
   risk_gp = "All", risk_gpr = "All", min_gp_size = 10, risk_gps = "All",
-  n_perm = 100, search_mode = "heuristic",#exhaustive
+  #TODO: CHANGE BACK TO 100
+  n_perm = 10, search_mode = "heuristic",#exhaustive
   
   projectStatus="none", project="", max_project_n=1, try_error=0
   ,tcga=T,tcgar=T,target=T,targetr=T,depmap=F,depmapr=F
@@ -64,7 +65,6 @@ rv <- reactiveValues(
   ,exp_iter_yyy=FALSE #Used to decide whether show heatmap
   ,quantile_graph=NULL
   ,heatmap_df=NULL
-  ,heatmap_annotation_df=NULL
   ,tracking_heatmap_text_size = 14
   ,tracking_heatmap_annotation = TRUE
   ,tracking_heatmap_color = "default"

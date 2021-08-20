@@ -328,9 +328,10 @@ populate_quantile_df <- function(quantile_s, min, max, step, substitue_value = 1
   return(result)
 }
 #Helper function to update a heatmap dataframe's p_value column based on a index mapping df
-update_p_values <- function(target_df,index_df){
+update_p_values <- function(target_df,index_df,column_name = "p_value"){
   result <- target_df
-  result$p_value[index_df$index] <- as.numeric(index_df$p_value)
+  result[[column_name]][index_df$index] <- as.numeric(index_df$p_value)
+  result <- result[[column_name]]
   return(result)
 }
 
@@ -419,9 +420,9 @@ one_gene_cox <- function(df,cat,q,depmap_T,p_kc,new_row_T=T){
 
 # function to loop quantiles2 based on q in quantiles
 two_gene_cox_inner <- function(
-  q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T
+  q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, heatmap_df
 ){
-  # system(sprintf('echo "\n%s"', q2))
+  # system(sprintf('echo "\n%s"', q2)
   df2 <- generate_surv_df(df_o2, patient_ids2, exp2, q2)
   df_list <- list(df,df2)
   # generate interaction df
@@ -458,6 +459,7 @@ two_gene_cox_inner <- function(
         }else{
           surv_diff <- surv_cox(df_combined,mode = 1)
           hr <- coef(summary(surv_diff))[,2]
+          View(coef(summary(surv_diff)))
         }
         p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
       }
@@ -466,8 +468,16 @@ two_gene_cox_inner <- function(
     if(!is.na(p_diff)){
       # # #append current p value to the p value df
       new_row = c(p_diff,gsub("%$","",names(q2)),q2,NA)
-      results <- list(new_row,p_diff,df_combined,hr,names(q2))
-      names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant")
+      #TODO: optimize!
+      quantile_1  = unlist(strsplit(names(q),split = '%',fixed=T))
+      quantile_2  = unlist(strsplit(names(q2),split = '%',fixed=T))
+      #start of heatmp section:
+      heatmap_df_index = which((heatmap_df$Q1 == as.numeric(quantile_1))&(heatmap_df$Q2 == as.numeric(quantile_2)))
+      #print(hr)
+      heatmap_new_row = c(round(heatmap_df_index,0),p_diff)#,hr)
+      names(heatmap_new_row) <- c("index","p_value")#,"hr")
+      results <- list(new_row,p_diff,df_combined,hr,names(q2),heatmap_new_row)
+      names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant","heatmap_new_row")
     }else{
       results <- NULL
     }
@@ -476,11 +486,13 @@ two_gene_cox_inner <- function(
 }
 
 two_gene_cox <- function(
-  q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, new_row_T=T
+  q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, new_row_T=T,heatmap_df
 ){
-  rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
+  #TODO CHANGE BACK TO mclapply
+  #rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
+  rrr2 <- lapply(seq_along(quantiles2),function(j){
     q2 <- quantiles2[j]
-    two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T)
+    two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T,heatmap_df = heatmap_df)
   })
   
   rrr2 <- Filter(Negate(is.null), rrr2)
@@ -500,6 +512,9 @@ two_gene_cox <- function(
       least_p_value0 <- res[["least_p_value"]]
       df_most_significant0 <- res[["df_most_significant"]]
       cutoff_most_significant0 <- res[["cutoff_most_significant"]]
+      heatmap_new_rows <- lapply(rrr2, function(x) {
+        data.frame(t(data.frame(x[["heatmap_new_row"]])))})
+      heatmap_new_rows <- do.call("rbind", heatmap_new_rows)
 
       # Proceed only if enough data
       if(is.null(df_most_significant0)){
@@ -514,6 +529,7 @@ two_gene_cox <- function(
             least_hr = NA,
             cutoff_most_significant = c(names(q),cutoff_most_significant0)
             ,p_df = p_df2
+            ,heatmap_new_rows = heatmap_new_rows
           )
         }else{
           results <- list(
@@ -522,6 +538,8 @@ two_gene_cox <- function(
             least_hr = NA,
             cutoff_most_significant = c(names(q),cutoff_most_significant0)
             ,p_df = p_df2
+            #not add new lines
+            #,heatmap_new_rows = heatmap_new_rows
           )
         }
         return(results)
@@ -535,7 +553,7 @@ two_gene_heuristic <- function(
   quantiles, quantiles2,
   df_o, patient_ids, exp,
   df_o2, patient_ids2, exp2
-  ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores
+  ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, heatmap_df
 ){
   # create a tracking dataframe
   i_len <- length(quantiles); j_len <- length(quantiles2)
@@ -551,7 +569,7 @@ two_gene_heuristic <- function(
   df_tracking[i,] <- 1
   
   # loop quantiles2 using q
-  rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+  rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores,heatmap_df = heatmap_df)
   
   # anchor the optimized start point of heuristic searching
   q2 <- rrr2[["cutoff_most_significant"]][2]; j <- which(names(quantiles2) == q2)
@@ -574,7 +592,7 @@ two_gene_heuristic <- function(
         # fit cox regression
         q <- quantiles[i_k]; q2 <- quantiles2[j_k]
         df <- generate_surv_df(df_o, patient_ids, exp, q)
-        results <- two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T)
+        results <- two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, heatmap_df = heatmap_df)
         if(!is.null(results)){
           results[["cutoff_most_significant"]] <- names(c(q,q2))
           ij_k <- list(ij_k); names(ij_k) <- "ij"
@@ -631,10 +649,10 @@ get_info_most_significant_rna <-
   # initiate quantiles according to margin and step values
   quantile_s = seq(min, max, by = step)
   #initiate heatmap dataframe according to quantile_s
-  heatmap_df = populate_quantile_df(quantile_s,min, max, step, 1)
+  heatmap_df <- populate_quantile_df(quantile_s,min, max, step, 1)
   heatmap_df <- data.frame(sapply(heatmap_df, function(x) as.numeric(as.character(x))))
-  heatmap_annotation_df <- populate_quantile_df(quantile_s,min, max, step, NA)
-  heatmap_annotation_df$hr <- NA
+  heatmap_df$annotation <- NA
+  heatmap_df$hr <- NA
   
   # retrieve survival analysis df_o
   df_o <- original_surv_df(data$patient_id)
@@ -679,139 +697,143 @@ get_info_most_significant_rna <-
     quantiles2 <- quantile(exp2, quantile_s2, na.rm = T)
 
     n_min_r <- perc_min * nrow(data2)
-    rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
-      q <- quantiles[i]
-      df <- generate_surv_df(df_o, patient_ids, exp, q)
-
-      rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
-        q2 <- quantiles2[j]
-        # system(sprintf('echo "\n%s"', q2))
-        df2 <- generate_surv_df(df_o2, patient_ids2, exp2, q2)
-        df_list <- list(df,df2)
-        # generate interaction df
-        df_combined <- Reduce(
-          function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
-          df_list
-        )
-        x_y <- c("x","y")[1:length(df_list)]
-        df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
-        # combine subgroups if indicated
-        if(gp != "All"){
-          other_gp <- paste0(gps[!gps %in% c(gp,"All")],collapse = ", ")
-          df_combined[["level"]] <- ifelse(df_combined[["level"]] == gp,gp,other_gp)
-          df_combined[["level"]] <- factor(df_combined[["level"]],levels = c(other_gp,gp))
-        }
-
-        # determine if meet min % samples requirement
-        n_min <- min(table(df_combined[["level"]]))
-        if(n_min < n_min_r){
-          results <- NULL
-        }else{
-          # # test if there is significant difference between high and low level genes
-          if(depmap_T){
-            surv_diff <- kruskal.test(dependency ~ level, data = df)
-            hr <- NA
-            p_diff <- surv_diff$p.value #summary(surv_diff)[[1]][[5]][1]
-          }else{
-            if(p_kc == "km"){
-              # surv_diff <- surv_km(df_combined)
-              km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined)
-              p_diff <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
-            }else if(p_kc == "cox"){
-              if(gp == "All"){
-                surv_diff <- surv_cox(df_combined,mode = 2)
-              }else{
-                surv_diff <- surv_cox(df_combined,mode = 1)
-              }
-              p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
-            }
-          }
-
-          if(!is.na(p_diff)){
-            # #append current p value to the p value df
-            quantile_1  = unlist(strsplit(names(quantiles[i]),split = '%',fixed=T))
-            quantile_2  = unlist(strsplit(names(quantiles2[j]),split = '%',fixed=T))
-            
-            new_row = c(p_diff,quantile_2,quantiles2[j],NA)
-            #start of heatmp section:
-            heatmap_df_index = which((heatmap_df$Q1 == as.numeric(quantile_1))&(heatmap_df$Q2 == as.numeric(quantile_2)))
-            heatmap_new_row = c(round(heatmap_df_index,0),p_diff)
-            names(heatmap_new_row) <- c("index","p_value")
-            #end of heatmap
-            
-            results <- list(new_row,p_diff,df_combined,hr,names(quantiles2[j]),heatmap_new_row)
-            names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant","heatmap_new_row")
-          }else{
-            results <- NULL
-          }
-        }
-
-        return(results)
-      })
-      #View(rrr2)
-      #print(rrr2)
-      #print("CALCULATED RRR2")
-      rrr2 <- Filter(Negate(is.null), rrr2)
-      if(is.null(rrr2)){
-        return(NULL)
-      }else{
-        
-        # P tracking record on variable 2 j
-        p_df2 <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["new_row"]])))})
-        p_df2 <- try(transform_p_df(p_df2))
-        # system(sprintf('echo "p_df2: %s hihi\n"', head(p_df2)))
-        if(inherits(p_df2, "try-error")){
-          return(NULL)
-        }else{
-          ## Determine the min-P point at percentile i in variable 1
-          # Find the minimum P-value
-          pvals <- sapply(rrr2, function(x) x[["least_p_value"]])
-          pvals_i <- which.min(pvals)[[1]]
-          res <- rrr2[[pvals_i]]
-          least_p_value0 <- res[["least_p_value"]]
-          df_most_significant0 <- res[["df_most_significant"]]
-          cutoff_most_significant0 <- res[["cutoff_most_significant"]]
-          heatmap_new_rows <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["heatmap_new_row"]])))})
-          heatmap_new_rows <- do.call("rbind", heatmap_new_rows)
-          new_row1 = c(least_p_value0,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],NA)
-          
-          # Feel free to run this command to see what is inside of heatmap_new_rows variable
-          # View(heatmap_new_rows)
-          
-          # Proceed only if enough data
-          if(is.null(df_most_significant0)){
-            return(NULL)
-          }else{
-            results <- list(
-              new_row = new_row1,
-              least_p_value = least_p_value0,
-              df_most_significant = df_most_significant0,
-              least_hr = NA,
-              cutoff_most_significant = c(names(quantiles[i]),cutoff_most_significant0)
-              ,p_df = p_df2
-              ,heatmap_new_rows = heatmap_new_rows
-            )
-            return(results)
-          }
-        }
-      }
-    })
+    # rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+    #   q <- quantiles[i]
+    #   df <- generate_surv_df(df_o, patient_ids, exp, q)
+    # 
+    #   rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
+    #     q2 <- quantiles2[j]
+    #     # system(sprintf('echo "\n%s"', q2))
+    #     df2 <- generate_surv_df(df_o2, patient_ids2, exp2, q2)
+    #     df_list <- list(df,df2)
+    #     # generate interaction df
+    #     df_combined <- Reduce(
+    #       function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
+    #       df_list
+    #     )
+    #     x_y <- c("x","y")[1:length(df_list)]
+    #     df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
+    #     # combine subgroups if indicated
+    #     if(gp != "All"){
+    #       other_gp <- paste0(gps[!gps %in% c(gp,"All")],collapse = ", ")
+    #       df_combined[["level"]] <- ifelse(df_combined[["level"]] == gp,gp,other_gp)
+    #       df_combined[["level"]] <- factor(df_combined[["level"]],levels = c(other_gp,gp))
+    #     }
+    # 
+    #     # determine if meet min % samples requirement
+    #     n_min <- min(table(df_combined[["level"]]))
+    #     if(n_min < n_min_r){
+    #       results <- NULL
+    #     }else{
+    #       # # test if there is significant difference between high and low level genes
+    #       if(depmap_T){
+    #         surv_diff <- kruskal.test(dependency ~ level, data = df)
+    #         hr <- NA
+    #         p_diff <- surv_diff$p.value #summary(surv_diff)[[1]][[5]][1]
+    #       }else{
+    #         if(p_kc == "km"){
+    #           # surv_diff <- surv_km(df_combined)
+    #           km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined)
+    #           p_diff <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
+    #         }else if(p_kc == "cox"){
+    #           if(gp == "All"){
+    #             surv_diff <- surv_cox(df_combined,mode = 2)
+    #           }else{
+    #             surv_diff <- surv_cox(df_combined,mode = 1)
+    #           }
+    #           p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
+    #         }
+    #       }
+    # 
+    #       if(!is.na(p_diff)){
+    #         # #append current p value to the p value df
+    #         quantile_1  = unlist(strsplit(names(quantiles[i]),split = '%',fixed=T))
+    #         quantile_2  = unlist(strsplit(names(quantiles2[j]),split = '%',fixed=T))
+    #         
+    #         new_row = c(p_diff,quantile_2,quantiles2[j],NA)
+    #         #start of heatmp section:
+    #         heatmap_df_index = which((heatmap_df$Q1 == as.numeric(quantile_1))&(heatmap_df$Q2 == as.numeric(quantile_2)))
+    #         heatmap_new_row = c(round(heatmap_df_index,0),p_diff)
+    #         names(heatmap_new_row) <- c("index","p_value")
+    #         #end of heatmap
+    #         
+    #         results <- list(new_row,p_diff,df_combined,hr,names(quantiles2[j]),heatmap_new_row)
+    #         names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant","heatmap_new_row")
+    #       }else{
+    #         results <- NULL
+    #       }
+    #     }
+    # 
+    #     return(results)
+    #   })
+    #   #View(rrr2)
+    #   #print(rrr2)
+    #   #print("CALCULATED RRR2")
+    #   rrr2 <- Filter(Negate(is.null), rrr2)
+    #   if(is.null(rrr2)){
+    #     return(NULL)
+    #   }else{
+    #     
+    #     # P tracking record on variable 2 j
+    #     p_df2 <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["new_row"]])))})
+    #     p_df2 <- try(transform_p_df(p_df2))
+    #     # system(sprintf('echo "p_df2: %s hihi\n"', head(p_df2)))
+    #     if(inherits(p_df2, "try-error")){
+    #       return(NULL)
+    #     }else{
+    #       ## Determine the min-P point at percentile i in variable 1
+    #       # Find the minimum P-value
+    #       pvals <- sapply(rrr2, function(x) x[["least_p_value"]])
+    #       pvals_i <- which.min(pvals)[[1]]
+    #       res <- rrr2[[pvals_i]]
+    #       least_p_value0 <- res[["least_p_value"]]
+    #       df_most_significant0 <- res[["df_most_significant"]]
+    #       cutoff_most_significant0 <- res[["cutoff_most_significant"]]
+    #       heatmap_new_rows <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["heatmap_new_row"]])))})
+    #       heatmap_new_rows <- do.call("rbind", heatmap_new_rows)
+    #       new_row1 = c(least_p_value0,unlist(strsplit(names(quantiles[i]),split = '%',fixed=T)),quantiles[i],NA)
+    #       
+    #       # Feel free to run this command to see what is inside of heatmap_new_rows variable
+    #       # View(heatmap_new_rows)
+    #       
+    #       # Proceed only if enough data
+    #       if(is.null(df_most_significant0)){
+    #         return(NULL)
+    #       }else{
+    #         results <- list(
+    #           new_row = new_row1,
+    #           least_p_value = least_p_value0,
+    #           df_most_significant = df_most_significant0,
+    #           least_hr = NA,
+    #           cutoff_most_significant = c(names(quantiles[i]),cutoff_most_significant0)
+    #           ,p_df = p_df2
+    #           ,heatmap_new_rows = heatmap_new_rows
+    #         )
+    #         return(results)
+    #       }
+    #     }
+    #   }
+    # })
     
-
+    #THIS IS THE NEW METHOD:
     # ---- TWO GENES exhaustive ----
+    
     if(search_mode == "exhaustive"){
-      rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+      #TODO: CHANGE BACK
+      #rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+      rrr <- lapply(seq_along(quantiles),function(i){
         q <- quantiles[i]
         df <- generate_surv_df(df_o, patient_ids, exp, q)
-
-        two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+        
+        two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, heatmap_df = heatmap_df)
       })
+      
     # ---- TWO GENES heuristic ----
     }else if(search_mode == "heuristic"){
       rrr <- two_gene_heuristic(quantiles, quantiles2,
                          df_o, patient_ids, exp,
                          df_o2, patient_ids2, exp2
-                         ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+                         ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, heatmap_df = heatmap_df)
     }
   # ---- ONE GENE ----
   }else{
@@ -829,7 +851,6 @@ get_info_most_significant_rna <-
   }
 
   rrr <- Filter(Negate(is.null), rrr)
-  
   if(length(rrr)>0){
     #Find the minimum P-value
     pvals <- sapply(rrr, function(x) x[["least_p_value"]])
@@ -862,7 +883,8 @@ get_info_most_significant_rna <-
       p_df <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
       p_df <- transform_p_df(p_df)
     }
-
+    #TODO: fix heuristics function
+    #TODO: add hr right now it is something else
     # ---- PERMUTATION ----
     if(least_p < 0.1){
       if(num == 1){
@@ -883,14 +905,16 @@ get_info_most_significant_rna <-
         })
       }else if(num > 1){
         if(search_mode == "heuristic"){
-          rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+          #TODO:CHANGE BACK TO mclapply
+          #rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
+          rrr_perm <- lapply(1:n_perm,function(ii){
             df_o_new <- df_o[idx.mat[,ii],]
             df_o_new$patient_id <- patient_ids
             
             rrr <- two_gene_heuristic(quantiles, quantiles2,
                                       df_o_new, patient_ids, exp,
                                       df_o_new, patient_ids2, exp2
-                                      ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+                                      ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores,heatmap_df = heatmap_df)
             rrr <- Filter(Negate(is.null), rrr)
             res <- find_minP_res(rrr)
             res[["least_p_value"]]
@@ -899,12 +923,12 @@ get_info_most_significant_rna <-
           rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
             df_o_new <- df_o[idx.mat[,ii],]
             df_o_new$patient_id <- patient_ids
-            
-            rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+            #TODO:CHANGE BACK TO MCLAPPLY
+            #rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
+            rrr <- lapply(seq_along(quantiles),function(i){
               q <- quantiles[i]
               df <- generate_surv_df(df_o_new, patient_ids, exp, q)
-              
-              two_gene_cox(q, quantiles2, df_o_new, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
+              two_gene_cox(q, quantiles2, df_o_new, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores,heatmap_df = heatmap_df)
             })
             rrr <- Filter(Negate(is.null), rrr)
             res <- find_minP_res(rrr)
@@ -934,16 +958,14 @@ get_info_most_significant_rna <-
       return(NULL)
     }else{
       
-      heatmap_df <- update_p_values(target_df = heatmap_df,index_df = heatmap_mapping_df)
-      heatmap_annotation_df <- update_p_values(target_df = heatmap_annotation_df,index_df = heatmap_mapping_df)
-      View(heatmap_annotation_df)
+      heatmap_df$p_value <- update_p_values(target_df = heatmap_df,index_df = heatmap_mapping_df)
+      heatmap_df$annotation <- update_p_values(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "annotation")
       results <- list(
         df = df_most_significant,
         cutoff = cutoff_most_significant
         ,hr = least_hr
         ,p_df = p_df
         ,heatmap_df = heatmap_df
-        ,heatmap_annotation_df = heatmap_annotation_df
         ,p.adj = p_adj
       )
       return(results)
