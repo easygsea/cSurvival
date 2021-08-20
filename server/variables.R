@@ -67,10 +67,10 @@ input_mode_names <- c(
   ,"Mean Z-score" = "manual"
   ,"Median-centered RRPA value" = "rrpa"
   ,"Normalized protein expression" = "pro"
-  ,"Gene effect (CERES)" = "DepMap-CRISPR"
+  ,"Gene effect (Chronos)" = "DepMap-CRISPR"
   ,"Gene effect (DEMETER2)" = "DepMap-RNAi"
   ,"Cell viability" = "DepMap-Drug"
-  ,"Gene effect (CERES)" = "crispr"
+  ,"Gene effect (Chronos)" = "crispr"
   ,"Gene effect (DEMETER2)" = "rnai"
   ,"Cell viability" = "drug"
   ,"Normalized expression" = "g"
@@ -222,7 +222,7 @@ cox_km_txt <- paste0("Select the method for analyzing and summarizing survival d
                      ,"additional density and box plots are provided for DepMap data analysis and visualization."
 )
 # padj_q_txt <- paste0("Improved Bonferroni-inequality-based adjustment for multiple testing arising from assessing a sequence of candidate thresholds with the minimum <i>P</i>-value method (Lausen and Schumacher, 1993)")
-padj_q_txt <- reactive({paste0("Adjustment based on ",rv$n_perm," permutations. Adjust # of permutations in advanced run parameters. More permutations increase statistical precision but need more run time.")})
+padj_q_txt <- reactive({paste0("Adjustment based on ",rv$n_perm," permutations. Adjust # of permutations in advanced run parameters. More permutations increase statistical precision but need longer run time.")})
 
 # ----- Miscellaneous ----
 # correction methods for pairwise comparisons
