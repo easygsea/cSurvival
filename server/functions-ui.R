@@ -802,16 +802,25 @@ assemble_percentile_plot <- function(quantile_df_list){
 
 #heatmap----
 pvalue_heatmap <- function(heatmap_df){
+  #prepare dat needed for plotly
   dat = heatmap_df
+  #annotation and hr columns are for texts on top of heatmap graph on hovertext
   dat$annotation = as.character(round(dat$annotation,2))
-  dat$annotation[is.na(dat$annotation)] <- "NA"
+  dat$hr = as.character(round(dat$hr,2))
+  #dat$annotation[is.na(dat$annotation)] <- "NA"
+  dat[is.na(dat)] <- "NA"
+  #p value and log p value columns are for plotly ploting and color scaling
   dat$p_value = round(dat$p_value,4)
+  #p value column is for texts on top of heatmap graph
   dat$log_p_value <- -log10(dat$p_value)
   dat$log_p_value[is.na(dat$log_p_value)] <- 0
+  #axis names:
+  x_axis_title = str_remove(rv[["title_1"]], fixed(" expression"))
+  y_axis_title = str_remove(rv[["title_2"]], fixed(" expression"))
   
   req(length(dat$log_p_value)>0)
   selected_color = col_scale
-  
+  #default color scale
   if(rv$tracking_heatmap_color != "default"){
     selected_color_no <- c(0, 0.16666666, 0.33333333333, 0.5, 0.66666666, 1)
     selected_color <- sequential_hcl(5, palette = rv$tracking_heatmap_color) %>% rev(.) %>% col2rgb()
@@ -819,22 +828,26 @@ pvalue_heatmap <- function(heatmap_df){
     selected_color <- c("rgb(255, 255, 255)", selected_color)
     selected_color <- lapply(1:length(selected_color), function(i) list(selected_color_no[i], selected_color[i]))
   }
-  fig <- plot_ly() %>%
+  fig <- plot_ly(hoverinfo = "text",hovertext = paste0("P value: ", '<b>',dat$annotation,'</b>',
+                                  "<br> Hazard Ratio: ", '<b>', dat$hr,'</b>',
+                                  "<br>", x_axis_title, " quantile: ", '<b>',dat$Q1,'%','</b>',
+                                  "<br>", y_axis_title, " quantile: ", '<b>',dat$Q2,'%','</b>'
+                                  )) %>%
     add_trace(data = dat, x = ~Q1, y = ~Q2, z = ~log_p_value, type = "heatmap",
               colorscale  = selected_color,zmax = 2,zmin=0, #max(dat$log_p_value)
               colorbar = list(
                 title = list(text="-log10(P)", side = "right")
                 ,len = 1.2
-              ),
-              text = ~annotation,
-              hovertemplate = paste('%{yaxis.title.text} quantile: <b>%{x}%</b> and %{yaxis.title.text} quantile: <b>%{y}%</b><br>',
-                                    'Corresponding P-value: <b>%{text}</b>','<extra></extra>'
               )
+              #text = ~annotation,
+              #hovertemplate = paste('%{yaxis.title.text} quantile: <b>%{x}%</b> and %{yaxis.title.text} quantile: <b>%{y}%</b><br>',
+              #                      'Corresponding P-value: <b>%{text}</b>','<extra></extra>'
+              #)
     )%>%
     layout(
       title = "Quantile P value Heatmap",
-      xaxis = list(title = str_remove(rv[["title_1"]], fixed(" expression")), showticklabels = T),
-      yaxis = list(title = str_remove(rv[["title_2"]], fixed(" expression")), showticklabels = T)
+      xaxis = list(title = x_axis_title, showticklabels = T),
+      yaxis = list(title = y_axis_title, showticklabels = T)
       # ,margin = list(l=200)
     )
   if(rv$tracking_heatmap_annotation){

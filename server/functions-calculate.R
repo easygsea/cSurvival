@@ -327,10 +327,10 @@ populate_quantile_df <- function(quantile_s, min, max, step, substitue_value = 1
   result$Q2 = result$Q2 * 100
   return(result)
 }
-#Helper function to update a heatmap dataframe's p_value column based on a index mapping df
-update_p_values <- function(target_df,index_df,column_name = "p_value"){
+#Helper function to update a heatmap dataframe's columns based on a index mapping df
+update_heatmap_column <- function(target_df,index_df,column_name = "p_value"){
   result <- target_df
-  result[[column_name]][index_df$index] <- as.numeric(index_df$p_value)
+  result[[column_name]][index_df$index] <- as.numeric(index_df[[column_name]])
   result <- result[[column_name]]
   return(result)
 }
@@ -453,13 +453,14 @@ two_gene_cox_inner <- function(
         # surv_diff <- surv_km(df_combined)
         km.stats <- survdiff(Surv(survival_days, censoring_status) ~ level, data = df_combined)
         p_diff <- 1 - pchisq(km.stats$chisq, length(km.stats$n) - 1)
+        hr <- NA
       }else if(p_kc == "cox"){
         if(gp == "All"){
           surv_diff <- surv_cox(df_combined,mode = 2)
+          hr <- NA
         }else{
           surv_diff <- surv_cox(df_combined,mode = 1)
           hr <- coef(summary(surv_diff))[,2]
-          View(coef(summary(surv_diff)))
         }
         p_diff <- summary(surv_diff)$logtest[3] #coefficients[,5]
       }
@@ -474,8 +475,10 @@ two_gene_cox_inner <- function(
       #start of heatmp section:
       heatmap_df_index = which((heatmap_df$Q1 == as.numeric(quantile_1))&(heatmap_df$Q2 == as.numeric(quantile_2)))
       #print(hr)
-      heatmap_new_row = c(round(heatmap_df_index,0),p_diff)#,hr)
-      names(heatmap_new_row) <- c("index","p_value")#,"hr")
+      #heatmap_new_row = c(round(heatmap_df_index,0),p_diff)#,hr)
+      #names(heatmap_new_row) <- c("index","p_value")#,"hr")
+      heatmap_new_row = c(round(heatmap_df_index,0),p_diff,hr)
+      names(heatmap_new_row) <- c("index","p_value","hr")
       results <- list(new_row,p_diff,df_combined,hr,names(q2),heatmap_new_row)
       names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant","heatmap_new_row")
     }else{
@@ -858,6 +861,9 @@ get_info_most_significant_rna <-
     #prepared index mapping df for heatmapdf
     heatmap_mapping_df <- lapply(rrr, function(x) {data.frame(x[["heatmap_new_rows"]])})
     heatmap_mapping_df <- rbindlist(heatmap_mapping_df)
+    #annotation column is for showing the texts on top of heatmap, so it needs a separate column
+    heatmap_mapping_df$annotation <- heatmap_mapping_df$p_value
+    
     res <- rrr[[pvals_i]]
     df_most_significant <- res[["df_most_significant"]]
     # assign levels in order
@@ -884,7 +890,6 @@ get_info_most_significant_rna <-
       p_df <- transform_p_df(p_df)
     }
     #TODO: fix heuristics function
-    #TODO: add hr right now it is something else
     # ---- PERMUTATION ----
     if(least_p < 0.1){
       if(num == 1){
@@ -958,8 +963,9 @@ get_info_most_significant_rna <-
       return(NULL)
     }else{
       
-      heatmap_df$p_value <- update_p_values(target_df = heatmap_df,index_df = heatmap_mapping_df)
-      heatmap_df$annotation <- update_p_values(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "annotation")
+      heatmap_df$p_value <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df)
+      heatmap_df$annotation <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "annotation")
+      heatmap_df$hr <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "hr")
       results <- list(
         df = df_most_significant,
         cutoff = cutoff_most_significant
