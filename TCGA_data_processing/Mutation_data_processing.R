@@ -13,7 +13,7 @@ library(org.Hs.eg.db)
 library(data.table)
 library(tidyverse)
 
-# avaialbel TCGA studies
+# available TCGA studies
 tcga_projects <- fread("https://tau.cmmt.ubc.ca/cSurvival/project_data/977/projects",header=F)
 tcga_projects <- tcga_projects[["V1"]]
 
