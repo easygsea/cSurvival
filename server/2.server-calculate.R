@@ -291,6 +291,7 @@ observeEvent(input$confirm,{
             n_col <- ncol(data) - 1
             if(n_col < 1){
               shinyalert(paste0("None of the entered genes in Analysis #",x," 1.3 are found in the expression dataset of the selected cancer project. Please revise your gene list entry in Analysis #",x,". Thank you."))
+              remove_modal_spinner()
             }else{
               rv[[paste0("title_",x)]] <- paste0("Manual collection of genes (input n=",length(rv[[paste0("gs_m_",x)]])
                                                  ,", detected n=",rv[[paste0("gs_m_len",x)]],")"
@@ -348,6 +349,7 @@ observeEvent(input$confirm,{
                   }
                   rv$try_error <- 1
                   shinyalert(paste0(txt,"."))
+                  remove_modal_spinner()
                 }
 
                 req(enough_error == 0)
@@ -471,6 +473,7 @@ observeEvent(input$confirm,{
               error <- error + 1
               ol <- nons[nons %in% syns]
               shinyalert(paste0("You have selected ",paste0(ol,collapse = ", ")," in both Mutated and Other in Analysis #",x,". Please refine your selection."))
+              remove_modal_spinner()
             }
 
             req(error == 0)
@@ -482,6 +485,7 @@ observeEvent(input$confirm,{
               shinyalert("Not enough data found for the selected endpoint and parameters")
               error_snv <- 1
               rv$try_error <- 1
+              remove_modal_spinner()
             }
             req(error_snv == 0)
             cutoff_x <- paste0("cutoff_",x)
@@ -567,6 +571,7 @@ observeEvent(input$confirm,{
         }
         if(error_gp > 0){
           shinyalert("The selected subgroup does not have enough samples for analysis")
+          remove_modal_spinner()
         }
         req(error_gp == 0)
         rv[["df_all"]] <- df_combined
