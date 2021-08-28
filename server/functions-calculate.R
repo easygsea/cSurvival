@@ -546,7 +546,7 @@ two_gene_heuristic <- function(
     a <- c(i-1,j); b <- c(i,j-1); c <- c(i+1,j); d <- c(i,j+1)
     comb <- list(a,b,c,d)
     # fix regression models via parallel processing
-    rrr_sr <- lapply(1:4,function(k){#mc.cores = nCores,
+    rrr_sr <- mclapply(1:4,mc.cores = nCores,function(k){
       ij_k <- comb[[k]]; i_k <- ij_k[1]; j_k <- ij_k[2]
       # skip if tracked
       if(df_tracking[i_k,j_k] == 1){
