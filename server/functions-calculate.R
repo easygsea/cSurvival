@@ -546,7 +546,7 @@ two_gene_heuristic <- function(
     a <- c(i-1,j); b <- c(i,j-1); c <- c(i+1,j); d <- c(i,j+1)
     comb <- list(a,b,c,d)
     # fix regression models via parallel processing
-    rrr_sr <- mclapply(1:4,mc.cores = nCores,function(k){
+    rrr_sr <- lapply(1:4,function(k){#mc.cores = nCores,
       ij_k <- comb[[k]]; i_k <- ij_k[1]; j_k <- ij_k[2]
       # skip if tracked
       if(df_tracking[i_k,j_k] == 1){
@@ -558,6 +558,7 @@ two_gene_heuristic <- function(
         results <- two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T)
         if(!is.null(results)){
           results[["cutoff_most_significant"]] <- names(c(q,q2))
+          names(ij_k) <- names(c(q,q2))
           ij_k <- list(ij_k); names(ij_k) <- "ij"
           results <- append(results,ij_k)
         }
