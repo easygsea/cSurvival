@@ -416,8 +416,11 @@ two_gene_cox_inner <- function(
   }
   
   # determine if meet min % samples requirement
-  n_min <- min(table(df_combined[["level"]]))
-  if(n_min < n_min_r){
+  n_mins <- table(df[["level"]]); n_min <- min(n_mins)
+  return_null <- F
+  if(cat == "All"){if(length(n_mins) < 4){return_null <- T}}
+  if(n_min < n_min_r){return_null <- T}
+  if(return_null){
     results <- NULL
   }else{
     # # test if there is significant difference between high and low level genes
@@ -680,13 +683,28 @@ get_info_most_significant_rna <-
     if(cat != ""){
       cat_s <- strsplit(cat,"_")[[1]]
       cat_si <- which(tolower(cat_s) %in% c("high","low"))
+      n_min_r <- perc_min * nrow(data)
+    }else{
+      n_min_r <- NULL
     }
-
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
       df <- assign_df_levels(df, data, cat, cat_si)
-      one_gene_cox(df,cat,q,depmap_T,p_kc)
+      if(!is.null(n_min_r)){
+        # determine if meet min % samples requirement
+        n_mins <- table(df[["level"]]); n_min <- min(n_mins)
+        return_null <- F
+        if(cat == "All"){if(length(n_mins) < 4){return_null <- T}}
+        if(n_min < n_min_r){return_null <- T}
+        if(return_null){
+          return(NULL)
+        }else{
+          one_gene_cox(df,cat,q,depmap_T,p_kc)
+        }
+      }else{
+        one_gene_cox(df,cat,q,depmap_T,p_kc)
+      }
     })
   }
 
