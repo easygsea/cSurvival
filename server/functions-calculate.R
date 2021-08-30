@@ -555,7 +555,7 @@ two_gene_heuristic <- function(
     rrr_sr <- mclapply(1:4,mc.cores = nCores,function(k){
       ij_k <- comb[[k]]; i_k <- ij_k[1]; j_k <- ij_k[2]
       # skip if tracked
-      if(df_tracking[i_k,j_k] == 1){
+      if(df_tracking[j_k,i_k] == 1){
         return(NULL)
       }else{
         # fit cox regression
@@ -573,7 +573,7 @@ two_gene_heuristic <- function(
     })
     # assign 1 to tracked quantile combination
     ijs <- unlist(comb)
-    df_tracking[ijs[1:4],ijs[5:8]] <- 1
+    df_tracking[ijs[2],ijs[1]] <- 1; df_tracking[ijs[4],ijs[3]] <- 1; df_tracking[ijs[6],ijs[5]] <- 1; df_tracking[ijs[8],ijs[7]] <- 1
     # the new P, if any
     rrr_sr <- Filter(Negate(is.null), rrr_sr)
     if(length(rrr_sr)>0){
