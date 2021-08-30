@@ -454,9 +454,9 @@ two_gene_cox_inner <- function(
   }
 
   # determine if meet min % samples requirement
-  n_mins <- table(df[["level"]]); n_min <- min(n_mins)
+  n_mins <- table(df_combined[["level"]]); n_min <- min(n_mins)
   return_null <- F
-  # if(gp == "All"){if(length(n_mins) < 4){return_null <- T}}
+  if(gp == "All"){if(length(n_mins) < 4){return_null <- T}}
   if(n_min < n_min_r){return_null <- T}
   if(return_null){
     results <- NULL
