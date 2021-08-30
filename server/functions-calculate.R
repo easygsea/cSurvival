@@ -454,8 +454,11 @@ two_gene_cox_inner <- function(
   }
   
   # determine if meet min % samples requirement
-  n_min <- min(table(df_combined[["level"]]))
-  if(n_min < n_min_r){
+  n_mins <- table(df[["level"]]); n_min <- min(n_mins)
+  return_null <- F
+  # if(gp == "All"){if(length(n_mins) < 4){return_null <- T}}
+  if(n_min < n_min_r){return_null <- T}
+  if(return_null){
     results <- NULL
   }else{
     # # test if there is significant difference between high and low level genes
@@ -584,6 +587,9 @@ two_gene_heuristic <- function(
   
   # start from the median quantile
   i <- floor(i_len/2); q <- quantiles[i]
+  # if not enough data, skip and render users an error msg
+  if(q == 0 | length(unique(quantiles2))==1){return(NULL);next;}
+  # proceed only if enough data
   df <- generate_surv_df(df_o, patient_ids, exp, q)
   
   # mark initial iterated points
@@ -592,7 +598,10 @@ two_gene_heuristic <- function(
   # loop quantiles2 using q
   rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores,heatmap_df = heatmap_df)
   # anchor the optimized start point of heuristic searching
-  q2 <- rrr2[["cutoff_most_significant"]][2]; j <- which(names(quantiles2) == q2)
+  q2 <- rrr2[["cutoff_most_significant"]][2]
+  # if not enough data, skip and render users an error msg
+  if(is.null(q2)){return(NULL);next;}
+  j <- which(names(quantiles2) == q2)
   names(j) <- q2; q2 <- quantiles2[j]
   rrr2[["cutoff_most_significant"]][1] <- names(q)
   init_min_p <- rrr2[["least_p_value"]]
@@ -621,6 +630,7 @@ two_gene_heuristic <- function(
         results <- two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, heatmap_df = heatmap_df)
         if(!is.null(results)){
           results[["cutoff_most_significant"]] <- names(c(q,q2))
+          names(ij_k) <- names(c(q,q2))
           ij_k <- list(ij_k); names(ij_k) <- "ij"
           results <- append(results,ij_k)#,heatmap_info)
         }
@@ -897,13 +907,28 @@ get_info_most_significant_rna <-
     if(cat != ""){
       cat_s <- strsplit(cat,"_")[[1]]
       cat_si <- which(tolower(cat_s) %in% c("high","low"))
+      n_min_r <- perc_min * nrow(data)
+    }else{
+      n_min_r <- NULL
     }
-
     rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       q <- quantiles[i]
       df <- generate_surv_df(df_o, patient_ids, exp, q)
       df <- assign_df_levels(df, data, cat, cat_si)
-      one_gene_cox(df,cat,q,depmap_T,p_kc)
+      if(!is.null(n_min_r)){
+        # determine if meet min % samples requirement
+        n_mins <- table(df[["level"]]); n_min <- min(n_mins)
+        return_null <- F
+        if(cat == "All"){if(length(n_mins) < 4){return_null <- T}}
+        if(n_min < n_min_r){return_null <- T}
+        if(return_null){
+          return(NULL)
+        }else{
+          one_gene_cox(df,cat,q,depmap_T,p_kc)
+        }
+      }else{
+        one_gene_cox(df,cat,q,depmap_T,p_kc)
+      }
     })
   }
 
