@@ -511,3 +511,32 @@ rm(df_rnai)
 
 
 
+cutoffs = list(c("45%", "50%"), c("45%", "60%"))
+
+
+
+cutoffs <- sapply(cutoffs, function(x) {
+  #substituting the values using gsub()
+  res <- gsub('%','',x)
+  res <- list(as.numeric(res))
+  res <- data.frame(res)
+}
+)
+cutoffs <- do.call("rbind",cutoffs)
+cutoffs <- data.frame(cutoffs)
+rownames(cutoffs) <- NULL
+colnames(cutoffs) <- c("Q1", "Q2")
+replace = c(999,999)
+
+cutoffs$p_value = replace
+
+
+df = data.frame(Q1 = c(45,45,50), Q2 = c(50,60,70), p_value = c(1,2,3))
+
+
+C <- merge(df, cutoffs, by = c("Q1", "Q2"),all.x = TRUE)
+
+C$p_value.x <- ifelse(is.na(C$p_value.x), C$p_value.x, C$p_value.x)
+C$p_value.y <- NULL
+names(C)[3] <- "three"
+
