@@ -535,7 +535,10 @@ two_gene_heuristic <- function(
   rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
   
   # anchor the optimized start point of heuristic searching
-  q2 <- rrr2[["cutoff_most_significant"]][2]; j <- which(names(quantiles2) == q2)
+  q2 <- rrr2[["cutoff_most_significant"]][2]
+  # if not enough data, skip and render users an error msg
+  if(is.null(q2)){return(NULL);next;}
+  j <- which(names(quantiles2) == q2)
   names(j) <- q2; q2 <- quantiles2[j]
   rrr2[["cutoff_most_significant"]][1] <- names(q)
   init_min_p <- rrr2[["least_p_value"]]
