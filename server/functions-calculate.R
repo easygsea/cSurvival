@@ -509,9 +509,8 @@ two_gene_cox_inner <- function(
 two_gene_cox <- function(
   q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, new_row_T=T,heatmap_df
 ){
-  #TODO CHANGE BACK TO mclapply
-  #rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
-  rrr2 <- lapply(seq_along(quantiles2),function(j){
+  rrr2 <- mclapply(seq_along(quantiles2),mc.cores = nCores,function(j){
+  #rrr2 <- lapply(seq_along(quantiles2),function(j){
     q2 <- quantiles2[j]
     two_gene_cox_inner(q, q2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T,heatmap_df = heatmap_df)
   })
@@ -583,7 +582,6 @@ two_gene_heuristic <- function(
   df_tracking <- matrix(NA, i_len, j_len)
   colnames(df_tracking) <- 1:i_len#names(quantiles2)
   rownames(df_tracking) <- 1:j_len#names(quantiles)
-  update_tracker <- create_tracker(heatmap_df)
 
   # start from the median quantile
   i <- floor(i_len/2); q <- quantiles[i]
@@ -605,7 +603,8 @@ two_gene_heuristic <- function(
   names(j) <- q2; q2 <- quantiles2[j]
   rrr2[["cutoff_most_significant"]][1] <- names(q)
   init_min_p <- rrr2[["least_p_value"]]
-  View(rrr2)
+  
+  update_tracker <- rrr2[["heatmap_new_rows"]]
   # start surrounding searching
   final_min_p <- init_min_p
   while(i > 1 & i < i_len & j > 1 & j < j_len){
@@ -613,12 +612,9 @@ two_gene_heuristic <- function(
     names(j) <- names(quantiles2[j])
     a <- c(i-1,j); b <- c(i,j-1); c <- c(i+1,j); d <- c(i,j+1)
     comb <- list(a,b,c,d)
-    if(include_tracking){
-      print(comb)
-    }
     # fix regression models via parallel processing
-    #rrr_sr <- mclapply(1:4,mc.cores = nCores,function(k){
-    rrr_sr <- lapply(1:4,function(k){
+    rrr_sr <- mclapply(1:4,mc.cores = nCores,function(k){
+    #rrr_sr <- lapply(1:4,function(k){
       ij_k <- comb[[k]]; i_k <- ij_k[1]; j_k <- ij_k[2]
       # skip if tracked
       if(!is.na(df_tracking[j_k,i_k])){
@@ -637,23 +633,16 @@ two_gene_heuristic <- function(
         return(results)
       }
     })
-
-    if(include_tracking){
-      View(df_tracking)
-    }
     # the new P, if any
     rrr_sr <- Filter(Negate(is.null), rrr_sr)
 
     # size of rrr_sr may vary so it is best to update values here
     # assign 1 to tracked quantile combination
-    View(rrr_sr)
     #create a cutoffs df in order to replace cell values in update_tracker
-
     heatmap_new_rows <- lapply(rrr_sr, function(x) {data.frame(t(data.frame(x[["heatmap_new_row"]])))})
     heatmap_new_rows <- do.call("rbind", heatmap_new_rows)
-
-    #heatmap_new_rows <- do.call("rbind",heatmap_new_rows)
-    print(heatmap_new_rows)
+    rownames(heatmap_new_rows) <- NULL
+    update_tracker <- rbind(update_tracker,heatmap_new_rows)
 
     ijs <- unlist(comb)
     df_tracking[ijs[2],ijs[1]] <- 1; df_tracking[ijs[4],ijs[3]] <- 1; df_tracking[ijs[6],ijs[5]] <- 1; df_tracking[ijs[8],ijs[7]] <- 1
@@ -884,7 +873,6 @@ get_info_most_significant_rna <-
     # ---- TWO GENES exhaustive ----
 
     if(search_mode == "exhaustive"){
-      #TODO: CHANGE BACK
       rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
       #rrr <- lapply(seq_along(quantiles),function(i){
         q <- quantiles[i]
@@ -894,12 +882,13 @@ get_info_most_significant_rna <-
       })
 
     # ---- TWO GENES heuristic ----
+      #because we developed this algorithm, so the heatmap update mechanism will be a little different
     }else if(search_mode == "heuristic"){
       rrr <- two_gene_heuristic(quantiles, quantiles2,
                          df_o, patient_ids, exp,
                          df_o2, patient_ids2, exp2
                          ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores, heatmap_df = heatmap_df, include_tracking = TRUE)
-      df_tracking <- rrr[[2]]
+      heatmap_mapping_df <- rrr[[2]]
       rrr <- rrr[[1]]
     }
   # ---- ONE GENE ----
@@ -938,9 +927,11 @@ get_info_most_significant_rna <-
     pvals <- sapply(rrr, function(x) x[["least_p_value"]])
     pvals_i <- which.min(pvals)[[1]]
     #prepared index mapping df for heatmapdf
-    heatmap_mapping_df <- lapply(rrr, function(x) {data.frame(x[["heatmap_new_rows"]])})
-    heatmap_mapping_df <- rbindlist(heatmap_mapping_df)
-
+    if(search_mode == "exhaustive"){
+      heatmap_mapping_df <- lapply(rrr, function(x) {data.frame(x[["heatmap_new_rows"]])})
+      heatmap_mapping_df <- rbindlist(heatmap_mapping_df)
+    }
+    
     res <- rrr[[pvals_i]]
     df_most_significant <- res[["df_most_significant"]]
     # assign levels in order
@@ -1004,7 +995,6 @@ get_info_most_significant_rna <-
           rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
             df_o_new <- df_o[idx.mat[,ii],]
             df_o_new$patient_id <- patient_ids
-            #TODO:CHANGE BACK TO MCLAPPLY
             rrr <- mclapply(seq_along(quantiles),mc.cores = nCores,function(i){
             #rrr <- lapply(seq_along(quantiles),function(i){
               q <- quantiles[i]
@@ -1048,8 +1038,6 @@ get_info_most_significant_rna <-
       heatmap_df$p_value <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df)
       heatmap_df$annotation <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "annotation")
       heatmap_df$hr <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "hr")
-
-
       results <- list(
         df = df_most_significant,
         cutoff = cutoff_most_significant

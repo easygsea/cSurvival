@@ -451,7 +451,7 @@ name_project_choices <- function(overlapped_parameter){
 #======================================================================#
 # format p values
 format_p <- function(p, max = 0.0001){
-  if(!is.numeric(p)){
+  if(is.na(p)){
     NA
   }else{
     if(p < max){
