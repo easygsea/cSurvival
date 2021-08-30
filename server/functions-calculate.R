@@ -992,6 +992,7 @@ get_info_most_significant_rna <-
             list(res[["least_p_value"]],heatmap_new_rows)
           })
         }else if(search_mode == "exhaustive"){
+          #TODO: optimize!
           rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
             df_o_new <- df_o[idx.mat[,ii],]
             df_o_new$patient_id <- patient_ids

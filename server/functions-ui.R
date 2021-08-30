@@ -805,7 +805,7 @@ pvalue_heatmap <- function(heatmap_df){
   #prepare dat needed for plotly
   dat = heatmap_df
   #annotation and hr columns are for texts on top of heatmap graph on hovertext
-  dat$annotation = as.character(lapply(dat$annotation,function(x){format_p(x)}))
+  dat$annotation = as.character(lapply(dat$annotation,function(x){format_heatmap_p(x)}))
   #dat$annotation = as.character(round(dat$annotation,2))
   dat$hr = as.character(round(dat$hr,2))
   #dat$annotation[is.na(dat$annotation)] <- "NA"

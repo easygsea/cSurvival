@@ -461,3 +461,15 @@ format_p <- function(p, max = 0.0001){
     }
   }
 }
+# format heatmap p values
+format_heatmap_p <- function(p, max = 0.0001){
+  if(is.na(p)){
+    NA
+  }else{
+    if(p < max){
+      format(p, scientific = T, digits = 2)
+    }else{
+      format(p, scientific = F, digits = 2)
+    }
+  }
+}
