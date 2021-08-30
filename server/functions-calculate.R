@@ -621,7 +621,7 @@ two_gene_heuristic <- function(
     rrr_sr <- lapply(1:4,function(k){
       ij_k <- comb[[k]]; i_k <- ij_k[1]; j_k <- ij_k[2]
       # skip if tracked
-      if(is.na(df_tracking[i_k,j_k])){
+      if(!is.na(df_tracking[i_k,j_k])){
         return(NULL)
       }else{
         # fit cox regression
