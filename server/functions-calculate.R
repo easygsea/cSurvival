@@ -521,8 +521,8 @@ two_gene_heuristic <- function(
   # create a tracking dataframe
   i_len <- length(quantiles); j_len <- length(quantiles2)
   df_tracking <- matrix(0, i_len, j_len)
-  rownames(df_tracking) <- 1:i_len#names(quantiles2)
-  colnames(df_tracking) <- 1:j_len#names(quantiles)
+  colnames(df_tracking) <- 1:i_len#names(quantiles2)
+  rownames(df_tracking) <- 1:j_len#names(quantiles)
   
   # start from the median quantile
   i <- floor(i_len/2); q <- quantiles[i]
@@ -532,7 +532,7 @@ two_gene_heuristic <- function(
   df <- generate_surv_df(df_o, patient_ids, exp, q)
   
   # mark initial iterated points
-  df_tracking[i,] <- 1
+  df_tracking[,i] <- 1
   
   # loop quantiles2 using q
   rrr2 <- two_gene_cox(q, quantiles2, df_o2, patient_ids2, exp2, df, gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores)
