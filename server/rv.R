@@ -7,7 +7,7 @@ rv <- reactiveValues(
   flagged = "y", min_p_kc = "km",
   risk_gp = "All", risk_gpr = "All", min_gp_size = 10, risk_gps = "All",
   #TODO: CHANGE BACK TO 100
-  n_perm = 10, search_mode = "heuristic",#exhaustive
+  n_perm = 100, search_mode = "heuristic",#exhaustive
   
   projectStatus="none", project="", max_project_n=1, try_error=0
   ,tcga=T,tcgar=T,target=T,targetr=T,depmap=F,depmapr=F
