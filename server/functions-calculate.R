@@ -485,11 +485,11 @@ two_gene_cox_inner <- function(
     }
 
     if(!is.na(p_diff)){
-      # # #append current p value to the p value df
-      new_row = c(p_diff,gsub("%$","",names(q2)),q2,NA)
-      #TODO: optimize!
-      quantile_1  = unlist(strsplit(names(q),split = '%',fixed=T))
-      quantile_2  = unlist(strsplit(names(q2),split = '%',fixed=T))
+      # # # #append current p value to the p value df
+      # new_row = c(p_diff,gsub("%$","",names(q2)),q2,NA)
+      #TODO: optimize! (Jean fixed on Aug 31)
+      quantile_1  = gsub("%$","",names(q))
+      quantile_2  = gsub("%$","",names(q2))
       #start of heatmp section:
       heatmap_df_index = which((heatmap_df$Q1 == as.numeric(quantile_1))&(heatmap_df$Q2 == as.numeric(quantile_2)))
       #print(hr)
@@ -497,8 +497,8 @@ two_gene_cox_inner <- function(
       #names(heatmap_new_row) <- c("index","p_value")#,"hr")
       heatmap_new_row = c(round(heatmap_df_index,0),p_diff,hr)
       names(heatmap_new_row) <- c("index","p_value","hr")
-      results <- list(new_row,p_diff,df_combined,hr,names(q2),heatmap_new_row)
-      names(results) <- c("new_row","least_p_value","df_most_significant","least_hr","cutoff_most_significant","heatmap_new_row")
+      results <- list(p_diff,df_combined,hr,names(q2),heatmap_new_row)#new_row,
+      names(results) <- c("least_p_value","df_most_significant","least_hr","cutoff_most_significant","heatmap_new_row")#"new_row",
     }else{
       results <- NULL
     }
@@ -519,13 +519,13 @@ two_gene_cox <- function(
   if(length(rrr2)<1){
     return(NULL)
   }else{
-    # P tracking record on variable 2 j
-    p_df2 <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["new_row"]])))})
-    p_df2 <- try(transform_p_df(p_df2))
-    # system(sprintf('echo "p_df2: %s hihi\n"', head(p_df2)))
-    if(inherits(p_df2, "try-error")){
-      return(NULL)
-    }else{
+    # # P tracking record on variable 2 j
+    # p_df2 <- lapply(rrr2, function(x) {data.frame(t(data.frame(x[["new_row"]])))})
+    # p_df2 <- try(transform_p_df(p_df2))
+    # # system(sprintf('echo "p_df2: %s hihi\n"', head(p_df2)))
+    # if(inherits(p_df2, "try-error")){
+    #   return(NULL)
+    # }else{
       ## Determine the min-P point at percentile i in variable 1
       # Find the minimum P-value
       res <- find_minP_res(rrr2)
@@ -542,14 +542,14 @@ two_gene_cox <- function(
         return(NULL)
       }else{
         if(new_row_T){
-          new_row1 = c(least_p_value0,gsub("%$","",names(q)),q,NA)
+          # new_row1 = c(least_p_value0,gsub("%$","",names(q)),q,NA)
           results <- list(
-            new_row = new_row1,
+            # new_row = new_row1,
             least_p_value = least_p_value0,
             df_most_significant = df_most_significant0,
             least_hr = NA,
             cutoff_most_significant = c(names(q),cutoff_most_significant0)
-            ,p_df = p_df2
+            # ,p_df = p_df2
             ,heatmap_new_rows = heatmap_new_rows
           )
         }else{
@@ -558,14 +558,14 @@ two_gene_cox <- function(
             df_most_significant = df_most_significant0,
             least_hr = NA,
             cutoff_most_significant = c(names(q),cutoff_most_significant0)
-            ,p_df = p_df2
+            # ,p_df = p_df2
             #not add new lines
             #,heatmap_new_rows = heatmap_new_rows
           )
         }
         return(results)
       }
-    }
+    # }
   }
 }
 
@@ -603,7 +603,7 @@ two_gene_heuristic <- function(
   names(j) <- q2; q2 <- quantiles2[j]
   rrr2[["cutoff_most_significant"]][1] <- names(q)
   init_min_p <- rrr2[["least_p_value"]]
-  
+
   update_tracker <- rrr2[["heatmap_new_rows"]]
   # start surrounding searching
   final_min_p <- init_min_p
@@ -931,7 +931,7 @@ get_info_most_significant_rna <-
       heatmap_mapping_df <- lapply(rrr, function(x) {data.frame(x[["heatmap_new_rows"]])})
       heatmap_mapping_df <- rbindlist(heatmap_mapping_df)
     }
-    
+
     res <- rrr[[pvals_i]]
     df_most_significant <- res[["df_most_significant"]]
     # assign levels in order
@@ -949,10 +949,10 @@ get_info_most_significant_rna <-
 
     #Transform the p_df a little bit to make it work with the ggplot
     if(num > 1){
-      p_df1 <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
-      p_df1 <- transform_p_df(p_df1)
-      p_df2 <- res[["p_df"]]
-      p_df <- list(p_df1,p_df2)
+      # p_df1 <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
+      # p_df1 <- transform_p_df(p_df1)
+      # p_df2 <- res[["p_df"]]
+      p_df <- NULL# list(p_df1,p_df2)
     }else{
       p_df <- lapply(rrr, function(x) {data.frame(t(data.frame(x[[1]])))})
       p_df <- transform_p_df(p_df)
