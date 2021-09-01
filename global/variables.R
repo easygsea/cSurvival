@@ -1,5 +1,7 @@
 d_red = "#EA5455"
 bcols = c("#f4f4f4","#f5f0ed") # colors for parameter wellpanels EFF5FA EAEDF3
+#the maximum -log10 value percentile heatmaps will apply as darkest color
+heatmap_maximum_thershold = 3
 
 # ------ available projects -----
 pro_dir <- paste0(getwd(),"/www/project_data/")

@@ -806,15 +806,16 @@ pvalue_heatmap <- function(heatmap_df){
   dat = heatmap_df
   #annotation and hr columns are for texts on top of heatmap graph on hovertext
   dat$annotation = as.character(lapply(dat$annotation,function(x){format_heatmap_p(x)}))
-  #dat$annotation = as.character(round(dat$annotation,2))
   dat$hr = as.character(round(dat$hr,2))
-  #dat$annotation[is.na(dat$annotation)] <- "NA"
   dat[is.na(dat)] <- "NA"
   #p value and log p value columns are for plotly ploting and color scaling
   dat$p_value = round(dat$p_value,4)
   #p value column is for texts on top of heatmap graph
   dat$log_p_value <- -log10(dat$p_value)
   dat$log_p_value[is.na(dat$log_p_value)] <- 0
+  #sometimes this value could become Inf, and thus make the heatmap's distribution unclear,
+  #so add this line to replace all exceeding-threshold values as threshold values
+  dat$log_p_value[dat$log_p_value > heatmap_maximum_thershold] <- heatmap_maximum_thershold
   #axis names:
   x_axis_title = str_remove(rv[["title_1"]], fixed(" expression"))
   y_axis_title = str_remove(rv[["title_2"]], fixed(" expression"))
@@ -835,7 +836,7 @@ pvalue_heatmap <- function(heatmap_df){
                                   "<br>", y_axis_title, " quantile: ", '<b>',dat$Q2,'%','</b>'
                                   )) %>%
     add_trace(data = dat, x = ~Q1, y = ~Q2, z = ~log_p_value, type = "heatmap",
-              colorscale  = selected_color,zmax = 2,zmin=0, #max(dat$log_p_value)
+              colorscale  = selected_color,zmax = heatmap_maximum_thershold,zmin=0, #max(dat$log_p_value)
               colorbar = list(
                 title = list(text="-log10(P)", side = "right")
                 ,len = 1.2
