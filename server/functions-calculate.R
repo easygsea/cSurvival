@@ -988,8 +988,9 @@ get_info_most_significant_rna <-
                                       ,gp, gps, other_gp, n_min_r, p_kc, depmap_T, nCores,heatmap_df = heatmap_df)
             rrr <- Filter(Negate(is.null), rrr)
             res <- find_minP_res(rrr)
-            heatmap_new_rows <- assemble_new_rows(rrr)
-            list(res[["least_p_value"]],heatmap_new_rows)
+            res[["least_p_value"]]
+            # heatmap_new_rows <- assemble_new_rows(rrr)
+            # list(res[["least_p_value"]],heatmap_new_rows)
           })
         }else if(search_mode == "exhaustive"){
           #TODO: optimize!
@@ -1017,7 +1018,7 @@ get_info_most_significant_rna <-
         # index_df <- do.call("rbind", index_df)
 
         #Find all the P-value
-        pvals_perm <- unlist(lapply(rrr_perm, `[[`, 1))# unlist(rrr_perm)
+        pvals_perm <- unlist(rrr_perm)# unlist(lapply(rrr_perm, `[[`, 1))
         p_adj <- sum(pvals_perm <= least_p) / n_perm
         least_error <- 1/n_perm
         if(p_adj < least_error) p_adj <- paste0("< ",least_error)
