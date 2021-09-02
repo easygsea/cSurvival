@@ -927,7 +927,7 @@ get_info_most_significant_rna <-
     pvals <- sapply(rrr, function(x) x[["least_p_value"]])
     pvals_i <- which.min(pvals)[[1]]
     #prepared index mapping df for heatmapdf
-    if(search_mode == "exhaustive"){
+    if(search_mode == "exhaustive" & num > 1){
       heatmap_mapping_df <- lapply(rrr, function(x) {data.frame(x[["heatmap_new_rows"]])})
       heatmap_mapping_df <- rbindlist(heatmap_mapping_df)
     }
@@ -1033,12 +1033,16 @@ get_info_most_significant_rna <-
     if(is.null(df_most_significant)){
       return(NULL)
     }else{
-      #update the original heatmap_df here
-      #annotation column is for showing the texts on top of heatmap, so it needs a separate column
-      heatmap_mapping_df$annotation <- heatmap_mapping_df$p_value
-      heatmap_df$p_value <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df)
-      heatmap_df$annotation <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "annotation")
-      heatmap_df$hr <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "hr")
+      if(num > 1){
+        #update the original heatmap_df here
+        #annotation column is for showing the texts on top of heatmap, so it needs a separate column
+        heatmap_mapping_df$annotation <- heatmap_mapping_df$p_value
+        heatmap_df$p_value <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df)
+        heatmap_df$annotation <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "annotation")
+        heatmap_df$hr <- update_heatmap_column(target_df = heatmap_df,index_df = heatmap_mapping_df, column_name = "hr")
+      }else{
+        heatmap_mapping_df <- NULL
+      }
       results <- list(
         df = df_most_significant,
         cutoff = cutoff_most_significant
