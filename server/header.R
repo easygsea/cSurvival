@@ -123,7 +123,7 @@ observeEvent(input$db_download,{
               ,tags$li(HTML(paste0("<b>Gene expression (RNA-seq, TPM)</b>: ",dlink(paste0(db_dir,"DepMap/df_gene.csv"),paste0("DepMap_expression.csv")))))
               ,tags$li(HTML(paste0("<b>Simple nucleotide variation (SNV)</b>: ",dlink(paste0(db_dir,"DepMap/df_snv_class.csv"),paste0("DepMap_mutation.csv")))))
               ,tags$li(HTML(paste0("<b>Copy number variation (CNV)</b>: ",dlink(paste0(db_dir,"DepMap/df_cnv.csv"),paste0("DepMap_copy_number.csv")))))
-              ,tags$li(HTML(paste0("<b>Protemoics</b>: ",dlink(paste0(db_dir,"DepMap/df_proteomic.csv"),paste0("DepMap_proteomics.csv")))))
+              ,tags$li(HTML(paste0("<b>Proteomics</b>: ",dlink(paste0(db_dir,"DepMap/df_proteomic.csv"),paste0("DepMap_proteomics.csv")))))
             )
           )
           ,tabPanel(
