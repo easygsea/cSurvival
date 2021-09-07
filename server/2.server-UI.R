@@ -165,7 +165,7 @@ output$ui_results <- renderUI({
                 6,
               ),
               column(
-                6,align="center",id="div_annot_cells",#style="z-index:1000",
+                5,align="center",id="div_annot_cells",#style="z-index:1000",
                 selectizeInput(
                   "annot_cells"
                   ,HTML(paste0("(Optional) highlight cell line(s) in box plot:",add_help("annot_cells_q")))
@@ -223,6 +223,17 @@ output$ui_results <- renderUI({
                 ,div(
                   align = "left",
                   style = "position: absolute; right: 1.5em; top: -3em;",
+                  div(
+                    id = "gear_btn_box",
+                    style="display: inline-block;vertical-align:top;",
+                    dropdown(
+                      uiOutput("plot_gear_box"),
+                      circle = TRUE, status = "danger", style = "material-circle",
+                      size="sm", right = T,
+                      icon = icon("gear"), width = "300px",
+                      tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
+                    )
+                  ),
                   div(
                     id="download_btn_box",
                     style="display: inline-block;vertical-align:top;",
@@ -732,6 +743,11 @@ output$plot_gear_dens <- renderUI({
 })
 
 observeEvent(input$palette_dens,{req(!is.null(input$palette_dens));req(input$palette_dens!="");rv$palette <- input$palette_dens})
+
+# --------- 1a-iii. plot parameters for box -------------
+output$plot_gear_box <- renderUI({
+  
+})
 
 # --------- 1b-i. download plot -------------
 output$download_plot <- downloadHandler(
