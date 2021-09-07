@@ -693,8 +693,8 @@ single_plot <- function(quantile_df, index){
                              reversescale =TRUE
                            ),
                            text = quantile_df$expression,
-                           name = '',mode = 'lines+markers', hovertemplate = paste(
-                             "P-value: %{y:.4f}<br>",
+                           name = '',mode = 'lines+markers', hovertemplate = paste0(
+                             "P-value: %{y:.8f}<br>",
                              "Quantile (in %): %{x:.0f}<br>",
                              "Expression: %{text:.3f}<br>"
                            )) %>%
