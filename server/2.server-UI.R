@@ -124,7 +124,7 @@ output$ui_results <- renderUI({
         direction = "horizontal"
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
-      ,if(surv_yn & typeof(rv[[paste0("df_",input$plot_type)]]) == "list" & !rv$depmapr){
+      ,if(surv_yn & typeof(rv[[paste0("df_",input$plot_type)]]) == "list" & !rv$depmapr & !rv$exp_iter_yyy){
         column(12,align="left",
           # survival analysis method
           radioGroupButtons(
@@ -964,14 +964,14 @@ output$ui_stats <- renderUI({
             #   )
             #   ,br()
             # ),
-            conditionalPanel(
-              'input.cox_km == "cox"',
-              # forest plot for single variable only
-              if(if_forest()){
+            # conditionalPanel(
+            #   'input.cox_km == "cox"',
+            #   # forest plot for single variable only
+              if(if_forest() & rv$cox_km == "cox"){
                 plotOutput("forest_plot",height = hf_plot)
               }
-            ),
-            div(
+            # )
+            ,div(
               align="left",
               verbatimTextOutput("ui_stats_details")
             )

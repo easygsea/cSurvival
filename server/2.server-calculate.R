@@ -685,8 +685,8 @@ observeEvent(input$confirm,{
     # })
 
     # update parameters
-    rv$exp_iter_yyy <- all(sapply(1:rv$variable_nr,function(x) exp_iter_yyy(x)))
-    rv$cox_km <- "km"
+    rv$exp_iter_yyy <- all(sapply(1:rv$variable_nr,function(x) exp_yyy(x) & exp_iter_yyy(x)))
+    if(rv$exp_iter_yyy){rv$cox_km <- rv$min_p_kc}else{rv$cox_km <- "km"}
     if(rv$tcga){rv$plot_sstype <- rv$plot_stype}
     else if(rv$target){rv$plot_sstype <- "Overall survival (OS)"}
     else if(rv$depmap){rv$plot_sstype <- dependency_names();rv$depmap_gener <- rv$depmap_gene}
