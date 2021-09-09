@@ -181,3 +181,5 @@ www/site.webmanifest
 .Rhistory
 
 www/project_data/TCGA-LUAD/df_gene_scale_bu.csv
+www/project_data/DepMap/df_metbl.csv
+www/project_data/DepMap/df_metbl_scale.csv

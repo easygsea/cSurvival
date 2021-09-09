@@ -1864,16 +1864,16 @@ observeEvent(list(rv$annot_cells_y,rv[["dens_df"]]),{
 # --------- 8. P-value tracking -------------
 #Percentile graph---
 output$ui_track <- renderUI({
-  
-  if((rv$variable_nr > 1) && (all(sapply(1:rv$variable_nr,function(x) exp_yyy(input_mode(x))))) && rv$exp_iter_yyy){
-    column(width = 12,
-           plotlyOutput("tracking_heatmap")
-           ,div(
-             align = "left",
-             style = "position: absolute; right: 7em; top: -3em;",
-             div(
-               id = "gear_btn_heatmap",
-               style="display: inline-block;vertical-align:top;",
+  withProgress(value = 1, message = "Generating heatmap...",{
+    if((rv$variable_nr > 1) && rv$exp_iter_yyy){
+      column(width = 12,
+             plotlyOutput("tracking_heatmap")
+             ,div(
+               align = "left",
+               style = "position: absolute; right: 7em; top: -3em;",
+               div(
+                 id = "gear_btn_heatmap",
+                 style="display: inline-block;vertical-align:top;",
                  dropdown(
                    uiOutput("tracking_heatmap_plot_gear"),
                    circle = TRUE, status = "danger", style = "material-circle",
@@ -1881,28 +1881,27 @@ output$ui_track <- renderUI({
                    icon = icon("gear"), width = "300px",
                    tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
                  )
+               )
              )
-           )
-           )
-  }
-  else{
-    if(length(rv$quantile_graph)>= 1){
-      plt_h <- 450 * length(rv$variable_nr)
-      
-      column(
-        #width = (12 / rv$variable_nr),
-        width = 12,
-        plotlyOutput("quantile_graph", height = paste0(plt_h,"px"))
-      )
-    }else{
-      column(
-        12,
-        p(style = "color:gray;", "Percentile tracking available for continuous variables only.")
       )
     }
-  }
-  
-
+    else{
+      if(length(rv$quantile_graph)>= 1){
+        plt_h <- 450 * length(rv$variable_nr)
+        
+        column(
+          #width = (12 / rv$variable_nr),
+          width = 12,
+          plotlyOutput("quantile_graph", height = paste0(plt_h,"px"))
+        )
+      }else{
+        column(
+          12,
+          p(style = "color:gray;", "Percentile tracking available for continuous variables only.")
+        )
+      }
+    }
+  })
 })
 
 

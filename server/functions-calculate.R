@@ -1062,6 +1062,7 @@ get_info_most_significant_rna <-
 # perform interaction survival analysis on continuous-categorical combinations
 cal_conti_cat_interaction <- function(x,gp_r,df_list){
   results <- get_info_most_significant_rna(rv[["dataF1"]], rv[["minF1"]], rv[["maxF1"]], rv[["stepF1"]], data2=rv[["dataF2"]], cat=gp_r)
+  if(is.null(results)){return(NULL);next;}
   rv[["padj_perm"]] <- results[["p.adj"]]
   if("p_df" %in% names(results)){
     rv[["quantile_graph"]][[1]] <- results[["p_df"]]
