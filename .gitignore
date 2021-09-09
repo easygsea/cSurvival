@@ -181,6 +181,7 @@ www/site.webmanifest
 .Rhistory
 
 www/project_data/TCGA-LUAD/df_gene_scale_bu.csv
+.Rproj.user
 www/project_data/DepMap/df_metbl.csv
 www/project_data/DepMap/df_metbl_scale.csv
 www/project_data/DepMap/DepMap-Metabolite.csv

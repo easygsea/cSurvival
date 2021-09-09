@@ -746,7 +746,17 @@ observeEvent(input$palette_dens,{req(!is.null(input$palette_dens));req(input$pal
 
 # --------- 1a-iii. plot parameters for box -------------
 output$plot_gear_box <- renderUI({
-  
+  fluidRow(
+    column(12, 
+           materialSwitch(inputId = "switch_boxplot_legend", 
+                          label = HTML(paste0("<b>Show Legend?</b>", add_help("switch_boxplot_legend_q"))),
+                          value = TRUE, status = "danger"),
+           bsTooltip("switch_boxplot_legend_q", 
+                     title = "If TRUE, show the legend for the box plot. If FALSE, hide the legend.", 
+                     placement = "top")
+           )
+  )
+
 })
 
 # --------- 1b-i. download plot -------------
@@ -1849,10 +1859,21 @@ output$dens_stats_plot <- renderPlotly({
     #   scale_shape_manual(values=c(8,16)) + scale_size_manual(values=c(3,1)) +
     #   labs(color = "", shape = "", size = "")
 
-
+    p <- p + theme(legend.position = rv$show_boxplot_legend)
     rv[["ggbox"]] <- p
     ggplotly(p,tooltip = c("Line","x","y"))
   })
+})
+
+# add or remove legend for boxplot
+observeEvent(input$switch_boxplot_legend, {
+  rv$switch_boxplot_legend <- input$switch_boxplot_legend
+  if (rv$switch_boxplot_legend) {
+    rv$show_boxplot_legend <- "right"
+  } else {
+    rv$show_boxplot_legend <- "none"
+  }
+  # print(rv$show_boxplot_legend)
 })
 
 # highlight cells

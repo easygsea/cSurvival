@@ -80,4 +80,6 @@ rv <- reactiveValues(
   ,violin_k=1.5 # no of s.d. to plot on violin
   ,violin_log_y=T
   ,violin_trim=T
+  
+  ,switch_boxplot_legend=T, show_boxplot_legend="right"
 )
