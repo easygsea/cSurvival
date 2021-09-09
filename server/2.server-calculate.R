@@ -448,7 +448,7 @@ observeEvent(input$confirm,{
               if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
                 cal_exp <- T; mut_exp_yyy <- T
                 df_list <- cal_conti_cat_interaction(x,gp_r,df_list)
-                if(is.null(df_list)){shinyalert("Not enough data found for the selected combination of genomic features")};remove_modal_spinner();req(!is.null(df_list))
+                if(is.null(df_list)){shinyalert(paste0("Not enough data for the selected combination of genomic features w/ the requirement of mininum ",rv$min_gp_size,"% samples in each risk subgroup"))};remove_modal_spinner();req(!is.null(df_list))
                 df <- df_list[[1]]; results <- df_list[[3]]; df_list <- df_list[[2]]
                 rv[["cutoff_1"]] <- paste0("<b>",results[["cutoff"]],"</b>")
                 rv[["cutoff_all"]] <- paste0("#1: ",rv[["cutoff_1"]],", #2: ",rv[["cutoff_2"]])
@@ -501,7 +501,7 @@ observeEvent(input$confirm,{
             if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
               cal_exp <- T; mut_exp_yyy <- T
               df_list <- cal_conti_cat_interaction(x,gp_r,df_list)
-              if(is.null(df_list)){shinyalert("Not enough data found for the selected combination of genomic features")};remove_modal_spinner();req(!is.null(df_list))
+              if(is.null(df_list)){shinyalert(paste0("Not enough data for the selected combination of genomic features w/ the requirement of mininum ",rv$min_gp_size,"% samples in each risk subgroup"))};remove_modal_spinner();req(!is.null(df_list))
               df <- df_list[[1]]; df_list <- df_list[[2]]
             }
           # ---------- 3D. survival analysis on CNVs ---------
@@ -523,7 +523,7 @@ observeEvent(input$confirm,{
             if(x == 2 & exp_yyy(input_mode(1)) & exp_iter_yyy(1)){
               cal_exp <- T; mut_exp_yyy <- T
               df_list <- cal_conti_cat_interaction(x,gp_r,df_list)
-              if(is.null(df_list)){shinyalert("Not enough data found for the selected combination of genomic features")};remove_modal_spinner();req(!is.null(df_list))
+              if(is.null(df_list)){shinyalert(paste0("Not enough data for the selected combination of genomic features w/ the requirement of mininum ",rv$min_gp_size,"% samples in each risk subgroup"))};remove_modal_spinner();req(!is.null(df_list))
               df <- df_list[[1]]; df_list <- df_list[[2]]
             }
           }
@@ -689,8 +689,8 @@ observeEvent(input$confirm,{
 
     # update parameters
     exp_iter_y <- sapply(1:rv$variable_nr,function(x) exp_yyy(input_mode(x)) & exp_iter_yyy(x))
-    rv$exp_iter_yyy <- all(exp_iter_y)
-    if(rv$exp_iter_yyy){rv$cox_km <- rv$min_p_kc}else{rv$cox_km <- "km"}
+    rv$exp_iter_yyy <- all(exp_iter_y); rv$exp_iter_yyy_any <- any(exp_iter_y)
+    if(rv$exp_iter_yyy_any){rv$cox_km <- rv$min_p_kc}else{rv$cox_km <- "km"}
     if(rv$tcga){rv$plot_sstype <- rv$plot_stype}
     else if(rv$target){rv$plot_sstype <- "Overall survival (OS)"}
     else if(rv$depmap){rv$plot_sstype <- dependency_names();rv$depmap_gener <- rv$depmap_gene}

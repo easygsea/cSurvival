@@ -124,7 +124,7 @@ output$ui_results <- renderUI({
         direction = "horizontal"
       )
       # ,tags$hr(style = "border-color: #F5DF4D;")
-      ,if(surv_yn & typeof(rv[[paste0("df_",input$plot_type)]]) == "list" & !rv$depmapr & !rv$exp_iter_yyy){
+      ,if(surv_yn & typeof(rv[[paste0("df_",input$plot_type)]]) == "list" & !rv$depmapr & !rv$exp_iter_yyy_any){
         column(12,align="left",
           # survival analysis method
           radioGroupButtons(
