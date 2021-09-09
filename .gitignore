@@ -183,3 +183,5 @@ www/site.webmanifest
 www/project_data/TCGA-LUAD/df_gene_scale_bu.csv
 www/project_data/DepMap/df_metbl.csv
 www/project_data/DepMap/df_metbl_scale.csv
+www/project_data/DepMap/DepMap-Metabolite.csv
+www/project_data/DepMap/DepMap-Metabolite_scale.csv
