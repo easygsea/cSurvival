@@ -30,7 +30,7 @@ head -n1 EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv|sed 's/\t/\n/
 awk -F '\t' 'FNR==NR {key[$2]=1}; FNR!=NR {if(!(key[$1])){print}}' all_bad.tsv df_gene.all > df_gene.all_good
 
 ## STEP2. TRANSPOSE GENE EXPRESSION TABLE, EXTRACT PATIENT IDS
-nohup awk -f tst.awk EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv | sed 's/"//g' | awk -F'\t' 'BEGIN {OFS = FS} {if($1 ~ /^TCGA/){split($1,a,"-"); $1=a[1]"-"a[2]"-"a[3]}; print $0}' > EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.t.tsv&
+nohup awk -f tst.awk EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv | sed 's/"//g' | sed 's/^gene/patient/' > EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.t.tsv&
 
 ## STEP3. EXTRACT PRIMARY TUMOR DATA (01; 01 06 for SKCM; 03 09 for LAML)
 ## filtered non-SKCM & non-LAML samples (01 solid primary tumors): https://tau.cmmt.ubc.ca/cSurvival/project_data/977/df_gene.all_good.non_skcmlaml_01
@@ -59,9 +59,9 @@ Rscript Gene_expression_data_processing.R
 # special process on SKCM, >70% are metastases
 Rscript Gene_expression_data_processing.R SKCM
 # remove duplicated data
-awk -F '\t' 'FNR==NR {key["patient_id"]=1; key[$2]=1}; FNR!=NR {if(!key[$1]){print}}' <(cat df_gene.all_good.non_skcmlaml_01dup df_gene.all_good.skcm_0106dup) EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.t.tsv > EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.t_nodup.tsv
+awk -F '\t' 'FNR==NR {key["patient_id"]=1; key[$1]=1}; FNR!=NR {if(key[$1]){print}}' <(awk -F '\t' 'FNR==NR {key["patient_id"]=1; key[$2]=1}; FNR!=NR {if(!key[$1]){print}}' <(cat df_gene.all_good.non_skcmlaml_01dup df_gene.all_good.skcm_0106dup) <(cat df_gene.all_good.non_skcmlaml_01 df_gene.all_good.skcm_0106 df_gene.all_good.laml_0309)|cut -d'-' -f1-3) EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.t.tsv > EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.t_nodup.tsv
 # add back geometric means
-cat EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.t_nodup.tsv EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.non_skcmlaml_01dup.tsv EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.skcm_0106dup.tsv | sed 's/^gene/patient/' > EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.t_dedup.tsv
+cat EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.t_nodup.tsv EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.non_skcmlaml_01dup.tsv EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.skcm_0106dup.tsv > EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.t_dedup.tsv
 
 ## STEP6. ASSIGN DATA BY STUDIES
 while read -r line; do awk -F '\t' 'FNR==NR {key["patient_id"]=1; key[$1]=1}; FNR!=NR {if(key[$1]){print}}' $line.testt EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.good.t_dedup.tsv | sed 's/\t/,/g' > ../TCGA-$line/df_gene.csv; done < projects
