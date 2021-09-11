@@ -2,7 +2,7 @@ library(stringr)
 library(hash)
 library(plumber)
 
-api_path = "/Applications/Codes/cSurvival_dev"
+api_path = "/home/cSurvival/ShinyApps"
 
 #Initialize a dictionary to record all possible get data combination----
 DepMap_dictionary <- hash()
