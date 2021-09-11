@@ -179,3 +179,7 @@ www/project_data/TCGA-LUAD/df_gene_scale_bu.csv
 www/project_data/DepMap/df_proteomic.csv
 www/project_data/DepMap/df_proteomic_scale.csv
 www/project_data/DepMap/df_snv_type.csv
+www/project_data/TCGA-LUAD/df_rrpa.csv
+www/project_data/TCGA-LUAD/df_met.csv
+www/project_data/TCGA-LUAD/df_met_scale.csv
+www/project_data/TCGA-LUAD/df_rrpa_scale.csv
