@@ -1,0 +1,3 @@
+element	intro
+db_1	Second, if category is gene/locus, select the type of molecular data: to study if cancer survival is associated with a gene's expression level, mutational status, copy number variation; a microRNA's expression; protein expression; or the methylation level of a DNA segment.
+div_g	Third, search and select your gene/locus of interest. If a gene or locus is not found, try its alias names. If still not found, it means its expression/alteration is barely detected in the selected cancer project. Or, if proteomics or RRPA, it has not been quantified. Or, if pan-cancer analysis, its expression/alteration is not detected in all selected projects.

@@ -1,0 +1,3 @@
+element	intro
+div_plot_gear	Click to adjust advanced visualization parameters.
+download_btn	Click to download the plot.

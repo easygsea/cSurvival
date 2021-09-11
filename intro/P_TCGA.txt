@@ -1,0 +1,3 @@
+element	intro
+div_tcga_stype	If TCGA, you will have the option to adjust and study the clinical outcome endpoint of interest. Warnings will be rendered according to the recommended use of curated clinical and survival outcome data by pan-cancer clinical study (Liu et al., <i>Cell</i>, 2018).
+tcga_stype_q	Click to learn detailed clinical endpoint recommendations.

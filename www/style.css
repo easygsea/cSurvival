@@ -1,0 +1,139 @@
+/* Stylesheet included 
+Main navy: #2D4059;
+Main red: #EA5455;
+Main biege: #DECDC3;
+Main grey: #E5E5E5
+*/
+/*------------------------------------------------------ F5FBEF f7f7ff EFF5FA*/
+/* body */
+.content-wrapper, .right-side {
+    background: linear-gradient(to bottom, #BDD5EA 0%, #fff 100%);
+    color: #2D4059;
+}
+
+/* logo */
+.skin-blue .main-header .logo {
+                      background-color: #2D4059;
+                      }
+
+/* logo when hovered */
+.skin-blue .main-header .logo:hover {
+                      background-color: #364c6a;
+                      }
+
+/* navbar (rest of the header) */
+.skin-blue .main-header .navbar {
+                      background-color: #2D4059;
+                      }        
+
+/* toggle button when hovered  */                    
+ .skin-blue .main-header .navbar .sidebar-toggle:hover{
+                      background-color: #364c6a;
+                      }
+
+/*------------------------------------------------------*/
+
+/* box headers */
+.box.box-solid.box-danger>.box-header {
+                      color: #fff;
+                      background: #1976d2;
+                      background-color: #1976d2;
+                      }
+
+/* box and tabbox top color */
+.box.box-danger {
+    border-top-color: #FFF; !important
+}
+
+.box.box-warning {
+    border-top-color: #F5DF4D; !important
+}
+
+.box {
+    border-top-color: #939597; !important
+}
+
+/* box title */
+.box-header .box-title, .box-header>.fa, .box-header>.glyphicon, .box-header>.ion {
+                      display: inline-block;
+                      font-size: 17px;
+                      margin: 0;
+                      line-height: 1;
+                  }
+/* add margins to fa icons */                  
+.fa {
+    margin-right: 3px;
+    margin-left: 1.5px;
+}
+
+/*------------------------------------------------------*/
+.handler-danger {
+  background: #EA5455 !important;
+}
+
+.pretty.p-danger input[type="checkbox"]:checked + label::before,
+.pretty.p-danger input[type="radio"]:checked + label::before {
+    background-color: #EA5455;
+    border-color: #EA5455;
+}
+.pretty.p-danger input[type="checkbox"]:checked + label::after,
+.pretty.p-danger input[type="radio"]:checked + label::after {
+    background-color: #EA5455 !important;
+    border-color: #EA5455 !important;
+}
+
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-danger,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-danger {
+  background: #EA5455 !important;
+}
+
+.pretty.p-danger {
+  background: #EA5455 !important;
+  background-color: #EA5455 !important;
+  border-color: #EA5455 !important;
+}
+
+.btn-primary {
+  background: #2D4059 !important;
+  border-color: #2D4059 !important;
+}
+
+.btn-primary:hover {
+    background:#364c6a !important;
+}
+
+.btn-danger {
+  background: #EA5455 !important;
+  border-color: #EA5455 !important;
+}
+
+.btn-danger:hover {
+    background:#ed6b6c !important;
+  border-color: #EA5455 !important;
+}
+
+.btn-danger:not(:disabled):not(.disabled):active, .btn-danger:focus, .btn-danger:active, .btn-danger:active:focus {
+  background: #EA5455 !important;
+  border-color: #EA5455 !important;
+}
+
+.btn-warning {
+  background: #f5df4d !important;
+  border-color: #f5df4d !important;
+}
+
+.btn-warning:hover {
+  background:#e5d13e !important;
+  border-color: #f5df4d !important;
+  color: #939597 !important;
+}
+
+.bttn-material-circle.bttn-danger {
+  background: #EA5455 !important;
+  border-color: #EA5455 !important;
+}
+
+.icon_red {
+  color: #EA5455;
+}
+

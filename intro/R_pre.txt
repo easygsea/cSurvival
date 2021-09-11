@@ -1,0 +1,6 @@
+element	intro
+div_project	To start, select a project from DepMap, TARGET, or TCGA. Multiple selections are allowed for related projects in TARGET and TCGA. Once confirmed, click <b>Confirm selection!</b> to the right to proceed.
+div_confirm_project	After selecting your project(s) of interest, you will see a <b>Confirm selection!</b> button. Click to proceed. You may also click <b>Reset selection</b> to change your selection.
+div_censor	If TARGET or TCGA, you will have the option to refine the censoring time to study defined benchmark (e.g. 5-year or 10-year) time intervals.
+div_nos	Increase to 2 to study interactions between genes, loci, pathways/gene sets, and/or drugs.
+

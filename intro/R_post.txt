@@ -1,0 +1,2 @@
+element	intro
+plot_type	Select visualization options.

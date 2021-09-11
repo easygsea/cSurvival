@@ -1,0 +1,2 @@
+element	intro
+gs_mode_1	Second, if category is gene set (GS), select mode of analysis. <b>Library</b> to study a pathway/GS from comprehensive and up-to-date libraries from <b><a href='https://tau.cmmt.ubc.ca/eVITTA/' target='_blank'>eVITTA</a></b>, a webserver we recently developed for transcriptome analysis. <b>Manual</b> to upload a customized list of genes (in HUGO symbols).

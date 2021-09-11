@@ -1,0 +1,4 @@
+element	intro
+div_par_gear	If needed, click to adjust advanced parameters.
+confirm	Click <b>Confirm and analyze!</b> to perform Kaplan-Meier (KM) log rank and Cox proportional-hazards (PH) regression analysis.
+

@@ -1,0 +1,2 @@
+element	intro
+div_cor_method	Adjust method for correlation analysis.

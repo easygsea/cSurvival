@@ -1,0 +1,2 @@
+element	intro
+div_ui_stats	Detailed statistics.
