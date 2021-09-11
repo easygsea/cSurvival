@@ -1,0 +1,508 @@
+patient_id	cancer_type	patient_annotation
+TCGA-P6-A5OG	ACC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior Osteosarcoma with Cisplatin, Methotrexate, and Adriamycin given to patient prior to TCGA specimen.
+TCGA-BL-A0C8	BLCA	Notification:Item does not meet study protocol:This is a non-muscle invasive pT1 bladder cancer submitted before the pT2 requirement
+TCGA-C4-A0EZ	BLCA	Notification:Prior malignancy:Patient had a melanoma of the lower limb. No radiation or systemic chemotherapy.
+TCGA-C4-A0F7	BLCA	Notification:Prior malignancy:Patient had an unspecified malignant neoplasm of the testis. No radiation or systemic chemotherapy.
+TCGA-CF-A9FM	BLCA	Notification:Item does not meet study protocol:The path TNM for the primary was confirmed as T1N0M0.  The surgeon recorded the TNM initially as T2N1M0 which is why the TSS submitted this case.
+TCGA-CU-A0YR	BLCA	Notification:Prior malignancy:Patient was previously diagnosed with prostate cancer. No radiation or systemic chemotherapy.
+TCGA-DK-A1A5	BLCA	Notification:Prior malignancy:Patient was previously diagnosed with basal cell carcinoma. No radiation or systemic chemotherapy.
+TCGA-DK-A3IQ	BLCA	Notification:Prior malignancy:Patient was previously diagnosed with kidney papillary renal cell cancer. No radiation or systemic chemotherapy.
+TCGA-DK-A3IU	BLCA	Notification:Prior malignancy:Patient had synchronous prostate cancer and prior history of non-muscle invasive bladder cancer. No radiation or systemic chemotherapy.
+TCGA-DK-A3IV	BLCA	Notification:Prior malignancy:Patient was previously diagnosed with prostate cancer. No radiation or systemic chemotherapy.
+TCGA-DK-A6B2	BLCA	Notification:Item does not meet study protocol:TSS found during enrollment the patient had a PT2 prior to the procurement of the TCGA sample. The TSS considered this a progression, but this would not have been allowed in based on TCGA rules.
+TCGA-FD-A3SQ	BLCA	Notification:Prior malignancy:Patient had synchronous prostate cancer and reported a prior breast cancer. No radiation or systemic chemotherapy.
+TCGA-FD-A3SS	BLCA	Notification:Prior malignancy:Patient was previously diagnosed with basal cell carcinoma. No radiation or systemic chemotherapy.
+TCGA-FD-A43P	BLCA	Notification:Prior malignancy:Patient had a prior non-muscle invasive bladder cancer. No radiation or systemic chemotherapy.
+TCGA-FD-A43X	BLCA	Notification:Prior malignancy:Patient had a prior non-muscle invasive bladder cancer. No radiation or systemic chemotherapy.
+TCGA-GC-A3WC	BLCA	Notification:Prior malignancy:Patient had a prior breast cancer. No radiation or systemic chemotherapy.
+TCGA-GV-A3QG	BLCA	Notification:Prior malignancy:Patient had a prior non-muscle invasive bladder cancer. No radiation or systemic chemotherapy.
+TCGA-GV-A3QK	BLCA	Notification:Prior malignancy:Patient had a prior colon cancer. No radiation or systemic chemotherapy.
+TCGA-GV-A40E	BLCA	Notification:Prior malignancy:Patient had a prior non-muscle invasive bladder cancer. No radiation or systemic chemotherapy.
+TCGA-GV-A40G	BLCA	Notification:Prior malignancy:Patient had a prior non-muscle invasive bladder cancer. No radiation or systemic chemotherapy.
+TCGA-HQ-A2OF	BLCA	Notification:Item does not meet study protocol:Sample was shipped as a muscle invasive urothelial carcinoma, but according to the path report and expert pathology review it is a papillary carcinoma. Therefore this case, does not meet TCGA BLCA requirements.
+TCGA-5L-AAT1	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had prior breast malignancy (in opposite breast) with systemic chemotherapy (Tamoxifen).
+TCGA-A7-A0CD	BRCA	Notification:Prior malignancy:Case had prior malignancy
+TCGA-A7-A0DC	BRCA	Notification:Item does not meet study protocol:Tumor is DCIS and not invasive which is required by the TCGA BRCA study
+TCGA-A8-A06T	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-A8-A06U	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-A8-A07E	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-A8-A084	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-A8-A08F	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-A8-A08S	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-A8-A091	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-A8-A093	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-A8-A09C	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-A8-A09E	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-A8-A09I	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-A8-A09K	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-AN-A0FE	BRCA	Redaction:Subject identity unknown:Identical subject to TCGA-AN-A0FG
+TCGA-AN-A0FG	BRCA	Redaction:Subject identity unknown:Identical subject to TCGA-AN-A0FE
+TCGA-AO-A0J5	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-AO-A0JI	BRCA	Notification:Prior malignancy:No Note Specified
+TCGA-AR-A2LL	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-AR-A2LR	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had prior primary breast cancer in the same breast as the TCGA primary and received chemotherapy (Adriamycin and Cytoxan)
+TCGA-BH-A0B6	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:During Enrollment it was found that patient recieved systemic tamoxifen 3 years prior to resection of TCGA tumor (left breast) for a prior right breast malignancy.
+TCGA-BH-A1F5	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:The patient had a prior thyroid cancer (~28 years prior) and a prior lung cancer (~23 years prior) to the TCGA cancer procurement. The TSS does not know if radiation or chemotherapy was given which is unacceptable for TCGA.
+TCGA-D8-A146	BRCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-E2-A1IP	BRCA	Redaction:Genotype mismatch:Tumor and normal do not match
+TCGA-DG-A2KH	CESC	Notification:Item does not meet study protocol:TSS confirmed TCGA tumor is villoglandular variant of endocervical adenocarcinoma, which was revealed at time of Enrollment.  This tumor type is not acceptable for the CESC study within TCGA.
+TCGA-DS-A1OC	CESC	Notification:Prior malignancy:Patient had a prior invasive breast cancer. No radiation or systemic chemotherapy.
+TCGA-FU-A3TX	CESC	Notification:Prior malignancy:Patient had a prior melanoma of the cheek. No radiation or systemic chemotherapy.
+TCGA-JW-A5VL	CESC	Notification:Item does not meet study protocol:non-invasive
+TCGA-PN-A8M9	CESC	Redaction:Genotype mismatch:tumor and blood do not match
+TCGA-A6-2670	COAD	Redaction:Subject withdrew consent:[intgen.org]: Subject Withdrew Consent
+TCGA-A6-2672	COAD	Notification:Item is noncanonical:FFPE COAD Pilot 1
+TCGA-A6-2682	COAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemicchemotherapy or radiation.
+TCGA-A6-4105	COAD	Notification:Prior malignancy:Prior malignancy skin cancer L eyelid. No systemic chemotherapy or radiation.
+TCGA-A6-5661	COAD	Notification:Item is noncanonical:FFPE COAD Pilot 1
+TCGA-A6-5665	COAD	Notification:Item is noncanonical:FFPE COAD Pilot 1
+TCGA-A6-6649	COAD	Notification:Prior malignancy:Prior malignancy basal cell carcinoma. No systemic chemotherapy or radiation.
+TCGA-AA-3496	COAD	Notification:Prior malignancy:Prior malignancy colon cancer. No systemic tchemotherapy or radiation.
+TCGA-AA-3516	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy skin cancer. No systemic chemotherapy or radiation. Prior malignancy rectal cancer treated w/ systemic chemotherapy.
+TCGA-AA-3522	COAD	Notification:Prior malignancy:Prior malignancy malignant melanoma of the trunk.  No systemic chemotherapy or radiation.
+TCGA-AA-3525	COAD	Notification:Case submitted is found to be a recurrence after submission:patient had a prior colon malignancy
+TCGA-AA-3527	COAD	Notification:Prior malignancy:Prior malignancy breast cancer. No systemic chemotherapy or radiation.
+TCGA-AA-3531	COAD	Notification:Prior malignancy:Prior malignancy skin cancer. No systemic chemotherapy or radiation.
+TCGA-AA-3554	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  breast cancer treated w/ hormone therapy (mistletoe) and radiation.
+TCGA-AA-3556	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  treated w/ systemic  chemotherapy.
+TCGA-AA-3560	COAD	Notification:Prior malignancy:Prior malignancy stomach cancer.  No systemic chemotherapy or radiation.
+TCGA-AA-3662	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy breast cancer treated with unknown hormone therapy.
+TCGA-AA-3672	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy breast cancer treated with unknown hormone therapy.
+TCGA-AA-3675	COAD	Notification:Prior malignancy:Unknown prior malignancy.
+TCGA-AA-3697	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated with chemotherapy and radiation.
+TCGA-AA-3713	COAD	Notification:Prior malignancy:Prior malignancy of the retroperitoneum and peritoneum and sigmoid colon. No systemic chemotherapy or radiation.
+TCGA-AA-3844	COAD	Notification:Prior malignancy:Prior malignancy malignant melanoma of the leg.  No systemic chemotherapy or radiation.
+TCGA-AA-3860	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  breast cancer treated with system chemotherapy, hormone therapy, and radiation.
+TCGA-AA-3862	COAD	Notification:Prior malignancy:Prior malignancy kidney cancer. No systemic chemotherapy or radiation.
+TCGA-AA-3867	COAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-AA-3939	COAD	Notification:Prior malignancy:Prior malignancy skin cancer. No systemic chemotherapy or radiation.
+TCGA-AA-3950	COAD	Notification:Prior malignancy:Prior malignancy stomach cancer.  No systemic chemotherapy or radiation.
+TCGA-AA-3952	COAD	Notification:Prior malignancy:Prior malignancy oral cancer. No systemic chemotherapy or radiation.
+TCGA-AA-3972	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  ascending colon cancer treated w/ systemic chemotherapy. Prior malignancy  mycosis fungoides. No systemic chemotherapy or radiation.
+TCGA-AA-3976	COAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic treatment or radiation.
+TCGA-AA-3986	COAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic treatment or radiation.
+TCGA-AA-A00L	COAD	Notification:Prior malignancy:Patient had a prior prostate cancer. No radiation or systemic chemotherapy.
+TCGA-AA-A00Z	COAD	Notification:Prior malignancy:No Note Specified
+TCGA-AA-A024	COAD	Notification:Prior malignancy:No Note Specified
+TCGA-AD-6895	COAD	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the scalp. No systemic chemotherapy or radiation.
+TCGA-AD-6964	COAD	Notification:Prior malignancy:Prior malignancy SCC of the inguinal lymph nodes. No systemic chemotherapy or radiation.
+TCGA-AZ-4313	COAD	Notification:Prior malignancy:Prior malignancy uterine cancer. No systemic chemotherapy or radiation.
+TCGA-AZ-6601	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated w/ radiation. (Tumor sent to TCGA was from sigmoid colon.)  Prior malignancy  bladder cancer. Prior malignancy  colon cancer. No systemic chemotherapy or radiation.
+TCGA-AZ-6608	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy Hodgkins lymphoma treated with chemotherapy and radiation.
+TCGA-CK-5912	COAD	Notification:Prior malignancy:Prior malignancy lung cancer. No systemic chemotherapy or radiation.
+TCGA-F4-6857	COAD	Redaction:Subject identity unknown:Gender mismatch between clinical and genomic data.  Site unable to provide/confirm correct data.
+TCGA-G4-6294	COAD	Notification:Prior malignancy:Prior malignancy prostate.  Unknown treatment history.
+TCGA-G4-6298	COAD	Notification:Prior malignancy:Prior malignancy prostate.  Unknown treatment history.
+TCGA-G4-6310	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy lymphoma treated with systemic chemotherapy.
+TCGA-G4-6314	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy bladder cancer treated with unknown locoregional pharmaceuticals and radiation.
+TCGA-G4-6586	COAD	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the nose. No systemic chemotherapy or radiation.
+TCGA-G4-6588	COAD	Notification:Prior malignancy:Prior malignancy SCC of the back. No systemic chemotherapy or radiation.
+TCGA-G4-6625	COAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy R breast treated with chemotherapy.
+TCGA-G4-6628	COAD	Notification:Prior malignancy:Prior malignancy of the L colon. No systemic chemotherapy or radiation.
+TCGA-G8-6906	DLBC	Notification:Case submitted is found to be a recurrence after submission:Patient diagnosed and had prior treatment (CHOP) 7 years prior to procurement of the TCGA specimen. The TSS did confirm the TCGA tumor was a recurrence.
+TCGA-IC-A6RF	ESCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:During Enrollment it was found that the patient had a prior right breast malignancy and recieved systemic pharma treatment (cytoxan and taxotere).
+TCGA-L5-A43M	ESCA	Notification:Prior malignancy:Patient had a prior colon cancer. No radiation or systemic chemotherapy.
+TCGA-L5-A88T	ESCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-02-0058	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.  Current TCGA tissue is reported as treated tissue.
+TCGA-06-0209	GBM	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy with systemic Treatment and locoregional radiation
+TCGA-06-0744	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-06-2557	GBM	Notification:Prior malignancy:Prior Prostate malignancy as per pathology report.
+TCGA-06-6391	GBM	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had prior breast malignancy with systemic radiation
+TCGA-06-6700	GBM	Notification:Prior malignancy:Prior Prostate malignancy as per pathology report treatment not specified.
+TCGA-08-0351	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-08-0375	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-12-0653	GBM	Redaction:Subject withdrew consent:[intgen.org]: Subject Withdrew Consent
+TCGA-12-1601	GBM	Redaction:Subject withdrew consent:[intgen.org]: Subject Withdrew Consent
+TCGA-14-1823	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-15-1449	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-16-1045	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-16-1047	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-16-1460	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-19-2619	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-19-5947	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-19-5953	GBM	Notification:Normal tissue origin incorrect:Samples were created as tssDNA from Normal Tissue.  Actually are tssDNA extracted from Blood.  Should have been 10A instead of 11A.
+TCGA-26-1442	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.
+TCGA-26-5132	GBM	Notification:Prior malignancy:Prior Prostate malignancy as per pathology report.
+TCGA-26-6173	GBM	Notification:Normal tissue origin incorrect:Samples were created as tssDNA from Normal Tissue.  Actually are tssDNA extracted from Blood.  Should have been 10A instead of 11A.
+TCGA-26-6174	GBM	Notification:Normal tissue origin incorrect:Samples were created as tssDNA from Normal Tissue.  Actually are tssDNA extracted from Blood.  Should have been 10A instead of 11A.
+TCGA-32-2495	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.  Current TCGA tissue is reported as treated tissue.
+TCGA-32-2498	GBM	Redaction:Subject withdrew consent:[intgen.org]: Subject Withdrew Consent
+TCGA-32-4209	GBM	Notification:Case submitted is found to be a recurrence after submission:Per enrollment form, patient had a prior diagnosis of a lower grade glioma.  Current TCGA tissue is reported as treated tissue.
+TCGA-BA-4075	HNSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient diagnosed with tongue cancer several months prior to procurement of the TCGA specimen and had prior treatment (chemo and radiation). This is a possible recurrence.
+TCGA-BA-4077	HNSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  of tongue cancer treated with cisplatin and locoregional radiation. Tumor submitted to TCGA possibly recurrence of Prior malignancy .
+TCGA-BA-5557	HNSC	Notification:Prior malignancy:Prior malignancy R tongue. No systemic chemotherapy or radiation.
+TCGA-BA-5559	HNSC	Notification:Prior malignancy:Prior malignancy SCC. No systemic chemotherapy or radiation.
+TCGA-BA-6871	HNSC	Notification:Prior malignancy:Prior malignancy prostate cancer and R KIRC. No systemic chemotherapy or radiation.
+TCGA-CN-6997	HNSC	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-CQ-5323	HNSC	Notification:Prior malignancy:Prior malignancy verrucous carcinoma of the maxilla. No systemic chemotherapy or radiation.
+TCGA-CQ-6221	HNSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy follicular lymphoma, no treatment. Prior malignancy DLBCL treated with R-CHOP and radiation.
+TCGA-CQ-6225	HNSC	Notification:Case submitted is found to be a recurrence after submission:Patient diagnosed and had prior treatment (radiation) 1 year prior to procurement of the TCGA specimen. The TSS did confirm the TCGA tumor was a recurrence.
+TCGA-CQ-7067	HNSC	Notification:Prior malignancy:Prior malignancy skin cancer. No systemic chemotherapy or radiation.
+TCGA-CQ-7068	HNSC	Notification:Prior malignancy:Prior malignancy oral cancer. No systemic chemotherapy or radiation.
+TCGA-CQ-A4C7	HNSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had a prior prostate cancer that was treated with systemic chemotherapy. No radiation.
+TCGA-CV-7406	HNSC	Notification:Case submitted is found to be a recurrence after submission:TSS confirmed the case sent for TCGA was a recurrence.
+TCGA-CV-7440	HNSC	Notification:Case submitted is found to be a recurrence after submission:Patient diagnosed and had prior treatment (radiation) 1 year prior to procurement of the TCGA specimen. The TSS did confirm the TCGA tumor was a recurrence.
+TCGA-CV-7568	HNSC	Notification:Case submitted is found to be a recurrence after submission:TSS confirmed the case sent for TCGA was a recurrence.
+TCGA-CX-7082	HNSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy of the R larynx treated with locoregional radiation. (TCGA tumor R oral cavity)
+TCGA-DQ-5629	HNSC	Notification:Prior malignancy:Prior malignancy cancer of the penis. No systemic chemotherapy or radiation.
+TCGA-DQ-7588	HNSC	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-DQ-7589	HNSC	Notification:Prior malignancy:Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-DQ-7593	HNSC	Notification:Prior malignancy:Prior malignancy melanoma R forearm. No systemic chemotherapy or radiation.
+TCGA-HD-8634	HNSC	Notification:Prior malignancy:Prior malignancy cervical cancer. No systemic chemotherapy or radiation.
+TCGA-HD-8635	HNSC	Notification:Prior malignancy:Prior malignancy cancer of the vulva. No systemic chemotherapy or radiation.
+TCGA-IQ-7631	HNSC	Notification:Item does not meet study protocol:An amended pathology report was submitted after case qualified and was shipped with a diagnosis change from squamous cell carcinoma to mucoepidermoid carcinoma.
+TCGA-KL-8328	KICH	Notification:Prior malignancy:Prior malignancy prostate cancer treated with locoregional radiation. Prior malignancy oncocytoma R kidney. No systemic chemotherapy or radiation.
+TCGA-KL-8339	KICH	Notification:Prior malignancy:Prior malignancy melanoma of the shoulder. No systemic chemotherapy or radiation.
+TCGA-KM-8441	KICH	Notification:Prior malignancy:Prior malignancy L kidney cancer. No systemic chemotherapy or radiation.
+TCGA-KN-8430	KICH	Notification:Prior malignancy:Prior malignancy epitheliod cancer R pleura treated with Alimta.
+TCGA-A3-3307	KIRC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-A3-3328	KIRC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-A3-3336	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient with synchronous non-Hodgkins Lymphoma treated w/ R-CHOP prior to procurement of TCGA tumor
+TCGA-A3-3358	KIRC	Notification:Prior malignancy:Prior malignancy cervical cancer. No systemic chemotherapy or radiation.
+TCGA-A3-3359	KIRC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-AK-3425	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated w/ systemic chemotherapy and radiation
+TCGA-AK-3454	KIRC	Notification:Prior malignancy:Prior malignancy R uteter. No systemic chemotherapy or radiation.
+TCGA-AK-3455	KIRC	Notification:Prior malignancy:Prior malignancy R KIRC. No systemic chemotherapy or radiation.
+TCGA-B0-4815	KIRC	Notification:Prior malignancy:Prior malignancy of the pituitary gland. No systemic chemotherapy or radiation.
+TCGA-B0-5088	KIRC	Notification:Prior malignancy:Prior malignancy malignant melanoma of the head/neck. No systemic chemotherapy or radiation.
+TCGA-B0-5691	KIRC	Notification:Prior malignancy:Prior malignancy L LUAD. No systemic chemotherapy or radiation.
+TCGA-B2-5635	KIRC	Notification:Prior malignancy:Prior malignancy skin cancer. No systemic chemotherapy or radiation.
+TCGA-B8-A54K	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:BCG given to prior bladder cancer
+TCGA-BP-4327	KIRC	Notification:Prior malignancy:Prior malignancy colon cancer. No systemic chemotherapy or radiation.
+TCGA-BP-4342	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  bladder cancer treated w/cisplatin, 5-FU, and radiation.
+TCGA-BP-4344	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  bladder cancer treated w/ mitomycin. Prior malignancy  uterine cancer.  No systemic chemotherapy or radiation.
+TCGA-BP-4353	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  lymphoma of L groin treated w/ systemic chemotherapy.
+TCGA-BP-4762	KIRC	Notification:Prior malignancy:Prior malignancy cancer R shoulder. Prior malignancy Leiomyoscarcoma R leg. No systemic chemotherapy or radiation for either.
+TCGA-BP-4775	KIRC	Notification:Prior malignancy:Prior malignancy DLBCL of the stomach. No systemic chemotherapy or radiation.
+TCGA-BP-4795	KIRC	Notification:Prior malignancy:Prior malignancy thyroid cancer. No systemic chemotherapy or radiation.
+TCGA-BP-4807	KIRC	Notification:Prior malignancy:Prior malignancy thyroid cancer. No systemic chemotherapy or radiation.
+TCGA-BP-4976	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  colon cancer in unknown location treated w/ locoregional radiation. Prior malignancy  prostate cancer. No systemic chemotherapy or radiation.
+TCGA-BP-4986	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  R colon cancer treated with systemic chemotherapy.
+TCGA-BP-4988	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  L lung adenocarcinoma treated with fludarabine and L lung bronchoalveolar cancer.  No systemic chemotherapy  or radiation.
+TCGA-BP-4995	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  basil cell carcinoma  of the neck with unknown chemotherapy  per e-mail.
+TCGA-BP-5006	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  basil cell cancer treated with unknown chemotherapy  per e-mail.
+TCGA-BP-5009	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  Hairy Cell Leukemia treated with Interferon.
+TCGA-BP-5168	KIRC	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-BP-5178	KIRC	Notification:Prior malignancy:Prior malignancy chronic lymphocytic leukemia. No systemic chemotherapy or radiation.
+TCGA-BP-5181	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy L breast cancer treated with Arimidex and locoregional radiation.
+TCGA-BP-5189	KIRC	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-BP-5199	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  L lung cancer with brian mets treated with etoposide and cisplatin and locoregional radiation.
+TCGA-BP-5201	KIRC	Notification:Prior malignancy:Prior malignancy melanoma of the chest wall. No systemic chemotherapy or radiation.
+TCGA-CJ-4636	KIRC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-CJ-4642	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Pt with synchronous B-cell lymphoma treated with cyclophosphamide, Adriamycin, vincristine, prednisone, and Rituxin prior to procurment of TCGA tumor.
+TCGA-CJ-4891	KIRC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-CJ-4894	KIRC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-CJ-6030	KIRC	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-CZ-4854	KIRC	Notification:Prior malignancy:Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-CZ-4864	KIRC	Notification:Case submitted is found to be a recurrence after submission:Patient diagnosed with RCC 3 years prior to procurement of the TCGA specimen and had prior treatment (cryoablation). The TSS did confirm the TCGA tumor was a recurrence.
+TCGA-CZ-4865	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  Breast treated w/ taxol and radiation.
+TCGA-DV-5565	KIRC	Notification:Prior malignancy:Prior malignancy pancreas cancer. Prior malignancy bilateral kidney cancer x2. No systemic chemotherapy or radiation for any malignancies.
+TCGA-DV-5566	KIRC	Notification:Prior malignancy:Prior malignancy pancreas cancer, R KIRC and L kidney cancer. No systemic chemotherapy or radiationfor any malignancies.
+TCGA-DV-5568	KIRC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  L KIRC. No systemic chemotherapy or radiation. Prior malignancy  of the eye treated with Avastin. Pt with synchronous bilateral KIRC.
+TCGA-DV-5569	KIRC	Notification:Prior malignancy:Prior malignancy bilateral KIRC. No systemic chemotherapy or radiation.
+TCGA-A4-7288	KIRP	Notification:Prior malignancy:Prior malignancy R breast cancer. No systemic chemotherapy or radiation.
+TCGA-A4-7734	KIRP	Notification:Prior malignancy:
+TCGA-AL-3468	KIRP	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  of leukemia treated w/ systemic chemotherapy.
+TCGA-AL-A5DJ	KIRP	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-B1-A47M	KIRP	Notification:Prior malignancy:Patient had a prior colon adenocarcinoma. No systemic chemotherapy or radiation.
+TCGA-B1-A47O	KIRP	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-B9-5155	KIRP	Notification:Prior malignancy:Prior malignancy L kidney cancer. No systemic chemotherapy or radiation.
+TCGA-B9-A44B	KIRP	Notification:Prior malignancy:Patient had a prior prostate adenocarcinoma. No systemic chemotherapy or radiation.
+TCGA-BQ-5886	KIRP	Notification:Prior malignancy:Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-BQ-5888	KIRP	Notification:Prior malignancy:Prior malignancy L breast cancer. No systemic chemotherapy or radiation.
+TCGA-BQ-5892	KIRP	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the skin. No systemic chemotherapy or radiation.
+TCGA-BQ-7046	KIRP	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the face. No systemic chemotherapy or radiation.
+TCGA-BQ-7049	KIRP	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  basal cell cancer of the back. No chemotherapy or radiation.  PM melanoma of the eye treated with antigen-bearing dentric cells.
+TCGA-BQ-7055	KIRP	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-BQ-7056	KIRP	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  malignant fibrous histiocytoma treated with Adriamycin and locoregional radiation.
+TCGA-G7-A8LE	KIRP	Notification:Case submitted is found to be a recurrence after submission:TSS confirmed case is a recurrence
+TCGA-CS-6670	LGG	Notification:Case submitted is found to be a recurrence after submission:Patient diagnosed with oligodendroma 5 years prior to procurement of the TCGA specimen and had prior treatment (Temodar). The TSS did confirm the TCGA tumor was a recurrence.
+TCGA-DB-5270	LGG	Notification:Case submitted is found to be a recurrence after submission:patient had a prior lower grade glioma
+TCGA-DH-5141	LGG	Notification:Case submitted is found to be a recurrence after submission:patient had a prior lower grade glioma
+TCGA-DU-7011	LGG	Notification:Case submitted is found to be a recurrence after submission:Sample sent to TCGA was not the primary tumor, it was a recurrence.
+TCGA-DU-7300	LGG	Notification:Prior malignancy:Prior malignancy melanoma. No systemic chemotherapy or radiation.
+TCGA-FG-5962	LGG	Notification:Normal tissue origin incorrect:Samples were created as tssDNA from Normal Tissue.  Actually are tssDNA extracted from Blood.  Should have been 10A instead of 11A.
+TCGA-FG-8187	LGG	Notification:Prior malignancy:Patient had prior testicular germ cell tumor. No radiation or systemic chemotherapy.
+TCGA-HT-7483	LGG	Observation:Item may not meet study protocol:TSS confirmed that submitted tumor is a recurrence and patient had 2 prior resections before tumor submitted to BCR. Submitted tumor was in same tumor bed as primary. The patient had no prior chemo/radiation treatment.
+TCGA-HT-7604	LGG	Notification:Case submitted is found to be a recurrence after submission:patient had prior LGG malignancy (and complete resection) 5 years prior to TCGA malignancy. No treatment was given prior to procurement of TCGA specimen.
+TCGA-HT-A619	LGG	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had a prior LGG diagnosis, surgery and radiation to the head. TCGA tumor was resected 10 years later.
+TCGA-HW-7490	LGG	Notification:Prior malignancy:[intgen.org]: Prior malignancy of thyroid.  No systemic treatment or radiation given.
+TCGA-IK-8125	LGG	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the nose. No systemic chemotherapy or radiation.
+TCGA-R8-A73M	LGG	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-BC-A110	LIHC	Notification:Prior malignancy:Patient had a prior Wilms tumor. No systemic chemotherapy or radiation.
+TCGA-BD-A3ER	LIHC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had a prior prostate adenocarcinoma treated with systemic chemotherapy.
+TCGA-EP-A3JL	LIHC	Notification:Prior malignancy:Patient had a prior tumor in the back. No systemic chemotherapy or radiation.
+TCGA-FV-A3I1	LIHC	Notification:Prior malignancy:Patient had a prior colon adenocarcinoma. No systemic chemotherapy or radiation.
+TCGA-FV-A3R2	LIHC	Notification:Prior malignancy:Patient had a prior papillary transitional cell bladder cancer. No systemic chemotherapy or radiation.
+TCGA-G3-A25W	LIHC	Notification:Prior malignancy:Patient had a prior papillary renal cell carcinoma. No systemic chemotherapy or radiation.
+TCGA-T1-A6J8	LIHC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:TSS confirmed the patient had a prior bladder and prostate cancer with an unknown treatment history which is unacceptable for TCGA cases.
+TCGA-XR-A8TC	LIHC	Notification:Case submitted is found to be a recurrence after submission:During enrollment, the TSS found the patient had surgery 2 months prior to the TCGA cancer procurement.
+TCGA-05-4382	LUAD	Notification:Prior malignancy:Prior maligancy cancer of the penis. No systemic chemotherapy or radiation.
+TCGA-05-4384	LUAD	Notification:Prior malignancy:Prior malignancy rectal cancer. Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-05-4396	LUAD	Notification:Prior malignancy:Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-05-4402	LUAD	Notification:Prior malignancy:Prior malignancy uterine cancer. No systemic chemotherapy or radiation.
+TCGA-05-4405	LUAD	Notification:Prior malignancy:Prior malignancy uterine cancer. No systemic chemotherapy or radiation.
+TCGA-05-4410	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-05-4418	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-05-4427	LUAD	Notification:Prior malignancy:Prior malignancy malignant melanoma of the skin. No systemic chemotherapy or radiation.
+TCGA-05-4434	LUAD	Notification:Prior malignancy:Prior malignancy  breast cancer. No systemic chemotherapy or radiation.
+TCGA-05-5420	LUAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated with hormone therapy. Prior malignancy secondary malignancy of unknown location treated with radiation in unknown field.
+TCGA-35-3621	LUAD	Redaction:Genotype mismatch:Repeat of redaction for this patient to allow database to process
+TCGA-38-4629	LUAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  of the larynx treated with chemotherapy and radiation.
+TCGA-38-4630	LUAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  uterine serous endometrial adenocarcinoma treated wtih  systemic radiation.
+TCGA-38-4631	LUAD	Notification:Prior malignancy:Prior malignancy R breast cancer. Prior malignancy L breast cancer. No systemic chemotherapy or radiation for either.
+TCGA-38-6178	LUAD	Notification:Prior malignancy:Prior malignancy L ovarian cancer. No systemic chemotherapy or radiation.
+TCGA-44-2661	LUAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Pt with synchronous R breast cancer treated with Femara prior to procurement of tumor submitted to TCGA.
+TCGA-44-6146	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-44-6147	LUAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  of bowel carcinoid tumor treated with sandostatin. Prior malignancyR KIRP. No systemic chemotherapy or radiation .
+TCGA-44-7670	LUAD	Notification:Prior malignancy:Prior malignancy of the vulva. No systemic chemotherapy or radiation.
+TCGA-44-7671	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-44-8119	LUAD	Notification:Prior malignancy:Prior malignancy skin cancer upper lip.  No systemic chemotherapy or radiation.
+TCGA-49-4501	LUAD	Notification:Prior malignancy:Prior malignancy lymphoma. No systemic chemotherapy or radiation.
+TCGA-49-6742	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-49-6745	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-50-5932	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-50-5935	LUAD	Notification:Prior malignancy:Prior malignancy cervical cancer. No systemic chemotherapy or radiation.
+TCGA-50-5939	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-55-1592	LUAD	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-55-6978	LUAD	Notification:Prior malignancy:Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-55-6979	LUAD	Notification:Prior malignancy:Prior malignancy thryoid cancer. No systemic chemotherapy or radiation.
+TCGA-55-7573	LUAD	Notification:Prior malignancy:Prior malignancy L KIRC. No systemic chemotherapy or radiation.
+TCGA-55-7724	LUAD	Notification:Prior malignancy:Uterus. No chemo or radiation.
+TCGA-55-7726	LUAD	Notification:Prior malignancy:Left eyelid CA. No chemo or radiation.
+TCGA-55-7914	LUAD	Notification:Prior malignancy:R breast CA. No chemo or radiation.
+TCGA-55-8091	LUAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-55-8203	LUAD	Notification:Prior malignancy:Prior malignancy chronic lymphocytic leukemia. Prior malignancy skin cancer. No systemic chemotherapy or radiation.
+TCGA-55-8511	LUAD	Notification:Prior malignancy:Prior malignancy uterine cancer. No systemic chemotherapy or radiation.
+TCGA-55-8621	LUAD	Notification:Prior malignancy:Prior malignancy kidney cancer. No systemic treatment or radiation.
+TCGA-73-4658	LUAD	Notification:Prior malignancy:Prior malignancy L LUAD. No systemic chemotherapy or radiation.
+TCGA-78-7166	LUAD	Notification:Prior malignancy:Prior malignancy basal cell carcinoma or the ear and nose. No systemic chemotherapy or radiation.
+TCGA-78-8660	LUAD	Notification:Prior malignancy:Prior malignancy melanoma of the right arm. No systemic chemotherapy or radiation.
+TCGA-80-5607	LUAD	Notification:Prior malignancy:Prior malignancy colon cancer. No systemic chemotherapy or radiation.
+TCGA-95-7947	LUAD	Notification:Prior malignancy:Prior malignancy cancer of the larynx. No systemic chemotherapy or radiation.
+TCGA-97-8172	LUAD	Notification:Prior malignancy:Prior malignancy breast cancer. No systemic chemotherapy or radiation.
+TCGA-J2-8192	LUAD	Notification:Prior malignancy:Prior malignancy of breast, cervix, and uterus. No systemic chemotherapy or radiation.
+TCGA-J2-8194	LUAD	Notification:Prior malignancy:Prior malignancy breast cancer. No systemic chemotherapy or radiation.
+TCGA-18-3406	LUSC	Notification:Prior malignancy:Prior malignancy L LUSC. No systemic chemotherapy or radiation.
+TCGA-18-3409	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy basal cell carcinoma of the forehead.  No systemic chemotherapy or radiation.  Prior malignancy basaloid squamous cell carcinoma of the anal canal treated with chemotherapy and radiation.
+TCGA-18-3410	LUSC	Notification:Prior malignancy:Prior malignancy squamous cell carcinoma of the foot. No systemic chemotherapy or radiation.
+TCGA-18-3416	LUSC	Notification:Prior malignancy:Prior malignancy melanoma of the left chest. Prior malignancy melanoma of the arm.  Unknown treatment history.
+TCGA-18-5595	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy cancer of the pharynx treated with cisplatin.
+TCGA-21-1070	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  breast cancer treated with chemo and radiation per path report
+TCGA-21-1077	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-21-1078	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-21-1083	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-21-A5DI	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-22-5471	LUSC	Notification:Prior malignancy:Prior malignancy melanoma of the neck. No systemic chemotherapy or radiation.
+TCGA-22-5472	LUSC	Notification:Prior malignancy:Prior malignancy SCC of the L cheek.  No systemic chemotherapy or radiation.
+TCGA-33-4532	LUSC	Notification:Prior malignancy:Prior malignancy of the lip and nose. No systemic chemotherapy or radiation.
+TCGA-33-4533	LUSC	Notification:Case submitted is found to be a recurrence after submission:Other Malignancy form states patient had prior lung squamous malignancy in same lung 9.5 years before TCGA tumor procurement.
+TCGA-33-4579	LUSC	Notification:Prior malignancy:Prior malignancy SCC of the nasal cavity. No systemic chemotherapy or radiation.
+TCGA-33-6737	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  Hairy Cell Leukemia treated with 2-CdA and Pentostatin.
+TCGA-34-2605	LUSC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-34-2609	LUSC	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-43-2578	LUSC	Notification:Prior malignancy:Prior malignancy R LUAD. No systemic chemotherapy or radiaiton.
+TCGA-43-5668	LUSC	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the skin. No systemic chemotherapy or radiation.
+TCGA-43-7657	LUSC	Notification:Prior malignancy:Prior malignancy uterine cancer. No systemic chemotherapy or radiation.
+TCGA-43-7658	LUSC	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the nose. No systemic chemotherapy or radiation.
+TCGA-43-A474	LUSC	Notification:Prior malignancy:Patient had a prior skin malignancy. No systemic radiation or chemotherapy.
+TCGA-56-7221	LUSC	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the skin. No systemic chemotherapy or radiation.
+TCGA-56-8305	LUSC	Notification:Prior malignancy:Prior malignancy B-cell chronic lymphocytic leukemia. No systemic chemotherapy or radiation.
+TCGA-56-8308	LUSC	Notification:Prior malignancy:Prior malignancy melanoma of the R eye. No systemic chemotherapy or radiation.
+TCGA-56-8504	LUSC	Notification:Prior malignancy:Prior malignancy skin cancer. No systemic chemotherapy or radiation.
+TCGA-56-8623	LUSC	Notification:BCR Notification:Possible tumor/normal sample swap, cross-contamination, and/or sample purity issues. The sequencing and characterization centers have reported that molecular signature of the tumor DNA and RNA cluster with the normal controls. Their analysis suggests that the purity of the tumor is very low. Therefore, the data from this patient should be used with caution.
+TCGA-60-2695	LUSC	Notification:Prior malignancy:[intgen.org]: Subject has Hx of prior malignancy
+TCGA-60-2696	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  breast cancer treated w/ tamoxifen and radiation and tymus cancer treated w/ cancerrboplatin and Paclitaxel
+TCGA-60-2698	LUSC	Notification:Prior malignancy:[intgen.org]: Subject has Hx of prior malignancy
+TCGA-60-2711	LUSC	Notification:Prior malignancy:[intgen.org]: Subject has Hx of prior malignancy
+TCGA-60-2715	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy of the larynx treated w/ chemotherapy  and radiation.
+TCGA-60-2721	LUSC	Notification:Prior malignancy:[intgen.org]: Subject has Hx of prior malignancy
+TCGA-77-7140	LUSC	Notification:Prior malignancy:[intgen.org]: Patient had prior malignancy of basal cell carcinoma; treated surgically only.
+TCGA-77-8138	LUSC	Notification:Item does not meet study protocol:Subjects history of prior malignancies is unknown, which does not meet study protocol criteria.
+TCGA-77-A5GA	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-90-6837	LUSC	Notification:BCR Notification:Possible tumor/normal sample swap, cross-contamination, and/or sample purity issues. The sequencing and characterization centers have reported that molecular signatures from the DNA and RNA from the tumor and normal tissue, as well as DNA from the blood derived normal, do not cluster with the expected sample types. This suggests the tumor and normal samples may not be labeled correctly; all genotyping results confirm that all samples are from the same patient. Data from this patient should be used with caution.
+TCGA-90-7766	LUSC	Notification:Prior malignancy:Prior malignancy of a gynecological cancer. No systemic chemotherapy or radiation.
+TCGA-94-7943	LUSC	Notification:Prior malignancy:Prior malignancy lung cancer. No systemic chemotherapy or radiation.
+TCGA-96-7545	LUSC	Notification:Prior malignancy:Prior malignancy bilateral LUAD. Prior malignancy R LUAD. No systemic chemotherapy or radiation.
+TCGA-96-A4JK	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient was given BCG for the prior bladder cancer, which was not approved by the lung group as an acceptable prior treatment. (per Kristen Leraas/BCR TCGA-2222)
+TCGA-98-8020	LUSC	Notification:Prior malignancy:Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-NK-A5D1	LUSC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-O2-A5IC	LUSC	Redaction:Duplicate case:Duplicate Subject (with TCGA-60-2712)
+TCGA-09-1675	OV	Notification:Prior malignancy:Prior malignancy of metastatic breast cancer
+TCGA-09-2056	OV	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy right breast cancer treated with chemo and radiation per path report.
+TCGA-20-1687	OV	Notification:Prior malignancy:Prior malignancy of breast cancer
+TCGA-23-1116	OV	Notification:Prior malignancy:Prior malignancy of breast cancer
+TCGA-24-0981	OV	Redaction:Duplicate case:Duplicate Subject (with TCGA-04-1364)
+TCGA-24-1928	OV	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-24-2029	OV	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-24-2036	OV	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  breast cancer treated with systemic treatment per path report.
+TCGA-24-2280	OV	Notification:Prior malignancy:[intgen.org]: Prior Malignancy
+TCGA-24-2293	OV	Notification:Prior malignancy:Prior malignancy of Ovarian cancer
+TCGA-24-2298	OV	Notification:Prior malignancy:Prior malignancy of breast carcinoma
+TCGA-29-1691	OV	Notification:Prior malignancy:Prior malignancy of breast cancer
+TCGA-29-1781	OV	Notification:Prior malignancy:Prior malignancy of breast cancer
+TCGA-29-2425	OV	Notification:Prior malignancy:Prior malignancy of breast cancer
+TCGA-29-2428	OV	Notification:Prior malignancy:Prior malignancy of high grade endometrial carcinoma
+TCGA-36-2538	OV	Notification:Prior malignancy:Prior malignancy of ovarian cancer
+TCGA-36-2539	OV	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy of L breast cancer. No systemic chemotherapy or radiation. Prior malignancy  R breast cancer treated with taxoterene.
+TCGA-2L-AAQM	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-3A-A9IJ	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-3A-A9IL	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-3A-A9IN	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-3A-A9IO	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-3A-A9IR	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-3A-A9IS	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-3A-A9IV	PAAD	Notification:Item does not meet study protocol:This case is a neuroendocrine tumor and should not have been included in the PAAD study
+TCGA-F2-6880	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is normal pancreas with atrophy
+TCGA-F2-7273	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is atrophic pancreas with a single focus of low-grade PanIN
+TCGA-F2-7276	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is atrophic pancreas with a single focus of low-grade PanIN
+TCGA-FB-AAPP	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is a non-invasive IPMNs
+TCGA-H8-A6C1	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is atrophic pancreas
+TCGA-HZ-7918	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is an acinar cell carcinoma
+TCGA-HZ-7920	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is atrophic pancreas
+TCGA-HZ-7923	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is atrophic pancreas
+TCGA-HZ-7924	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is normal ampula of Vater
+TCGA-IB-7654	PAAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-IB-AAUV	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is normal pancreas with atrophy
+TCGA-IB-AAUW	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is normal pancreas with atrophy
+TCGA-RL-AAAS	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is normal pancreas with atrophy
+TCGA-US-A77J	PAAD	Notification:Item does not meet study protocol:Per the PAAD EPC, this tumor is normal pancreas with atrophy
+TCGA-WB-A820	PCPG	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-CH-5763	PRAD	Notification:Prior malignancy:Prior malignancy lung cancer. No systemic chemotherapy or radiation.
+TCGA-CH-5764	PRAD	Notification:Prior malignancy:Prior malignancy esophageal cancer. No systemic chemotherapy or radiation.
+TCGA-CH-5772	PRAD	Notification:Prior malignancy:Prior malignancy colon cancer.  No systemic chemotherapy or radiation.
+TCGA-CH-5790	PRAD	Notification:Prior malignancy:Prior malignancy kidney cancer. No systemic treatment or radiation.
+TCGA-CH-5791	PRAD	Notification:Prior malignancy:Prior malignancy skin cancer. No systemic chemotherapy or radiation.
+TCGA-EJ-5542	PRAD	Notification:Prior malignancy:Prior malignancy melanoma. No systemic chemotherapy or radiation.
+TCGA-EJ-7123	PRAD	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the nose. No systemic chemotherapy or radiation.
+TCGA-EJ-7312	PRAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had previous cancer in thyroid gland and unknown radiation and chemotherapy.
+TCGA-EJ-7791	PRAD	Notification:Prior malignancy:Prior malignancy basal cell carcinoma L arm.  Unknown treatment history.
+TCGA-HC-7740	PRAD	Notification:Item is noncanonical:FFPE PRAD Pilot 1
+TCGA-HC-7741	PRAD	Notification:Item is noncanonical:FFPE validation
+TCGA-HC-7748	PRAD	Notification:Prior malignancy:Prior malignancy R kidney cancer.  No systemic chemotherapy or radiation.
+TCGA-HC-7821	PRAD	Notification:Prior malignancy:Prior malignancy SCC of the neck.  No systemic chemotherapy or radiation.
+TCGA-HC-8212	PRAD	Notification:Item is noncanonical:FFPE PRAD Pilot 1- There are currently no matching frozen tissue analytes that have been shipped as of 06/18/2012.
+TCGA-HC-8258	PRAD	Notification:Item is noncanonical:FFPE PRAD Pilot 1
+TCGA-HC-8259	PRAD	Notification:Item does not meet study protocol:Upon second review, the frozen top slide used to qualify the case had no tumor.
+TCGA-HC-8261	PRAD	Notification:Item is noncanonical:FFPE PRAD Pilot 1
+TCGA-HC-8265	PRAD	Notification:Item is noncanonical:FFPE PRAD Pilot 1
+TCGA-XK-AAJ3	PRAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:extent and type of chemotherapy unknown
+TCGA-XK-AAK1	PRAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:During Enrollment it was found that the patient had a prior skin malignancy where dates and txreatment information are unknown.
+TCGA-AF-3913	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated with chemotherapy.
+TCGA-AG-3580	READ	Notification:Prior malignancy:Prior malignancy pancreas cancer treated with radiation
+TCGA-AG-3611	READ	Notification:Prior malignancy:Prostate cancer treated with hormone therapy and radiation.
+TCGA-AG-3612	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy breast cancer treated with systemic chemotherapy and radiation
+TCGA-AG-4008	READ	Notification:Prior malignancy:Prior malignancy prostate cancer.  No systemic chemotherapy or radiation.
+TCGA-AG-A00H	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-AG-A014	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-AG-A015	READ	Notification:Prior malignancy:Patient had a prior melanoma of trunk, and skin cancer in the head and neck. No radiation or systemic chemotherapy.
+TCGA-AG-A01N	READ	Notification:Prior malignancy:Patient had a prior cancer in the sigmoid colon. No radiation or systemic chemotherapy.
+TCGA-AG-A023	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-BM-6198	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated with locoregional radiation.
+TCGA-G5-6233	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated with locoregional radiation.
+TCGA-G5-6235	READ	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated with locoregional radiation.
+TCGA-G5-6572	READ	Notification:Case submitted is found to be a recurrence after submission:The TSS confirmed they sent the BCR a recurrence and not a primary tumor.
+TCGA-G5-6641	READ	Notification:Prior malignancy:Prior malignancy basal cell carcinoma of the lip. No systemic chemotherapy or radiation.
+TCGA-FX-A3NK	SARC	Notification:Prior malignancy:Patient had a prior unknown malignancy of the kidney. No radiation or systemic chemotherapy.
+TCGA-HS-A5N9	SARC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-IF-A3RQ	SARC	Notification:Prior malignancy:Patient had a prior tubular adenonoma of the colon. No radiation or systemic chemotherapy.
+TCGA-IF-A4AK	SARC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had an invasive mammary carcinoma, NOS of the breast. Patient had localized radiation and systemic chemotherapy.
+TCGA-IS-A3K6	SARC	Notification:Prior malignancy:Patient had a prior basal cell carcinoma of the face. No radation or systemic chemotherapy.
+TCGA-IS-A3K8	SARC	Notification:Prior malignancy:Patient had a prior melanoma of the arm and squamous cell carcinoma of the lip. No radiation or systemic chemotherapy.
+TCGA-KF-A41W	SARC	Notification:Prior malignancy:Patient had an unknown prior tumor of the skin. No radiation or systemic chemotherapy.
+TCGA-MO-A47P	SARC	Notification:Item does not meet study protocol:This sarcoma case is a well-differentiated adenocarcinoma and the study requires the cases be de-differentiated.
+TCGA-PC-A5DM	SARC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-PC-A5DP	SARC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-QQ-A8VB	SARC	Notification:Case submitted is found to be a recurrence after submission:TSS confirmed this case is a recurrence and not a primary tumor
+TCGA-BR-4186	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4190	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4194	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4195	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4196	STAD	Redaction:Duplicate case:Duplicate subject (with 4197) per Roy (redact)
+TCGA-BR-4197	STAD	Redaction:Duplicate case:Duplicate subject (with 4196) per Roy (redact)
+TCGA-BR-4199	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4200	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4205	STAD	Redaction:Duplicate case:Case is duplicate of TCGA-BR-4282.  per Kenna on the 6/15/2011 Joint BCR call, redact both cases
+TCGA-BR-4259	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4260	STAD	Redaction:Duplicate case:Duplicate subject (with 4263) per Roy (redact)
+TCGA-BR-4261	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4263	STAD	Redaction:Duplicate case:Duplicate subject (with 4260) per Roy (redact)
+TCGA-BR-4264	STAD	Redaction:Duplicate case:Duplicate subject (with 4266) per Roy (redact)
+TCGA-BR-4265	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4266	STAD	Redaction:Duplicate case:Duplicate subject (with 4264) per Roy (redact)
+TCGA-BR-4270	STAD	Redaction:Duplicate case:Duplicate subject (with 4271) per Roy (redact)
+TCGA-BR-4271	STAD	Redaction:Duplicate case:Duplicate subject (with 4270) per Roy (redact)
+TCGA-BR-4272	STAD	Redaction:Duplicate case:Duplicate subject (with 4273) per Roy (redact)
+TCGA-BR-4273	STAD	Redaction:Duplicate case:Duplicate subject (with 4272) per Roy (redact)
+TCGA-BR-4274	STAD	Redaction:Duplicate case:Duplicate subject (with 4276) per Roy (redact)
+TCGA-BR-4276	STAD	Redaction:Duplicate case:Duplicate subject (with 4274) per Roy (redact)
+TCGA-BR-4277	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4278	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4281	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4282	STAD	Redaction:Duplicate case:Case is duplicate of TCGA-BR-4205. per Kenna on the 6/15/2011 Joint BCR call, redact both cases
+TCGA-BR-4283	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4284	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4285	STAD	Redaction:Duplicate case:Duplicate subject (with 4286) per Roy (redact)
+TCGA-BR-4286	STAD	Redaction:Duplicate case:Duplicate subject (with 4285) per Roy (redact)
+TCGA-BR-4288	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4291	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4298	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4375	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-BR-4376	STAD	Redaction:Subject identity unknown:Site found that there was duplicate tissue in their biobank with another ID and different clinical data than that sent to TCGA.  Case is being redacted but may be salvaged if the site can reconsile the correct clinical data to the tissue.
+TCGA-CG-4444	STAD	Notification:Prior malignancy:Prior malignancy bladder cancer. No systemic chemotherapy or radiation.
+TCGA-CG-4460	STAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy  ovarian cancer treated with chemotherapy.
+TCGA-CG-4476	STAD	Notification:Prior malignancy:Prior malignancy of the prostate. No systemic chemotherpay or radiation.
+TCGA-CG-5716	STAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy prostate cancer treated with chemotherapy and radiation.
+TCGA-EQ-A4SO	STAD	Notification:Prior malignancy:Patient had a prior basal cell carcinoma of the skin. No radiation or systemic chemotherapy.
+TCGA-F1-6177	STAD	Notification:Prior malignancy:Prior malignancy prostate cancer. No systemic chemotherapy or radiation.
+TCGA-HF-7131	STAD	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior malignancy R breast cancer treated with Epirubicin Hydrochloride, Fluorouracil, Cyclophosphamide, Docetaxel, and Tamoxifen Citrate.
+TCGA-2G-AAFE	TGCT	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient recieved chemotherapy (Bleomycine, Etoposide, and Cisplatin) for the prior maligancy (opposite testicle)
+TCGA-BJ-A0ZF	THCA	Notification:Item does not meet study protocol:After pathology report review it was found that the case is a Follicular Carcinoma, not a follicular variant.
+TCGA-BJ-A290	THCA	Notification:Prior malignancy:Patient had a prior prostate cancer. No radiation or systemic chemotherapy.
+TCGA-BJ-A291	THCA	Notification:Prior malignancy:Patient had a prior skin cancer, NOS. No radiation or systemic chemotherapy.
+TCGA-DE-A0XZ	THCA	Notification:Prior malignancy:Patient had a prior melanoma on back. No radiation or systemic chemotherapy.
+TCGA-DJ-A3UU	THCA	Notification:Prior malignancy:Patient had a prior basal cell carcinoma of the skin in head/neck region. Unknown radiation or systemic chemotherapy.
+TCGA-DJ-A3UV	THCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had a prior non-Hodgkins lymphoma that was treated with systemic chemotherapy.
+TCGA-DJ-A3UW	THCA	Notification:Prior malignancy:Patient had a prior squamous cell carcinoma of the oral cavity. No radiation or systemic chemotherapy.
+TCGA-DJ-A3V4	THCA	Notification:Prior malignancy:Patient had a prior in situ ductal carcinoma of the breast. No radiation or systemic chemotherapy.
+TCGA-DJ-A3V6	THCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had a prior non-Hodgkins lymphoma that was treated with systemic chemotherapy.
+TCGA-E3-A3E5	THCA	Notification:Prior malignancy:Patient had a prior in situ melanoma of the head and neck region. No radiation or systemic chemotherapy.
+TCGA-EL-A3CS	THCA	Notification:Case submitted is found to be a recurrence after submission:patient had a prior thyroid maligancy with radiation
+TCGA-EL-A3D0	THCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-EL-A3D5	THCA	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-EM-A3AQ	THCA	Notification:Prior malignancy:Patient had a prior 0.9 mm melanoma of the calf. Sentinel node negative. No radiation or systemic chemotherapy.
+TCGA-ET-A3BO	THCA	Notification:Prior malignancy:Patient had a prior basal cell carcinoma of the scalp. No radiation or systemic chemotherapy.
+TCGA-ET-A3BV	THCA	Notification:Prior malignancy:Patient had a prior carcinoid lung cancer. No radiation or systemic chemotherapy.
+TCGA-FK-A3SD	THCA	Notification:Prior malignancy:Patient had a prior ductal carcinoma of the breast. No radiation or systemic chemotherapy.
+TCGA-J8-A3NZ	THCA	Notification:Prior malignancy:Patient had a prior lobular carcinoma in situ of the breast. No radiation or systemic chemotherapy.
+TCGA-L6-A4ET	THCA	Notification:Prior malignancy:Patient had a prior small cell squamous cell carcinoma of the lung. No radiation or systemic chemotherapy.
+TCGA-3G-AB0T	THYM	Notification:Case submitted is found to be a recurrence after submission:Distant metastasis submitted as a primary for TCGA. Case was initially diagnosed 5 years prior.
+TCGA-A5-A0GI	UCEC	Notification:Prior malignancy:Case had Prior malignancy
+TCGA-A5-A0GM	UCEC	Notification:Prior malignancy:Case had Prior malignancy
+TCGA-AP-A053	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-AP-A05D	UCEC	Notification:Prior malignancy:from Jay Bowen/NWCH
+TCGA-AX-A06D	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-AX-A1CP	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-AX-A1CR	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-AX-A2H8	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-AX-A2HF	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-AX-A3G3	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-B5-A0KB	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-BG-A0M8	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:During Enrollment it was found that patient had a prior left breast ductal malignany that was treated with systemic pharma treatment (Adriamycin/Cytoxan) 7 years prior to TCGA tumor procurement
+TCGA-BG-A0MS	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Prior to resection of TCGA tumor, patient had pharmaceutical treatment for a prior left breast cancer. Following the mastectomy, patient had 5 years of Tamoxifen and 6-8 cycles of chemotherapy.
+TCGA-BG-A220	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:systemic treatment given to the prior/other malignancy
+TCGA-BG-A221	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-D1-A0ZO	UCEC	Notification:Prior malignancy:
+TCGA-D1-A102	UCEC	Notification:Prior malignancy:Patient had a prior parotid gland tumor of unknown histology. No systemic radation or chemotherapy.
+TCGA-D1-A2G5	UCEC	Notification:Prior malignancy:Patient had a prior kidney tumor. No systemic radation or chemotherapy.
+TCGA-D1-A3JP	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-EY-A1G7	UCEC	Notification:Case submitted is found to be a recurrence after submission:patient had a prior endometrial maligancy
+TCGA-EY-A1G8	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:unknown treatment history
+TCGA-EY-A1GK	UCEC	Notification:Prior malignancy:Patient had a previous cancer of the ureter. No systemic radiation or chemotherapy.
+TCGA-EY-A1GQ	UCEC	Notification:Prior malignancy:Patient had a previous melanoma of the foot. No systemic radiation or chemotherapy.
+TCGA-EY-A212	UCEC	Notification:Prior malignancy:Patient had a previous colorectal tumor. No systemic radiation or chemotherapy.
+TCGA-EY-A215	UCEC	Notification:Prior malignancy:Patient had a previous chondrosarcoma. No systemic radiation or chemotherapy.
+TCGA-FI-A2CX	UCEC	Notification:Prior malignancy:Patient had a previous basaloid squamous cell carcinoma of the forehead. No systemic radiation or chemotherapy.
+TCGA-FI-A2F4	UCEC	Notification:Prior malignancy:Patient had a previous pheochromocytoma of the adrenal gland. No systemic radiation or chemotherapy.
+TCGA-KJ-A3U4	UCEC	Notification:History of unacceptable prior treatment related to a prior/other malignancy:Patient had a previous invasive ductal adenocarcinoma of the breast that was treated with locoregional radiation and systemic chemotherapy.
+TCGA-KP-A3VZ	UCEC	Notification:Prior malignancy:Patient had a previous basaloid squamous cell carcinoma of the nose. No systemic radiation or chemotherapy.
