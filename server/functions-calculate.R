@@ -584,7 +584,7 @@ two_gene_heuristic <- function(
   rownames(df_tracking) <- 1:j_len#names(quantiles)
 
   # start from the median quantile
-  i <- floor(i_len/2); q <- quantiles[i]
+  i <- ceiling(i_len/2); q <- quantiles[i]
   # if not enough data, skip and render users an error msg
   if(q == 0 | length(unique(quantiles2))==1){return(NULL);next;}
   # proceed only if enough data
