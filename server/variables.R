@@ -1,7 +1,7 @@
 # directory to temporarily save variables
 surv_dir <- paste0(dirname(dirname(getwd())), "/variables/")
 # default iteration parameters
-dmin <- .1; dmax <- .9; dstep <- .05
+dmin <- .2; dmax <- .8; dstep <- .1
 # ------ available GMT gene sets -----
 gmt_dir <- "https://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/hsa/"
 in_gmt_lst <- "https://tau.cmmt.ubc.ca/eVITTA/easyGSEA/gmts/gmts_list.csv"
