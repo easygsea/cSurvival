@@ -3,11 +3,11 @@ db_dir <- "https://tau.cmmt.ubc.ca/cSurvival/project_data/"
 observeEvent(input$db_download,{
   showModal(
     modalDialog(
-      title = h3(HTML("cSurvival Data Repository")),
+      title = h3(HTML("cSurvival<sup>v1.0.0</sup> Data Repository")),
       fluidRow(style = "font-size:110%;",
         column(
           12,
-          p(paste0("cSurvival aims to provide reliable and integrated resources for both experimental and clinical researchers to scrutinize potential prognostic biomarkers and their interactions, evaluate candidate cell line models for mechanistic studies, and study genetic regulation of drug resistance in cancers."))
+          p(paste0("cSurvival aims to provide reliable and integrated resources for both experimental and clinical researchers to scrutinize potential prognostic biomarkers and their interactions, evaluate candidate cell line models for mechanistic studies, and study the genetic regulation of drug resistance in cancers."))
           ,p(paste0("For each dataset, we controlled for quality by flagging problematic samples (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC)",
                     ", extracted primary tumor data (Sample Type Code 03 or 09 for TCGA-LAML, TARGET-ALL and TARGET-AML; 01 or 06 for TCGA-SKCM; 01 for others) to suit the purpose of outcomes analysis, and transformed the data into a standardized format for customizable and reproducible studies."
                     ," Uniquely, cSurvival offers:"

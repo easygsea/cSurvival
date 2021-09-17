@@ -17,7 +17,7 @@ shinyUI(
         
         title="cSurival",
 
-        dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<span style='color:#F5FBEF;'><b>cSurvival</b></span>: a mechanistic cancer survival database"))
+        dashboardHeader(title = div(id="ui_title",align="left",HTML("<span style='color:#F5FBEF;'><b>cSurvival</b><sup><img src='android-chrome-512x512.png' height='13px' title='Logo by Jiaming (Caitlyn) Xu' style='margin-top: -3px;'></img>v1.0.0</sup></span>: a mechanistic cancer survival database"))
                         ,titleWidth = "80%"
                         ,tags$li(class = "dropdown", actionButton("db_download", NULL,icon("database"),style=db_style))
                         ,tags$li(class = "dropdown", actionButton("db_help", NULL,icon("question"),style=db_style))
