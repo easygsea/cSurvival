@@ -2,6 +2,10 @@ library(stringr)
 library(hash)
 library(plumber)
 
+#* @apiTitle cSurvival API
+#* @apiDescription API to download cSurvival's database
+#* @apiVersion 1.0.0
+
 api_path = "/home/cSurvival/ShinyApps"
 
 #Initialize a dictionary to record all possible get data combination----
