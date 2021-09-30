@@ -98,8 +98,6 @@ calculate_ylim <- function(DepMap,TARGET,TCGA,bigproject = c("DepMap","TARGET","
   return(box_ylim)
 }
 
-
-box_ylim
 box_ylim <- calculate_ylim(DepMap = DepMap,TARGET = TARGET, TCGA = TCGA)
 
 text_coefficient <- 0.9
@@ -158,12 +156,12 @@ circos.text(x = c(1,1.75:32.75), y = CELL_META$cell.ylim[2] * text_coefficient *
 circos.text(x = c(0.75,1.75:8.75), y = CELL_META$cell.ylim[2] * text_coefficient * 0.9, labels = as.character(df_inner$count[df_inner$bigproject == "TARGET"]), cex = 0.4, facing = "clockwise", niceFacing = TRUE, sector.index	= "TARGET", track.index = 3)
 circos.text(x = c(1,1.75:2.75), y = CELL_META$cell.ylim[2] * text_coefficient * 0.9, labels = as.character(df_inner$count[df_inner$bigproject == "DepMap"]), cex = 0.4, facing = "clockwise", niceFacing = TRUE, sector.index	= "DepMap", track.index = 3)
 
-#This is for the most inner track
-circos.track(df_inner$bigproject,ylim = c(0,1), track.height = 0.2, panel.fun = function(x, y){
-  circos.axis(h = 1, major.tick = F, minor.ticks = F,
-              labels.cex = 0.1, col = categories_cols[CELL_META$sector.numeric.index], labels.col="#ffffff")
-  circos.text(CELL_META$xcenter, y = 0, CELL_META$sector.index, cex = 0.75,
-              facing = "clockwise",col = categories_cols[CELL_META$sector.numeric.index], niceFacing = TRUE)
-}, bg.border = NA)
+# #This is for the most inner track
+# circos.track(df_inner$bigproject,ylim = c(0,1), track.height = 0.2, panel.fun = function(x, y){
+#   circos.axis(h = 1, major.tick = F, minor.ticks = F,
+#               labels.cex = 0.1, col = categories_cols[CELL_META$sector.numeric.index], labels.col="#ffffff")
+#   circos.text(CELL_META$xcenter, y = 0, CELL_META$sector.index, cex = 0.75,
+#               facing = "clockwise",col = categories_cols[CELL_META$sector.numeric.index], niceFacing = TRUE)
+# }, bg.border = NA)
 
 circos.clear()
