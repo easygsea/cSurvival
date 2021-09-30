@@ -3,6 +3,7 @@ if(!requireNamespace("BiocManager", quietly = TRUE))
 if (!require('shiny')) {install.packages('shiny')}
 if (!require('shinydashboard')) {install.packages('shinydashboard')}
 if (!require('shinydashboardPlus')) {install.packages('shinydashboardPlus')}
+detach("package:shinydashboardPlus",unload=TRUE)
 if (!require('shinythemes')) {install.packages('shinythemes')}
 if (!require('shinyWidgets')) install.packages('shinyWidgets')
 if (!require('shinyBS')) install.packages('shinyBS')
