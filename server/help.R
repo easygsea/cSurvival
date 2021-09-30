@@ -110,7 +110,7 @@ init_tcga <- function(){
   shinyjs::delay(4500, updateSelectizeInput(session,"gs_l_2", selected = "WP_HIF1A_and_PPARG_regulation_of_glycolysis%WP2456"))
   
   # mimic clicking run button
-  shinyjs::delay(5000, shinyjs::click("confirm"))
+  shinyjs::delay(8000, shinyjs::click("confirm"))
 }
 
 
@@ -138,7 +138,7 @@ init_depmap <- function(){
   shinyjs::delay(1800, rv[["g_2"]] <- "KEAP1|9817")
 
   # mimic clicking run button
-  shinyjs::delay(7500, shinyjs::click("confirm"))
+  shinyjs::delay(10000, shinyjs::click("confirm"))
 }
 
 load_demo_modal <- function(time=11000){
