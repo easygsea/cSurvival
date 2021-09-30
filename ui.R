@@ -16,12 +16,13 @@ shinyUI(
     dashboardPage(
         
         title="cSurival",
-
-        dashboardHeader(title = div(id="ui_title",align="left",HTML("&nbsp&nbsp&nbsp&nbsp<span style='color:#F5FBEF;'><b>cSurvival</b></span>: a mechanistic cancer survival database"))
-                        ,titleWidth = "80%"
+        
+        dashboardHeader(title = div(id="ui_title",align="left",HTML("<span style='color:#F5FBEF;'><b>cSurvival</b><sup><a href='https://tau.cmmt.ubc.ca/cSurvival/android-chrome-512x512.png' target='_blank' data-toggle='tooltip' title='' data-original-title='Logo by Jiaming (Caitlyn) Xu' data-placement='bottom'><img src='android-chrome-512x512.png' height='13px' style='margin-top: -3px;'></img></a>v1.0.0</sup></span>: a mechanistic cancer survival database"))
+                        ,titleWidth = "60%"
                         ,tags$li(class = "dropdown", actionButton("db_download", NULL,icon("database"),style=db_style))
                         ,tags$li(class = "dropdown", actionButton("db_help", NULL,icon("question"),style=db_style))
                         ,tags$li(class = "dropdown", actionButton("db_demo", NULL,icon=icon("play"),style=db_style))
+                        # ,tags$li(class = "dropdown", actionButton("db_api", NULL,icon=icon("bookmark", "fas"),style=db_style))
         )
         # skin = "black",
         ,sidebar
@@ -40,7 +41,7 @@ shinyUI(
             use_waiter(), # dependencies
             waiter_show_on_load(tagList(spin_orbiter(),h4(loadMsg)), color = "#2D4059"), # shows before anything else
             disconnectMessage(text = "Your session has timed out. Please refresh page and start again. For bug report, email us at jcheng@cmmt.ubc.ca. Thank you for your support."),
-
+            
             useShinyalert(),  # Set up shinyalert
             rintrojs::introjsUI(), # introjs
             useShinyjs(), # Set up shinyjs
@@ -53,6 +54,7 @@ shinyUI(
             ,bsTooltip("db_download","Download source data")
             ,bsTooltip("db_help","Help")
             ,bsTooltip("db_demo","Example runs")
+            # ,bsTooltip("db_api", "Show API commands available")
             
             # ,tags$footer(HTML("<b>Taubert Lab</b> | BC Children's Hospital Research Institute | Centre for Molecular Medicine and Therapeutics | University of British Columbia. 2019-2020. All Rights Reserved."),
             #             align = "left", style = "
@@ -64,9 +66,9 @@ shinyUI(
             #   padding: 5px;
             #   background-color: #3179ae;
             #   z-index: 1000;")
-
-
+            
+            
         )
-
+        
     )
 )
