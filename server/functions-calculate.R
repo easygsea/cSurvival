@@ -584,7 +584,7 @@ two_gene_heuristic <- function(
   rownames(df_tracking) <- 1:j_len#names(quantiles)
 
   # start from the median quantile
-  i <- floor(i_len/2); q <- quantiles[i]
+  i <- ceiling(i_len/2); q <- quantiles[i]
   # if not enough data, skip and render users an error msg
   if(q == 0 | length(unique(quantiles2))==1){return(NULL);next;}
   # proceed only if enough data
@@ -607,13 +607,13 @@ two_gene_heuristic <- function(
   update_tracker <- rrr2[["heatmap_new_rows"]]
   # start surrounding searching
   final_min_p <- init_min_p
-  while(i > 1 & i < i_len & j > 1 & j < j_len){
+  while(i < i_len | j < j_len | i > 1 | j > 1){
     names(i) <- names(quantiles[i])
     names(j) <- names(quantiles2[j])
-    a <- c(i-1,j); b <- c(i,j-1); c <- c(i+1,j); d <- c(i,j+1)
-    comb <- list(a,b,c,d)
+    a <- ifelse(c(i-1==0,F),NA,c(i-1,j)); b <- ifelse(c(j-1==0,F),NA,c(i,j-1)); c <- ifelse(c(i+1>i_len,F),NA,c(i+1,j)); d <- ifelse(c(j+1>j_len,F),NA,c(i,j+1))
+    comb <- list(a,b,c,d); comb <- Filter(Negate(anyNA), comb)
     # fix regression models via parallel processing
-    rrr_sr <- mclapply(1:4,mc.cores = nCores,function(k){
+    rrr_sr <- mclapply(1:length(comb),mc.cores = nCores,function(k){
     #rrr_sr <- lapply(1:4,function(k){
       ij_k <- comb[[k]]; i_k <- ij_k[1]; j_k <- ij_k[2]
       # skip if tracked

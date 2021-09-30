@@ -10,6 +10,10 @@ library(data.table)
 #* @apiDescription API to download cSurvival's database
 #* @apiVersion 1.0.0
 
+#* @apiTitle cSurvival API
+#* @apiDescription API to download cSurvival's database
+#* @apiVersion 1.0.0
+
 api_path = "/home/cSurvival/ShinyApps"
 indir <- paste0(api_path, "/www/project_data/")
 df_ccle <- fread(paste0(indir,"DepMap/ccle.csv"), select = c("patient_id","CCLE_Name","gender","primary_or_metastasis","primary_disease","Subtype"))
