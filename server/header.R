@@ -17,10 +17,11 @@ observeEvent(input$db_download,{
           ,p("Plus,")
           ,tags$li(HTML("A curated outcomes database."))
           ,br()
-          ,p(paste0(
-            "Scroll down to download cSurvival's curated datasets. For each dataset, we controlled for quality by flagging problematic samples (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC)",
+          ,HTML(paste0(
+          #HTML("<p style='font-weight: bold; font-size: large'>Click to access </p>"),
+            "<p>Scroll down, or use <span style='font-weight: bold;'><a href='http://tau.cmmt.ubc.ca:4500/__docs__/' target='_blank'>cSurvival's API<i class='fas fa-external-link-alt fa-sm'></i></a></span> to download cSurvival's curated datasets. For each dataset, we controlled for quality by flagging problematic samples (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC)",
             ", extracted primary tumor data (Sample Type Code 03 or 09 for TCGA-LAML, TARGET-ALL and TARGET-AML; 01 or 06 for TCGA-SKCM; 01 for others) to suit the purpose of outcomes analysis, and transformed the data into a standardized format for customizable and reproducible studies."
-            ,""
+            ,"</p>"
           ))
           ,br()
         ),
@@ -139,7 +140,7 @@ observeEvent(input$db_download,{
             # ------------- 4. eVITTA GSs --------------
             ,red_title("eVITTA gene set (GS) libraries by category:")
             ,tagList(lapply(names(gmt_dbs), function(db_cat){
-              
+
               div(
                 grey_h4(db_cat),
                 tagList(
@@ -161,3 +162,32 @@ observeEvent(input$db_download,{
 })
 
 observeEvent(input$project_tcga,{req(input$project_tcga != "");rv$project_tcga <- input$project_tcga})
+
+# getAPIPage<-function() {
+#   return(tags$iframe(src = "http://tau.cmmt.ubc.ca:4500/__docs__/"
+#                      , style="width:100%;",  frameborder="0"
+#                      ,id="iframe"
+#                      , height = "500px"))
+#   cat(HTML(readLines('http://tau.cmmt.ubc.ca:4500/__docs__/')))
+#   return((HTML(readLines('http://tau.cmmt.ubc.ca:4500/__docs__/'))))
+# }
+
+# output$APIPage<-renderUI({
+#   getAPIPage
+#   tags$iframe(src = "http://tau.cmmt.ubc.ca:4500/__docs__/"
+#               , style="width:100%;",  frameborder="0"
+#               ,id="iframe"
+#               , height = "500px")
+# })
+
+# observeEvent(input$db_api, {
+#   showModal(
+#     modalDialog(
+#       tags$iframe(src = "http://tau.cmmt.ubc.ca:4500/__docs__/"
+#                   , style="width:100%;",  frameborder="0"
+#                   ,id="iframe"
+#                   , height = "500px"),
+#       size="l"
+#     )
+#   )
+# })
