@@ -2023,11 +2023,18 @@ output$tracking_heatmap_plot_gear <- renderUI({
           bsTooltip("tracking_heatmap_annotation_help",paste0("Switch on to show p-value texts on top of the heatmap. Switch off to hide them"),placement = "top")
           ,conditionalPanel(
           'input.tracking_heatmap_annotation',
-            sliderInput("tracking_heatmap_text_size", label = HTML(paste0("Font size of the annotation texts:", add_help("tracking_heatmap_text_size_help"))),
+          selectInput(
+            "hm_text_color",
+            HTML(paste0("Color of the annotation text: ",add_help("hm_text_color_q"))),
+            choices = c("Black"="black", "White"="white"),
+            selected = rv$hm_text_color
+          )
+          ,bsTooltip("hm_text_color_q","Adjust the font color of the text.",placement = "top"),
+            sliderInput("tracking_heatmap_text_size", label = HTML(paste0("Font size of the annotation text: ", add_help("tracking_heatmap_text_size_help"))),
                         min = 1, max = 30, value = rv$tracking_heatmap_text_size
             )
-            ,bsTooltip("tracking_heatmap_text_size_help",HTML(paste0("Increase or decrease the font size of the tracking heatmap plot."))
-            ,placement = "top"),
+            ,bsTooltip("tracking_heatmap_text_size_help",HTML(paste0("Adjust the font size of the text."))
+            ,placement = "top")
         )
         )
       )
@@ -2037,6 +2044,7 @@ observeEvent(input$tracking_heatmap_annotation,{rv$tracking_heatmap_annotation <
 observeEvent(input$tracking_heatmap_text_size,{rv$tracking_heatmap_text_size <- input$tracking_heatmap_text_size})
 observeEvent(input$tracking_heatmap_color,{req(!is.null(input$tracking_heatmap_color));req(input$tracking_heatmap_color != "");rv$tracking_heatmap_color <- input$tracking_heatmap_color})
 observeEvent(input$hm_alpha,{rv$hm_alpha <- input$hm_alpha})
+observeEvent(input$hm_text_color,{req(!is.null(input$hm_text_color));rv$hm_text_color <- input$hm_text_color})
 
 # --------- 8b. download tracking plots -------------
 output$download_plot_heatmap <- downloadHandler(

@@ -830,7 +830,11 @@ pvalue_heatmap <- function(heatmap_df){
     }
     selected_color <- col2rgb(selected_color) #adjust_transparency(selected_color,alpha=rv$hm_alpha)
     selected_color <- sapply(1:ncol(selected_color), function(x) {x <- c(selected_color[,x],rv$hm_alpha); paste0("rgba(",paste0(x, collapse = ", "),")")})
-    selected_color <- c("rgba(255, 255, 255, 1)", selected_color)
+    if(rv$hm_text_color == "black"){
+      selected_color <- c(paste0("rgba(255, 255, 255, ",rv$hm_alpha,")"), selected_color)
+    }else if(rv$hm_text_color == "white"){
+      selected_color <- c(paste0("rgba(190, 190, 190, ",rv$hm_alpha,")"), selected_color)
+    }
     selected_color <- lapply(1:length(selected_color), function(i) list(selected_color_no[i], selected_color[i]))
   }else if(rv$tracking_heatmap_color == "white"){
     selected_color <- rep("rgb(255, 255, 255)",6)
@@ -858,11 +862,17 @@ pvalue_heatmap <- function(heatmap_df){
       yaxis = list(title = y_axis_title, showticklabels = T, showgrid = F)
       # ,margin = list(l=200)
     )
+  # cols <- ifelse(dat$annotation == "NA","#000000","#ffffff")
   if(rv$tracking_heatmap_annotation){
+    if(rv$hm_text_color == "black"){
+      tcol <- "#000000"
+    }else if(rv$hm_text_color == "white"){
+      tcol <- "#ffffff"
+    }
     fig <- fig %>%
       add_annotations(x = dat$Q1, y = dat$Q2,
                       text = dat$annotation,
-                      showarrow = FALSE, xref = 'x', yref = 'y', font=list(color='black', size = rv$tracking_heatmap_text_size)
+                      showarrow = FALSE, xref = 'x', yref = 'y', font=list(color=tcol, size = rv$tracking_heatmap_text_size)
                       ,ax = 20, ay = -20
       )
   }
