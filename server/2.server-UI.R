@@ -1996,10 +1996,20 @@ output$tracking_heatmap_plot_gear <- renderUI({
                         "Oranges" = "Oranges",
                         "Blues" = "Blues",
                         "Greys" = "Grays"
+                        ,"White" = "white"
                         ),
             selected = rv$tracking_heatmap_color
           )
           ,bsTooltip("tracking_heatmap_color_help",paste0("Select the color scheme for the tracking heatmap"),placement = "top")
+          # add transparency to colors
+          ,conditionalPanel(
+            'input.tracking_heatmap_color != "white"',
+            sliderInput(
+              "hm_alpha",
+              HTML(paste0("Adjust color transparency: ",add_help("hm_alpha_q"))),
+              value = rv$hm_alpha, min = 0, max = 1, step = 0.1
+            )
+          )
           # show annotation
           ,materialSwitch(
             inputId = "tracking_heatmap_annotation",
@@ -2023,6 +2033,7 @@ output$tracking_heatmap_plot_gear <- renderUI({
 observeEvent(input$tracking_heatmap_annotation,{rv$tracking_heatmap_annotation <- input$tracking_heatmap_annotation})
 observeEvent(input$tracking_heatmap_text_size,{rv$tracking_heatmap_text_size <- input$tracking_heatmap_text_size})
 observeEvent(input$tracking_heatmap_color,{req(!is.null(input$tracking_heatmap_color));req(input$tracking_heatmap_color != "");rv$tracking_heatmap_color <- input$tracking_heatmap_color})
+observeEvent(input$hm_alpha,{rv$hm_alpha <- input$hm_alpha})
 
 # --------- 8b. download tracking plots -------------
 output$download_plot_heatmap <- downloadHandler(
