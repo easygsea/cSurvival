@@ -230,7 +230,10 @@ observeEvent(input$confirm,{
       rv$scatter_gender <- NULL
       if(rv$variable_nr == 1){
         rv$plot_type <- "1"; if(rv$cor_method=="pearson" & !rv$depmap){rv$cor_method <- "kendall"}
-        if(rv$depmap){rv$cor_method<-"spearman";rv$scatter_log_x<-F}
+        if(rv$depmap){
+          rv$cor_method<-"pearson";rv$scatter_log_x<-F
+          if(input$cat_1 == "gs"){rv$scatter_log_y <- F}
+        }
       }else{
         rv$plot_type <- "all"; if(rv$cor_method!="pearson"){rv$cor_method <- "pearson"}
       }
