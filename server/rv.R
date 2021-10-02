@@ -68,7 +68,7 @@ rv <- reactiveValues(
   ,tracking_heatmap_text_size = 14
   ,tracking_heatmap_annotation = TRUE
   ,tracking_heatmap_color = "default"
-  ,hm_alpha = 0.7
+  ,hm_alpha = 1
   
   # annotate cells
   ,annot_cells_y="" # yes

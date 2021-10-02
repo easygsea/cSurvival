@@ -1989,12 +1989,14 @@ output$tracking_heatmap_plot_gear <- renderUI({
             inputId = "tracking_heatmap_color",
             label = HTML(paste0("Select color scheme: ",add_help("tracking_heatmap_color_help"))),
             choices = c("Default" = "default",
-                        "Yellow Green Blue" = "YlGnBu",
+                        "Orange-Yellow" = "OrYel",
+                        "Peach" = "Peach",
                         "Reds" = "Reds",
-                        "Red Purple" = "RdPu",
-                        "Purples" = "Purples",
                         "Oranges" = "Oranges",
+                        "Purples" = "Purp",
                         "Blues" = "Blues",
+                        "Teal" = "Teal",
+                        "Greens" ="Greens",
                         "Greys" = "Grays"
                         ,"White" = "white"
                         ),
@@ -2009,6 +2011,7 @@ output$tracking_heatmap_plot_gear <- renderUI({
               HTML(paste0("Adjust color transparency: ",add_help("hm_alpha_q"))),
               value = rv$hm_alpha, min = 0, max = 1, step = 0.1
             )
+            ,bsTooltip("hm_alpha_q","1 = 100% opacity; 0 = transparent",placement = "top")
           )
           # show annotation
           ,materialSwitch(
