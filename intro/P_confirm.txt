@@ -1,4 +1,4 @@
 element	intro
-div_par_gear	If needed, click to adjust advanced parameters.
+div_par_gear	If needed, click to adjust advanced parameters. For example, you can adjust	the method for analyzing and summarizing survival data: KM describe the survival according to one factor under investigation; Cox regression model assesses the effect of several risk factors simultaneously.
 confirm	Click <b>Confirm and analyze!</b> to perform Kaplan-Meier (KM) log rank and Cox proportional-hazards (PH) regression analysis.
 

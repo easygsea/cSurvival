@@ -793,20 +793,24 @@ output$download_plot <- downloadHandler(
 # --------- 1b-ii. download dens plot -------------
 output$download_plot_dens <- downloadHandler(
   filename = function(){
-    paste0("dpdens_",Sys.time(),".html")
+    paste0("depmap_dens_",Sys.time(),".html")
   },
   content = function(file) {
-    saveWidget(as_widget(ggplotly(rv[["ggdens"]])), file, selfcontained = TRUE)
+    withProgress(value = 1,message = "Downloading plot...",{
+      saveWidget(as_widget(ggplotly(rv[["ggdens"]])), file, selfcontained = TRUE)
+    })
   }
 )
 
 # --------- 1b-iii. download dens's box plot -------------
 output$download_plot_box <- downloadHandler(
   filename = function(){
-    paste0("dpbox_",Sys.time(),".html")
+    paste0("depmap_box_",Sys.time(),".html")
   },
   content = function(file) {
-    saveWidget(as_widget(ggplotly(rv[["ggbox"]])), file, selfcontained = TRUE)
+    withProgress(value = 1,message = "Downloading plot...",{
+      saveWidget(as_widget(ggplotly(rv[["ggbox"]])), file, selfcontained = TRUE)
+    })
   }
 )
 
@@ -1903,6 +1907,15 @@ output$ui_track <- renderUI({
                    tooltip = tooltipOptions(title = "Click for advanced plotting parameters", placement = "top")
                  )
                )
+               ,div(
+                 id="download_btn_heatmap_div",
+                 style="display: inline-block;vertical-align:top;",
+                 downloadBttn(
+                   size = "sm", color = "danger", style = "material-circle",
+                   outputId = "download_plot_heatmap", label = NULL
+                 )
+                 ,bsTooltip("download_btn_heatmap_div","Click to download plot", placement = "top")
+               )
              )
       )
     }
@@ -1914,6 +1927,19 @@ output$ui_track <- renderUI({
           #width = (12 / rv$variable_nr),
           width = 12,
           plotlyOutput("quantile_graph", height = paste0(plt_h,"px"))
+          ,div(
+            align = "left",
+            style = "position: absolute; right: 7em; top: -3em;",
+            div(
+              id="download_btn_quantile_div",
+              style="display: inline-block;vertical-align:top;",
+              downloadBttn(
+                size = "sm", color = "danger", style = "material-circle",
+                outputId = "download_btn_quantile", label = NULL
+              )
+              ,bsTooltip("download_btn_quantile_div","Click to download plot", placement = "top")
+            )
+          )
         )
       }else{
         column(
@@ -1941,15 +1967,15 @@ output$quantile_graph <- renderPlotly({
   if(length(fig_list) == 2){
     fig <- subplot(fig_list[[1]], fig_list[[2]],nrows = 2, margin = 0.05)
   }
+  rv$fig_quantile <- fig
   fig
-
 })
 
 #Tracking boxplot graph---
 
 output$tracking_heatmap <- renderPlotly({
   #View(rv$heatmap_df)
-  fig <- pvalue_heatmap(rv$heatmap_df)
+  fig <- rv$fig_heatmap <- pvalue_heatmap(rv$heatmap_df)
   fig
 })
 
@@ -1963,17 +1989,30 @@ output$tracking_heatmap_plot_gear <- renderUI({
             inputId = "tracking_heatmap_color",
             label = HTML(paste0("Select color scheme: ",add_help("tracking_heatmap_color_help"))),
             choices = c("Default" = "default",
-                        "Yellow Green Blue" = "YlGnBu",
+                        "Orange-Yellow" = "OrYel",
+                        "Peach" = "Peach",
                         "Reds" = "Reds",
-                        "Red Purple" = "RdPu",
-                        "Purples" = "Purples",
                         "Oranges" = "Oranges",
+                        "Purples" = "Purp",
                         "Blues" = "Blues",
+                        "Teal" = "Teal",
+                        "Greens" ="Greens",
                         "Greys" = "Grays"
+                        ,"White" = "white"
                         ),
             selected = rv$tracking_heatmap_color
           )
           ,bsTooltip("tracking_heatmap_color_help",paste0("Select the color scheme for the tracking heatmap"),placement = "top")
+          # add transparency to colors
+          ,conditionalPanel(
+            'input.tracking_heatmap_color != "white"',
+            sliderInput(
+              "hm_alpha",
+              HTML(paste0("Adjust color transparency: ",add_help("hm_alpha_q"))),
+              value = rv$hm_alpha, min = 0, max = 1, step = 0.1
+            )
+            ,bsTooltip("hm_alpha_q","1 = 100% opacity; 0 = transparent",placement = "top")
+          )
           # show annotation
           ,materialSwitch(
             inputId = "tracking_heatmap_annotation",
@@ -1984,11 +2023,18 @@ output$tracking_heatmap_plot_gear <- renderUI({
           bsTooltip("tracking_heatmap_annotation_help",paste0("Switch on to show p-value texts on top of the heatmap. Switch off to hide them"),placement = "top")
           ,conditionalPanel(
           'input.tracking_heatmap_annotation',
-            sliderInput("tracking_heatmap_text_size", label = HTML(paste0("Font size of the annotation texts:", add_help("tracking_heatmap_text_size_help"))),
+          selectInput(
+            "hm_text_color",
+            HTML(paste0("Color of the annotation text: ",add_help("hm_text_color_q"))),
+            choices = c("Black"="black", "White"="white"),
+            selected = rv$hm_text_color
+          )
+          ,bsTooltip("hm_text_color_q","Adjust the font color of the text.",placement = "top"),
+            sliderInput("tracking_heatmap_text_size", label = HTML(paste0("Font size of the annotation text: ", add_help("tracking_heatmap_text_size_help"))),
                         min = 1, max = 30, value = rv$tracking_heatmap_text_size
             )
-            ,bsTooltip("tracking_heatmap_text_size_help",HTML(paste0("Increase or decrease the font size of the tracking heatmap plot."))
-            ,placement = "top"),
+            ,bsTooltip("tracking_heatmap_text_size_help",HTML(paste0("Adjust the font size of the text."))
+            ,placement = "top")
         )
         )
       )
@@ -1997,47 +2043,31 @@ output$tracking_heatmap_plot_gear <- renderUI({
 observeEvent(input$tracking_heatmap_annotation,{rv$tracking_heatmap_annotation <- input$tracking_heatmap_annotation})
 observeEvent(input$tracking_heatmap_text_size,{rv$tracking_heatmap_text_size <- input$tracking_heatmap_text_size})
 observeEvent(input$tracking_heatmap_color,{req(!is.null(input$tracking_heatmap_color));req(input$tracking_heatmap_color != "");rv$tracking_heatmap_color <- input$tracking_heatmap_color})
+observeEvent(input$hm_alpha,{rv$hm_alpha <- input$hm_alpha})
+observeEvent(input$hm_text_color,{req(!is.null(input$hm_text_color));rv$hm_text_color <- input$hm_text_color})
 
-  # fig <- plot_ly(rv$quantile_graph, x = rv$quantile_graph$quantile)
-  # fig <- fig %>% add_trace(y = ~rv$quantile_graph$p_value,type = 'scatter',#color =~p_value,
-  #                          line = list(color = 'rgb(173,173,173)', width = 2),
-  #
-  #                          name = 'P Value',
-  #                          marker=list(
-  #                            color=~p_value,
-  #                            # colorbar=list(
-  #                            #   title='Colorbar'
-  #                            # ),
-  #                            colorscale=col_scale,#'YlOrRd',#custom_colorscale,
-  #                            cmid = 0.5,
-  #                            reversescale =TRUE
-  #                          ),
-  #                          text = rv$quantile_graph$expression,
-  #                          name = '',mode = 'lines+markers', hovertemplate = paste(
-  #                            "%{y:.3f}<br>",
-  #                            "Quantile(in %) : %{x:.0f}<br>",
-  #                            "Expressions : %{text:.3f}<br>"
-  #                          )) %>%
-  #   add_trace(y = rv$quantile_graph$hr, name = 'Hazard Ratio',mode = 'lines+markers',type = 'scatter',
-  #             line = list(color = 'rgb(0,88,155)', width = 2),
-  #             marker=list(
-  #               symbol = 'diamond',
-  #               color=rv$quantile_graph$hr,
-  #               colorscale='RdBu',#'RdBu',#col_scale_hr,
-  #               cmid = 1,
-  #               reversescale =FALSE
-  #             ),
-  #             yaxis = "y2"
-  #   )%>%
-  #   layout(title = 'Precentile Tracking',
-  #          xaxis = list(title = 'Quantile(%)'),
-  #          yaxis = list (title = 'P Value'),
-  #          yaxis2 = list(overlaying = "y",
-  #                        side = "right",
-  #                        title = "Harzard Ratio"),
-  #          hovermode = "x unified"
-  #   )
+# --------- 8b. download tracking plots -------------
+output$download_plot_heatmap <- downloadHandler(
+  filename = function(){
+    paste0("tracking_heatmap_",Sys.time(),".html")
+  },
+  content = function(file) {
+    withProgress(value = 1,message = "Downloading plot...",{
+      saveWidget(as_widget(rv[["fig_heatmap"]]), file, selfcontained = TRUE)
+    })
+  }
+)
 
+output$download_btn_quantile <- downloadHandler(
+  filename = function(){
+    paste0("tracking_quantile_",Sys.time(),".html")
+  },
+  content = function(file) {
+    withProgress(value = 1,message = "Downloading plot...",{
+      saveWidget(as_widget(rv[["fig_quantile"]]), file, selfcontained = TRUE)
+    })
+  }
+)
 # --------- 9. violin plot -------------
 output$violin_plot <- renderPlotly({
   # check data types

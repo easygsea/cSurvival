@@ -3,20 +3,26 @@ db_dir <- "https://tau.cmmt.ubc.ca/cSurvival/project_data/"
 observeEvent(input$db_download,{
   showModal(
     modalDialog(
-      title = h3(HTML("cSurvival<sup>v1.0.0</sup> Data Repository")),
+      title = h3(HTML(paste0("cSurvival<sup>",current_version,"</sup> Data Repository"))),
       fluidRow(style = "font-size:110%;",
         column(
           12,
-          p(paste0("cSurvival aims to provide reliable and integrated resources for both experimental and clinical researchers to scrutinize potential prognostic biomarkers and their interactions, evaluate candidate cell line models for mechanistic studies, and study the genetic regulation of drug resistance in cancers."))
-          ,p(paste0("For each dataset, we controlled for quality by flagging problematic samples (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC)",
-                    ", extracted primary tumor data (Sample Type Code 03 or 09 for TCGA-LAML, TARGET-ALL and TARGET-AML; 01 or 06 for TCGA-SKCM; 01 for others) to suit the purpose of outcomes analysis, and transformed the data into a standardized format for customizable and reproducible studies."
-                    ," Uniquely, cSurvival offers:"
-                    ))
-          ,tags$li(HTML("Bivariate outcomes analysis to identify biomarker and/or pathway interactions and to screen for synthetical lethality or compensatory targets for non-targetable drivers;"))
-          ,tags$li(HTML("Pathway-level outcomes analysis with comprehensive libraries of up-to-date GSs from <a href='https://tau.cmmt.ubc.ca/eVITTA/' target='_blank'>eVITTA</a> (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8218201/' target='_blank'><i>Nucleic Acids Research</i>, 2021</a>), a webserver we recently developed for transcriptome analysis;"))
-          ,tags$li(HTML("A refined and adjustable analytical pipeline."))
+          p(paste0(
+            "cSurvival aims to provide reliable and integrated resources for both experimental and clinical researchers to assess potential prognostic biomarkers and their interactions, evaluate candidate cell line models for mechanistic studies, and study the genetic regulation of drug resistance in cancers."
+            ," cSurvival offers three main advances:"))
+          ,tags$li(HTML("Joint analysis with two genomic predictors to identify interactions between biomarkers, and to screen for synthetical lethality or compensatory targets for non-targetable drivers;"))
+          ,tags$li(HTML("Survival analysis not only at the gene, but also the gene set (GS) level with with comprehensive libraries of up-to-date GSs from <a href='https://tau.cmmt.ubc.ca/eVITTA/' target='_blank'>eVITTA</a> (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8218201/' target='_blank'><i>Nucleic Acids Research</i>, 2021</a>), a webserver we recently developed for transcriptome analysis;"))
+          ,tags$li(HTML("A pipeline to integrate clinical and experimental cell line data to generate synergistic biological insights."))
           ,br()
-          ,p("Scroll down to download cSurvival's curated datasets.")
+          ,p("Plus,")
+          ,tags$li(HTML("A curated outcomes database."))
+          ,br()
+          ,HTML(paste0(
+          #HTML("<p style='font-weight: bold; font-size: large'>Click to access </p>"),
+            "<p>Scroll down, or use <span style='font-weight: bold;'><a href='http://tau.cmmt.ubc.ca:4500/__docs__/' target='_blank'>cSurvival's API<i class='fas fa-external-link-alt fa-sm'></i></a></span> to download cSurvival's curated datasets. For each dataset, we controlled for quality by flagging problematic samples (e.g. tumor tissue origin incorrect, unacceptable prior treatment, prior malignancy, does not meet study protocol, subject withdrew consent, failed QC)",
+            ", extracted primary tumor data (Sample Type Code 03 or 09 for TCGA-LAML, TARGET-ALL and TARGET-AML; 01 or 06 for TCGA-SKCM; 01 for others) to suit the purpose of outcomes analysis, and transformed the data into a standardized format for customizable and reproducible studies."
+            ,"</p>"
+          ))
           ,br()
         ),
         tabBox(id="db_panel",
@@ -134,7 +140,7 @@ observeEvent(input$db_download,{
             # ------------- 4. eVITTA GSs --------------
             ,red_title("eVITTA gene set (GS) libraries by category:")
             ,tagList(lapply(names(gmt_dbs), function(db_cat){
-              
+
               div(
                 grey_h4(db_cat),
                 tagList(
@@ -156,3 +162,32 @@ observeEvent(input$db_download,{
 })
 
 observeEvent(input$project_tcga,{req(input$project_tcga != "");rv$project_tcga <- input$project_tcga})
+
+# getAPIPage<-function() {
+#   return(tags$iframe(src = "http://tau.cmmt.ubc.ca:4500/__docs__/"
+#                      , style="width:100%;",  frameborder="0"
+#                      ,id="iframe"
+#                      , height = "500px"))
+#   cat(HTML(readLines('http://tau.cmmt.ubc.ca:4500/__docs__/')))
+#   return((HTML(readLines('http://tau.cmmt.ubc.ca:4500/__docs__/'))))
+# }
+
+# output$APIPage<-renderUI({
+#   getAPIPage
+#   tags$iframe(src = "http://tau.cmmt.ubc.ca:4500/__docs__/"
+#               , style="width:100%;",  frameborder="0"
+#               ,id="iframe"
+#               , height = "500px")
+# })
+
+# observeEvent(input$db_api, {
+#   showModal(
+#     modalDialog(
+#       tags$iframe(src = "http://tau.cmmt.ubc.ca:4500/__docs__/"
+#                   , style="width:100%;",  frameborder="0"
+#                   ,id="iframe"
+#                   , height = "500px"),
+#       size="l"
+#     )
+#   )
+# })
