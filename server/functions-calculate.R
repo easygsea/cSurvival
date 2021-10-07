@@ -174,7 +174,11 @@ extract_gene_data <- function(x, type){
         # data_n[["Mean"]] <- pnorm(data_n[["Mean"]])
       }
       data <- dplyr::left_join(data, data_n, by = "patient_id")
-      data[,2] <- data[,2] / data[,3]
+      if(input[[g_ui_norm_id]]=="gs"){
+        data[,2] <- data[,2] / data[,3]
+      }else{
+        data[,2] <- (data[,2] + 1) / (data[,3] + 1)
+      }
       data <- data[,1:2]
     }
     # save original expression data
