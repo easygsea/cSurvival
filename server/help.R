@@ -103,11 +103,11 @@ init_tcga <- function(){
 
   # update GS selection
   updatePrettyRadioButtons(session, "cat_1", selected = "gs")
-  shinyjs::delay(2000, updatePrettyRadioButtons(session, "cat_2", selected = "gs"))
+  shinyjs::delay(3500, updatePrettyRadioButtons(session, "cat_2", selected = "gs"))
   shinyjs::delay(2000, updateSelectizeInput(session,"gs_db_1", selected = "WikiPathways"))
   shinyjs::delay(2000, updateSelectizeInput(session,"gs_db_2", selected = "WikiPathways"))
   shinyjs::delay(4500, updateSelectizeInput(session,"gs_l_1", selected = "WP_NRF2-ARE_regulation%WP4357"))
-  shinyjs::delay(4500, updateSelectizeInput(session,"gs_l_2", selected = "WP_HIF1A_and_PPARG_regulation_of_glycolysis%WP2456"))
+  shinyjs::delay(5000, updateSelectizeInput(session,"gs_l_2", selected = "WP_HIF1A_and_PPARG_regulation_of_glycolysis%WP2456"))
   
   # mimic clicking run button
   shinyjs::delay(8000, shinyjs::click("confirm"))
