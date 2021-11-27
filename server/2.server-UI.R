@@ -1944,7 +1944,7 @@ output$ui_track <- renderUI({
       }else{
         column(
           12,
-          p(style = "color:gray;", "Percentile tracking available for continuous variables only.")
+          p(style = "color:gray;", "Percentile tracking available for continuous variables Percentile tracking available for continuous variables analyzed with minimum P-value approaches only.")
         )
       }
     }

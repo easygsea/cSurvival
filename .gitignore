@@ -183,3 +183,8 @@ www/project_data/TCGA-LUAD/df_rrpa.csv
 www/project_data/TCGA-LUAD/df_met.csv
 www/project_data/TCGA-LUAD/df_met_scale.csv
 www/project_data/TCGA-LUAD/df_rrpa_scale.csv
+www/help_images/*
+www/help.pptx
+www/help.Rmd
+www/help.html
+www/help.css

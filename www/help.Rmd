@@ -1,0 +1,97 @@
+---
+title: "cSurvival User Guide"
+date: "v1.0.0 25/11/2021"
+output: 
+  html_document:
+    css: help.css
+    toc: true
+    toc_float:
+      toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+<hr>
+
+# Select project(s)
+On top left, click the dropdown widget. You may either a) scroll down, or b) type in keywords, to find your project(s) of interest.
+
+<img src="help_images/01_start.png" alt="" width="55%"/>
+
+<br> Click and select your project(s) of interest. Then, click **Confirm selection!** to proceed.
+
+<img src="help_images/02_colon.png" alt="" width="73%"/>
+
+<br> To re-select project(s), click **Reset selection**.
+
+<img src="help_images/03_colond.png" alt="" width="73%"/>
+
+<hr>
+# Adjust censoring time
+Censoring allows analysis with a specified time interval. You may choose a censoring time in days, months (30.4375 days), or years (365.25 days). For a selected clinical endpoint (e.g. overall survival (OS), progression-free survival (PFS)), if the time-to-event is larger than the defined time, we set censoring status to 0 and time to the defined time; if the time-to-event is smaller than or equal to the defined time, we set censoring status to 1 and time stays unchanged. By default, cases are censored at 10 years.
+
+<img src="help_images/04_censor.png" alt="" width="25%"/>
+
+<hr>
+# Single or interaction
+Enter or click the upper arrow button to **2** to analyze interactions between biomarkers. Choose **1** to analyze a single biomarker.
+
+<img src="help_images/05_no.png" alt="" width="25.5%"/>
+
+<hr>
+# Clinical endpoint (TCGA)
+If TCGA, select the clinical endpoint of interest. Recommendations are provided according to <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/" target="_blank">TCGA pan-cancer clinical study (Liu et al., Cell, 2018)</a>. You may also click on the lightblue book button for the full published recommendation table.
+
+<img src="help_images/06_endpoint.png" alt="" width="100%"/>
+
+<hr>
+# Select biomarker(s)
+cSurvival supports survival analysis with a wide range of biomarkers including gene or GS expression, somatic mutation, microRNA expression, DNA methylation, and protein expression. In addition, two biomarkers can be selected at a time for interaction analysis.
+
+## Single biomarker
+
+
+## Two biomarkers
+
+<hr>
+# Run parameters
+
+<hr>
+# Example uses
+
+## Single biomarker analysis
+
+### Expression
+
+### Mutation
+
+EGFR LUAD
+
+### GS expression
+
+<hr>
+## Biomarker interaction analysis
+
+### Expression & expression
+
+<hr>
+## DepMap
+
+### CRISPR/RNAi
+
+### Drug sensitivity
+
+<hr>
+# Support
+<br>
+<p style="font-size:125%;"><b>Feel free to reach us at jcheng@cmmt.ubc.ca if you have any questions!</b></p>
+
+<p style="font-size:120%">Q&A - known issues</p>
+Q: I can't click on any button or select any options. Seems the website is not responding. Why is that?
+<br>A: We might experience high traffic. Please come back after a few minutes. If problem still exists. Please email us.
+
+<!-- This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. -->
+
+
+
