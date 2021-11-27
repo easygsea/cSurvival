@@ -30,6 +30,14 @@ link_icon <- function(id, link, title="Click to visit", icon="fas fa-external-li
   ,link,icon,id,color)
 }
 
+# a red asterisk, need to wrap in HTML
+# example: HTML(paste0("Option 1 ",asterisk_icon()))
+asterisk_icon <- function(title="Mandatory", icon="fas fa-asterisk", color="#2D4059", style="font-size: 0.73em;"){
+  sprintf(
+    '<i class="%s" title="%s" style = "color:%s;%s"></i>'
+    ,icon,title,color,style)
+}
+
 # # add a gear button
 add_gear <- function(
   id, left="6.9em", top="1em", title="Click for advanced run parameters", up = F, width = "80%"
@@ -129,9 +137,16 @@ plot_ui <- function(n){
       wellPanel(
         style = paste0("background-color: ", col, "; border: .5px solid #fff;"),
         h4(paste0("Analysis #",x), align = "center"),
+        # reminder/feedback on user inputs
+        column(
+          12,align="center",
+          HTML(paste0(
+            "<p style='color:grey;font-size: 0.85em;'>Mandatory fields are marked with an asterisk (",asterisk_icon(),")</p>"
+          ))
+        ),
         prettyRadioButtons(
           cat_id,
-          label = HTML(paste0(x,".1. Select data category:",add_help(cat_id_q))),
+          label = HTML(paste0(asterisk_icon(),x,".1. Select data category:",add_help(cat_id_q))),
           choices = c("Gene or locus" = "g", "Gene set (GS)" = "gs")
           ,selected = rv[[cat_id]]
           ,status = "default"
@@ -146,7 +161,7 @@ plot_ui <- function(n){
           condition = sprintf("input.%s=='g'", cat_id),
           radioGroupButtons(
             inputId = db_id,
-            label = HTML(paste0(x,".2. Select type of molecular data:",add_help(db_id_q))),
+            label = HTML(paste0(asterisk_icon(),x,".2. Select type of molecular data:",add_help(db_id_q))),
             choices = data_types(),
             status = "danger",
             selected = rv[[db_id]],
@@ -159,7 +174,7 @@ plot_ui <- function(n){
           ,div(id = "div_g",
             selectizeInput(
               g_ui_id,
-              HTML(paste0(x,".3. Select your gene of interest:",add_help(g_ui_id_q)))
+              HTML(paste0(asterisk_icon(),x,".3. Select your gene of interest:",add_help(g_ui_id_q)))
               ,choices=c()
               ,selected=rv[[g_ui_id]]
               ,width = "100%"
@@ -174,7 +189,7 @@ plot_ui <- function(n){
           condition = sprintf("input.%s=='gs'", cat_id),
           radioButtons(
             gs_mode_id,
-            HTML(paste0(x,".2. Mode of analysis:",add_help(gs_mode_id_q)))
+            HTML(paste0(asterisk_icon(),x,".2. Mode of analysis:",add_help(gs_mode_id_q)))
             ,choices = c("Library"="lib","Manual"="manual")
             ,selected = rv[[gs_mode_id]]
             ,inline = T
@@ -186,7 +201,7 @@ plot_ui <- function(n){
                 4,
                 selectizeInput(
                   gs_db_id,
-                  HTML(paste0(x,".3a. Select database:"),add_help(gs_db_id_q))
+                  HTML(paste0(asterisk_icon(),x,".3a. Select database:"),add_help(gs_db_id_q))
                   ,choices=gmt_dbs
                   ,selected=rv[[gs_db_id]]
                   ,options = list(
@@ -202,7 +217,7 @@ plot_ui <- function(n){
                   4,
                   selectizeInput(
                     gs_lib_id,
-                    HTML(paste0(x,".3b. Select gene set (GS):"),add_help(gs_lib_id_q))
+                    HTML(paste0(asterisk_icon(),x,".3b. Select gene set (GS):"),add_help(gs_lib_id_q))
                     ,choices=names(rv[[paste0("gmts_tmp",x)]])
                     ,selected=rv[[gs_lib_id]]
                     ,options = list(
@@ -262,7 +277,7 @@ plot_ui <- function(n){
             condition = sprintf("input.%s=='manual'", gs_mode_id),
             textAreaInput(
               gs_manual_id,
-              HTML(paste0(x,".3. Enter your genes:"),add_help(gs_manual_id_q))
+              HTML(paste0(asterisk_icon(),x,".3. Enter your genes:"),add_help(gs_manual_id_q))
               ,value = rv[[gs_manual_id]]
               ,placeholder = "Type to enter..."
             )
@@ -271,7 +286,7 @@ plot_ui <- function(n){
           )
         )
         ,conditionalPanel(
-          sprintf("(input.%s== 'g' & input.%s== 'rna' & input.%s!='') | (input.%s== 'gs' & input.%s=='lib' & input.%s!='') | (input.%s== 'gs' & input.%s=='manual' & output.%s)", cat_id,db_id,g_ui_id, cat_id,gs_mode_id,gs_lib_id, cat_id,gs_mode_id,paste0("gs_manual_uploaded",x)),
+          sprintf("output.projectStatus & ((input.%s== 'g' & input.%s== 'rna' & input.%s!='') | (input.%s== 'gs' & input.%s=='lib' & input.%s!='') | (input.%s== 'gs' & input.%s=='manual' & output.%s))", cat_id,db_id,g_ui_id, cat_id,gs_mode_id,gs_lib_id, cat_id,gs_mode_id,paste0("gs_manual_uploaded",x)),
           radioGroupButtons(
             g_ui_norm_id,
             HTML(paste0(x,".4a. (Optional) normalize gene expression by:",add_help(g_ui_norm_id_q))),
@@ -288,7 +303,7 @@ plot_ui <- function(n){
             sprintf("input.%s == 'g'", g_ui_norm_id),
             selectizeInput(
               g_ui_norm_g_id,
-              HTML(paste0(x,".4b. Select a normalization gene:",add_help(g_ui_norm_g_id_q)))
+              HTML(paste0(asterisk_icon(),x,".4b. Select a normalization gene:",add_help(g_ui_norm_g_id_q)))
               ,choices=c()
               ,selected=rv[[g_ui_norm_g_id]]
               ,width = "100%"
@@ -305,7 +320,7 @@ plot_ui <- function(n){
                 4,
                 selectizeInput(
                   g_ui_norm_gs_db_id,
-                  HTML(paste0(x,".4b. Select database:"),add_help(g_ui_norm_gs_db_id_q))
+                  HTML(paste0(asterisk_icon(),x,".4b. Select database:"),add_help(g_ui_norm_gs_db_id_q))
                   ,choices=gmt_dbs
                   ,selected=rv[[g_ui_norm_gs_db_id]]
                   ,options = list(
@@ -321,7 +336,7 @@ plot_ui <- function(n){
                   8,
                   selectizeInput(
                     g_ui_norm_gs_lib_id,
-                    HTML(paste0(x,".4c. Select gene set (GS):"),add_help(g_ui_norm_gs_lib_id_q))
+                    HTML(paste0(asterisk_icon(),x,".4c. Select gene set (GS):"),add_help(g_ui_norm_gs_lib_id_q))
                     ,choices=names(rv[[paste0("gnorm_gmts",x)]])
                     ,selected=rv[[g_ui_norm_gs_lib_id]]
                     ,options = list(
