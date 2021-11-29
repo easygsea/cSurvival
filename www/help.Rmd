@@ -78,14 +78,24 @@ cSurvival supports survival analysis with a wide range of biomarkers including g
 ## Single biomarker
 Make sure **No. of analysis** is **1**. You will see a light grey panel
 
+### Gene-level biomarker
+
+### GS-level biomarker
+
 ## Two biomarkers
 Make sure **No. of analysis** is increased to **2**.
+
+### Gene and gene
+
+### GS and GS
+
+### Gene and GS
 
 <hr>
 # Run parameters
 
 <hr>
-# Example uses
+# Use cases
 
 ## Single biomarker analysis
 
