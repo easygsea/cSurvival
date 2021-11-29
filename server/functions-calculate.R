@@ -38,7 +38,11 @@ extract_gene_data <- function(x, type){
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
-  all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+  if(type != "lib" & type != "manual"){
+    all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+  }else{
+    all_genes <- sapply(rv[["genes_lib"]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+  }
 
   if(type == "rna"){
     # # original file that stores raw FPKM values
@@ -87,18 +91,18 @@ extract_gene_data <- function(x, type){
 
   }else if(type == "lib"){
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
-    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+    genes <- rv[["genes_lib"]][all_genes %in% genes]
 
     g_ui_norm_id <- paste0("gnorm_",x); g_ui_norm_g_id <- paste0("gnorm_g_",x); g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x)
     if(input[[g_ui_norm_id]] == "g"){
       genes_n <- input[[g_ui_norm_g_id]]
     }else if(input[[g_ui_norm_id]] == "gs"){
       genes_n <- toupper(rv[[paste0("gnorm_gs_genes_",x)]])
-      genes_n <- rv[[paste0("genes",x)]][all_genes %in% genes_n]
+      genes_n <- rv[["genes_lib"]][all_genes %in% genes_n]
     }
   }else if(type == "manual"){
     genes <- toupper(rv[[paste0("gs_m_",x)]])
-    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+    genes <- rv[["genes_lib"]][all_genes %in% genes]
     rv[[paste0("gs_m_len",x)]] <- length(genes)
   }else if(type == "cnv" | type == "mir" | type == "met" | type == "pro" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
     # all_genes <- rv[[paste0("genes",x)]]

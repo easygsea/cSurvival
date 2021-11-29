@@ -32,7 +32,7 @@ link_icon <- function(id, link, title="Click to visit", icon="fas fa-external-li
 
 # a red asterisk, need to wrap in HTML
 # example: HTML(paste0("Option 1 ",asterisk_icon()))
-asterisk_icon <- function(title="Mandatory", icon="fas fa-asterisk", color="#2D4059", style="font-size: 0.73em;"){
+asterisk_icon <- function(title="Mandatory", icon="fas fa-asterisk", color="orange", style="font-size: 0.73em;"){#2D4059
   sprintf(
     '<i class="%s" title="%s" style = "color:%s;%s"></i>'
     ,icon,title,color,style)

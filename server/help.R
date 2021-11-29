@@ -17,6 +17,7 @@ observeEvent(input$db_help, {
             "Click for intro tours"
           )
         ),
+        hr(),
         tags$iframe(
           src = "https://tau.cmmt.ubc.ca/cSurvival/help.html",
           style="width:100%;",  frameborder="0",id="iframe", height = "800px"

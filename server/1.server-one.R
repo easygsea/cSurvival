@@ -148,6 +148,10 @@ observeEvent(input$confirm_project,{
     }
   })
 
+  # retrieve expression genes for GS calculation
+  rv[["genes_lib"]] <- retrieve_genes(1,lib=T)
+  
+  # success in projects selection
   rv$projectStatus <- "selected"
   shinyjs::disable("project")
 

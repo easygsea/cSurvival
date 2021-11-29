@@ -35,7 +35,7 @@ Censoring allows analysis with a specified time interval. You may choose a censo
 
 <hr>
 # Single or interaction
-Enter or click the upper arrow button to **2** to analyze interactions between biomarkers. Choose **1** to analyze a single biomarker.
+Under **No. of analysis:**, enter or click the upper arrow button to **2** to analyze interactions between biomarkers. Choose **1** to analyze a single biomarker.
 
 <img src="help_images/05_no.png" alt="" width="25.5%"/>
 
@@ -46,13 +46,40 @@ If TCGA, select the clinical endpoint of interest. Recommendations are provided 
 <img src="help_images/06_endpoint.png" alt="" width="100%"/>
 
 <hr>
+# Cell lines & gene/drug (DepMap)
+Using DepMap data, cSurvival can assess how a biomarker or combinations of biomarkers affect(s) the knockout (CRISPR) / knockdown (RNAi) effect of a gene, or the sensitivity to a drug compound. First, select the type of DepMap data to analyze:
+
+<img src="help_images/07_dp.png" alt="" width="90%"/>
+
+<br>
+Next, select the cancer type(s) to study. You may type in keywords to search your cancer type(s) of interest.
+
+<img src="help_images/08_dp1.png" alt="" width="42%"/>
+
+<br>
+Optionally, filter the cell lines by subtypes. By default, all subtypes of the selected cancer type(s) are selected.
+
+<img src="help_images/09_dp2.png" alt="" width="55%"/>
+
+<br>
+Optionally, manually select specific cell lines. By default, all cell lines of the selected subtype(s) are selected.
+
+<img src="help_images/10_dp3.png" alt="" width="41%"/>
+
+<br>
+Then, type to search, and select your gene (or drug) of interest.
+
+<img src="help_images/11_dp4.png" alt="" width="45%"/>
+
+<hr>
 # Select biomarker(s)
 cSurvival supports survival analysis with a wide range of biomarkers including gene or GS expression, somatic mutation, microRNA expression, DNA methylation, and protein expression. In addition, two biomarkers can be selected at a time for interaction analysis.
 
 ## Single biomarker
-
+Make sure **No. of analysis** is **1**. You will see a light grey panel
 
 ## Two biomarkers
+Make sure **No. of analysis** is increased to **2**.
 
 <hr>
 # Run parameters
