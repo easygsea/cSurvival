@@ -16,16 +16,14 @@ output$ui_results <- renderUI({
     )
 
     dtype1 <- rv[["data_type_1"]]
-    if(!(!rv$depmapr & dtype1 != "cnv")){
+    if(!(!rv$depmapr & (dtype1 == "cnv" | dtype1 == "snv"))){
       dtype1_name <- call_datatype_from_rv(dtype1)
       dtype1_scatter <- as.list("scatter")
       names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
-
-      if(dtype1 == "snv"){
-        l_plot <- list("Mutation statistics"="snv_stats")
-      }else{
-        l_plot <- dtype1_scatter
-      }
+      
+      l_plot <- dtype1_scatter
+    }else if(dtype1 == "snv"){
+      l_plot <- list("Mutation statistics"="snv_stats")
     }
   }else{
     # indi <- as.list(1:x)
@@ -256,8 +254,7 @@ output$ui_results <- renderUI({
         )
       }else if(rv$plot_type == "track"){
         uiOutput("ui_track")
-      }
-      else{
+      }else{
           div(
             column(id="div_surv",style="word-break: break-word;",
               area_w, align = "left",
@@ -323,11 +320,24 @@ output$ui_results <- renderUI({
                   ,div(
                     id="download_btn",
                     style="display: inline-block;vertical-align:top;",
-                    downloadBttn(
-                      size = "sm", color = "danger", style = "material-circle",
-                      outputId = "download_plot", label = NULL
+                    dropdown(
+                      column(12,
+                        downloadButton(
+                          # size = "sm", color = "danger", style = "material-circle",
+                          outputId = "download_plot", label = "Download plot"
+                        )
+                        ,br(),downloadButton(
+                          outputId = "download_data", label = "Download data"
+                        )
+                        ,br(),br()
+                      )
+                      ,width = '200px',size = "sm",up = FALSE,right = TRUE,icon = icon("download")
+                      ,status="danger",style = "material-circle",circle = TRUE,
+                      tooltip = tooltipOptions(
+                        title = "Click to download plot and data"
+                        ,placement = "top")
                     )
-                    ,bsTooltip("download_btn","Click to download plot", placement = "top")
+                    # ,bsTooltip("download_btn","Click to download plot", placement = "top")
                   )
                 )
               }
@@ -419,7 +429,11 @@ observeEvent(input$plot_type,{
   }else{
     rv$annot_data_points_y <- ""
   }
-  rv[["title"]] <- rv[[paste0("title_",x)]]
+  if(input$plot_type == "snv_stats"){
+    rv[["title"]] <- rv[["title_1"]]
+  }else{
+    rv[["title"]] <- rv[[paste0("title_",x)]]
+  }
   if(!if_surv()){
     rv$annot_cells_y <- ""
   }else{
@@ -759,17 +773,18 @@ output$plot_gear_box <- renderUI({
 
 })
 
-# --------- 1b-i. download plot -------------
+# --------- 1b-i-a. download plot -------------
 output$download_plot <- downloadHandler(
   filename = function(){
+    dtil <- gsub(" ","_",rv[["title"]])
     if(if_surv()){
-      paste0(toupper(rv$cox_km),"_",rv[["title"]],".pdf")
+      paste0(toupper(rv$cox_km),"_",dtil,".pdf")
     }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
-      paste0("Scatter_",rv[["title"]],".html")
+      paste0("Scatter_",dtil,".html")
     }else if(rv$plot_type == "snv_stats"){
-      paste0("Mutation_",rv[["title"]],".html")
+      paste0("Stats_",dtil,".html")
     }else if(rv$plot_type == "violin"){
-      paste0("Violin_",rv[["title"]],".html")
+      paste0("Violin_",dtil,".html")
     }
   },
   content = function(file) {
@@ -785,6 +800,35 @@ output$download_plot <- downloadHandler(
         saveWidget(as_widget(rv[["snv_stats_fig"]]), file, selfcontained = TRUE)
       }else if(rv$plot_type == "violin"){
         saveWidget(as_widget(rv[["violin_plot"]]), file, selfcontained = TRUE)
+      }
+    })
+  }
+)
+
+# --------- 1b-i-b. download data -------------
+output$download_data <- downloadHandler(
+  filename = function(){
+    dtil <- gsub(" ","_",rv[["title"]])
+    if(if_surv()){
+      paste0(toupper(rv$cox_km),"_",dtil,".tsv")
+    }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+      paste0("Scatter_",dtil,".tsv")
+    }else if(rv$plot_type == "snv_stats"){
+      paste0("Stats_",dtil,".tsv")
+    }else if(rv$plot_type == "violin"){
+      paste0("Violin_",dtil,".tsv")
+    }
+  },
+  content = function(file) {
+    withProgress(value = 1,message = "Downloading data...",{
+      if(if_surv()){
+        fwrite(rv[["res"]][[rv$cox_km]][["df"]],file,sep="\t")
+      }else if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
+        fwrite(rv[["annot_df"]],file,sep="\t")
+      }else if(rv$plot_type == "snv_stats"){
+        fwrite(rv[["snv_stats_df"]],file,sep="\t")
+      }else if(rv$plot_type == "violin"){
+        fwrite(rv[["violin_plot_df"]],file,sep="\t")
       }
     })
   }
@@ -1533,6 +1577,7 @@ output$snv_stats_plot <- renderPlotly({
     xlab("") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+  dat$Cases <- gsub(",",";",gsub(" ","",gsub("<br>","",Cases))); rv[["snv_stats_df"]] <- dat
   rv[["snv_stats_fig"]] <- ggplotly(fig, tooltip = c("Mutation","Frequency","Category","Cases"))
 })
 
@@ -2177,6 +2222,7 @@ output$violin_plot <- renderPlotly({
           axis.text = element_text(size = rel(1.35))
     )
 
+  rv[["violin_plot_df"]] <- df
   rv[["violin_plot"]] <- suppressWarnings(ggplotly(p,tooltip="label"))
 })
 

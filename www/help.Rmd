@@ -122,8 +122,8 @@ EGFR LUAD
 <hr>
 # Support
 <br>
-<p style="font-size:125%;"><b>Feel free to reach us at jcheng@cmmt.ubc.ca if you have any questions!</b></p>
-
+<p style="font-size:125%;"><b>Feel free to reach us at jcheng@cmmt.ubc.ca or taubert@cmmt.ubc.ca if you have any questions!</b></p>
+<br>
 <p style="font-size:120%">Q&A - known issues</p>
 Q: I can't click on any button or select any options. Seems the website is not responding. Why is that?
 <br>A: We might experience high traffic. Please come back after a few minutes. If problem still exists. Please email us.
