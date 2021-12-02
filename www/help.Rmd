@@ -28,7 +28,7 @@ On top left, click the dropdown widget. You may either a) scroll down, or b) typ
 <img src="help_images/03_colond.png" alt="" width="73%"/>
 
 <hr>
-# Adjust censoring time
+# Censoring
 Censoring allows analysis with a specified time interval. You may choose a censoring time in days, months (30.4375 days), or years (365.25 days). For a selected clinical endpoint (e.g. overall survival (OS), progression-free survival (PFS)), if the time-to-event is larger than the defined time, we set censoring status to 0 and time to the defined time; if the time-to-event is smaller than or equal to the defined time, we set censoring status to 1 and time stays unchanged. By default, cases are censored at 10 years.
 
 <img src="help_images/04_censor.png" alt="" width="25%"/>
@@ -40,13 +40,13 @@ Under **No. of analysis:**, enter or click the upper arrow button to **2** to an
 <img src="help_images/05_no.png" alt="" width="25.5%"/>
 
 <hr>
-# Clinical endpoint (TCGA)
+# TCGA: linical endpoint
 If TCGA, select the clinical endpoint of interest. Recommendations are provided according to <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/" target="_blank">TCGA pan-cancer clinical study (Liu et al., Cell, 2018)</a>. You may also click on the lightblue book button for the full published recommendation table.
 
 <img src="help_images/06_endpoint.png" alt="" width="100%"/>
 
 <hr>
-# Cell lines & gene/drug (DepMap)
+# DepMap: cell lines & gene/drug
 Using DepMap data, cSurvival can assess how a biomarker or combinations of biomarkers affect(s) the knockout (CRISPR) / knockdown (RNAi) effect of a gene, or the sensitivity to a drug compound. First, select the type of DepMap data to analyze:
 
 <img src="help_images/07_dp.png" alt="" width="90%"/>
@@ -75,12 +75,85 @@ Then, type to search, and select your gene (or drug) of interest.
 # Select biomarker(s)
 cSurvival supports survival analysis with a wide range of biomarkers including gene or GS expression, somatic mutation, microRNA expression, DNA methylation, and protein expression. In addition, two biomarkers can be selected at a time for interaction analysis.
 
+<p>Mandatory fields are marked with an orange asterisk.</p>
+
 ## Single biomarker
-Make sure **No. of analysis** is **1**. You will see a light grey panel
+Make sure **No. of analysis** is **1**. You will see a light grey panel in the center. First, select data category of interest.
 
 ### Gene-level biomarker
 
+Select **Gene or locus** to study if the expression level, mutational status, copy number, methylation, or protein level of a gene or locus correlates with poorer/better survival:
+<br>
+<img src="help_images/12_single1a.png" alt="" width="35.5%"/>
+
+<br>
+Next, select the type of molecular data to analyze:
+<img src="help_images/12_single1b.png" alt="" width="92%"/>
+
+* **Expression**: a gene's expression level
+* **Mutation**: a gene's mutational status
+* **CNV**: copy number variation of a DNA segment
+* **miRNA**: a microRNA's expression
+* **Methylation**: methylation level of a DNA segment
+* **Protein**: expression level of a protein
+
+<br>
+Then, type to search your gene of interest:
+<br>
+<img src="help_images/12_single1c.png" alt="" width="44%"/>
+
+<br>
+Make sure you have clicked on the gene so it is properly selected:
+<br>
+<img src="help_images/12_single1d.png" alt="" width="40%"/>
+
+<br>
+If "Expression", option is provided to normalize the selected gene's expression against another gene, or a gene set.
+<br>
+<img src="help_images/12_single1e.png" alt="" width="47.5%"/>
+
 ### GS-level biomarker
+Select **Gene set** to study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes:
+<br>
+<img src="help_images/12_single2a.png" alt="" width="36.5%"/>
+
+<br>Next, select **Library** (default) to choose a gene set from <a href="https://academic.oup.com/nar/article/49/W1/W207/6279840" target="_blank">eVITTA</a> to analyze a pathway, a biological process, a cellular location, a transcriptional factor, a drug, or a gene's interacting partners.
+<br>
+<img src="help_images/12_single2b.png" alt="" width="29.5%"/>
+
+<br>Then, select a database. For full list of available databases, visit <a href="https://tau.cmmt.ubc.ca/eVITTA/documentation/index2.html#db" target="_blank">easyGSEA User Guide</a>:
+<img src="help_images/12_single2c.png" alt="" width="70%"/>
+
+<br>After that, gene sets from the selected database will be loaded. Search for keywords (e.g. glycolysis, chemokine, signaling) and select the one of interest:
+<img src="help_images/12_single2d.png" alt="" width="72%"/>
+
+<br>(Optional) You could filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by "&" (and) or "|" (or). "|" is evaluated before "&". Example: MYC&TP53|BCL2&BRCA1|BRCA2 is evaluated as MYC&(TP53|BCL2)&(BRCA1|BRCA2), which means MYC and (TP53 or BCL2) and (BRCA1 or BRCA2). A maximum of 10 genes are supported. Click the magnifier button to search and filter; click the cross button to cancel the filter.
+<br>
+<img src="help_images/12_single2e.png" alt="" width="70%"/>
+
+<br>
+(Optional) After filtering, only gene sets containing the gene(s) will be displayed:
+<br>
+<img src="help_images/12_single2f.png" alt="" width="70%"/>
+
+
+<br>
+Click to select your gene set of interest. Upon successful selection, feedback is provided showing the genes contained in the gene set. To the right, you could click the red download button to download the gene list, or click the red link button for more details about the selected gene set from its original database.
+<br>
+<img src="help_images/12_single2g.png" alt="" width="110%"/>
+
+<br><hr style="border-top: dotted 1px lightgrey;" /><br>
+
+Alternatively, select **Manual** to enter your own list of genes.
+<br>
+<img src="help_images/12_single3a.png" alt="" width="30%"/>
+
+<br>
+Enter your genes in HUGO symbol format, delimited by newline, space or comma. Click **Submit** to submit your list. Feedback is provided upon successful submission.
+<br>
+<img src="help_images/12_single3b.png" alt="" width="52%"/>
+
+<br><hr><br>
 
 ## Two biomarkers
 Make sure **No. of analysis** is increased to **2**.
@@ -94,6 +167,14 @@ Make sure **No. of analysis** is increased to **2**.
 <hr>
 # Run parameters
 
+Exclude cases in TCGA
+
+# Continuous variables
+
+# Categorical variables
+
+# Joint analysis
+
 <hr>
 # Use cases
 
@@ -103,7 +184,11 @@ Make sure **No. of analysis** is increased to **2**.
 
 ### Mutation
 
-EGFR LUAD
+### microRNA Expression
+
+### DNA methylation
+
+### Protein expression
 
 ### GS expression
 
@@ -111,6 +196,12 @@ EGFR LUAD
 ## Biomarker interaction analysis
 
 ### Expression & expression
+
+### Mutation & expression
+
+### Mutation & GS expression
+
+### GS expression & GS expression
 
 <hr>
 ## DepMap

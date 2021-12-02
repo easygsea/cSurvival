@@ -383,7 +383,7 @@ plot_ui <- function(n){
         ,bsTooltip(gs_gene_id_q, HTML(paste0("To filter out gene sets that contains your gene(s) of interest, in HUGO symbol format, delimited by \"&\" (and) or \"|\" (or). | is evaluated before &. Example: MYC&TP53|BCL2&BRCA1|BRCA2 is evaluated as MYC&(TP53|BCL2)&(BRCA1|BRCA2), which means MYC and (TP53 or BCL2) and (BRCA1 or BRCA2)."
                                              ," A maximum of 10 genes are supported."))
                    ,placement = "top")
-        ,bsTooltip(gs_manual_id_q,HTML("Newline-, space- or comma-delimited")
+        ,bsTooltip(gs_manual_id_q,HTML("In HUGO symbol format. Newline-, space- or comma-delimited")
                    ,placement = "right")
         ,radioTooltip(id = db_id, choice = "rna", title = HTML("Gene expression level quantified by RNA-seq"))
         ,radioTooltip(id = db_id, choice = "snv", title = HTML("Simple Nucleotide Variation (SNV)"))
