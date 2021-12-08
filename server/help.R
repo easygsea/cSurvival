@@ -18,6 +18,7 @@ observeEvent(input$db_help, {
           )
         ),
         hr(),
+        div(align="center",style="font-size:125%;",HTML('<a href="https://tau.cmmt.ubc.ca/cSurvival/help.html" target="_blank"><u>Open User Guide in a new window <i class="fas fa-mouse-pointer"></i></u></a>')),
         tags$iframe(
           src = "https://tau.cmmt.ubc.ca/cSurvival/help.html",
           style="width:100%;",  frameborder="0",id="iframe", height = "800px"

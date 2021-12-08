@@ -221,6 +221,7 @@ observeEvent(input$confirm,{
       }
 
       # ------- begin analysis after error checking -----
+    update_all()
       show_modal_spinner(
         color = "#BDD5EA", spin = "half-circle",
         text = HTML("<span style='font-size:125%; font-family: sans-serif;'><br>Analysis in progress ...<br><br>This might take a while when permutation is applied.<br><br>Please wait a minute. Thank you.</span>"))

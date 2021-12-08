@@ -156,9 +156,18 @@ Enter your genes in HUGO symbol format, delimited by newline, space or comma. Cl
 <br><hr><br>
 
 ## Two biomarkers
-Make sure **No. of analysis** is increased to **2**.
+Make sure **No. of analysis** is increased to **2**. Then you will see two panels:
+<br>
+<img src="help_images/13_two.png" alt="" width="100%"/>
+
+<br>
+Select each biomarker in each panel. Below are guidelines for different combinations of biomarkers. For more detailed explanation for individual biomarker selection, see above **6.1 Single biomarker**. 
 
 ### Gene and gene
+
+Select **Gene or locus** in both panels:
+<br>
+<img src="help_images/13_two1.png" alt="" width="100%"/>
 
 ### GS and GS
 
@@ -217,7 +226,7 @@ Exclude cases in TCGA
 <br>
 <p style="font-size:120%">Q&A - known issues</p>
 Q: I can't click on any button or select any options. Seems the website is not responding. Why is that?
-<br>A: We might experience high traffic. Please come back after a few minutes. If problem still exists. Please email us.
+<br>A: Two possible reasons. First, check whether your internet is stable. Second, We might experience high traffic. Please come back after a few minutes. If problem still exists. Please email us.
 
 <!-- This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. -->
 
