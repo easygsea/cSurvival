@@ -558,7 +558,7 @@ plot_run_ui <- function(n){
             ,bsTooltip(cnv_id_q,HTML(paste0("<b>Automatic</b>: Automatically determines whether copy number gain and/or loss results in more significant survival difference"
                                             ,"<br><b>Copy number gain</b>: To compare cases with copy number gain with the rest of the population"
                                             ,"<br><b>Copy number loss</b>: To compare cases with copy number loss with the rest of the population"
-                                            ,"<br><b>Copy number gain and loss</b>: To compare cases with copy number gain and loss, respectively, with the rest of the population"
+                                            # ,"<br><b>Copy number gain and loss</b>: To compare cases with copy number gain and loss, respectively, with the rest of the population"
             ))
             ,placement = "top")
           )
@@ -637,10 +637,12 @@ plot_run_ui <- function(n){
         )
         ,if(x == 1 & rv$variable_n > 1){
           if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input")){
-            div(
-              style="display: inline-block;vertical-align:top;",
-              bsButton("toall", strong("Apply to all"), icon = icon("globe"), style = "primary")
-            )
+            # if(!(unique(c(rv[["db_1"]], rv[["db_2"]])) > 1 & (("snv" %in% c(rv[["db_1"]], rv[["db_2"]])) | (!rv$depmap & "cnv" %in% c(rv[["db_1"]], rv[["db_2"]]))))){
+              div(
+                style="display: inline-block;vertical-align:top;",
+                bsButton("toall", strong("Apply to all"), icon = icon("globe"), style = "primary")
+              )
+            # }
           }else if(req_filter_on(paste0("db_",2:rv$variable_n),filter="snv",target="input",mode="unequal")){
             div(
               style="display: inline-block;vertical-align:top;",

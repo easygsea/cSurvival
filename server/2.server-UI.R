@@ -490,7 +490,7 @@ output$plot_gear <- renderUI({
                 ),
                 direction = "horizontal"
               )
-              ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap projects"
+              ,bsTooltip("ymd_q",HTML(paste0("Select the time unit to display on x-axis. Not applicable to DepMap data."
               ))
               ,placement = "top")
               # fine-tune time intervals
@@ -502,7 +502,7 @@ output$plot_gear <- renderUI({
                 ,grid=T, force_edges=T
               )
               ,bsTooltip("ymd_int_q",HTML(paste0(
-                "Select the # of time units to display on x-axis. Not applicable to DepMap projects"
+                "Adjust the # of time units to display on x-axis. Not applicable to DepMap data."
               )),placement = "top")
             )
           }
@@ -513,7 +513,7 @@ output$plot_gear <- renderUI({
             choices = c("Journal of Clinical Oncology palette"="jco","Classic black and red"="br")
             ,selected = rv$palette
           )
-          ,bsTooltip("palette_q","Select color palette",placement = "top")
+          ,bsTooltip("palette_q","Adjust color palette",placement = "top")
           # confidence intervals
           ,materialSwitch(
             inputId = "confi",

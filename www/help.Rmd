@@ -40,7 +40,7 @@ Under **No. of analysis:**, enter or click the upper arrow button to **2** to an
 <img src="help_images/05_no.png" alt="" width="25.5%"/>
 
 <hr>
-# TCGA: linical endpoint
+# TCGA: clinical endpoint
 If TCGA, select the clinical endpoint of interest. Recommendations are provided according to <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6066282/" target="_blank">TCGA pan-cancer clinical study (Liu et al., Cell, 2018)</a>. You may also click on the lightblue book button for the full published recommendation table.
 
 <img src="help_images/06_endpoint.png" alt="" width="100%"/>
@@ -77,10 +77,10 @@ cSurvival supports survival analysis with a wide range of biomarkers including g
 
 <p>Mandatory fields are marked with an orange asterisk.</p>
 
-## Single biomarker
+## Single biomarker {#s}
 Make sure **No. of analysis** is **1**. You will see a light grey panel in the center. First, select data category of interest.
 
-### Gene-level biomarker
+### Gene-level biomarker {#sg}
 
 Select **Gene or locus** to study if the expression level, mutational status, copy number, methylation, or protein level of a gene or locus correlates with poorer/better survival:
 <br>
@@ -112,7 +112,7 @@ If "Expression", option is provided to normalize the selected gene's expression 
 <br>
 <img src="help_images/12_single1e.png" alt="" width="47.5%"/>
 
-### GS-level biomarker
+### GS-level biomarker {#sgs}
 Select **Gene set** to study if the average expression level of a gene set correlates with cancer survival, e.g. genes in the same pathway, TF targets, drug targets, miRNA targets, interacting proteins, or user-defined list of genes:
 <br>
 <img src="help_images/12_single2a.png" alt="" width="36.5%"/>
@@ -156,55 +156,361 @@ Enter your genes in HUGO symbol format, delimited by newline, space or comma. Cl
 <br><hr><br>
 
 ## Two biomarkers
-Make sure **No. of analysis** is increased to **2**. Then you will see two panels:
+Make sure **No. of analysis** is increased to **2**. You will see two panels:
 <br>
 <img src="help_images/13_two.png" alt="" width="100%"/>
 
 <br>
-Select each biomarker in each panel. Below are guidelines for different combinations of biomarkers. For more detailed explanation for individual biomarker selection, see above **6.1 Single biomarker**. 
+Select each biomarker in each panel. Below are guidelines for different combinations of biomarkers. For more detailed explanation for individual biomarker selection, see above [**6.1 Single biomarker**](#s). 
 
 ### Gene and gene
 
 Select **Gene or locus** in both panels:
 <br>
 <img src="help_images/13_two1.png" alt="" width="100%"/>
+For more detailed explanation for individual gene/locus selection, see above [**6.1.1 Gene-level biomarker**](#sg).
 
 ### GS and GS
 
+Select **Gene set (GS)** in both panels:
+<br>
+<img src="help_images/13_two2.png" alt="" width="100%"/>
+For more detailed explanation for individual GS selection, see above [**6.1.2 GS-level biomarker**](#sgs).
+
 ### Gene and GS
+
+Select **Gene or locus** in one panel, and **Gene set (GS)** in the other:
+<br>
+<img src="help_images/13_two3.png" alt="" width="100%"/>
+For more detailed explanation for individual gene/locus and GS selection, see above [**6.1.1 Gene-level biomarker**](#sg) and [**6.1.2 GS-level biomarker**](#sgs).
 
 <hr>
 # Run parameters
 
-Exclude cases in TCGA
+Click the light-blue round gear button on top right of **Confirm and analyze!** for cSurvival's refined and user-controlled parameters:
+<br>
+<img src="help_images/14_gear.png" alt="" width="25%"/>
 
-# Continuous variables
+## Common parameter
 
-# Categorical variables
+For TCGA, we removed [507 problematic cases](https://tau.cmmt.ubc.ca/cSurvival/project_data/977/flagged_cases.tsv) based on comments in the <a href="https://gdc.cancer.gov/node/977" target="_blank">merged_sample_quality_annotations.tsv</a> file by default, but a user can choose to include them via the web interface:
+<br>
+<img src="help_images/14_tcga.png" alt="" width="45%"/>
 
-# Joint analysis
+## Continuous variable
+Parameters specifically for analyzing continuous variables (e.g. gene/GS/miRNA/protein expression, DNA methylation, cell line copy number) include:
+
+* Method to determine the minimum *P*-value (only applicable to dynamic iteration approach):
+<br>
+<img src="help_images/14_tkm.png" alt="" width="40%"/>
+<br><br>
+
+* Number of permutations to calculate the false discovery rate (FDR) (default:100); increased permutations improve statistical precision, but longer run time may be expected:
+<br>
+<img src="help_images/14_tperm.png" alt="" width="35%"/>
+<br><br>
+
+* We provide two alternative methods to stratify patients into risk groups: i) dynamic iteration with the minimum *P*-value approach, and ii) user-selected quantile.
+For i):
+<br>
+<img src="help_images/14_x1.png" alt="" width="100%"/>
+<br><br>
+For ii):
+<img src="help_images/14_x2.png" alt="" width="100%"/>
+<br><br>
+
+
+## Categorical variable
+
+For mutations, by default, variants to be classified as High/Moderate variant consequences are selected as the "Mutated" group, while wild-type (WT) and variants to be classified as Low/No variant consequences are selected as the "Other" group. Adjust to suit the purpose of your study. For more information about variant classification: http://uswest.ensembl.org/Help/Glossary?id=535:
+
+<br>
+<img src="help_images/14_y1.png" alt="" width="100%"/>
+<br><br>
+
+For thresholded copy number data, select i) **Automatic** to automatically determines whether copy number gain and/or loss results in more significant survival difference, ii) **Copy number gain** to compare cases with copy number gain with the rest of the population, and iii) **Copy number loss** to compare cases with copy number loss with the rest of the population:
+
+<br>
+<img src="help_images/14_y2.png" alt="" width="100%"/>
+<br><br>
+
+## Joint analysis
+
+In joint analysis with two genomic predictors, select the risk group (subgroup) of interest. If **All** is selected, an ANOVA-like test is done to test if there is significant difference between any of the four subgroups. If a specific subgroup is selected, it is compared against the other subgroups as a whole:
+<br>
+<img src="help_images/15_joint1.png" alt="" width="100%"/>
+<br><br>
+
+Also adjustable is the minimum number of cases (default, 10% of the population) to define a subgroup. This parameter only applies to dynamic iteration with continuous variables (e.g. mRNA gene expression, DNA methylation):
+<br>
+<img src="help_images/15_joint2.png" alt="" width="30%"/>
+<br><br>
+
+Another parameter for joint analysis with two continuous genomic predictors is the dynamic search method: **Median-anchored greedy search** (heuristic) determines the minimum *P*-value by finding the percentile in variable 2 that gives the minimum *P*-value on the median percentile in variable 1, then looking for percentile combinations that give lower *P*-values via greedy search. **Exhaustive search** determines the minimum *P*-value by testing all percentile combinations:
+<br>
+<img src="help_images/15_joint3.png" alt="" width="40%"/>
+<br><br>
 
 <hr>
-# Use cases
+# Visualization customization
+
+## Survival curves
+
+We offer options to customize the survival curves:
+<br>
+<img src="help_images/16_visP1.png" alt="" width="100%"/>
+<img src="help_images/16_visP2.png" alt="" width="85%"/>
+
+## Scatter plot
+
+Customization options for a scatter plot:
+<br>
+<img src="help_images/16_visP3.png" alt="" width="100%"/>
+
+## Violin plot
+
+Customization options for a violin plot:
+<br>
+<img src="help_images/16_visP4.png" alt="" width="100%"/>
+
+## Heatmap tracking
+
+Customization options for a heatmap tracking looping percentiles in joint analysis with two continuous genomic predictors:
+<br>
+<img src="help_images/16_visP5.png" alt="" width="100%"/>
+
+
+<hr>
+# Application cases
 
 ## Single biomarker analysis
 
 ### Expression
+To test if the expression level of RELA (v-rel avian reticuloendotheliosis viral oncogene homolog A) is correlated with overall survival in lung adenocarcinoma (TCGA-LUAD):
+<br><br>
+<img src="help_images/17_RELA1.png" alt="" width="100%"/>
+
+<br>
+**KM log-rank** test is performed and its result is displayed by default:
+<br><br>
+<img src="help_images/17_RELA2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result:
+<br>
+<img src="help_images/17_RELA2b.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+The Cox regression result:
+<br><br>
+<img src="help_images/17_RELA4.png" alt="" width="100%"/>
+<br>
+Percentile tracking of the Cox regression result:
+<br>
+<img src="help_images/17_RELA4b.png" alt="" width="100%"/>
 
 ### Mutation
 
+To test if missense (potentially gain-of-function) mutation of EGFR (epidermal growth factor receptor) is correlated with overall survival in lung adenocarcinoma (TCGA-LUAD):
+<br><br>
+<img src="help_images/18_EGFR1.png" alt="" width="100%"/>
+
+<br>
+Adjust advanced run parameters to analyze missense mutations:
+<br><br>
+<img src="help_images/18_EGFR2.png" alt="" width="100%"/>
+
+<br>
+Missense mutation of EGFR is correlated with poor prognosis in TCGA-LUAD patients:
+<br><br>
+<img src="help_images/18_EGFR3.png" alt="" width="100%"/>
+
 ### microRNA Expression
+
+To test if the expression level of miR-130a-3p is correlated with overall survival in stomach adenocarcinoma (TCGA-STAD):
+<br><br>
+<img src="help_images/19_130a1.png" alt="" width="100%"/>
+
+<br>
+**KM log-rank** test is performed and its result is displayed by default:
+<br><br>
+<img src="help_images/19_130a2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result:
+<br>
+<img src="help_images/19_130a2b.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+The Cox regression result:
+<br><br>
+<img src="help_images/19_130a4.png" alt="" width="100%"/>
+<br>
+Percentile tracking of the Cox regression result:
+<br>
+<img src="help_images/19_130a4b.png" alt="" width="100%"/>
 
 ### DNA methylation
 
+To test if methylation level of APC (APC Regulator Of WNT Signaling Pathway) at the locus chr5:112737735-112737737 (cg16970232) is associated with cancer progression in prostate adenocarcinoma (TCGA-PRAD):
+
+<br><br>
+<img src="help_images/20_APC1.png" alt="" width="100%"/>
+
+<br>
+**KM log-rank** test is performed and its result is displayed by default:
+<br><br>
+<img src="help_images/20_APC2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result:
+<br><br>
+<img src="help_images/20_APC2b.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+The Cox regression result:
+<br><br>
+<img src="help_images/20_APC4.png" alt="" width="100%"/>
+<br>
+Percentile tracking of the Cox regression result:
+<br>
+<img src="help_images/20_APC4b.png" alt="" width="100%"/>
+
 ### Protein expression
 
+To test if the protein expression level of collagen VI is associated with overall survival in skin cutaneous melanoma (TCGA-SKCM):
+
+<br><br>
+<img src="help_images/21_col1.png" alt="" width="100%"/>
+
+<br>
+**KM log-rank** test is performed and its result is displayed by default:
+<br><br>
+<img src="help_images/21_col2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result:
+<br><br>
+<img src="help_images/21_col2b.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+The Cox regression result:
+<br><br>
+<img src="help_images/21_col4.png" alt="" width="100%"/>
+<br>
+Percentile tracking of the Cox regression result:
+<br>
+<img src="help_images/21_col4b.png" alt="" width="100%"/>
+
 ### GS expression
+
+To test if expression of the nuclear factor-erythroid factor 2-related factor 2 (Nrf2)-antioxidant response element (ARE) pathway genes is associated with overall survival in lung adenocarcinoma (TCGA-LUAD):
+
+<br>
+<img src="help_images/22_nrf21.png" alt="" width="100%"/>
+
+<br>
+**KM log-rank** test is performed and its result is displayed by default:
+<br><br>
+<img src="help_images/22_nrf22.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result:
+<br><br>
+<img src="help_images/22_nrf22b.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+The Cox regression result:
+<br><br>
+<img src="help_images/22_nrf24.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result:
+<br>
+<img src="help_images/22_nrf24b.png" alt="" width="100%"/>
 
 <hr>
 ## Biomarker interaction analysis
 
 ### Expression & expression
+
+To test if the expression levels of solute carrier family 7 member 11 (SLC7A11) and solute carrier family 2 member 1 (SLC2A1, also known as glucose transporter 1 (GLUT1)) are jointly associated with overall in liver hepatocellular carcinoma (TCGA-LIHC):
+
+<br>
+<img src="help_images/23_slc1.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by **KM log-rank**:
+<br><br>
+<img src="help_images/23_slc2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc2b.png" alt="" width="100%"/>
+<br><br>
+Click **Expression-Expression scatter** to measure the correlation between expressions of SLC7A11 and SLC2A1:
+<br><br>
+<img src="help_images/23_slc2cor.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+<br><br>
+<img src="help_images/23_slc4.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br>
+<img src="help_images/23_slc4b.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **High-High** risk subgroup (patients with high expressions of both SLC7A11 and SLC2A1) showed a worse outcome than the other three subgroups (patients with low expressions of SLC7A11 and/or SLC2A1). Therefore, we selected the **High-High** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/23_slc5a.png" alt="" width="100%"/>
+
+<br>
+The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+<br><br>
+<img src="help_images/23_slc5b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc5c.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with **Cox regression**:
+<br><br>
+<img src="help_images/23_slc6a.png" alt="" width="100%"/>
+<img src="help_images/23_slc6b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc6c.png" alt="" width="100%"/>
+<br><br>
+
 
 ### Mutation & expression
 
@@ -215,18 +521,20 @@ Exclude cases in TCGA
 <hr>
 ## DepMap
 
-### CRISPR/RNAi
+### CRISPR
+
+### RNAi
 
 ### Drug sensitivity
 
 <hr>
 # Support
 <br>
-<p style="font-size:125%;"><b>Feel free to reach us at jcheng@cmmt.ubc.ca or taubert@cmmt.ubc.ca if you have any questions!</b></p>
+<p style="font-size:125%;"><b>Feel free to reach us at taubert@cmmt.ubc.ca or jcheng@cmmt.ubc.ca if you have any questions!</b></p>
 <br>
 <p style="font-size:120%">Q&A - known issues</p>
 Q: I can't click on any button or select any options. Seems the website is not responding. Why is that?
-<br>A: Two possible reasons. First, check whether your internet is stable. Second, We might experience high traffic. Please come back after a few minutes. If problem still exists. Please email us.
+<br>A: Two possible reasons. First, check whether your internet is stable. Second, we might be experiencing high traffic. Please come back after a few minutes. If problem still exists. Please email us.
 
 <!-- This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. -->
 

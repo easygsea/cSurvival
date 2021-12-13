@@ -933,7 +933,7 @@ output$par_gear <- renderUI({
           ,bsTooltip("search_mode_q",
                      HTML(paste0(
                        "Method to determine the minimum <i>P</i>-value:<br>",
-                       "<b>Median-anchored greedy search</b> (heuristic) determines the minimum <i>P</i>-value by finding the percentile in variable 2 that gives the minimum <i>P</i>-value on the median percentile in variable 1, then looking for percentile combinations that give lower <i>P</i>-values via greedy search."
+                       "<b>Median-anchored greedy search</b> (smart) determines the minimum <i>P</i>-value by finding the percentile in variable 2 that gives the minimum <i>P</i>-value on the median percentile in variable 1, then looking for percentile combinations that give lower <i>P</i>-values via greedy search."
                        ,"<br><b>Exhaustive search</b> determines the minimum <i>P</i>-value by testing all percentile combinations."
                        )),placement = "top")
         )
