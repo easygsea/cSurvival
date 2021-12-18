@@ -453,7 +453,7 @@ Percentile tracking of the Cox regression result:
 
 ### Expression & expression
 
-To test if the expression levels of solute carrier family 7 member 11 (SLC7A11) and solute carrier family 2 member 1 (SLC2A1, also known as glucose transporter 1 (GLUT1)) are jointly associated with overall in liver hepatocellular carcinoma (TCGA-LIHC):
+To test if the expression levels of solute carrier family 7 member 11 (SLC7A11) and solute carrier family 2 member 1 (SLC2A1, also known as glucose transporter 1 (GLUT1)) are jointly associated with overall survival in liver hepatocellular carcinoma (TCGA-LIHC):
 
 <br>
 <img src="help_images/23_slc1.png" alt="" width="100%"/>
@@ -512,20 +512,222 @@ Percentile tracking of the Cox regression result; optimal cutoff combination is 
 <br><br>
 
 
-### Mutation & expression
+<!-- ### Mutation & expression
 
-### Mutation & GS expression
+To test if the missense (potentially gain-of-function) mutation status of epidermal growth factor receptor (EGFR) and the expression level of v-rel avian reticuloendotheliosis viral oncogene homolog A (RELA) are jointly associated with overall survival in lung adenocarcinoma (TCGA-LUAD):
 
-### GS expression & GS expression
+<br>
+<img src="help_images/24_rela1.png" alt="" width="100%"/>
+
+<br><br>Adjust the advanced parameters:
+<img src="help_images/24_rela1b.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by **KM log-rank**:
+<br><br>
+<img src="help_images/24_rela2.png" alt="" width="100%"/>
+
+<br><br>
+**Violin plot** shows no difference in RELA expression between EGFR mutated vs non-mutated groups:
+<br><br>
+<img src="help_images/24_rela2vio.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+<br><br>
+<img src="help_images/23_slc4.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br>
+<img src="help_images/23_slc4b.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **High-High** risk subgroup (patients with high expressions of both SLC7A11 and SLC2A1) showed a worse outcome than the other three subgroups (patients with low expressions of SLC7A11 and/or SLC2A1). Therefore, we selected the **High-High** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/23_slc5a.png" alt="" width="100%"/>
+
+<br>
+The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+<br><br>
+<img src="help_images/23_slc5b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc5c.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with **Cox regression**:
+<br><br>
+<img src="help_images/23_slc6a.png" alt="" width="100%"/>
+<img src="help_images/23_slc6b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc6c.png" alt="" width="100%"/>
+<br><br> -->
+
+
+<!-- ### Mutation & GS expression
+
+To test if the missense (potentially gain-of-function) mutation status of epidermal growth factor receptor (EGFR) and the expression level of genes in the tumour necrosis factor alpha (TNFa) signaling pathway (Wikipathways:WP231) are jointly associated with overall survival in lung adenocarcinoma (TCGA-LUAD):
+
+<br>
+<img src="help_images/24_rela1.png" alt="" width="100%"/>
+
+<br><br>Adjust the advanced parameters:
+<img src="help_images/24_rela1b.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by **KM log-rank**:
+<br><br>
+<img src="help_images/25_tnf2.png" alt="" width="100%"/>
+
+<br><br>
+**Violin plot** shows no expression difference of genes in the TNFa pathway between EGFR mutated vs non-mutated groups:
+<br><br>
+<img src="help_images/25_tnf2vio.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+<br><br>
+<img src="help_images/25_tnf4.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br>
+<img src="help_images/23_slc4b.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **High-High** risk subgroup (patients with high expressions of both SLC7A11 and SLC2A1) showed a worse outcome than the other three subgroups (patients with low expressions of SLC7A11 and/or SLC2A1). Therefore, we selected the **High-High** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/23_slc5a.png" alt="" width="100%"/>
+
+<br>
+The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+<br><br>
+<img src="help_images/23_slc5b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc5c.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with **Cox regression**:
+<br><br>
+<img src="help_images/23_slc6a.png" alt="" width="100%"/>
+<img src="help_images/23_slc6b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc6c.png" alt="" width="100%"/> -->
+
+<!-- ### GS expression & GS expression
+
+To test if the expression levels of genes in the nuclear factor-erythroid factor 2-related factor 2 (nrf2) antioxidant response element (ARE) pathway (WP4357), and genes in the tumour necrosis factor alpha (TNFa) signaling pathway (Wikipathways:WP231) are jointly associated with overall survival in lung adenocarcinoma (TCGA-LUAD):
+
+<br>
+<img src="help_images/26_tnf1.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by **KM log-rank**:
+<br><br>
+<img src="help_images/26_tnf2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/26_tnf2b.png" alt="" width="100%"/>
+<br><br>
+Click **Expression-Expression scatter** to measure the correlation between expressions of SLC7A11 and SLC2A1:
+<br><br>
+<img src="help_images/26_tnf2cor.png" alt="" width="100%"/>
+
+<br>
+To run the **Cox regression** test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+<br><br>
+<img src="help_images/26_tnf4.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br>
+<img src="help_images/26_tnf4b.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **High-High** risk subgroup (patients with high expressions of both SLC7A11 and SLC2A1) showed a worse outcome than the other three subgroups (patients with low expressions of SLC7A11 and/or SLC2A1). Therefore, we selected the **High-High** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/26_tnf5a.png" alt="" width="100%"/>
+
+<br>
+The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+<br><br>
+<img src="help_images/23_slc5b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc5c.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with **Cox regression**:
+<br><br>
+<img src="help_images/23_slc6a.png" alt="" width="100%"/>
+<img src="help_images/23_slc6b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/23_slc6c.png" alt="" width="100%"/>
+<br><br> -->
 
 <hr>
 ## DepMap
 
 ### CRISPR
 
+To test in lung cancer cell lines, if the knockout effect by NFE2 Like BZIP Transcription Factor 2 (NFE2L2) is correlated with mutations of Kelch-like ECH-associated protein 1 (KEAP1):
+
+<br>
+<img src="help_images/27_cnrf1.png" alt="" width="100%"/>
+
+KEAP1-mutated lung cancer cell lines were more sensitive to NFE2L2 knockout:
+<br>
+<img src="help_images/27_cnrf2.png" alt="" width="100%"/>
+
+
 ### RNAi
 
+To test in lung cancer cell lines, if the knockdown effect by NFE2 Like BZIP Transcription Factor 2 (NFE2L2) is correlated with mutations of Kelch-like ECH-associated protein 1 (KEAP1):
+
+<br>
+<img src="help_images/28_inrf1.png" alt="" width="100%"/>
+
+KEAP1-mutated lung cancer cell lines were more sensitive to NFE2L2 knockdown:
+<br>
+<img src="help_images/28_inrf2.png" alt="" width="100%"/>
+
 ### Drug sensitivity
+
+To test in lung cancer cell lines, if the response to a potent oxidative stress inducer, menadione (BRD-K78126613-001-28-5), is correlated with the expression of genes in the nuclear factor-erythroid factor 2-related factor 2 (Nrf2)-antioxidant response element (ARE) pathway:
+
+<br>
+<img src="help_images/29_men1.png" alt="" width="100%"/>
+
+KEAP1-mutated lung cancer cell lines were more sensitive to NFE2L2 knockdown:
+<br>
+<img src="help_images/29_men2.png" alt="" width="100%"/>
 
 <hr>
 # Support

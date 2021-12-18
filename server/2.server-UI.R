@@ -16,7 +16,7 @@ output$ui_results <- renderUI({
     )
 
     dtype1 <- rv[["data_type_1"]]
-    if(!(!rv$depmapr & (dtype1 == "cnv" | dtype1 == "snv"))){
+    if(!((!rv$depmapr & (dtype1 == "cnv" | dtype1 == "snv")) | (rv$depmapr & dtype1 == "snv"))){
       dtype1_name <- call_datatype_from_rv(dtype1)
       dtype1_scatter <- as.list("scatter")
       names(dtype1_scatter) <- paste0(dtype1_name,"-survival scatter")
@@ -270,24 +270,26 @@ output$ui_results <- renderUI({
                 }
               }else{
                 div(id="div_plot",
-                  div(
-                    id="div_annot_data_points",
-                    selectizeInput(
-                      "annot_data_points"
-                      ,HTML(paste0("(Optional) highlight data point(s):",add_help("annot_data_points_q")))
-                      ,choices = c()
-                      ,multiple = T
-                      ,width = "85%"
-                      ,options = list(
-                        `live-search` = TRUE,
-                        placeholder = "Type to search ..."
-                        ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+                  if(rv$plot_type != "snv_stats"){
+                    div(
+                      id="div_annot_data_points",
+                      selectizeInput(
+                        "annot_data_points"
+                        ,HTML(paste0("(Optional) highlight data point(s):",add_help("annot_data_points_q")))
+                        ,choices = c()
+                        ,multiple = T
+                        ,width = "85%"
+                        ,options = list(
+                          `live-search` = TRUE,
+                          placeholder = "Type to search ..."
+                          ,onInitialize = I(sprintf('function() { this.setValue(%s); }',""))
+                        )
                       )
+                      ,bsTooltip("annot_data_points_q",HTML(paste0(
+                        "Select to annotate data point(s) of interest, if any, in the plot below"
+                      )),placement = "right")
                     )
-                    ,bsTooltip("annot_data_points_q",HTML(paste0(
-                      "Select to annotate data point(s) of interest, if any, in the plot below"
-                    )),placement = "right")
-                  )
+                  }
                   ,if(rv$plot_type == "scatter" | rv$plot_type == "scatter2"){
                     plotlyOutput("scatter_plot", height = "585px")
                   }else if(rv$plot_type == "snv_stats"){
