@@ -297,10 +297,10 @@ if_any_iter <- function(n=rv$variable_n){
 assign_gp <- function(df,gp){
   lels_tmp <- unique(df$level)
   if(grepl("Gain",gp)){
-    gp_hl <- strsplit(gp,"_")[[1]]; gp_hl_i <- which(gp_hl %in% c("High","Low"))
+    gp_hl <- strsplit(gp,"_")[[1]]; gp_hl_i <- which(grepl("High|Low|Mutated|Other",gp_hl))
     gp_hl <- gp_hl[gp_hl_i]
     gain_or_loss <- strsplit(lels_tmp,"_") %>% unlist() %>% unique
-    gain_or_loss <- gain_or_loss[!gain_or_loss %in% c("High","Low","Other")]
+    gain_or_loss <- gain_or_loss[!grepl("High|Low|Mutated|Other",gain_or_loss)]
     if(gp_hl_i == 1){
       gain_or_loss_gp <- paste0(gp_hl,"_",gain_or_loss)
     }else if(gp_hl_i == 2){
