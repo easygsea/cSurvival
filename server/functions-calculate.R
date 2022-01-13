@@ -744,7 +744,7 @@ get_info_most_significant_rna <-
   patient_ids <- data$patient_id
   exp <-data[,2] %>% unlist(.) %>% unname(.)
   # the quantiles we will use to define the level of gene percentages
-  quantiles <- quantile(exp, quantile_s, na.rm = T)
+  quantiles <- quantile(as.numeric(exp), quantile_s, na.rm = T)
   # permutation matrix
   set.seed(0)
   n_samples <- nrow(df_o)

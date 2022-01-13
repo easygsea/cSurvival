@@ -692,6 +692,46 @@ Percentile tracking of the Cox regression result; optimal cutoff combination is 
 <img src="help_images/23_slc6c.png" alt="" width="100%"/>
 <br><br> -->
 
+### Mutation & copy number variation
+
+To test if the missense (potentially gain-of-function) mutation status of Kirsten rat sarcoma 2 viral oncogene homolog (KRAS) and copy number gains of Phosphatidylinositol-4,5-Bisphosphate 3-Kinase Catalytic Subunit Alpha (PIK3CA)  are jointly associated with overall survival in pancreatic adenocarcinoma (TCGA-PAAD):
+
+<br>
+<img src="help_images/30_kras1.png" alt="" width="100%"/>
+
+<br><br>Adjust the advanced parameters:
+<img src="help_images/30_kras1b.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by **KM log-rank**:
+<br><br>
+<img src="help_images/30_kras2.png" alt="" width="100%"/>
+
+<br>
+Click the switch button for the **Cox regression** test result:
+<br><br>
+<img src="help_images/30_kras3.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **Mutated-Gain** risk subgroup (patients with missense mutations of KRAS and copy number gains of PIK3CA) showed a worse outcome than the other three subgroups (patients with non-mutated KRAS and/or copy number neutral PIK3CA). Therefore, we selected the **Mutated-Gain** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/30_kras4a.png" alt="" width="100%"/>
+
+<br>
+The **Mutated-Gain** group showed a worse prognosis as assessed with **KM log-rank**:
+<br><br>
+<img src="help_images/30_kras4b.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with **Cox regression**:
+<br><br>
+<img src="help_images/30_kras4c.png" alt="" width="100%"/>
+<br><br>
+
+These results are consistent with studies showing that PI3K-AKT-mTOR and RAS/MAPK signaling can synergize to promote prostate cancer growth and metastatic progression <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7350257/' target='_blank'>Shorning et al. 2020</a>. Notably, clinical trials exploring co-inhibition of the PI3K-AKT-mTOR and RAS/MAPK cascades to treat various advanced solid cancers have also been developed (e.g., ClinicalTrials.gov identifiers: NCT01390818, NCT01347866, and NCT02583542).
+<br><br>
+
 <hr>
 ## DepMap
 
