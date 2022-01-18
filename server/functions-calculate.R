@@ -594,7 +594,7 @@ two_gene_heuristic <- function(
   # start from the median quantile
   i <- ceiling(i_len/2); q <- quantiles[i]
   # if not enough data, skip and render users an error msg
-  if(q == 0 | length(unique(quantiles2))==1){return(NULL);next;}
+  if(length(unique(quantiles))==1 | length(unique(quantiles2))==1){return(NULL);next;} #q == 0
   # proceed only if enough data
   df <- generate_surv_df(df_o, patient_ids, exp, q)
 
