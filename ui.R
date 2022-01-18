@@ -17,7 +17,7 @@ shinyUI(
 
         title="cSurival",
 
-        dashboardHeader(title = div(id="ui_title",align="left",HTML(paste0("<span style='color:#F5FBEF;'><b>cSurvival</b><sup><a href='https://tau.cmmt.ubc.ca/cSurvival/android-chrome-512x512.png' target='_blank' data-toggle='tooltip' title='' data-original-title='Logo by Jiaming (Caitlyn) Xu' data-placement='bottom'><img src='android-chrome-512x512.png' height='13px' style='margin-top: -3px;'></img></a>",current_version,"</sup></span>: a mechanistic cancer survival database")))
+        dashboardHeader(title = div(id="ui_title",align="left",HTML(paste0("<span style='color:#F5FBEF;'><b>cSurvival</b><sup><a href='https://tau.cmmt.ubc.ca/cSurvival/android-chrome-512x512.png' target='_blank' data-toggle='tooltip' title='' data-original-title='Logo by Jiaming (Caitlyn) Xu' data-placement='bottom'><img src='android-chrome-512x512.png' height='13px' style='margin-top: -3px;'></img></a>",current_version,"</sup></span>: biomarker interactions in cancer outcomes and in cell lines")))
                         ,titleWidth = "80%"
                         ,tags$li(class = "dropdown", actionButton("db_download", NULL,icon("database"),style=db_style))
                         ,tags$li(class = "dropdown", actionButton("db_help", NULL,icon("question"),style=db_style))

@@ -291,7 +291,7 @@ To test if the expression level of RELA (v-rel avian reticuloendotheliosis viral
 <img src="help_images/17_RELA1.png" alt="" width="100%"/>
 
 <br>
-**KM log-rank** test is performed and its result is displayed by default:
+KM log-rank test is performed and its result is displayed by default:
 <br><br>
 <img src="help_images/17_RELA2.png" alt="" width="100%"/>
 <br><br>
@@ -300,7 +300,7 @@ Percentile tracking of the KM log-rank result:
 <img src="help_images/17_RELA2b.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
@@ -336,7 +336,7 @@ To test if the expression level of miR-130a-3p is correlated with overall surviv
 <img src="help_images/19_130a1.png" alt="" width="100%"/>
 
 <br>
-**KM log-rank** test is performed and its result is displayed by default:
+KM log-rank test is performed and its result is displayed by default:
 <br><br>
 <img src="help_images/19_130a2.png" alt="" width="100%"/>
 <br><br>
@@ -345,7 +345,7 @@ Percentile tracking of the KM log-rank result:
 <img src="help_images/19_130a2b.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
@@ -366,7 +366,7 @@ To test if methylation level of APC (APC Regulator Of WNT Signaling Pathway) at 
 <img src="help_images/20_APC1.png" alt="" width="100%"/>
 
 <br>
-**KM log-rank** test is performed and its result is displayed by default:
+KM log-rank test is performed and its result is displayed by default:
 <br><br>
 <img src="help_images/20_APC2.png" alt="" width="100%"/>
 <br><br>
@@ -375,7 +375,7 @@ Percentile tracking of the KM log-rank result:
 <img src="help_images/20_APC2b.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
@@ -396,7 +396,7 @@ To test if the protein expression level of collagen VI is associated with overal
 <img src="help_images/21_col1.png" alt="" width="100%"/>
 
 <br>
-**KM log-rank** test is performed and its result is displayed by default:
+KM log-rank test is performed and its result is displayed by default:
 <br><br>
 <img src="help_images/21_col2.png" alt="" width="100%"/>
 <br><br>
@@ -405,7 +405,7 @@ Percentile tracking of the KM log-rank result:
 <img src="help_images/21_col2b.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
@@ -426,7 +426,7 @@ To test if expression of the nuclear factor-erythroid factor 2-related factor 2 
 <img src="help_images/22_nrf21.png" alt="" width="100%"/>
 
 <br>
-**KM log-rank** test is performed and its result is displayed by default:
+KM log-rank test is performed and its result is displayed by default:
 <br><br>
 <img src="help_images/22_nrf22.png" alt="" width="100%"/>
 <br><br>
@@ -435,7 +435,7 @@ Percentile tracking of the KM log-rank result:
 <img src="help_images/22_nrf22b.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
@@ -451,7 +451,7 @@ Percentile tracking of the Cox regression result:
 <hr>
 ## Biomarker interaction analysis
 
-### Expression & expression
+### Interaction: gene expression & gene expression
 
 To test if the expression levels of solute carrier family 7 member 11 (SLC7A11) and solute carrier family 2 member 1 (SLC2A1, also known as glucose transporter 1 (GLUT1)) are jointly associated with overall survival in liver hepatocellular carcinoma (TCGA-LIHC):
 
@@ -459,7 +459,7 @@ To test if the expression levels of solute carrier family 7 member 11 (SLC7A11) 
 <img src="help_images/23_slc1.png" alt="" width="100%"/>
 
 <br>
-By default, differences between all risk subgroups are tested by **KM log-rank**:
+By default, differences between all risk subgroups are tested by KM log-rank:
 <br><br>
 <img src="help_images/23_slc2.png" alt="" width="100%"/>
 <br><br>
@@ -472,12 +472,12 @@ Click **Expression-Expression scatter** to measure the correlation between expre
 <img src="help_images/23_slc2cor.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
 <br>
-In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways:
 <br><br>
 <img src="help_images/23_slc4.png" alt="" width="100%"/>
 <br><br>
@@ -491,7 +491,7 @@ From the ANOVA-like results above, we could tell that the **High-High** risk sub
 <img src="help_images/23_slc5a.png" alt="" width="100%"/>
 
 <br>
-The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+The **High-High** group showed a worse prognosis as assessed with KM log-rank:
 <br><br>
 <img src="help_images/23_slc5b.png" alt="" width="100%"/>
 <br><br>
@@ -501,7 +501,7 @@ Percentile tracking of the KM log-rank result; optimal cutoff combination is hig
 <br><br>
 
 <br>
-Such correlation is also true with **Cox regression**:
+Such correlation is also true with Cox regression:
 <br><br>
 <img src="help_images/23_slc6a.png" alt="" width="100%"/>
 <img src="help_images/23_slc6b.png" alt="" width="100%"/>
@@ -511,6 +511,64 @@ Percentile tracking of the Cox regression result; optimal cutoff combination is 
 <img src="help_images/23_slc6c.png" alt="" width="100%"/>
 <br><br>
 
+### Interaction: DNA methylation & microRNA expression
+
+CDKN2A promoter hypermethylation was shown to associate with an enhancive hepatocellular carcinoma risk, with a potential value to being a triage marker for hepatocellular carcinoma (<a href='https://pubmed.ncbi.nlm.nih.gov/30143452/' target='_blank'>Zhou et al. 2018</a>). Meanwhile, miR-34a has been shown to be a potent tumor suppressor (<a href='https://www.cell.com/molecular-therapy-family/nucleic-acids/fulltext/S2162-2531(16)30334-1#relatedArticles' target='_blank'>Misso et al. 2014</a>) and can inhibit metastasis in liver cancer cells (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6256319/' target='_blank'>Wei et al. 2018</a>). Here, we sought to test if the methylation level of cg00718440 (chr9:21995312-21995314, promoter region of cyclin-dependent kinase inhibitor 2A (CDKN2A)) and the expression level of miR-34a-5p are jointly associated with overall survival in liver hepatocellular carcinoma (TCGA-LIHC):
+
+<br>
+<img src="help_images/32_p16mir34a1.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by KM log-rank:
+<br><br>
+<img src="help_images/32_p16mir34a2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/32_p16mir34a2b.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+To run the Cox regression test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+Cox regression also showed significant difference between risk subgroups:
+<br><br>
+<img src="help_images/32_p16mir34a4.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br>
+<img src="help_images/32_p16mir34a4b.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **High-Low** risk subgroup (patients with high methylation of CDKN2A and low expression of miR-34a-5p) showed a worse outcome than the other three subgroups (patients with low methylation of CDKN2A and/or low expression of miR-34a-5p). Therefore, we selected the **High-Low** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/32_p16mir34a5a.png" alt="" width="100%"/>
+
+<br>
+The **High-Low** group showed a worse prognosis as assessed with KM log-rank:
+<br><br>
+<img src="help_images/32_p16mir34a5b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/32_p16mir34a5c.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with Cox regression:
+<br><br>
+<img src="help_images/32_p16mir34a6a.png" alt="" width="100%"/>
+<img src="help_images/32_p16mir34a6b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/32_p16mir34a6c.png" alt="" width="100%"/>
+<br><br>
+
+Our analysis showed a synergistic negative effects between CDKN2A promoter hypermethylation and miR-34a-5p low expression on outcomes in liver hepatocellular carcinoma patients (TCGA-LIHC).
 
 <!-- ### Mutation & expression
 
@@ -523,7 +581,7 @@ To test if the missense (potentially gain-of-function) mutation status of epider
 <img src="help_images/24_rela1b.png" alt="" width="100%"/>
 
 <br>
-By default, differences between all risk subgroups are tested by **KM log-rank**:
+By default, differences between all risk subgroups are tested by KM log-rank:
 <br><br>
 <img src="help_images/24_rela2.png" alt="" width="100%"/>
 
@@ -533,12 +591,12 @@ By default, differences between all risk subgroups are tested by **KM log-rank**
 <img src="help_images/24_rela2vio.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
 <br>
-In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways prognosis:
 <br><br>
 <img src="help_images/23_slc4.png" alt="" width="100%"/>
 <br><br>
@@ -552,7 +610,7 @@ From the ANOVA-like results above, we could tell that the **High-High** risk sub
 <img src="help_images/23_slc5a.png" alt="" width="100%"/>
 
 <br>
-The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+The **High-High** group showed a worse prognosis as assessed with KM log-rank:
 <br><br>
 <img src="help_images/23_slc5b.png" alt="" width="100%"/>
 <br><br>
@@ -562,7 +620,7 @@ Percentile tracking of the KM log-rank result; optimal cutoff combination is hig
 <br><br>
 
 <br>
-Such correlation is also true with **Cox regression**:
+Such correlation is also true with Cox regression:
 <br><br>
 <img src="help_images/23_slc6a.png" alt="" width="100%"/>
 <img src="help_images/23_slc6b.png" alt="" width="100%"/>
@@ -572,6 +630,56 @@ Percentile tracking of the Cox regression result; optimal cutoff combination is 
 <img src="help_images/23_slc6c.png" alt="" width="100%"/>
 <br><br> -->
 
+### Interaction: mutation & microRNA expression
+
+Epidermal growth factor receptor (EGFR) frequently gains activating mutations in lung cancers and is an important therapeutic target (<a href='https://pubmed.ncbi.nlm.nih.gov/20887192/' target='_blank'>Santos et al., 2011</a>). However, acquired resistance to EGFR inhibitors are common due to activation of alternative signaling pathways (<a href='https://www.sciencedirect.com/science/article/pii/S0923753419316692' target=-'_blank'>Westover et al., 2018</a>), calling for strategies to identify new entry points to confront drug resistance. 
+
+<br>
+miR-31 was found upregulated in lung adenocarcinoma (LUAD) cells and its expression was found positively correlated with the prognosis of LUAD patients (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8408630/' target='_blank'>Xu et al., 2021</a>). Mechanistically, miR-31 directly targets and reduces expression of negative regulators of RAS/MAPK signaling (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4701567/' target='_blank'>Edmonds et al., 2016</a>).
+
+<br>
+To test if the missense (potentially gain-of-function) mutation status of EGFR and the expression level of miR-31-5p are jointly associated with overall survival in lung adenocarcinoma (TCGA-LUAD):
+
+<br>
+<img src="help_images/31_egfr311.png" alt="" width="100%"/>
+
+<br><br>Adjust the advanced parameters:
+<img src="help_images/31_egfr10b1b.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by KM log-rank:
+<br><br>
+<img src="help_images/31_egfr312.png" alt="" width="100%"/>
+
+<br>
+To run the Cox regression test:
+<br><br>
+<img src="help_images/31_egfr10b3a.png" alt="" width="100%"/>
+
+<br>
+Cox regression result is also significant:
+<br><br>
+<img src="help_images/31_egfr313b.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **Mutated-High** risk subgroup (patients with missense mutation of EGFR and high expression of miR-31-5p) showed a worse outcome than the other three subgroups (patients with intact EGFR and/or low expression of miR-31-5p). Therefore, we selected the **Mutated-High** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/31_egfr10b4a.png" alt="" width="100%"/>
+
+<br>
+The **Mutated-High** group showed a worse prognosis as assessed with KM log-rank:
+<br><br>
+<img src="help_images/31_egfr314b.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with Cox regression:
+<br><br>
+<img src="help_images/31_egfr10b5a.png" alt="" width="100%"/>
+<img src="help_images/31_egfr315b.png" alt="" width="100%"/>
+<br><br>
+
+Our analysis showed a synergistic negative effects between EGFR missense mutation and miR-31-5a high expression on outcomes in lung adenocarcinoma patients.
 
 <!-- ### Mutation & GS expression
 
@@ -584,7 +692,7 @@ To test if the missense (potentially gain-of-function) mutation status of epider
 <img src="help_images/24_rela1b.png" alt="" width="100%"/>
 
 <br>
-By default, differences between all risk subgroups are tested by **KM log-rank**:
+By default, differences between all risk subgroups are tested by KM log-rank:
 <br><br>
 <img src="help_images/25_tnf2.png" alt="" width="100%"/>
 
@@ -594,12 +702,12 @@ By default, differences between all risk subgroups are tested by **KM log-rank**
 <img src="help_images/25_tnf2vio.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
 <br>
-In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways prognosis:
 <br><br>
 <img src="help_images/25_tnf4.png" alt="" width="100%"/>
 <br><br>
@@ -613,7 +721,7 @@ From the ANOVA-like results above, we could tell that the **High-High** risk sub
 <img src="help_images/23_slc5a.png" alt="" width="100%"/>
 
 <br>
-The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+The **High-High** group showed a worse prognosis as assessed with KM log-rank:
 <br><br>
 <img src="help_images/23_slc5b.png" alt="" width="100%"/>
 <br><br>
@@ -623,7 +731,7 @@ Percentile tracking of the KM log-rank result; optimal cutoff combination is hig
 <br><br>
 
 <br>
-Such correlation is also true with **Cox regression**:
+Such correlation is also true with Cox regression:
 <br><br>
 <img src="help_images/23_slc6a.png" alt="" width="100%"/>
 <img src="help_images/23_slc6b.png" alt="" width="100%"/>
@@ -640,7 +748,7 @@ To test if the expression levels of genes in the nuclear factor-erythroid factor
 <img src="help_images/26_tnf1.png" alt="" width="100%"/>
 
 <br>
-By default, differences between all risk subgroups are tested by **KM log-rank**:
+By default, differences between all risk subgroups are tested by KM log-rank:
 <br><br>
 <img src="help_images/26_tnf2.png" alt="" width="100%"/>
 <br><br>
@@ -653,12 +761,12 @@ Click **Expression-Expression scatter** to measure the correlation between expre
 <img src="help_images/26_tnf2cor.png" alt="" width="100%"/>
 
 <br>
-To run the **Cox regression** test:
+To run the Cox regression test:
 <br><br>
 <img src="help_images/17_RELA3.png" alt="" width="100%"/>
 
 <br>
-In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways to affect prognosis:
+In joint analysis, detailed Cox regression models are provided to assess how two predictors jointly impact outcomes by calculating the effect sizes (hazard ratios, HRs) and the statistical significances of the two predictors and their interaction. We could see that SLC7A11 (*P* = 0.02040) and SLC2A1 (*P* = 0.00551) each had an effect on prognosis, while their interaction term was not significant (*P* = 0.89597), suggesting that they might function in separate pathways prognosis:
 <br><br>
 <img src="help_images/26_tnf4.png" alt="" width="100%"/>
 <br><br>
@@ -672,7 +780,7 @@ From the ANOVA-like results above, we could tell that the **High-High** risk sub
 <img src="help_images/26_tnf5a.png" alt="" width="100%"/>
 
 <br>
-The **High-High** group showed a worse prognosis as assessed with **KM log-rank**:
+The **High-High** group showed a worse prognosis as assessed with KM log-rank:
 <br><br>
 <img src="help_images/23_slc5b.png" alt="" width="100%"/>
 <br><br>
@@ -682,7 +790,7 @@ Percentile tracking of the KM log-rank result; optimal cutoff combination is hig
 <br><br>
 
 <br>
-Such correlation is also true with **Cox regression**:
+Such correlation is also true with Cox regression:
 <br><br>
 <img src="help_images/23_slc6a.png" alt="" width="100%"/>
 <img src="help_images/23_slc6b.png" alt="" width="100%"/>
@@ -692,9 +800,15 @@ Percentile tracking of the Cox regression result; optimal cutoff combination is 
 <img src="help_images/23_slc6c.png" alt="" width="100%"/>
 <br><br> -->
 
-### Mutation & copy number variation
+### Interaction: mutation & copy number variation
 
-To test if the missense (potentially gain-of-function) mutation status of Kirsten rat sarcoma 2 viral oncogene homolog (KRAS) and copy number gains of Phosphatidylinositol-4,5-Bisphosphate 3-Kinase Catalytic Subunit Alpha (PIK3CA)  are jointly associated with overall survival in pancreatic adenocarcinoma (TCGA-PAAD):
+Activating point mutation of the Kirsten rat sarcoma 2 viral oncogene homolog (KRAS) oncogene is the major genetic event in pancreatic ductal adenocarcinoma (PDAC), and KRAS mutations tend to be associated with reduced overall survival. The use of KRAS as a therapeutic target for pancreatic cancer has been studied extensively. However, escape mechanisms exist despite KRAS inactivation. (<a href='https://www.nature.com/articles/s41575-019-0245-4' target='_blank'>Buscail et al., 2020</a>)
+
+Phosphatidylinositol-4,5-bisphosphate 3-kinase catalytic subunit alpha (PIK3CA) encodes a catalytic subunit of phosphoinositide 3-kinase (PI3K), a group of plasma membrane-associated lipid kinases. PIK3CA is frequently mutated or amplified in cancers, and is used to stratify patients for treatment with PI3K pathway inhibitors. (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6580874/' target='_blank'>Conway et al., 2019</a>)
+
+Many of the aberrant signalling pathways in PDAC rely on downstream signal transduction through the RAS/MAPK and PI3K-AKT-mTOR  pathways, which has led to the development of several approaches to target these key regulators, primarily as combination therapies. (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6580874/' target='_blank'>Conway et al., 2019</a>)
+
+To test if the missense (potentially gain-of-function) mutation status of KRAS and copy number gains of PIK3CA are jointly associated with overall survival in pancreatic adenocarcinoma (TCGA-PAAD):
 
 <br>
 <img src="help_images/30_kras1.png" alt="" width="100%"/>
@@ -703,12 +817,12 @@ To test if the missense (potentially gain-of-function) mutation status of Kirste
 <img src="help_images/30_kras1b.png" alt="" width="100%"/>
 
 <br>
-By default, differences between all risk subgroups are tested by **KM log-rank**:
+By default, differences between all risk subgroups are tested by KM log-rank:
 <br><br>
 <img src="help_images/30_kras2.png" alt="" width="100%"/>
 
 <br>
-Click the switch button for the **Cox regression** test result:
+Click the switch button for the Cox regression test result:
 <br><br>
 <img src="help_images/30_kras3.png" alt="" width="100%"/>
 
@@ -718,13 +832,13 @@ From the ANOVA-like results above, we could tell that the **Mutated-Gain** risk 
 <img src="help_images/30_kras4a.png" alt="" width="100%"/>
 
 <br>
-The **Mutated-Gain** group showed a worse prognosis as assessed with **KM log-rank**:
+The **Mutated-Gain** group showed a worse prognosis as assessed with KM log-rank:
 <br><br>
 <img src="help_images/30_kras4b.png" alt="" width="100%"/>
 <br><br>
 
 <br>
-Such correlation is also true with **Cox regression**:
+Such correlation is also true with Cox regression:
 <br><br>
 <img src="help_images/30_kras4c.png" alt="" width="100%"/>
 <br><br>
@@ -732,6 +846,116 @@ Such correlation is also true with **Cox regression**:
 These results are consistent with studies showing that PI3K-AKT-mTOR and RAS/MAPK signaling can synergize to promote prostate cancer growth and metastatic progression <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7350257/' target='_blank'>Shorning et al. 2020</a>. Notably, clinical trials exploring co-inhibition of the PI3K-AKT-mTOR and RAS/MAPK cascades to treat various advanced solid cancers have also been developed (e.g., ClinicalTrials.gov identifiers: NCT01390818, NCT01347866, and NCT02583542).
 <br><br>
 
+### Interaction: GS expression & microRNA expression
+
+<!-- The let-7 microRNA family controls development and differentiation, and let-7 loss contributes to carcinogenesis via an increase in its target oncogenes and stemness factors; clinically, let-7 can be used as a biomarker for rational precision medicine decisions, resulting in improved patient survival (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6715759/' target='_blank'>Chirshev et al. 2019</a>). -->
+
+The Janus kinase-signal transducer and activator of transcription (JAK-STAT) signaling pathway is involved in cell immunity, division and death, as well as in tumor formation. High expression levels of several genes in the JAK-STAT signaling pathway, including STAT1, STAT3, STAT4 and STAT5B, were found to be associated with favorable prognosis in skin cutaneous melanoma (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7039088/' target='_blank'>Pan et al. 2020</a>). Studies have also shown that defective Jak-STAT signal transduction pathway can render melanoma cells resistant to growth inhibition by interferon-alpha (<a href='https://pubmed.ncbi.nlm.nih.gov/10699955/' target='_blank'>Pan et al. 2020</a>).
+
+miR-125b is found as a tumor suppressor that is downregulated in melanoma (<a href='https://pubmed.ncbi.nlm.nih.gov/20827223/' target='_blank'>Glud et al. 2010</a>; <a href='https://www.nature.com/articles/onc2012307' target='_blank'>Kappelmann et al. 2012</a>). It can directly regulate c-Jun protein expression (<a href='https://www.nature.com/articles/onc2012307' target='_blank'>Kappelmann et al. 2012</a>) and can induce senescence in melanoma cells (<a href='https://pubmed.ncbi.nlm.nih.gov/21460750/' target='_blank'>Glud et al. 2011</a>; <a href='https://bmcdermatol.biomedcentral.com/articles/10.1186/1471-5945-14-8' target='_blank'>Nyholm et al. 2014</a>).
+
+To test if the expression level of genes in the JAK-STAT signaling pathway and that of miR-125b-5p are jointly associated with overall survival in skin cutaneous melanoma (TCGA-SKCM):
+
+<br>
+<img src="help_images/33_jak125b1.png" alt="" width="100%"/>
+
+<br>
+By default, differences between all risk subgroups are tested by KM log-rank:
+<br><br>
+<img src="help_images/33_jak125b2.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/33_jak125b2b.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+To run the Cox regression test:
+<br><br>
+<img src="help_images/17_RELA3.png" alt="" width="100%"/>
+
+<br>
+Cox regression also showed significant difference between risk subgroups::
+<br><br>
+<img src="help_images/33_jak125b4.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br>
+<img src="help_images/33_jak125b4b.png" alt="" width="100%"/>
+
+<br><br>
+From the ANOVA-like results above, we could tell that the **Low-Low** risk subgroup (patients with low expressions of both genes in the JAK-STAT signaling pathway and miR-125b-5p) showed a worse outcome than the other three subgroups (patients with low expressions of genes in the JAK-STAT signaling pathway and/or miR-125b-5p). Therefore, we selected the **Low-Low** risk subgroup to contrast against the combined other three. Adjust the advanced run parameters:
+<br><br>
+<img src="help_images/33_jak125b5a.png" alt="" width="100%"/>
+
+<br>
+The **Low-Low** group showed a worse prognosis as assessed with KM log-rank:
+<br><br>
+<img src="help_images/33_jak125b5b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the KM log-rank result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/33_jak125b5c.png" alt="" width="100%"/>
+<br><br>
+
+<br>
+Such correlation is also true with Cox regression:
+<br><br>
+<img src="help_images/33_jak125b6a.png" alt="" width="100%"/>
+<img src="help_images/33_jak125b6b.png" alt="" width="100%"/>
+<br><br>
+Percentile tracking of the Cox regression result; optimal cutoff combination is highlighted by a yellow arrow:
+<br><br>
+<img src="help_images/33_jak125b6c.png" alt="" width="100%"/>
+<br><br>
+
+We also tested individual genes in the JAK-STAT signaling pathway, including STAT1, STAT3, STAT4 and STAT5B, and recapitulated the findings that their expression levels were negatively correlated with SKCM prognosis (overall survival, censored at 10 years) (<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7039088/' target='_blank'>Pan et al. 2020</a>):
+<br><br>
+KM log-rank test:
+<img src="help_images/33_stat125b1a.png" alt="" width="100%"/>
+<br><br>
+Cox regression:
+<img src="help_images/33_stat125b1b.png" alt="" width="100%"/>
+<br><br>
+
+We further found that low expressions of those STAT genes and miR-125b-5p are jointly associated with overall survival, censored at 10 years, in SKCM patients:
+<br><br>
+KM log-rank test:
+<img src="help_images/33_stat125b2a.png" alt="" width="100%"/>
+<br><br>
+Cox regression:
+<img src="help_images/33_stat125b2b.png" alt="" width="100%"/>
+<br><br>
+
+And the **Low-Low** risk subgroup (patients with low expressions of both STAT genes and miR-125b-5p) showed a worse outcome than the other three subgroups (patients with low expressions of STAT genes and/or miR-125b-5p).
+<br><br>
+KM log-rank test:
+<img src="help_images/33_stat125b3a.png" alt="" width="100%"/>
+<br><br>
+Cox regression:
+<img src="help_images/33_stat125b3b.png" alt="" width="100%"/>
+<br><br>
+
+
+<!-- miR-34
+
+let-7a
+cdk8
+Melanoma oncogenes are BRAF, NRAS, CDK8, KIT
+mir-34: Lung, prostate, colon, breast, hematological, bladder, osteosarcoma
+RB1 gene
+VEGF
+Liver cancer: 	TP53, CTNNB1, AXIN1, SMAD2, SMAD4, RB1,
+Fu, J.; Xiong, Z.; Huang, C.; Li, J.; Yang, W.; Han, Y.; Paiboonrungruan, C.; Major, M.B.; Chen, K.N.; Kang, X.; et al. Hyperactivity of the transcription factor Nrf2 causes metabolic reprogramming in mouse esophagus. J.
+Biol. Chem. 2019, 294, 327–340.
+4EBP1
+INI1/SNF5
+BRG1
+KAT5A
+BRG1 - lung blood, brain
+CDKN2A
+https://www.thelancet.com/journals/ebiom/article/PIIS2352-3964(16)30152-9/fulltext#t0005
+-->
 <hr>
 ## DepMap
 

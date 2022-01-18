@@ -452,7 +452,7 @@ two_gene_cox_inner <- function(
   df_combined <- Reduce(
     function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
     df_list
-  )
+  ) %>% distinct()
   x_y <- c("x","y")[1:length(df_list)]
   df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
   # combine subgroups if indicated
