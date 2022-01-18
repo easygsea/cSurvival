@@ -346,7 +346,7 @@ observeEvent(input$confirm,{
               if(cal_exp){
                 if(is.null(results)){
                   enough_error <- 1
-                  txt <- "The selected project does not have enough data for the selected gene/locus/gene set"
+                  txt <- "No significant result identified"
                   if(rv$variable_n > 0 & if_any_exp()){
                     txt <- paste0(txt," at the defined threshold of at least ",rv$min_gp_size,"% cases in each risk subgroup")
                   }
@@ -581,8 +581,26 @@ observeEvent(input$confirm,{
           lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
           df_combined$level <- factor(df_combined$level, levels = lels)
         }
+        # test if at least 10% (default) of samples in each subgroup
+        if(rv$variable_nr > 1){
+          lel_min_gps <- table(df_combined$level)
+          min_gp_size_n <- rv$min_gp_size / 100 * sum(lel_min_gps)
+          lel_min <- min(lel_min_gps)
+          if(lel_min < min_gp_size_n){
+            lel_min_gps <- lel_min_gps[lel_min_gps < min_gp_size_n]
+            lel_min_gps <- sapply(lel_min_gps, function(x){
+              paste0(names(lel_min_gps[lel_min_gps == x])," (n=",x,")")
+            }) %>% paste0(., collapse = ", ")
+            error_gp <- 2
+          }
+        }
         if(error_gp > 0){
-          shinyalert("The selected subgroup does not have enough samples for analysis")
+          if(error_gp == 1){
+            shinyalert("The selected subgroup does not have enough samples for analysis")
+          }else if(error_gp == 2){
+            shinyalert(paste0(lel_min_gps," do(es) not meet the minimum number of cases criterion (min n=",min_gp_size_n,", ",rv$min_gp_size,"% of the population)."))
+          }
+          rv$try_error <- 1
           remove_modal_spinner()
         }
         req(error_gp == 0)
