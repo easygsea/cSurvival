@@ -278,7 +278,7 @@ plot_ui <- function(n){
             textAreaInput(
               gs_manual_id,
               HTML(paste0(asterisk_icon(),x,".3. Enter your genes:"),add_help(gs_manual_id_q))
-              ,value = rv[[gs_manual_id]]
+              # ,value = rv[[gs_manual_id]]
               ,placeholder = "Type to enter..."
             )
             ,span(verbatimTextOutput(gs_genes_id), style = paste0(rv$verbTxtStyle1))

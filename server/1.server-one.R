@@ -256,7 +256,7 @@ observeEvent(input$variable_n,{
       "variable_n",
       value = rv$variable_n
     )
-    update_all()
+    update_all(m=F)
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
     update_normalization_UI()
   }

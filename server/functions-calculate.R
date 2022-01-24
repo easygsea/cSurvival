@@ -38,7 +38,7 @@ extract_gene_data <- function(x, type){
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
-  if(type != "lib" & type != "manual"){
+  if(!(type == "lib" | type == "manual")){
     all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
   }else{
     all_genes <- sapply(rv[["genes_lib"]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)

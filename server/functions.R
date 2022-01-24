@@ -51,9 +51,12 @@ init_rv <- function(x){
 }
 
 # update these into rv when selections change
-update_all <- function(){
+update_all <- function(m=T){
   for(x in 1:rv$variable_n){
     lst <- dyn_list(x)
+    if(!m){
+      lst <- lst[lst != paste0("gs_m_",x)]
+    }
     updateRV(lst)
   }
 }

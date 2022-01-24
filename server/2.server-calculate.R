@@ -75,8 +75,10 @@ observeEvent(input$confirm,{
           }
         }else if(input[[gs_mode_id]] == "manual"){
           gs_manual_id <- paste0("gs_m_",x)
-          if(rv[[gs_manual_id]] == ""){
-            error_manual <- c(error_manual,x)
+          if(length(unique(rv[[gs_manual_id]])) == 1){
+            if(rv[[gs_manual_id]] == ""){
+              error_manual <- c(error_manual,x)
+            }
           }
         }
       }
@@ -221,7 +223,7 @@ observeEvent(input$confirm,{
       }
 
       # ------- begin analysis after error checking -----
-    update_all()
+    update_all(m=F)
       show_modal_spinner(
         color = "#BDD5EA", spin = "half-circle",
         text = HTML("<span style='font-size:125%; font-family: sans-serif;'><br>Analysis in progress ...<br><br>This might take a while when permutation is applied.<br><br>Please wait a minute. Thank you.</span>"))
@@ -268,7 +270,7 @@ observeEvent(input$confirm,{
           extract_mode <- input_mode(x)
 
           # title for the survival plot
-          rv[[title_x]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
+          rv[[title_x]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], ifelse(input[[gs_mode_id]]=="lib",input[[gs_lib_id]],"Manual GS"))
           if(input[[cat_id]] == "g"){rv[[title_x]] <- paste0(rv[[title_x]]," ",tolower(names(dtypes_tmp)[dtypes_tmp == extract_mode]))}
           # check if normalized
           g_ui_norm_id <- paste0("gnorm_",x)
