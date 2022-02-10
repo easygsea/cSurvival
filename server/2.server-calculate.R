@@ -163,6 +163,9 @@ observeEvent(input$confirm,{
         }
         req(tcga_error == 0)
       }
+      if(rv$target){
+        rv$df_survival <- rv$df_survival %>% dplyr::filter(!is.na(survival_days))
+      }
       if(!rv$depmap){
         # re-calculate survival days if censored by time
         if(input$censor_time_ymd != "none"){
