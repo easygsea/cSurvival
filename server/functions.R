@@ -51,9 +51,12 @@ init_rv <- function(x){
 }
 
 # update these into rv when selections change
-update_all <- function(){
+update_all <- function(m=T){
   for(x in 1:rv$variable_n){
     lst <- dyn_list(x)
+    if(!m){
+      lst <- lst[lst != paste0("gs_m_",x)]
+    }
     updateRV(lst)
   }
 }
@@ -324,14 +327,16 @@ update_gs_by_db <- function(x, mode="nil", gs_db_id = paste0("gs_db_",x), gs_lib
 }
 
 # retrieve genes from a project
-retrieve_genes <- function(x){
+retrieve_genes <- function(x,lib=F){
   db_id <- paste0("db_",x)
   snv_id <- paste0("snv_method_",x)
   # if(is.null(input[[snv_id]])){
   #   method <- "mutect"
   # }else{method <- input[[snv_id]]}
   dbt <- rv[[db_id]]
-  if(is.null(dbt)){
+  if(lib){
+    infiles <- paste0(rv$indir,"df_gene_scale.csv")
+  }else if(is.null(dbt)){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")
   }else if(dbt == "rna"){
     infiles <- paste0(rv$indir,"df_gene_scale.csv")

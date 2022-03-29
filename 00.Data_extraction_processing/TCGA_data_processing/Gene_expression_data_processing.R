@@ -24,7 +24,7 @@ if(length(studies) > 1){
   # the indices of primary tumors
   df_gene_all_01 <- sapply(df_gene_all, function(x){if(grepl(pat0,strsplit(x,"-")[[1]][4])){return(x)}else{return(NULL)}})
   df_gene_all_01 <- Filter(Negate(is.null), df_gene_all_01)
-  
+
   if(studies != "LAML"){
     # extract duplicated samples
     df_gene_dup <- fread(paste0("https://tau.cmmt.ubc.ca/cSurvival/project_data/977/",infiles),header = F) %>% .[["V2"]]
@@ -40,13 +40,18 @@ if(length(studies) > 1){
     
     # extract duplicated samples' data and calculate geometric means
     data <- fread("EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv",select = which(pat))
-    data <- log10(data + 1)
+    # calculate geometric
     odd_indexes<-seq(1,ncol(data),2)
-    for(i in odd_indexes){
-      data[[i]] <- apply(data[,i:(i+1)],1,mean)
+    if(studies != "SKCM"){
+      data <- log10(data + 1)
+      for(i in odd_indexes){
+        data[[i]] <- apply(data[,i:(i+1)],1,mean)
+      }
+      data <- dplyr::select(data,all_of(odd_indexes))
+      data <- 10^data - 1
+    }else{
+      data <- dplyr::select(data,all_of(odd_indexes))
     }
-    data <- dplyr::select(data,all_of(odd_indexes))
-    data <- 10^data - 1
     data <- t(data)
     patient_ids <-sapply(rownames(data),function(x) paste0(strsplit(x,"-")[[1]][1:3],collapse = "-"))
     rownames(data) <- patient_ids

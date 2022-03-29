@@ -148,6 +148,10 @@ observeEvent(input$confirm_project,{
     }
   })
 
+  # retrieve expression genes for GS calculation
+  rv[["genes_lib"]] <- retrieve_genes(1,lib=T)
+  
+  # success in projects selection
   rv$projectStatus <- "selected"
   shinyjs::disable("project")
 
@@ -252,7 +256,7 @@ observeEvent(input$variable_n,{
       "variable_n",
       value = rv$variable_n
     )
-    update_all()
+    update_all(m=F)
     rv[["ui_parameters"]] <- plot_ui(rv$variable_n)
     update_normalization_UI()
   }
@@ -913,9 +917,9 @@ output$par_gear <- renderUI({
               )
             }
           )
-          ,bsTooltip("risk_gp_q",HTML("In bivariate outcomes analysis, select the risk group (subgroup) of interest. If <b>All</b> is selected, an ANOVA-like test is done to test if there is significant difference between any of the four subgroups. If a specific subgroup is selected, it is compared against the other subgroups as a whole."),placement = "top")
+          ,bsTooltip("risk_gp_q",HTML("In joint analysis with two genomic predictors, select the risk group (subgroup) of interest. If <b>All</b> is selected, an ANOVA-like test is done to test if there is significant difference between any of the four subgroups. If a specific subgroup is selected, it is compared against the other subgroups as a whole."),placement = "top")
           ,radioTooltip(id = "risk_gp", choice = "All", title = HTML("ANOVA-like test on all subgroups"))
-          ,bsTooltip("min_gp_size_q",HTML("In bivariate outcomes analysis, select the minimum number of cases (default, 10% of the population) to define a subgroup. Only applicable for dynamic iteration on continuous variables (e.g. mRNA gene expression, DNA methylation)."),placement = "top")
+          ,bsTooltip("min_gp_size_q",HTML("In joint analysis with two genomic predictors, select the minimum number of cases (default, 10% of the population) to define a subgroup. Only applicable for dynamic iteration on continuous variables (e.g. mRNA gene expression, DNA methylation)."),placement = "top")
           ,bsTooltip("flagged_q",HTML(flagged_exp),placement = "top")
           ,radioTooltip(id = "flagged", choice = "y", title = HTML("Remove flagged cases"))
           ,radioTooltip(id = "flagged", choice = "n", title = HTML("Keep all cases"))
@@ -929,7 +933,7 @@ output$par_gear <- renderUI({
           ,bsTooltip("search_mode_q",
                      HTML(paste0(
                        "Method to determine the minimum <i>P</i>-value:<br>",
-                       "<b>Median-anchored greedy search</b> (heuristic) determines the minimum <i>P</i>-value by finding the percentile in variable 2 that gives the minimum <i>P</i>-value on the median percentile in variable 1, then looking for percentile combinations that give lower <i>P</i>-values via greedy search."
+                       "<b>Median-anchored greedy search</b> (smart) determines the minimum <i>P</i>-value by finding the percentile in variable 2 that gives the minimum <i>P</i>-value on the median percentile in variable 1, then looking for percentile combinations that give lower <i>P</i>-values via greedy search."
                        ,"<br><b>Exhaustive search</b> determines the minimum <i>P</i>-value by testing all percentile combinations."
                        )),placement = "top")
         )

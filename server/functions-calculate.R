@@ -38,7 +38,11 @@ extract_gene_data <- function(x, type){
   )
   # # all genes in selected project
   # a_range <- 2:(length(rv[[paste0("genes",x)]])+1)
-  all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+  if(!(type == "lib" | type == "manual")){
+    all_genes <- sapply(rv[[paste0("genes",x)]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+  }else{
+    all_genes <- sapply(rv[["genes_lib"]], function(x) toupper(strsplit(x,"\\|")[[1]][1])) %>% unname(.)
+  }
 
   if(type == "rna"){
     # # original file that stores raw FPKM values
@@ -87,18 +91,18 @@ extract_gene_data <- function(x, type){
 
   }else if(type == "lib"){
     genes <- toupper(rv[[paste0("gs_genes_",x)]])
-    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+    genes <- rv[["genes_lib"]][all_genes %in% genes]
 
     g_ui_norm_id <- paste0("gnorm_",x); g_ui_norm_g_id <- paste0("gnorm_g_",x); g_ui_norm_gs_lib_id <- paste0("gnorm_gs_lib_",x)
     if(input[[g_ui_norm_id]] == "g"){
       genes_n <- input[[g_ui_norm_g_id]]
     }else if(input[[g_ui_norm_id]] == "gs"){
       genes_n <- toupper(rv[[paste0("gnorm_gs_genes_",x)]])
-      genes_n <- rv[[paste0("genes",x)]][all_genes %in% genes_n]
+      genes_n <- rv[["genes_lib"]][all_genes %in% genes_n]
     }
   }else if(type == "manual"){
     genes <- toupper(rv[[paste0("gs_m_",x)]])
-    genes <- rv[[paste0("genes",x)]][all_genes %in% genes]
+    genes <- rv[["genes_lib"]][all_genes %in% genes]
     rv[[paste0("gs_m_len",x)]] <- length(genes)
   }else if(type == "cnv" | type == "mir" | type == "met" | type == "pro" | type == "rrpa" | type == "crispr" | type == "rnai" | type == "drug"){
     # all_genes <- rv[[paste0("genes",x)]]
@@ -293,10 +297,10 @@ if_any_iter <- function(n=rv$variable_n){
 assign_gp <- function(df,gp){
   lels_tmp <- unique(df$level)
   if(grepl("Gain",gp)){
-    gp_hl <- strsplit(gp,"_")[[1]]; gp_hl_i <- which(gp_hl %in% c("High","Low"))
+    gp_hl <- strsplit(gp,"_")[[1]]; gp_hl_i <- which(grepl("High|Low|Mutated|Other",gp_hl))
     gp_hl <- gp_hl[gp_hl_i]
     gain_or_loss <- strsplit(lels_tmp,"_") %>% unlist() %>% unique
-    gain_or_loss <- gain_or_loss[!gain_or_loss %in% c("High","Low","Other")]
+    gain_or_loss <- gain_or_loss[!grepl("High|Low|Mutated|Other",gain_or_loss)]
     if(gp_hl_i == 1){
       gain_or_loss_gp <- paste0(gp_hl,"_",gain_or_loss)
     }else if(gp_hl_i == 2){
@@ -448,7 +452,7 @@ two_gene_cox_inner <- function(
   df_combined <- Reduce(
     function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
     df_list
-  )
+  ) %>% distinct()
   x_y <- c("x","y")[1:length(df_list)]
   df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
   # combine subgroups if indicated
@@ -460,7 +464,7 @@ two_gene_cox_inner <- function(
   # determine if meet min % samples requirement
   n_mins <- table(df_combined[["level"]]); n_min <- min(n_mins)
   return_null <- F
-  if(gp == "All"){if(length(n_mins) < 4){return_null <- T}}
+  if(gp == "All"){if(length(n_mins) < 2){return_null <- T}}
   if(n_min < n_min_r){return_null <- T}
   if(return_null){
     results <- NULL
@@ -590,7 +594,7 @@ two_gene_heuristic <- function(
   # start from the median quantile
   i <- ceiling(i_len/2); q <- quantiles[i]
   # if not enough data, skip and render users an error msg
-  if(q == 0 | length(unique(quantiles2))==1){return(NULL);next;}
+  if(length(unique(quantiles))==1 | length(unique(quantiles2))==1){return(NULL);next;} #q == 0
   # proceed only if enough data
   df <- generate_surv_df(df_o, patient_ids, exp, q)
 
@@ -740,7 +744,7 @@ get_info_most_significant_rna <-
   patient_ids <- data$patient_id
   exp <-data[,2] %>% unlist(.) %>% unname(.)
   # the quantiles we will use to define the level of gene percentages
-  quantiles <- quantile(exp, quantile_s, na.rm = T)
+  quantiles <- quantile(as.numeric(exp), quantile_s, na.rm = T)
   # permutation matrix
   set.seed(0)
   n_samples <- nrow(df_o)
@@ -962,7 +966,7 @@ get_info_most_significant_rna <-
       p_df <- transform_p_df(p_df)
     }
     # ---- PERMUTATION ----
-    if(least_p < 0.1){
+    if(least_p < 0.05){
       if(num == 1){
         rrr_perm <- mclapply(1:n_perm,mc.cores = nCores,function(ii){
           df_o_new <- df_o[idx.mat[,ii],]

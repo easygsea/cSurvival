@@ -75,8 +75,10 @@ observeEvent(input$confirm,{
           }
         }else if(input[[gs_mode_id]] == "manual"){
           gs_manual_id <- paste0("gs_m_",x)
-          if(rv[[gs_manual_id]] == ""){
-            error_manual <- c(error_manual,x)
+          if(length(unique(rv[[gs_manual_id]])) == 1){
+            if(rv[[gs_manual_id]] == ""){
+              error_manual <- c(error_manual,x)
+            }
           }
         }
       }
@@ -161,6 +163,9 @@ observeEvent(input$confirm,{
         }
         req(tcga_error == 0)
       }
+      if(rv$target){
+        rv$df_survival <- rv$df_survival %>% dplyr::filter(!is.na(survival_days))
+      }
       if(!rv$depmap){
         # re-calculate survival days if censored by time
         if(input$censor_time_ymd != "none"){
@@ -221,6 +226,7 @@ observeEvent(input$confirm,{
       }
 
       # ------- begin analysis after error checking -----
+    update_all(m=F)
       show_modal_spinner(
         color = "#BDD5EA", spin = "half-circle",
         text = HTML("<span style='font-size:125%; font-family: sans-serif;'><br>Analysis in progress ...<br><br>This might take a while when permutation is applied.<br><br>Please wait a minute. Thank you.</span>"))
@@ -267,7 +273,7 @@ observeEvent(input$confirm,{
           extract_mode <- input_mode(x)
 
           # title for the survival plot
-          rv[[title_x]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], input[[gs_lib_id]])
+          rv[[title_x]] <- ifelse(input[[cat_id]] == "g", input[[g_ui_id]], ifelse(input[[gs_mode_id]]=="lib",input[[gs_lib_id]],"Manual GS"))
           if(input[[cat_id]] == "g"){rv[[title_x]] <- paste0(rv[[title_x]]," ",tolower(names(dtypes_tmp)[dtypes_tmp == extract_mode]))}
           # check if normalized
           g_ui_norm_id <- paste0("gnorm_",x)
@@ -345,7 +351,7 @@ observeEvent(input$confirm,{
               if(cal_exp){
                 if(is.null(results)){
                   enough_error <- 1
-                  txt <- "The selected project does not have enough data for the selected gene/locus/gene set"
+                  txt <- "No significant result identified"
                   if(rv$variable_n > 0 & if_any_exp()){
                     txt <- paste0(txt," at the defined threshold of at least ",rv$min_gp_size,"% cases in each risk subgroup")
                   }
@@ -556,7 +562,7 @@ observeEvent(input$confirm,{
         df_combined <- Reduce(
           function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
           df_list
-        )
+        ) %>% distinct()
 
         x_y <- c("x","y")[1:length(df_list)]
         df_combined[["level"]] <- apply(df_combined %>% dplyr::select(paste0("level.",x_y)),1,paste0,collapse="_")
@@ -580,8 +586,26 @@ observeEvent(input$confirm,{
           lels <- unique(df_combined$level) %>% sort(.,decreasing = T)
           df_combined$level <- factor(df_combined$level, levels = lels)
         }
+        # test if at least 10% (default) of samples in each subgroup
+        if(rv$variable_nr > 1){
+          lel_min_gps <- table(df_combined$level)
+          min_gp_size_n <- rv$min_gp_size / 100 * sum(lel_min_gps)
+          lel_min <- min(lel_min_gps)
+          if(lel_min < min_gp_size_n){
+            lel_min_gps <- lel_min_gps[lel_min_gps < min_gp_size_n]
+            lel_min_gps <- sapply(lel_min_gps, function(x){
+              paste0(names(lel_min_gps[lel_min_gps == x])," (n=",x,")")
+            }) %>% paste0(., collapse = ", ")
+            error_gp <- 2
+          }
+        }
         if(error_gp > 0){
-          shinyalert("The selected subgroup does not have enough samples for analysis")
+          if(error_gp == 1){
+            shinyalert("The selected subgroup does not have enough samples for analysis")
+          }else if(error_gp == 2){
+            shinyalert(paste0(lel_min_gps," do(es) not meet the minimum number of cases criterion (min n=",min_gp_size_n,", ",rv$min_gp_size,"% of the population)."))
+          }
+          rv$try_error <- 1
           remove_modal_spinner()
         }
         req(error_gp == 0)

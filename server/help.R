@@ -6,6 +6,31 @@ call_introjs <- function(file_name) {
 }
 # the events trigger by pressing the help button on header
 observeEvent(input$db_help, {
+  showModal(
+    modalDialog(
+      size = "l",easyClose = TRUE
+      ,footer = modalButton("Dismiss"),
+      div(
+        div(align="center",
+          actionBttn(
+            "db_help_nav",
+            "Click for intro tours"
+          )
+        ),
+        hr(),
+        div(align="center",style="font-size:125%;",HTML('<a href="https://tau.cmmt.ubc.ca/cSurvival/help.html" target="_blank"><u>Open User Guide in a new window <i class="fas fa-mouse-pointer"></i></u></a>')),
+        tags$iframe(
+          src = "https://tau.cmmt.ubc.ca/cSurvival/help.html",
+          style="width:100%;",  frameborder="0",id="iframe", height = "800px"
+        )
+      )
+    )
+  )
+})
+
+observeEvent(input$db_help_nav,{
+  removeModal()
+  
   df <- intros$R_pre
   
   if(rv$tcga){

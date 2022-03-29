@@ -83,6 +83,11 @@ bodyOne <- tabItem(tabName = "one",
               ,uiOutput("depmap_pars")
             )
             
+            # feedbacks/reminders
+            ,fluidRow(
+              uiOutput("ui_reminder")
+            )
+            
             # control widgets for individual analysis
             ,fluidRow(
               uiOutput("ui_parameters")
