@@ -244,6 +244,7 @@ generate_surv_df <- function(df, patient_ids, exp, q){
   df$level <- gene_quantiles
   lels <- unique(df$level) %>% sort(.,decreasing = T)
   df$level <- factor(df$level, levels = lels)
+  df$value <- exp
 
   # df <- df %>% dplyr::filter(!is.na(patient_id))
   return(df)
@@ -450,7 +451,7 @@ two_gene_cox_inner <- function(
   df_list <- list(df,df2)
   # generate interaction df
   df_combined <- Reduce(
-    function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
+    function(x, y) inner_join(x, dplyr::select(y, patient_id, level, value), by = "patient_id"),
     df_list
   ) %>% distinct()
   x_y <- c("x","y")[1:length(df_list)]
@@ -1286,6 +1287,11 @@ cal_surv_rna <-
     ,iter_mode=T
     ,gp=rv$risk_gp
   ){
+    df_o <- df
+    if(any(grepl('^value', colnames(df)))){
+      df <- df %>% dplyr::select(-starts_with("value"))
+    }
+    
     lels <- levels(df$level)
     # # 1. KM # #
     # summary statistics
@@ -1311,7 +1317,7 @@ cal_surv_rna <-
       # }
 
       results = list(
-        df = df
+        df = df_o
         ,fit = surv_diff
         # ,stats = km.stats
         ,lels = lels
@@ -1389,14 +1395,14 @@ cal_surv_rna <-
       # lels_y <- levels(df$`level.y`)
       # # lels <- apply(expand.grid(lels_x,lels_y),1,paste0,collapse="_")
       # create new df to seperate effects in Cox regression
-      new_df <- with(df,data.frame(level = lels))
+      new_df <- with(df_o,data.frame(level = lels))
       cox.fit <- survfit(cox_fit,newdata=new_df)
 
       # save df, fit, and statistics
       if(!exists("cox_fit1")){cox_fit1 <- cox_fit}
       results <- list(
         km = list(
-          df = df,
+          df = df_o,
           fit = km.fit,
           stats = km.stats
           ,lels = lels
@@ -1405,7 +1411,7 @@ cal_surv_rna <-
           ,p.adj = rv[["padj_perm"]]
         )
         ,cox = list(
-          df = new_df,
+          df = df_o,
           fit = cox.fit,
           stats = cox.stats
           ,lels = lels
@@ -1556,7 +1562,8 @@ translate_cells <- function(patient_ids){
 }
 
 retrieve_dens_df <- function(){
-  df <- rv[["res"]][["df"]]
+  df <- rv[["res"]][["df"]] %>%
+    dplyr::select(-starts_with("value"))
   req(!is.null(df[["dependency"]]))
   # if(rv$project == "DepMap-Drug"){
   #   df[["dependency"]] <- log2(df[["dependency"]])
@@ -1605,13 +1612,17 @@ de_dfgene <- function(){
   # the genes
   genes <- colnames(df_gene)[-1]
 
+  ## latest research shows that Wilcoxon test outperforms these DE packages when n >= 8
+  ## https://genomebiology.biomedcentral.com/articles/10.1186/s13059-022-02648-4
+  ## therefore, we use edgeR if n < 8 in every condition, and Wilcoxon test if maimum n >= 8
+  ## BEGIN: scripts for transposing dataframe for DESeq2/edgeR/limma
   incProgress(amount = 0.1, message = wait_msg("Formatting gene expression matrix for DE analysis..."))
-
-  # transpose
-  df_gene <- data.table::transpose(df_gene) %>% .[-1,] %>% as.data.frame()
-  # reassign patient ids
-  colnames(df_gene) <- patients
-  rownames(df_gene) <- genes
+  # # transpose
+  # df_gene <- data.table::transpose(df_gene) %>% .[-1,] %>% as.data.frame()
+  # # reassign patient ids
+  # colnames(df_gene) <- patients
+  # rownames(df_gene) <- genes
+  df_gene <- df_gene %>% dplyr::select(-patient_id) %>% as.data.frame()
 
   incProgress(amount = 0.2, message = wait_msg("Converting gene IDs..."))
 
@@ -1629,19 +1640,24 @@ de_dfgene <- function(){
     gene_ids <- as_tibble_col(rownames(df_gene), column_name = "ensembl_id")
     gene_ids_table <- left_join(gene_ids, id_table, by="ensembl_id")
 
-    # convert gene ids
-    df_gene <- df_gene %>% dplyr::mutate(ensembl_id=rownames(df_gene)) %>%
+    # # convert gene ids
+    # df_gene <- df_gene %>% dplyr::mutate(ensembl_id=rownames(df_gene)) %>%
+    #   left_join(gene_ids_table, by = "ensembl_id")
+    df_gene_ids <- tibble(ensembl_id=rownames(df_gene)) %>%
       left_join(gene_ids_table, by = "ensembl_id")
 
-    # remove unnecessary columns
-    df_gene <- df_gene %>%
-      dplyr::distinct(symbol,.keep_all = TRUE) %>%
-      dplyr::filter(!is.na(symbol))
-
-    genes <- df_gene$symbol
-
-    df_gene <- df_gene %>%
-      dplyr::select(-c(ensembl_id, gene_id, symbol))
+    # # remove unnecessary columns
+    # df_gene <- df_gene %>%
+    #   dplyr::distinct(symbol,.keep_all = TRUE) %>%
+    #   dplyr::filter(!is.na(symbol))
+    # 
+    # genes <- df_gene$symbol
+    # 
+    # df_gene <- df_gene %>%
+    #   dplyr::select(-c(ensembl_id, gene_id, symbol))
+    genes_index <- which(!is.na(df_gene_ids$symbol) && !duplicated(df_gene_ids$symbol))
+    df_gene <- df_gene[,genes_index]
+    genes <- colnames(df_gene)
   }else{
     genes <- sapply(genes, function(x) str_split(x, "\\|")[[1]][1])
   }
@@ -1651,7 +1667,8 @@ de_dfgene <- function(){
     dplyr::mutate_all(as.numeric) %>%
     as.matrix(.)
 
-  rownames(df_gene) <- genes
+  # rownames(df_gene) <- genes
+  colnames(df_gene) <- genes
 
   return(df_gene)
 }

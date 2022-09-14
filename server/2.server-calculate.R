@@ -403,15 +403,15 @@ observeEvent(input$confirm,{
                   }
                   # save df
                   if(rv$depmap){
-                    df_1 <- df %>% dplyr::select(patient_id,dependency,level.x)
-                    df_2 <- df %>% dplyr::select(patient_id,dependency,level.y)
-                    colnames(df_1) <- c("patient_id","dependency","level")
-                    colnames(df_2) <- c("patient_id","dependency","level")
+                    df_1 <- df %>% dplyr::select(patient_id,dependency,level.x,value.x)
+                    df_2 <- df %>% dplyr::select(patient_id,dependency,level.y,value.y)
+                    colnames(df_1) <- c("patient_id","dependency","level","value")
+                    colnames(df_2) <- c("patient_id","dependency","level","value")
                   }else{
-                    df_1 <- df %>% dplyr::select(patient_id,survival_days,censoring_status,level.x)
-                    df_2 <- df %>% dplyr::select(patient_id,survival_days,censoring_status,level.y)
-                    colnames(df_1) <- c("patient_id","survival_days","censoring_status","level")
-                    colnames(df_2) <- c("patient_id","survival_days","censoring_status","level")
+                    df_1 <- df %>% dplyr::select(patient_id,survival_days,censoring_status,level.x,value.x)
+                    df_2 <- df %>% dplyr::select(patient_id,survival_days,censoring_status,level.y,value.y)
+                    colnames(df_1) <- c("patient_id","survival_days","censoring_status","level","value")
+                    colnames(df_2) <- c("patient_id","survival_days","censoring_status","level","value")
                   }
                   df_list[[1]] <- df_1; df_list[[2]] <- df_2
                   rv[["df_1"]] <- df_1
@@ -560,7 +560,7 @@ observeEvent(input$confirm,{
       if(rv$variable_n > 1){
         # generate interaction df
         df_combined <- Reduce(
-          function(x, y) inner_join(x, dplyr::select(y, patient_id, level), by = "patient_id"),
+          function(x, y) inner_join(x, dplyr::select(y, patient_id, level, value), by = "patient_id"),
           df_list
         ) %>% distinct()
 

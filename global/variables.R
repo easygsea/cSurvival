@@ -1,4 +1,4 @@
-current_version = "v1.0.0"
+current_version = "v1.0.1"
 d_red = "#EA5455"
 bcols = c("#f4f4f4","#f5f0ed") # colors for parameter wellpanels EFF5FA EAEDF3
 #the maximum -log10 value percentile heatmaps will apply as darkest color
