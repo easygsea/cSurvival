@@ -40,7 +40,7 @@ shinyUI(
             # theme = shinytheme("flatly"),
             use_waiter(), # dependencies
             waiter_show_on_load(tagList(spin_orbiter(),h4(loadMsg)), color = "#2D4059"), # shows before anything else
-            disconnectMessage(text = "Your session has timed out. Please refresh page and start again. For bug report, email us at jcheng@cmmt.ubc.ca. Thank you for your support."),
+            disconnectMessage(text = "Your session has timed out. Please refresh page and start again. For bug report, email us at taubert@cmmt.ubc.ca. Thank you for your support."),
 
             useShinyalert(),  # Set up shinyalert
             rintrojs::introjsUI(), # introjs

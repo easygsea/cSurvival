@@ -792,7 +792,16 @@ output$download_plot <- downloadHandler(
   content = function(file) {
     withProgress(value = 1,message = "Downloading plot...",{
       if(if_surv()){
-        pdf(file,onefile = TRUE)
+        h_plot <- ifelse(
+          rv$risk_table | rv$risk_table,
+          ifelse(
+            rv$cum_table & rv$risk_table,
+            9
+            ,8
+          )
+          ,7
+        )
+        pdf(file, height = h_plot, width = 9, onefile = TRUE)
         print(plot_surv(rv[["res"]]),newpage = FALSE)
         dev.off()
         # ggsave(file,print(plot_surv(rv[["res"]]),newpage = FALSE), device = "pdf", width = 10, height = 8, dpi = 300, units = "in")

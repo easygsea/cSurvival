@@ -273,3 +273,5 @@ col_scale_hr <- append(col_scale_temp, col_scale_hr)
 # )
 
 red2021 <- "#CF5C78"; yellow2021 <- "#F5DF4D"; gray2021 <- "#939597"; blue2021 <- "#00589B"; white2021 <- "#F0EEE9"
+
+reboot_dates <- paste0(c("03", "06", "09", "12"), "-30")

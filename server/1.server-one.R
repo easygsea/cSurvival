@@ -1399,3 +1399,17 @@ output$ui_demo_header <- renderUI({
   )
 })
 
+# ----- NN. REBOOT REMINDER -------
+output$ui_reboot_reminder <- renderUI({
+  system_time <- as.Date.character(Sys.time())
+  system_date <- sub("^[0-9]+-", "", system_time)
+  system_year <- sub("-.*$", "", system_time)
+  req(system_date %in% reboot_dates)
+  column(
+    12,align="center",
+    wellPanel(
+      style = sprintf("background:%s;color:%s;",addalpha(yellow2021,alpha=.5),"black"),
+      HTML(str_glue("<p><b>Scheduled Maintenance: {system_year}-{system_date} 9-9:30PM PDT</b></p>"))
+    )
+  )
+})
