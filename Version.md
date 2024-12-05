@@ -1,5 +1,9 @@
 # Update records
 
+## v1.0.5
+2024-12-04
+- Patch: Added citation. 
+
 ## v1.0.4
 2023-10-01
 - Patch: Added conditional scheduled maintenance note. 

@@ -11,13 +11,16 @@ observeEvent(input$db_help, {
       size = "l",easyClose = TRUE
       ,footer = modalButton("Dismiss"),
       div(
+        hr(),
+        p('Cheng, X., Liu, Y., Wang, J., Chen, Y., Robertson, A.G., Zhang, X., Jones, S.J. and Taubert, S., 2022. cSurvival: a web resource for biomarker interactions in cancer outcomes and in cell lines. Briefings in Bioinformatics, 23(3), p.bbac090.'),
+        hr(),
         div(align="center",
           actionBttn(
             "db_help_nav",
             "Click for intro tours"
           )
         ),
-        hr(),
+        br(),
         div(align="center",style="font-size:125%;",HTML('<a href="https://tau.cmmt.ubc.ca/cSurvival/help.html" target="_blank"><u>Open User Guide in a new window <i class="fas fa-mouse-pointer"></i></u></a>')),
         tags$iframe(
           src = "https://tau.cmmt.ubc.ca/cSurvival/help.html",

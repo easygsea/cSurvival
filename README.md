@@ -15,5 +15,6 @@ Step 2. cSurvival cannot start without its underlying database. Download example
 
 Step 3. To start cSurvival, open its global.R file in RStudio, click **Run App** on top right. If first time use, it may take a while to install required packages.
 
-
-
+# Citation
+Cheng, X., Liu, Y., Wang, J., Chen, Y., Robertson, A.G., Zhang, X., Jones, S.J. and Taubert, S., 2022. cSurvival: a web resource for biomarker interactions in cancer outcomes and in cell lines. Briefings in Bioinformatics, 23(3), p.bbac090.
+https://doi.org/10.1093/bib/bbac090
