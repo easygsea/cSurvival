@@ -207,11 +207,23 @@ output$ui_results <- renderUI({
                   ,div(
                     id="download_btn_dens",
                     style="display: inline-block;vertical-align:top;",
-                    downloadBttn(
-                      size = "sm", color = "danger", style = "material-circle",
-                      outputId = "download_plot_dens", label = NULL
+                    dropdown(
+                      column(12,
+                             downloadButton(
+                               outputId = "download_plot_dens", label = "Download plot"
+                             )
+
+                             ,br(),downloadButton(
+                               outputId = "download_data_dens", label = "Download data"
+                             )
+                             ,br(),br()
+                      )
+                      ,width = '200px',size = "sm",up = FALSE,right = TRUE,icon = icon("download")
+                      ,status="danger",style = "material-circle",circle = TRUE,
+                      tooltip = tooltipOptions(
+                        title = "Click to download plot and data"
+                        ,placement = "top")
                     )
-                    ,bsTooltip("download_btn_dens","Click to download plot", placement = "top")
                   )
                 )
               ),
@@ -235,11 +247,23 @@ output$ui_results <- renderUI({
                   div(
                     id="download_btn_box",
                     style="display: inline-block;vertical-align:top;",
-                    downloadBttn(
-                      size = "sm", color = "danger", style = "material-circle",
-                      outputId = "download_plot_box", label = NULL
+                    dropdown(
+                      column(12,
+                             downloadButton(
+                               outputId = "download_plot_box", label = "Download plot"
+                             )
+                             
+                             ,br(),downloadButton(
+                               outputId = "download_data_box", label = "Download data"
+                             )
+                             ,br(),br()
+                      )
+                      ,width = '200px',size = "sm",up = FALSE,right = TRUE,icon = icon("download")
+                      ,status="danger",style = "material-circle",circle = TRUE,
+                      tooltip = tooltipOptions(
+                        title = "Click to download plot and data"
+                        ,placement = "top")
                     )
-                    ,bsTooltip("download_btn_box","Click to download plot", placement = "top")
                   )
                 )
               )
@@ -845,7 +869,7 @@ output$download_data <- downloadHandler(
   }
 )
 
-# --------- 1b-ii. download dens plot -------------
+# --------- 1b-ii-a. download dens plot -------------
 output$download_plot_dens <- downloadHandler(
   filename = function(){
     paste0("depmap_dens_",Sys.time(),".html")
@@ -857,7 +881,21 @@ output$download_plot_dens <- downloadHandler(
   }
 )
 
-# --------- 1b-iii. download dens's box plot -------------
+# --------- 1b-ii-b. download dens data -------------
+output$download_data_dens <- downloadHandler(
+  filename = function(){
+    dtil <- gsub(" ","_",rv[["title"]])
+    dtil <- gsub("_expression","",dtil)
+    paste0("Density_",dtil,"_",Sys.time(),".tsv")
+  },
+  content = function(file) {
+    withProgress(value = 1,message = "Downloading data...",{
+      fwrite(retrieve_dens_df(),file,sep="\t")
+    })
+  }
+)
+
+# --------- 1b-iii-a. download dens's box plot -------------
 output$download_plot_box <- downloadHandler(
   filename = function(){
     paste0("depmap_box_",Sys.time(),".html")
@@ -865,6 +903,20 @@ output$download_plot_box <- downloadHandler(
   content = function(file) {
     withProgress(value = 1,message = "Downloading plot...",{
       saveWidget(as_widget(ggplotly(rv[["ggbox"]])), file, selfcontained = TRUE)
+    })
+  }
+)
+
+# --------- 1b-iii-b. download dens's box plot data -------------
+output$download_data_box <- downloadHandler(
+  filename = function(){
+    dtil <- gsub(" ","_",rv[["title"]])
+    dtil <- gsub("_expression","",dtil)
+    paste0("Box_",dtil,"_",Sys.time(),".tsv")
+  },
+  content = function(file) {
+    withProgress(value = 1,message = "Downloading data...",{
+      fwrite(retrieve_dens_df(),file,sep="\t")
     })
   }
 )

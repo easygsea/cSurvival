@@ -1,5 +1,9 @@
 # Update records
 
+## v1.0.6
+2024-12-05
+- Patch: Added data download options for DepMap projects.
+
 ## v1.0.5
 2024-12-04
 - Patch: Added citation. 
